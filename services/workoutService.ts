@@ -47,6 +47,22 @@ export const workoutService = {
     };
   },
 
+  // Retrieves all workout plans for a student.
+  async getWorkoutPlansForStudent(studentId: string): Promise<WorkoutPlan[]> {
+    const q = query(
+      collection(db, WORKOUT_PLANS_COLLECTION),
+      where("studentId", "==", studentId)
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map((doc) => {
+      const data = doc.data() as Omit<WorkoutPlan, "id">;
+      return {
+        id: doc.id,
+        ...data,
+      };
+    });
+  },
+
   // Logs a single workout entry for the student.
   async logWorkoutEntry(
     payload: Omit<WorkoutLog, "id" | "date"> & { date?: string }

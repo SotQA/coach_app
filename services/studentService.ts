@@ -1,10 +1,28 @@
-import { collection, doc, getDocs, query, setDoc, where } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  setDoc,
+  where,
+} from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import type { Student } from "../types/Student";
 
 const STUDENTS_COLLECTION = "students";
 
 export const studentService = {
+  async getStudentById(studentId: string): Promise<Student | null> {
+    const ref = doc(db, STUDENTS_COLLECTION, studentId);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return null;
+    return {
+      id: snap.id,
+      ...(snap.data() as Omit<Student, "id">),
+    };
+  },
+
   // Returns all students that belong to a specific coach.
   async getStudentsForCoach(coachId: string): Promise<Student[]> {
     const q = query(
