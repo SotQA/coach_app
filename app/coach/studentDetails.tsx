@@ -22,6 +22,8 @@ export default function StudentDetails() {
 
   useEffect(() => {
     const load = async () => {
+      console.log("[coach/studentDetails] load start", { studentId });
+      setLoading(true);
       try {
         setError(null);
 
@@ -31,12 +33,14 @@ export default function StudentDetails() {
         }
 
         const user = await authService.getCurrentUserWithRole();
+        console.log("[coach/studentDetails] currentUser", user);
         if (!user || user.role !== "coach") {
           setError("You must be logged in as a coach.");
           return;
         }
 
         const studentDoc = await studentService.getStudentById(studentId);
+        console.log("[coach/studentDetails] fetched student", studentDoc?.id);
         if (!studentDoc) {
           setError("Student not found.");
           return;
@@ -54,8 +58,10 @@ export default function StudentDetails() {
           user.id,
           studentId
         );
+        console.log("[coach/studentDetails] fetched plans", workoutPlans.length);
         setPlans(workoutPlans);
       } catch (e: any) {
+        console.error("[coach/studentDetails] load error", e);
         setError(e.message ?? "Failed to load student details.");
       } finally {
         setLoading(false);

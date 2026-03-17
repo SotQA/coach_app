@@ -34,6 +34,8 @@ export default function WorkoutExecution() {
 
   useEffect(() => {
     const load = async () => {
+      console.log("[student/workoutExecution] load start", { workoutPlanId });
+      setLoading(true);
       try {
         setError(null);
         setMessage(null);
@@ -44,12 +46,14 @@ export default function WorkoutExecution() {
         }
 
         const user = await authService.getCurrentUserWithRole();
+        console.log("[student/workoutExecution] currentUser", user);
         if (!user || user.role !== "student") {
           setError("You must be logged in as a student.");
           return;
         }
 
         const loaded = await workoutService.getWorkoutPlanById(workoutPlanId);
+        console.log("[student/workoutExecution] fetched plan", loaded?.id);
         if (!loaded) {
           setError("Workout plan not found.");
           return;
@@ -68,6 +72,7 @@ export default function WorkoutExecution() {
           }))
         );
       } catch (e: any) {
+        console.error("[student/workoutExecution] load error", e);
         setError(e.message ?? "Failed to load workout plan.");
       } finally {
         setLoading(false);
@@ -88,11 +93,16 @@ export default function WorkoutExecution() {
   const handleSubmit = async () => {
     if (!plan) return;
 
+    console.log("[student/workoutExecution] submit start", {
+      workoutPlanId: plan.id,
+      exercises: plan.exercises.length,
+    });
     setSaving(true);
     setError(null);
     setMessage(null);
     try {
       const user = await authService.getCurrentUserWithRole();
+      console.log("[student/workoutExecution] currentUser (submit)", user);
       if (!user || user.role !== "student") {
         setError("You must be logged in as a student.");
         return;
@@ -123,8 +133,10 @@ export default function WorkoutExecution() {
         })
       );
 
+      console.log("[student/workoutExecution] submit success");
       setMessage("Workout saved to history.");
     } catch (e: any) {
+      console.error("[student/workoutExecution] submit error", e);
       setError(e.message ?? "Failed to save workout.");
     } finally {
       setSaving(false);

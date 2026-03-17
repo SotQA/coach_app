@@ -70,15 +70,21 @@ export default function WorkoutHistory() {
 
   useEffect(() => {
     const load = async () => {
+      console.log("[student/workoutHistory] load start");
+      setLoading(true);
       try {
+        setError(null);
         const user = await authService.getCurrentUserWithRole();
+        console.log("[student/workoutHistory] currentUser", user);
         if (!user || user.role !== "student") {
           setError("You must be logged in as a student.");
           return;
         }
         const history = await workoutService.getWorkoutHistory(user.id);
+        console.log("[student/workoutHistory] fetched logs", history.length);
         setLogs(history);
       } catch (e: any) {
+        console.error("[student/workoutHistory] load error", e);
         setError(e.message ?? "Failed to load workout history.");
       } finally {
         setLoading(false);
