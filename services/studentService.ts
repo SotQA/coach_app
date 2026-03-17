@@ -53,6 +53,7 @@ export const studentService = {
     assertNonEmpty(payload.coachId, "coach UID (Student.coachId)");
 
     await setDoc(doc(db, STUDENTS_COLLECTION, payload.id), {
+      id: payload.id,
       coachId: payload.coachId,
       name: payload.name,
       email: payload.email,

@@ -19,6 +19,20 @@ const assertNonEmpty = (value: string, label: string) => {
   if (!value || !value.trim()) throw new Error(`Missing ${label}.`);
 };
 
+const toMs = (value: any): number => {
+  if (!value) return 0;
+  if (typeof value === "string") {
+    const ms = Date.parse(value);
+    return Number.isFinite(ms) ? ms : 0;
+  }
+  if (value instanceof Date) return value.getTime();
+  if (typeof value?.toDate === "function") {
+    const d = value.toDate();
+    return d instanceof Date ? d.getTime() : 0;
+  }
+  return 0;
+};
+
 const mapPlanDoc = (snap: QueryDocumentSnapshot): WorkoutPlan => ({
   id: snap.id,
   ...(snap.data() as Omit<WorkoutPlan, "id">),
@@ -46,14 +60,19 @@ export const workoutService = {
   async createWorkoutPlan(payload: Omit<WorkoutPlan, "id">): Promise<WorkoutPlan> {
     assertNonEmpty(payload.coachId, "coachId (Firebase Auth UID)");
     assertNonEmpty(payload.studentId, "studentId (Firebase Auth UID)");
+    const normalized = {
+      ...payload,
+      name: payload.name?.trim() || "Workout Plan",
+      createdAt: payload.createdAt ?? new Date(),
+    };
     const ref = await addDoc(
       collection(db, WORKOUT_PLANS_COLLECTION),
-      payload
+      normalized
     );
 
     return {
       id: ref.id,
-      ...payload,
+      ...normalized,
     };
   },
 
@@ -98,10 +117,11 @@ export const workoutService = {
 
   // Logs a single workout entry for the student.
   async logWorkoutEntry(
-    payload: Omit<WorkoutLog, "id" | "date"> & { date?: string }
+    payload: Omit<WorkoutLog, "id" | "date"> & { date?: Date }
   ): Promise<WorkoutLog> {
     assertNonEmpty(payload.studentId, "studentId (Firebase Auth UID)");
-    const date = payload.date ?? new Date().toISOString();
+    assertNonEmpty(payload.workoutPlanId, "workoutPlanId");
+    const date = payload.date ?? new Date();
     const ref = await addDoc(collection(db, WORKOUT_LOGS_COLLECTION), {
       ...payload,
       date,
@@ -117,7 +137,7 @@ export const workoutService = {
   // Returns all workout logs for a student, sorted newest-first by date.
   async getWorkoutHistory(studentId: string): Promise<WorkoutLog[]> {
     const logs = await listWorkoutLogs([where("studentId", "==", studentId)]);
-    return logs.sort((a, b) => (a.date < b.date ? 1 : -1));
+    return logs.sort((a, b) => toMs(b.date) - toMs(a.date));
   },
 
   // Helper used by coach screens when building workout plans interactively.

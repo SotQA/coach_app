@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { View, Text, ActivityIndicator, FlatList, ScrollView } from "react-native";
+import { View, Text, ActivityIndicator, FlatList, ScrollView, TextInput } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { authService } from "../../services/authService";
 import { workoutService } from "../../services/workoutService";
@@ -18,6 +18,7 @@ export default function CreateWorkoutPlan() {
 
   const [studentName] = useState(params.studentName ?? "Student");
   const [studentId] = useState(params.studentId ?? "");
+  const [planName, setPlanName] = useState("Workout Plan");
   const [exercises, setExercises] = useState<Exercise[]>([
     workoutService.createEmptyExercise(),
   ]);
@@ -66,10 +67,13 @@ export default function CreateWorkoutPlan() {
     setError(null);
     setLoading(true);
     try {
+      const name = planName.trim() || `Workout Plan for ${studentName}`;
       await workoutService.createWorkoutPlan({
         coachId,
         studentId,
+        name,
         exercises: exercises.filter((e) => e.name.trim().length > 0),
+        createdAt: new Date(),
       });
       router.replace("/coach/dashboard");
     } catch (e: any) {
@@ -117,6 +121,23 @@ export default function CreateWorkoutPlan() {
           <Text style={{ marginBottom: 16, color: "#9CA3AF" }}>
             For: {studentName}
           </Text>
+
+          <Text style={{ color: "#E5E7EB", marginBottom: 4 }}>Plan Name</Text>
+          <TextInput
+            placeholder="e.g. Strength Block A"
+            placeholderTextColor="#6B7280"
+            value={planName}
+            onChangeText={setPlanName}
+            style={{
+              borderWidth: 1,
+              borderColor: "#1F2937",
+              padding: 12,
+              borderRadius: 12,
+              marginBottom: 12,
+              color: "white",
+              backgroundColor: "#020617",
+            }}
+          />
 
           <FlatList
             data={exercises}

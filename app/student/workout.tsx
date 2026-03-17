@@ -20,6 +20,7 @@ import { PrimaryButton } from "../../components/PrimaryButton";
 export default function WorkoutScreen() {
   const router = useRouter();
   const [student, setStudent] = useState<AppUser | null>(null);
+  const [workoutPlanId, setWorkoutPlanId] = useState<string | null>(null);
   const [exercise, setExercise] = useState<Exercise>(
     workoutService.createEmptyExercise()
   );
@@ -37,6 +38,8 @@ export default function WorkoutScreen() {
           return;
         }
         setStudent(user);
+        const plan = await workoutService.getWorkoutPlanForStudent(user.id);
+        setWorkoutPlanId(plan?.id ?? null);
       } catch (e: any) {
         setError(e.message ?? "Failed to load user.");
       } finally {
@@ -49,12 +52,17 @@ export default function WorkoutScreen() {
 
   const handleLogWorkout = async () => {
     if (!student) return;
+    if (!workoutPlanId) {
+      setError("No workout plan assigned yet.");
+      return;
+    }
     setSubmitting(true);
     setError(null);
     setMessage(null);
     try {
       await workoutService.logWorkoutEntry({
         studentId: student.id,
+        workoutPlanId,
         exercise: exercise.name,
         sets: exercise.sets,
         reps: exercise.reps,

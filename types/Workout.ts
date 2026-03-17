@@ -9,19 +9,20 @@ export interface WorkoutPlan {
   id: string;
   coachId: string;
   studentId: string;
+  name: string;
   exercises: Exercise[];
+  createdAt: any;
 }
 
 export interface WorkoutLog {
   id: string;
   studentId: string;
-  workoutPlanId?: string;
+  workoutPlanId: string;
   exercise: string;
   sets: number;
   // Number of reps completed for this log entry.
   reps: number;
   weight?: number;
-  // ISO date string so it is easy to sort and render
-  date: string;
+  date: any;
 }
 
