@@ -100,7 +100,13 @@ export default function StudentDashboard() {
         <View style={{ marginTop: 24 }}>
           <PrimaryButton
             title="Start Workout"
-            onPress={() => router.push("/student/workout")}
+            onPress={() => {
+              if (!plan) return;
+              router.push({
+                pathname: "/student/workoutExecution",
+                params: { workoutPlanId: plan.id },
+              });
+            }}
           />
         </View>
         <View style={{ marginTop: 12 }}>

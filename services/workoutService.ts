@@ -143,6 +143,17 @@ export const workoutService = {
     return logs.sort((a, b) => toMs(b.date) - toMs(a.date));
   },
 
+  // Friendly aliases for app code (keep existing methods for backward compatibility).
+  async saveWorkoutLog(
+    payload: Omit<WorkoutLog, "id" | "date"> & { date?: Date }
+  ): Promise<WorkoutLog> {
+    return this.logWorkoutEntry(payload);
+  },
+
+  async getWorkoutLogs(studentId: string): Promise<WorkoutLog[]> {
+    return this.getWorkoutHistory(studentId);
+  },
+
   // Helper used by coach screens when building workout plans interactively.
   createEmptyExercise(): Exercise {
     return {
