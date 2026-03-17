@@ -1,19 +1,51 @@
-import { addDoc, collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+  type QueryConstraint,
+  type QueryDocumentSnapshot,
+} from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import type { Exercise, WorkoutLog, WorkoutPlan } from "../types/Workout";
 
 const WORKOUT_PLANS_COLLECTION = "workoutPlans";
 const WORKOUT_LOGS_COLLECTION = "workoutLogs";
 
+const assertNonEmpty = (value: string, label: string) => {
+  if (!value || !value.trim()) throw new Error(`Missing ${label}.`);
+};
+
+const mapPlanDoc = (snap: QueryDocumentSnapshot): WorkoutPlan => ({
+  id: snap.id,
+  ...(snap.data() as Omit<WorkoutPlan, "id">),
+});
+
+const mapLogDoc = (snap: QueryDocumentSnapshot): WorkoutLog => ({
+  id: snap.id,
+  ...(snap.data() as Omit<WorkoutLog, "id">),
+});
+
+async function listWorkoutPlans(constraints: QueryConstraint[]): Promise<WorkoutPlan[]> {
+  const q = query(collection(db, WORKOUT_PLANS_COLLECTION), ...constraints);
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(mapPlanDoc);
+}
+
+async function listWorkoutLogs(constraints: QueryConstraint[]): Promise<WorkoutLog[]> {
+  const q = query(collection(db, WORKOUT_LOGS_COLLECTION), ...constraints);
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(mapLogDoc);
+}
+
 export const workoutService = {
   // Creates a new workout plan for a specific student.
   async createWorkoutPlan(payload: Omit<WorkoutPlan, "id">): Promise<WorkoutPlan> {
-    if (!payload.coachId) {
-      throw new Error("Missing coachId (Firebase Auth UID).");
-    }
-    if (!payload.studentId) {
-      throw new Error("Missing studentId (Firebase Auth UID).");
-    }
+    assertNonEmpty(payload.coachId, "coachId (Firebase Auth UID)");
+    assertNonEmpty(payload.studentId, "studentId (Firebase Auth UID)");
     const ref = await addDoc(
       collection(db, WORKOUT_PLANS_COLLECTION),
       payload
@@ -28,26 +60,12 @@ export const workoutService = {
   // Retrieves the current workout plan for the student.
   // For simplicity, this returns the first plan found for the student.
   async getWorkoutPlanForStudent(studentId: string): Promise<WorkoutPlan | null> {
-    const q = query(
-      collection(db, WORKOUT_PLANS_COLLECTION),
-      where("studentId", "==", studentId)
-    );
-    const snapshot = await getDocs(q);
-
-    if (snapshot.empty) {
-      return null;
-    }
-
-    const doc = snapshot.docs[0];
-    const data = doc.data() as Omit<WorkoutPlan, "id">;
-
-    return {
-      id: doc.id,
-      ...data,
-    };
+    const plans = await listWorkoutPlans([where("studentId", "==", studentId)]);
+    return plans[0] ?? null;
   },
 
   async getWorkoutPlanById(planId: string): Promise<WorkoutPlan | null> {
+    assertNonEmpty(planId, "workoutPlanId");
     const ref = doc(db, WORKOUT_PLANS_COLLECTION, planId);
     const snap = await getDoc(ref);
     if (!snap.exists()) return null;
@@ -59,34 +77,12 @@ export const workoutService = {
 
   // Retrieves all workout plans for a student.
   async getWorkoutPlansForStudent(studentId: string): Promise<WorkoutPlan[]> {
-    const q = query(
-      collection(db, WORKOUT_PLANS_COLLECTION),
-      where("studentId", "==", studentId)
-    );
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map((doc) => {
-      const data = doc.data() as Omit<WorkoutPlan, "id">;
-      return {
-        id: doc.id,
-        ...data,
-      };
-    });
+    return listWorkoutPlans([where("studentId", "==", studentId)]);
   },
 
   // Coach-scoped: retrieves all workout plans that belong to a coach.
   async getWorkoutPlansForCoach(coachId: string): Promise<WorkoutPlan[]> {
-    const q = query(
-      collection(db, WORKOUT_PLANS_COLLECTION),
-      where("coachId", "==", coachId)
-    );
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map((doc) => {
-      const data = doc.data() as Omit<WorkoutPlan, "id">;
-      return {
-        id: doc.id,
-        ...data,
-      };
-    });
+    return listWorkoutPlans([where("coachId", "==", coachId)]);
   },
 
   // Coach-scoped: retrieves all workout plans for a student owned by the coach.
@@ -94,25 +90,17 @@ export const workoutService = {
     coachId: string,
     studentId: string
   ): Promise<WorkoutPlan[]> {
-    const q = query(
-      collection(db, WORKOUT_PLANS_COLLECTION),
+    return listWorkoutPlans([
       where("coachId", "==", coachId),
-      where("studentId", "==", studentId)
-    );
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map((doc) => {
-      const data = doc.data() as Omit<WorkoutPlan, "id">;
-      return {
-        id: doc.id,
-        ...data,
-      };
-    });
+      where("studentId", "==", studentId),
+    ]);
   },
 
   // Logs a single workout entry for the student.
   async logWorkoutEntry(
     payload: Omit<WorkoutLog, "id" | "date"> & { date?: string }
   ): Promise<WorkoutLog> {
+    assertNonEmpty(payload.studentId, "studentId (Firebase Auth UID)");
     const date = payload.date ?? new Date().toISOString();
     const ref = await addDoc(collection(db, WORKOUT_LOGS_COLLECTION), {
       ...payload,
@@ -128,20 +116,7 @@ export const workoutService = {
 
   // Returns all workout logs for a student, sorted newest-first by date.
   async getWorkoutHistory(studentId: string): Promise<WorkoutLog[]> {
-    const q = query(
-      collection(db, WORKOUT_LOGS_COLLECTION),
-      where("studentId", "==", studentId)
-    );
-    const snapshot = await getDocs(q);
-
-    const logs: WorkoutLog[] = snapshot.docs.map((doc) => {
-      const data = doc.data() as Omit<WorkoutLog, "id">;
-      return {
-        id: doc.id,
-        ...data,
-      };
-    });
-
+    const logs = await listWorkoutLogs([where("studentId", "==", studentId)]);
     return logs.sort((a, b) => (a.date < b.date ? 1 : -1));
   },
 
