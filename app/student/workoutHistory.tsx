@@ -29,26 +29,43 @@ export default function WorkoutHistory() {
   };
 
   const sections = useMemo(() => {
-    const sorted = [...logs].sort((a, b) => toMs(b.date) - toMs(a.date));
-    const groups = new Map<string, WorkoutLog[]>();
-
-    for (const log of sorted) {
-      const ms = toMs(log.date);
-      const dayKey = ms
-        ? new Date(ms).toLocaleDateString(undefined, {
-            weekday: "short",
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-          })
-        : "Unknown date";
-
-      const list = groups.get(dayKey) ?? [];
+    // Group by exercise name, then show progression over time.
+    const byExercise = new Map<string, WorkoutLog[]>();
+    for (const log of logs) {
+      const key = (log.exercise ?? "").trim() || "Unknown exercise";
+      const list = byExercise.get(key) ?? [];
       list.push(log);
-      groups.set(dayKey, list);
+      byExercise.set(key, list);
     }
 
-    return Array.from(groups.entries()).map(([title, data]) => ({ title, data }));
+    const exerciseNames = Array.from(byExercise.keys()).sort((a, b) =>
+      a.localeCompare(b, undefined, { sensitivity: "base" })
+    );
+
+    return exerciseNames.map((name) => {
+      const items = [...(byExercise.get(name) ?? [])].sort(
+        (a, b) => toMs(a.date) - toMs(b.date)
+      );
+
+      const weights = items
+        .map((x) => x.weight)
+        .filter((w): w is number => typeof w === "number" && Number.isFinite(w));
+
+      // Keep duplicates (80 → 80 → 85) as that’s still meaningful progression.
+      const progression = weights.length ? weights.map((w) => String(w)).join(" → ") : "—";
+
+      return {
+        title: name,
+        data: [
+          {
+            id: `progression:${name}`,
+            progression,
+            totalLogs: items.length,
+            lastMs: items.length ? toMs(items[items.length - 1].date) : 0,
+          },
+        ],
+      };
+    });
   }, [logs]);
 
   useEffect(() => {
@@ -136,31 +153,32 @@ export default function WorkoutHistory() {
               <Text style={{ color: "#E5E7EB", fontWeight: "700" }}>{section.title}</Text>
             </View>
           )}
-          renderItem={({ item }) => {
-            const ms = toMs(item.date);
-            const time = ms
-              ? new Date(ms).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })
-              : "";
+          renderItem={({ item }: any) => {
+            const lastText = item.lastMs
+              ? new Date(item.lastMs).toLocaleDateString(undefined, {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                })
+              : "—";
+
             return (
               <View
                 style={{
                   borderRadius: 16,
                   padding: 12,
-                  marginBottom: 8,
+                  marginBottom: 12,
                   backgroundColor: "#020617",
                   borderWidth: 1,
                   borderColor: "#1F2937",
                 }}
               >
-                <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                  <Text style={{ fontWeight: "700", color: "#F9FAFB" }}>{item.exercise}</Text>
-                  {time ? <Text style={{ color: "#6B7280" }}>{time}</Text> : null}
-                </View>
-                <Text style={{ color: "#9CA3AF", marginTop: 4 }}>
-                  {item.sets} sets × {item.reps} reps
-                  {item.weight !== undefined && item.weight !== null && item.weight !== 0
-                    ? ` @ ${item.weight}kg`
-                    : ""}
+                <Text style={{ color: "#9CA3AF", marginBottom: 6 }}>Progression</Text>
+                <Text style={{ fontWeight: "800", color: "#F9FAFB", fontSize: 16 }}>
+                  {item.progression}
+                </Text>
+                <Text style={{ color: "#6B7280", marginTop: 8 }}>
+                  Sessions: {item.totalLogs} • Last: {lastText}
                 </Text>
               </View>
             );
