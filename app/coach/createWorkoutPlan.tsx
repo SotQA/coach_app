@@ -1,20 +1,20 @@
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-  View,
-  Text,
   ActivityIndicator,
   FlatList,
-  ScrollView,
-  TextInput,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
+  Text,
+  TextInput,
+  View
 } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { ExerciseInput } from "../../components/ExerciseInput";
+import { PrimaryButton } from "../../components/PrimaryButton";
 import { authService } from "../../services/authService";
 import { workoutService } from "../../services/workoutService";
 import type { Exercise } from "../../types/Workout";
-import { ExerciseInput } from "../../components/ExerciseInput";
-import { PrimaryButton } from "../../components/PrimaryButton";
 
 // Screen for coaches to build a workout plan for a specific student.
 // Uses ExerciseInput to keep exercise editing logic reusable.
