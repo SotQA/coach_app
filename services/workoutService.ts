@@ -1,4 +1,4 @@
-import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import type { Exercise, WorkoutLog, WorkoutPlan } from "../types/Workout";
 
@@ -44,6 +44,16 @@ export const workoutService = {
     return {
       id: doc.id,
       ...data,
+    };
+  },
+
+  async getWorkoutPlanById(planId: string): Promise<WorkoutPlan | null> {
+    const ref = doc(db, WORKOUT_PLANS_COLLECTION, planId);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return null;
+    return {
+      id: snap.id,
+      ...(snap.data() as Omit<WorkoutPlan, "id">),
     };
   },
 

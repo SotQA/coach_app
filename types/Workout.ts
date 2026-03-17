@@ -15,8 +15,10 @@ export interface WorkoutPlan {
 export interface WorkoutLog {
   id: string;
   studentId: string;
+  workoutPlanId?: string;
   exercise: string;
   sets: number;
+  // Number of reps completed for this log entry.
   reps: number;
   weight?: number;
   // ISO date string so it is easy to sort and render
