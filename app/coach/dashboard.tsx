@@ -3,7 +3,7 @@ import { View, Text, FlatList, ActivityIndicator, ScrollView } from "react-nativ
 import { useRouter } from "expo-router";
 import { authService } from "../../services/authService";
 import { studentService } from "../../services/studentService";
-import type { Student } from "../../types/Student";
+import type { StudentSummary } from "../../types/StudentSummary";
 import type { AppUser } from "../../types/User";
 import { StudentCard } from "../../components/StudentCard";
 import { PrimaryButton } from "../../components/PrimaryButton";
@@ -15,7 +15,7 @@ import { PrimaryButton } from "../../components/PrimaryButton";
 export default function CoachDashboard() {
   const router = useRouter();
   const [, setCoach] = useState<AppUser | null>(null);
-  const [students, setStudents] = useState<Student[]>([]);
+  const [students, setStudents] = useState<StudentSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -132,7 +132,7 @@ export default function CoachDashboard() {
                 onPress={() =>
                   router.push({
                     pathname: "/coach/createWorkoutPlan",
-                    params: { studentId: item.id, studentName: item.name },
+                    params: { studentId: item.id, studentName: item.email || "Student" },
                   })
                 }
               />

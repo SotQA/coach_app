@@ -1,15 +1,16 @@
 import { FC } from "react";
 import { View, Text } from "react-native";
-import type { Student } from "../types/Student";
+import type { StudentSummary } from "../types/StudentSummary";
 import { PrimaryButton } from "./PrimaryButton";
 
 interface StudentCardProps {
-  student: Student;
+  student: StudentSummary;
   onPress?: () => void;
 }
 
 // Simple card for displaying basic student information with an optional action.
 export const StudentCard: FC<StudentCardProps> = ({ student, onPress }) => {
+  const label = student.email || "Student";
   return (
     <View
       style={{
@@ -22,9 +23,11 @@ export const StudentCard: FC<StudentCardProps> = ({ student, onPress }) => {
       }}
     >
       <Text style={{ fontWeight: "700", color: "#F9FAFB", marginBottom: 2 }}>
-        {student.name}
+        {label}
       </Text>
-      <Text style={{ color: "#9CA3AF", marginBottom: 12 }}>{student.email}</Text>
+      {student.email ? (
+        <Text style={{ color: "#9CA3AF", marginBottom: 12 }}>{student.email}</Text>
+      ) : null}
       {onPress ? (
         <PrimaryButton
           title="View / Plan Workout"

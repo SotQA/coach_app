@@ -18,8 +18,6 @@ import { PrimaryButton } from "../../components/PrimaryButton";
 export default function CreateStudent() {
   const router = useRouter();
   const [studentUid, setStudentUid] = useState("");
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -39,12 +37,7 @@ export default function CreateStudent() {
         return;
       }
 
-      await studentService.createStudent({
-        id: uid,
-        coachId: user.id,
-        name: name.trim(),
-        email: email.trim(),
-      });
+      await studentService.assignStudentToCoach(uid, user.id);
 
       router.replace("/coach/dashboard");
     } catch (e: any) {
@@ -82,7 +75,7 @@ export default function CreateStudent() {
             Create Student
           </Text>
           <Text style={{ color: "#9CA3AF", marginBottom: 16 }}>
-            Add a student to your roster using their Firebase Auth UID so you can assign workouts.
+            Link an existing student account to your roster using their Firebase Auth UID.
           </Text>
           <Text style={{ color: "#E5E7EB", marginBottom: 4 }}>Student UID</Text>
           <TextInput
@@ -101,45 +94,14 @@ export default function CreateStudent() {
               backgroundColor: "#020617",
             }}
           />
-          <Text style={{ color: "#E5E7EB", marginBottom: 4 }}>Student Name</Text>
-          <TextInput
-            placeholder="Jane Doe"
-            placeholderTextColor="#6B7280"
-            value={name}
-            onChangeText={setName}
-            style={{
-              borderWidth: 1,
-              borderColor: "#1F2937",
-              padding: 12,
-              borderRadius: 12,
-              marginBottom: 12,
-              color: "white",
-              backgroundColor: "#020617",
-            }}
-          />
-          <Text style={{ color: "#E5E7EB", marginBottom: 4 }}>Student Email</Text>
-          <TextInput
-            placeholder="student@example.com"
-            placeholderTextColor="#6B7280"
-            autoCapitalize="none"
-            keyboardType="email-address"
-            value={email}
-            onChangeText={setEmail}
-            style={{
-              borderWidth: 1,
-              borderColor: "#1F2937",
-              padding: 12,
-              borderRadius: 12,
-              marginBottom: 16,
-              color: "white",
-              backgroundColor: "#020617",
-            }}
-          />
+          <Text style={{ color: "#9CA3AF", marginBottom: 16 }}>
+            The student must have already signed up. This sets `users/{studentUid}.coachId` to you.
+          </Text>
 
           {loading ? (
             <ActivityIndicator style={{ marginVertical: 12 }} />
           ) : (
-            <PrimaryButton title="Create Student" onPress={handleCreate} />
+            <PrimaryButton title="Link Student" onPress={handleCreate} />
           )}
           {error ? (
             <Text style={{ color: "#FCA5A5", marginTop: 8 }}>{error}</Text>

@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { authService } from "../../services/authService";
 import { studentService } from "../../services/studentService";
 import { workoutService } from "../../services/workoutService";
-import type { Student } from "../../types/Student";
+import type { StudentSummary } from "../../types/StudentSummary";
 import type { WorkoutPlan } from "../../types/Workout";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { WorkoutCard } from "../../components/WorkoutCard";
@@ -15,7 +15,7 @@ export default function StudentDetails() {
 
   const studentId = useMemo(() => String(params.studentId ?? "").trim(), [params]);
 
-  const [student, setStudent] = useState<Student | null>(null);
+  const [student, setStudent] = useState<StudentSummary | null>(null);
   const [plans, setPlans] = useState<WorkoutPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -128,7 +128,7 @@ export default function StudentDetails() {
 
           <Text style={{ color: "#9CA3AF" }}>Name</Text>
           <Text style={{ color: "#F9FAFB", fontWeight: "600", marginBottom: 12 }}>
-            {student.name}
+            {student.email || "Student"}
           </Text>
 
           <Text style={{ color: "#9CA3AF" }}>Email</Text>
@@ -141,7 +141,7 @@ export default function StudentDetails() {
             onPress={() =>
               router.push({
                 pathname: "/coach/createWorkoutPlan",
-                params: { studentId: student.id, studentName: student.name },
+                params: { studentId: student.id, studentName: student.email || "Student" },
               })
             }
           />
