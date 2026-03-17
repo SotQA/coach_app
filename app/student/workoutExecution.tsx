@@ -137,6 +137,7 @@ export default function WorkoutExecution() {
 
       console.log("[student/workoutExecution] submit success");
       setMessage("Workout saved to history.");
+      router.replace("/student/workoutHistory");
     } catch (e: any) {
       console.error("[student/workoutExecution] submit error", e);
       setError(e.message ?? "Failed to save workout.");

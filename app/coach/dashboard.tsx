@@ -131,8 +131,8 @@ export default function CoachDashboard() {
                 student={item}
                 onPress={() =>
                   router.push({
-                    pathname: "/coach/createWorkoutPlan",
-                    params: { studentId: item.id, studentName: item.email || "Student" },
+                    pathname: "/coach/studentDetails",
+                    params: { studentId: item.id },
                   })
                 }
               />

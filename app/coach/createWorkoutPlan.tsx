@@ -4,11 +4,10 @@ import {
   ActivityIndicator,
   FlatList,
   KeyboardAvoidingView,
-  Platform,
   ScrollView,
   Text,
   TextInput,
-  View
+  View,
 } from "react-native";
 import { ExerciseInput } from "../../components/ExerciseInput";
 import { PrimaryButton } from "../../components/PrimaryButton";
@@ -120,8 +119,6 @@ export default function CreateWorkoutPlan() {
     <KeyboardAvoidingView
       style={{ flex: 1, backgroundColor: "#0F172A" }}
       behavior="padding"
-      // Slightly higher offset so the lowest inputs clear the keyboard on smaller screens.
-      keyboardVerticalOffset={Platform.OS === "ios" ? 140 : 100}
     >
       <ScrollView
         contentContainerStyle={{ padding: 16, paddingBottom: 80 }}

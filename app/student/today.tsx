@@ -88,7 +88,7 @@ export default function TodayWorkout() {
         }}
       >
         <Text style={{ color: "#FCA5A5", marginBottom: 8 }}>{error}</Text>
-        <PrimaryButton title="Go to Dashboard" onPress={() => router.replace("/student/dashboard")} />
+        <PrimaryButton title="Go to Login" onPress={() => router.replace("/login")} />
       </View>
     );
   }
@@ -107,9 +107,16 @@ export default function TodayWorkout() {
           Today&apos;s Workout ({todayName})
         </Text>
         {plans.length === 0 ? (
-          <Text style={{ color: "#9CA3AF" }}>
-            No workouts scheduled for today. Check with your coach or come back another day.
-          </Text>
+          <>
+            <Text style={{ color: "#9CA3AF", marginBottom: 16 }}>
+              No workouts scheduled for today. Your coach hasn&apos;t assigned anything for this day yet.
+            </Text>
+            <PrimaryButton
+              title="View History"
+              onPress={() => router.push("/student/workoutHistory")}
+              style={{ backgroundColor: "#1F2937" }}
+            />
+          </>
         ) : (
           plans.map((plan) => (
             <View key={plan.id} style={{ marginTop: 16 }}>

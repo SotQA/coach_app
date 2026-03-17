@@ -32,7 +32,7 @@ export default function Signup() {
       if (user.role === "coach") {
         router.replace("/coach/dashboard");
       } else {
-        router.replace("/student/dashboard");
+        router.replace("/student/today");
       }
     } catch (e: any) {
       setError(e.message ?? "Failed to sign up.");
