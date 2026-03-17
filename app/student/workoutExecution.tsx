@@ -261,7 +261,11 @@ export default function WorkoutExecution() {
         })}
 
         {message ? <Text style={{ color: "#6EE7B7", marginBottom: 12 }}>{message}</Text> : null}
-        {saving ? <ActivityIndicator /> : <PrimaryButton title="Submit Workout" onPress={handleSubmit} />}
+        {saving ? (
+          <ActivityIndicator />
+        ) : (
+          <PrimaryButton title="Complete Workout" onPress={handleSubmit} />
+        )}
       </ScrollView>
     </KeyboardAvoidingView>
   );

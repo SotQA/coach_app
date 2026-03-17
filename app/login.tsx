@@ -8,40 +8,51 @@ import {
   Platform,
   ScrollView,
 } from "react-native";
-import { useRouter } from "expo-router";
-import { authService } from "../services/authService";
-import type { AppUser } from "../types/User";
+import { Redirect, useRouter } from "expo-router";
 import { PrimaryButton } from "../components/PrimaryButton";
+import { useAuth } from "../context/AuthContext";
 
 // Login screen that authenticates with Firebase and routes the user
 // either to the coach dashboard or student dashboard based on Firestore role.
 export default function Login() {
   const router = useRouter();
+  const { user, loading: authLoading, login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const navigateAfterLogin = (user: AppUser) => {
-    if (user.role === "coach") {
-      router.replace("/coach/dashboard");
-    } else {
-      router.replace("/student/today");
-    }
-  };
-
   const handleLogin = async () => {
     setError(null);
     setLoading(true);
     try {
-      const user = await authService.login(email.trim(), password);
-      navigateAfterLogin(user);
+      await login(email.trim(), password);
     } catch (e: any) {
       setError(e.message ?? "Failed to login.");
     } finally {
       setLoading(false);
     }
   };
+
+  if (authLoading) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "#0F172A",
+        }}
+      >
+        <ActivityIndicator />
+      </View>
+    );
+  }
+
+  if (user) {
+    const href = user.role === "coach" ? "/coach/dashboard" : "/student/today";
+    return <Redirect href={href} />;
+  }
 
   return (
     <KeyboardAvoidingView
@@ -119,7 +130,14 @@ export default function Login() {
           {loading ? (
             <ActivityIndicator style={{ marginVertical: 12 }} />
           ) : (
-            <PrimaryButton title="Login" onPress={handleLogin} />
+            <>
+              <PrimaryButton title="Login" onPress={handleLogin} />
+              <PrimaryButton
+                title="Create account"
+                onPress={() => router.push("/signup")}
+                style={{ marginTop: 12, backgroundColor: "#1F2937" }}
+              />
+            </>
           )}
           {error ? (
             <Text style={{ color: "#FCA5A5", marginTop: 8 }}>{error}</Text>

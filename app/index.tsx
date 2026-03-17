@@ -1,62 +1,31 @@
-import { useRouter } from "expo-router";
-import { View, Text } from "react-native";
-import { PrimaryButton } from "../components/PrimaryButton";
+import { Redirect } from "expo-router";
+import { View, Text, ActivityIndicator } from "react-native";
+import { useAuth } from "../context/AuthContext";
 
 // Simple landing page that routes to login or signup.
 export default function Home() {
-  const router = useRouter();
+  const { user, loading } = useAuth();
 
-  return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        padding: 24,
-        backgroundColor: "#0F172A",
-      }}
-    >
+  if (loading) {
+    return (
       <View
         style={{
-          backgroundColor: "#111827",
-          borderRadius: 24,
-          padding: 24,
-          shadowColor: "#000",
-          shadowOpacity: 0.25,
-          shadowRadius: 10,
-          shadowOffset: { width: 0, height: 8 },
-          elevation: 6,
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "#0F172A",
         }}
       >
-        <Text
-          style={{
-            fontSize: 28,
-            fontWeight: "800",
-            marginBottom: 8,
-            color: "white",
-          }}
-        >
-          Gym Coach App
-        </Text>
-        <Text
-          style={{
-            marginBottom: 24,
-            color: "#9CA3AF",
-          }}
-        >
-          Manage students, build workout plans, and track progress in one place.
-        </Text>
-        <PrimaryButton
-          title="Login"
-          onPress={() => router.push("/login")}
-          style={{ marginBottom: 12 }}
-        />
-        <PrimaryButton
-          title="Sign Up"
-          onPress={() => router.push("/signup")}
-          style={{ backgroundColor: "white" }}
-          textStyle={{ color: "#111827" }}
-        />
+        <ActivityIndicator />
       </View>
-    </View>
-  );
+    );
+  }
+
+  if (user) {
+    const href = user.role === "coach" ? "/coach/dashboard" : "/student/today";
+    return <Redirect href={href} />;
+  }
+
+  return <Redirect href="/login" />;
+
 }

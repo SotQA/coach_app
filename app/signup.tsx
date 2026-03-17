@@ -9,15 +9,15 @@ import {
   Platform,
   ScrollView,
 } from "react-native";
-import { useRouter } from "expo-router";
-import { authService } from "../services/authService";
+import { Redirect } from "expo-router";
 import type { UserRole } from "../types/User";
 import { PrimaryButton } from "../components/PrimaryButton";
+import { useAuth } from "../context/AuthContext";
 
 // Signup screen that lets the user choose a role (coach | student),
 // creates the Firebase Auth user, and stores the role in Firestore.
 export default function Signup() {
-  const router = useRouter();
+  const { user, loading: authLoading, signup } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<UserRole>("coach");
@@ -28,12 +28,7 @@ export default function Signup() {
     setError(null);
     setLoading(true);
     try {
-      const user = await authService.signup({ email: email.trim(), password, role });
-      if (user.role === "coach") {
-        router.replace("/coach/dashboard");
-      } else {
-        router.replace("/student/today");
-      }
+      await signup(email.trim(), password, role);
     } catch (e: any) {
       setError(e.message ?? "Failed to sign up.");
     } finally {
@@ -74,6 +69,26 @@ export default function Signup() {
       </Pressable>
     );
   };
+
+  if (authLoading) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "#0F172A",
+        }}
+      >
+        <ActivityIndicator />
+      </View>
+    );
+  }
+
+  if (user) {
+    const href = user.role === "coach" ? "/coach/dashboard" : "/student/today";
+    return <Redirect href={href} />;
+  }
 
   return (
     <KeyboardAvoidingView

@@ -7,6 +7,7 @@ import type { StudentSummary } from "../../types/StudentSummary";
 import type { AppUser } from "../../types/User";
 import { StudentCard } from "../../components/StudentCard";
 import { PrimaryButton } from "../../components/PrimaryButton";
+import { useAuth } from "../../context/AuthContext";
 
 // Coach dashboard:
 // - Loads the current coach user
@@ -14,6 +15,7 @@ import { PrimaryButton } from "../../components/PrimaryButton";
 // - Allows navigation to create student or create workout plan flows
 export default function CoachDashboard() {
   const router = useRouter();
+  const { logout } = useAuth();
   const [, setCoach] = useState<AppUser | null>(null);
   const [students, setStudents] = useState<StudentSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -105,6 +107,16 @@ export default function CoachDashboard() {
             title="Create New Student"
             onPress={() => router.push("/coach/createStudent")}
           />
+          <View style={{ marginTop: 12 }}>
+            <PrimaryButton
+              title="Logout"
+              onPress={async () => {
+                await logout();
+                router.replace("/login");
+              }}
+              style={{ backgroundColor: "#1F2937" }}
+            />
+          </View>
         </View>
 
         <Text

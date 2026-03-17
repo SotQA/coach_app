@@ -21,22 +21,6 @@ export default function StudentDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const strongestByExercise = useMemo(() => {
-    const best = new Map<string, number>();
-    for (const log of logs) {
-      if (typeof log.weight !== "number" || !Number.isFinite(log.weight)) continue;
-      const key = (log.exercise ?? "").trim();
-      if (!key) continue;
-      const current = best.get(key);
-      if (current === undefined || log.weight > current) {
-        best.set(key, log.weight);
-      }
-    }
-    return Array.from(best.entries()).sort((a, b) =>
-      a[0].localeCompare(b[0], undefined, { sensitivity: "base" })
-    );
-  }, [logs]);
-
   useEffect(() => {
     const load = async () => {
       console.log("[coach/studentDetails] load start", { studentId });
@@ -131,6 +115,22 @@ export default function StudentDetails() {
       </View>
     );
   }
+
+  const strongestByExercise = (() => {
+    const best = new Map<string, number>();
+    for (const log of logs) {
+      if (typeof log.weight !== "number" || !Number.isFinite(log.weight)) continue;
+      const key = (log.exercise ?? "").trim();
+      if (!key) continue;
+      const current = best.get(key);
+      if (current === undefined || log.weight > current) {
+        best.set(key, log.weight);
+      }
+    }
+    return Array.from(best.entries()).sort((a, b) =>
+      a[0].localeCompare(b[0], undefined, { sensitivity: "base" })
+    );
+  })();
 
   return (
     <View style={{ flex: 1, backgroundColor: "#0F172A" }}>

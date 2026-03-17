@@ -1,11 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
-import { View, Text, ActivityIndicator, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
+import { useEffect, useMemo, useState } from "react";
+import { ActivityIndicator, ScrollView, Text, View } from "react-native";
+import { PrimaryButton } from "../../components/PrimaryButton";
+import { WorkoutCard } from "../../components/WorkoutCard";
 import { authService } from "../../services/authService";
 import { workoutService } from "../../services/workoutService";
 import type { WorkoutPlan } from "../../types/Workout";
-import { WorkoutCard } from "../../components/WorkoutCard";
-import { PrimaryButton } from "../../components/PrimaryButton";
+import { useAuth } from "../../context/AuthContext";
 
 const DAY_NAMES = [
   "Sunday",
@@ -19,6 +20,7 @@ const DAY_NAMES = [
 
 export default function TodayWorkout() {
   const router = useRouter();
+  const { logout } = useAuth();
   const [plans, setPlans] = useState<WorkoutPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -96,16 +98,32 @@ export default function TodayWorkout() {
   return (
     <View style={{ flex: 1, backgroundColor: "#0F172A" }}>
       <ScrollView contentContainerStyle={{ padding: 16 }}>
-        <Text
+        <View
           style={{
-            fontSize: 22,
-            fontWeight: "700",
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
             marginBottom: 8,
-            color: "#F9FAFB",
           }}
         >
-          Today&apos;s Workout ({todayName})
-        </Text>
+          <Text
+            style={{
+              fontSize: 22,
+              fontWeight: "700",
+              color: "#F9FAFB",
+            }}
+          >
+            Today&apos;s Workout ({todayName})
+          </Text>
+          <PrimaryButton
+            title="Logout"
+            onPress={async () => {
+              await logout();
+              router.replace("/login");
+            }}
+            style={{ paddingHorizontal: 12, backgroundColor: "#1F2937" }}
+          />
+        </View>
         {plans.length === 0 ? (
           <>
             <Text style={{ color: "#9CA3AF", marginBottom: 16 }}>
