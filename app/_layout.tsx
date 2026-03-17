@@ -1,24 +1,53 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
+import { Stack } from "expo-router";
+import { AuthProvider } from "../context/AuthContext";
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
-
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
-
+export default function Layout() {
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+    <AuthProvider>
+      <Stack
+        screenOptions={{
+          headerTitleAlign: "center",
+        }}
+      >
+        <Stack.Screen name="index" options={{ title: "Gym Coach App" }} />
+        <Stack.Screen name="login" options={{ title: "Login" }} />
+        <Stack.Screen name="signup" options={{ title: "Sign Up" }} />
+        <Stack.Screen name="coach/dashboard" options={{ title: "Coach Dashboard" }} />
+        <Stack.Screen
+          name="coach/studentDetails"
+          options={{ title: "Student Details" }}
+        />
+        <Stack.Screen
+          name="coach/createStudent"
+          options={{ title: "Create Student" }}
+        />
+        <Stack.Screen
+          name="coach/createWorkoutPlan"
+          options={{ title: "Create Workout Plan" }}
+        />
+        <Stack.Screen name="coach/viewProgress" options={{ title: "Progress" }} />
+        <Stack.Screen
+          name="student/dashboard"
+          options={{ title: "Student Dashboard" }}
+        />
+        <Stack.Screen name="student/today" options={{ title: "Today" }} />
+        <Stack.Screen
+          name="student/workout"
+          options={{ title: "Workout" }}
+        />
+        <Stack.Screen
+          name="student/workoutExecution"
+          options={{ title: "Workout Execution" }}
+        />
+        <Stack.Screen
+          name="student/workoutHistory"
+          options={{ title: "Workout History" }}
+        />
+        <Stack.Screen
+          name="student/exerciseDetails"
+          options={{ title: "Exercise Details" }}
+        />
       </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    </AuthProvider>
   );
 }
