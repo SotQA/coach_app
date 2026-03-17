@@ -20,12 +20,13 @@ const mapToAppUser = (user: User, role: AppUser["role"]): AppUser => ({
 export const authService = {
   // Creates a new Firebase Auth user and stores the role in the "users" collection.
   async signup({ email, password, role }: SignupPayload): Promise<AppUser> {
-    const credential = await createUserWithEmailAndPassword(auth, email, password);
+    const normalizedEmail = email.trim().toLowerCase();
+    const credential = await createUserWithEmailAndPassword(auth, normalizedEmail, password);
     const { user } = credential;
 
     // Store user metadata in Firestore so we can look up the role later.
     await setDoc(doc(db, USERS_COLLECTION, user.uid), {
-      email,
+      email: normalizedEmail,
       role,
     });
 

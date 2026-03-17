@@ -62,7 +62,19 @@ export const studentService = {
   async assignStudentToCoach(studentId: string, coachId: string): Promise<void> {
     assertNonEmpty(studentId, "studentId (Firebase Auth UID)");
     assertNonEmpty(coachId, "coachId (Firebase Auth UID)");
-    await setDoc(doc(db, USERS_COLLECTION, studentId), { coachId }, { merge: true });
+    const ref = doc(db, USERS_COLLECTION, studentId);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) {
+      throw new Error("Student user not found.");
+    }
+    const data = snap.data() as { role?: string; coachId?: string };
+    if (data.role !== "student") {
+      throw new Error("That user is not a student.");
+    }
+    if (data.coachId && data.coachId !== coachId) {
+      throw new Error("That student already belongs to another coach.");
+    }
+    await setDoc(ref, { coachId }, { merge: true });
   },
 
   // Finds a student user by email and links them to the coach.
@@ -70,12 +82,23 @@ export const studentService = {
     assertNonEmpty(email, "email");
     assertNonEmpty(coachId, "coachId (Firebase Auth UID)");
 
+    // Firestore equality match is case-sensitive. We store normalized lower-case on signup,
+    // but for safety we also try the raw trimmed email if needed.
     const normalizedEmail = email.trim().toLowerCase();
     const q = query(
       collection(db, USERS_COLLECTION),
       where("email", "==", normalizedEmail)
     );
-    const snapshot = await getDocs(q);
+    let snapshot = await getDocs(q);
+
+    if (snapshot.empty) {
+      const raw = email.trim();
+      if (raw && raw !== normalizedEmail) {
+        snapshot = await getDocs(
+          query(collection(db, USERS_COLLECTION), where("email", "==", raw))
+        );
+      }
+    }
 
     if (snapshot.empty) {
       throw new Error("No user found with that email.");
@@ -86,9 +109,12 @@ export const studentService = {
     }
 
     const match = snapshot.docs[0];
-    const data = match.data() as { role?: string };
+    const data = match.data() as { role?: string; coachId?: string };
     if (data.role !== "student") {
-      throw new Error("That user is not a student.");
+      throw new Error("That user is not a student (cannot add a coach).");
+    }
+    if (data.coachId && data.coachId !== coachId) {
+      throw new Error("That student already belongs to another coach.");
     }
 
     await setDoc(doc(db, USERS_COLLECTION, match.id), { coachId }, { merge: true });
