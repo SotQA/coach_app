@@ -31,16 +31,21 @@ export default function WorkoutScreen() {
 
   useEffect(() => {
     const loadUser = async () => {
+      console.log("[student/workout] load start");
       try {
+        setError(null);
         const user = await authService.getCurrentUserWithRole();
+        console.log("[student/workout] currentUser.id", user?.id);
         if (!user || user.role !== "student") {
           setError("You must be logged in as a student.");
           return;
         }
         setStudent(user);
         const plan = await workoutService.getWorkoutPlanForStudent(user.id);
+        console.log("[student/workout] workoutPlan", plan?.id ?? null);
         setWorkoutPlanId(plan?.id ?? null);
       } catch (e: any) {
+        console.error("[student/workout] load error", e);
         setError(e.message ?? "Failed to load user.");
       } finally {
         setLoadingUser(false);
@@ -56,6 +61,10 @@ export default function WorkoutScreen() {
       setError("No workout plan assigned yet.");
       return;
     }
+    console.log("[student/workout] submit start", {
+      currentUserId: student.id,
+      workoutPlanId,
+    });
     setSubmitting(true);
     setError(null);
     setMessage(null);
@@ -68,9 +77,11 @@ export default function WorkoutScreen() {
         reps: exercise.reps,
         weight: exercise.weight,
       });
+      console.log("[student/workout] submit success");
       setMessage("Workout logged!");
       setExercise(workoutService.createEmptyExercise());
     } catch (e: any) {
+      console.error("[student/workout] submit error", e);
       setError(e.message ?? "Failed to log workout.");
     } finally {
       setSubmitting(false);

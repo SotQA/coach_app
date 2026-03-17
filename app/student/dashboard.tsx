@@ -21,16 +21,22 @@ export default function StudentDashboard() {
 
   useEffect(() => {
     const load = async () => {
+      console.log("[student/dashboard] load start");
+      setLoading(true);
       try {
+        setError(null);
         const user = await authService.getCurrentUserWithRole();
+        console.log("[student/dashboard] currentUser.id", user?.id);
         if (!user || user.role !== "student") {
           setError("You must be logged in as a student.");
           return;
         }
         setStudent(user);
         const workoutPlan = await workoutService.getWorkoutPlanForStudent(user.id);
+        console.log("[student/dashboard] workoutPlan", workoutPlan?.id ?? null);
         setPlan(workoutPlan);
       } catch (e: any) {
+        console.error("[student/dashboard] load error", e);
         setError(e.message ?? "Failed to load dashboard.");
       } finally {
         setLoading(false);

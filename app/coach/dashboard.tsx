@@ -21,16 +21,22 @@ export default function CoachDashboard() {
 
   useEffect(() => {
     const loadData = async () => {
+      console.log("[coach/dashboard] load start");
+      setLoading(true);
       try {
+        setError(null);
         const user = await authService.getCurrentUserWithRole();
+        console.log("[coach/dashboard] currentUser.id", user?.id);
         if (!user || user.role !== "coach") {
           setError("You must be logged in as a coach.");
           return;
         }
         setCoach(user);
         const data = await studentService.getStudentsForCoach(user.id);
+        console.log("[coach/dashboard] students", data.length);
         setStudents(data);
       } catch (e: any) {
+        console.error("[coach/dashboard] load error", e);
         setError(e.message ?? "Failed to load dashboard.");
       } finally {
         setLoading(false);
