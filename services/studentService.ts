@@ -16,6 +16,9 @@ const STUDENTS_COLLECTION = "students";
 
 const assertNonEmpty = (value: string, label: string) => {
   if (!value || !value.trim()) throw new Error(`Missing ${label}.`);
+  if (value.includes("@")) {
+    console.warn(`[studentService] Possible email used as ${label}:`, value);
+  }
 };
 
 const mapStudentDoc = (

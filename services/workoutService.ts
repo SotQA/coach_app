@@ -17,6 +17,9 @@ const WORKOUT_LOGS_COLLECTION = "workoutLogs";
 
 const assertNonEmpty = (value: string, label: string) => {
   if (!value || !value.trim()) throw new Error(`Missing ${label}.`);
+  if (value.includes("@")) {
+    console.warn(`[workoutService] Possible email used as ${label}:`, value);
+  }
 };
 
 const toMs = (value: any): number => {
