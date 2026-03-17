@@ -18,6 +18,7 @@ import { PrimaryButton } from "../../components/PrimaryButton";
 export default function CreateStudent() {
   const router = useRouter();
   const [studentUid, setStudentUid] = useState("");
+  const [studentEmail, setStudentEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,12 +33,17 @@ export default function CreateStudent() {
       }
 
       const uid = studentUid.trim();
-      if (!uid) {
-        setError("Student UID is required.");
-        return;
-      }
+      const email = studentEmail.trim();
 
-      await studentService.assignStudentToCoach(uid, user.id);
+      if (email) {
+        await studentService.assignStudentToCoachByEmail(email, user.id);
+      } else {
+        if (!uid) {
+          setError("Enter a student email or UID.");
+          return;
+        }
+        await studentService.assignStudentToCoach(uid, user.id);
+      }
 
       router.replace("/coach/dashboard");
     } catch (e: any) {
@@ -76,6 +82,27 @@ export default function CreateStudent() {
           </Text>
           <Text style={{ color: "#9CA3AF", marginBottom: 16 }}>
             Link an existing student account to your roster using their Firebase Auth UID.
+          </Text>
+          <Text style={{ color: "#E5E7EB", marginBottom: 4 }}>Student Email</Text>
+          <TextInput
+            placeholder="student@example.com"
+            placeholderTextColor="#6B7280"
+            autoCapitalize="none"
+            keyboardType="email-address"
+            value={studentEmail}
+            onChangeText={setStudentEmail}
+            style={{
+              borderWidth: 1,
+              borderColor: "#1F2937",
+              padding: 12,
+              borderRadius: 12,
+              marginBottom: 12,
+              color: "white",
+              backgroundColor: "#020617",
+            }}
+          />
+          <Text style={{ color: "#9CA3AF", marginBottom: 12 }}>
+            Or link by UID below.
           </Text>
           <Text style={{ color: "#E5E7EB", marginBottom: 4 }}>Student UID</Text>
           <TextInput

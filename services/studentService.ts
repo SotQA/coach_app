@@ -64,5 +64,34 @@ export const studentService = {
     assertNonEmpty(coachId, "coachId (Firebase Auth UID)");
     await setDoc(doc(db, USERS_COLLECTION, studentId), { coachId }, { merge: true });
   },
+
+  // Finds a student user by email and links them to the coach.
+  async assignStudentToCoachByEmail(email: string, coachId: string): Promise<void> {
+    assertNonEmpty(email, "email");
+    assertNonEmpty(coachId, "coachId (Firebase Auth UID)");
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const q = query(
+      collection(db, USERS_COLLECTION),
+      where("email", "==", normalizedEmail)
+    );
+    const snapshot = await getDocs(q);
+
+    if (snapshot.empty) {
+      throw new Error("No user found with that email.");
+    }
+
+    if (snapshot.docs.length > 1) {
+      console.warn("[studentService] Multiple users matched email", normalizedEmail);
+    }
+
+    const match = snapshot.docs[0];
+    const data = match.data() as { role?: string };
+    if (data.role !== "student") {
+      throw new Error("That user is not a student.");
+    }
+
+    await setDoc(doc(db, USERS_COLLECTION, match.id), { coachId }, { merge: true });
+  },
 };
 
