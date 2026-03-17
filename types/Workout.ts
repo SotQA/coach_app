@@ -12,6 +12,10 @@ export interface WorkoutPlan {
   name: string;
   exercises: Exercise[];
   createdAt: any;
+  // Optional list of scheduled days for this plan, e.g. ["Monday", "Wednesday"].
+  scheduledDays?: string[];
+  // Optional note from the coach for this plan.
+  note?: string;
 }
 
 export interface WorkoutLog {

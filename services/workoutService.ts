@@ -67,6 +67,10 @@ export const workoutService = {
       ...payload,
       name: payload.name?.trim() || "Workout Plan",
       createdAt: payload.createdAt ?? new Date(),
+      scheduledDays: Array.isArray(payload.scheduledDays)
+        ? payload.scheduledDays.filter((d) => typeof d === "string" && d.trim().length > 0)
+        : undefined,
+      note: payload.note?.trim() || undefined,
     };
     const ref = await addDoc(
       collection(db, WORKOUT_PLANS_COLLECTION),
@@ -141,17 +145,6 @@ export const workoutService = {
   async getWorkoutHistory(studentId: string): Promise<WorkoutLog[]> {
     const logs = await listWorkoutLogs([where("studentId", "==", studentId)]);
     return logs.sort((a, b) => toMs(b.date) - toMs(a.date));
-  },
-
-  // Friendly aliases for app code (keep existing methods for backward compatibility).
-  async saveWorkoutLog(
-    payload: Omit<WorkoutLog, "id" | "date"> & { date?: Date }
-  ): Promise<WorkoutLog> {
-    return this.logWorkoutEntry(payload);
-  },
-
-  async getWorkoutLogs(studentId: string): Promise<WorkoutLog[]> {
-    return this.getWorkoutHistory(studentId);
   },
 
   // Helper used by coach screens when building workout plans interactively.

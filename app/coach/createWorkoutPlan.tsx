@@ -1,5 +1,14 @@
 import { useEffect, useState } from "react";
-import { View, Text, ActivityIndicator, FlatList, ScrollView, TextInput } from "react-native";
+import {
+  View,
+  Text,
+  ActivityIndicator,
+  FlatList,
+  ScrollView,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { authService } from "../../services/authService";
 import { workoutService } from "../../services/workoutService";
@@ -19,6 +28,8 @@ export default function CreateWorkoutPlan() {
   const [studentName] = useState(params.studentName ?? "Student");
   const [studentId] = useState(params.studentId ?? "");
   const [planName, setPlanName] = useState("Workout Plan");
+  const [scheduledDaysInput, setScheduledDaysInput] = useState("");
+  const [note, setNote] = useState("");
   const [exercises, setExercises] = useState<Exercise[]>([
     workoutService.createEmptyExercise(),
   ]);
@@ -68,12 +79,19 @@ export default function CreateWorkoutPlan() {
     setLoading(true);
     try {
       const name = planName.trim() || `Workout Plan for ${studentName}`;
+      const scheduledDays =
+        scheduledDaysInput
+          .split(",")
+          .map((d) => d.trim())
+          .filter((d) => d.length > 0) || [];
       await workoutService.createWorkoutPlan({
         coachId,
         studentId,
         name,
         exercises: exercises.filter((e) => e.name.trim().length > 0),
         createdAt: new Date(),
+        scheduledDays: scheduledDays.length ? scheduledDays : undefined,
+        note: note.trim() || undefined,
       });
       router.replace("/coach/dashboard");
     } catch (e: any) {
@@ -99,8 +117,16 @@ export default function CreateWorkoutPlan() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#0F172A" }}>
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
+    <KeyboardAvoidingView
+      style={{ flex: 1, backgroundColor: "#0F172A" }}
+      behavior="padding"
+      // Slightly higher offset so the lowest inputs clear the keyboard on smaller screens.
+      keyboardVerticalOffset={Platform.OS === "ios" ? 140 : 100}
+    >
+      <ScrollView
+        contentContainerStyle={{ padding: 16, paddingBottom: 80 }}
+        keyboardShouldPersistTaps="handled"
+      >
         <View
           style={{
             backgroundColor: "#111827",
@@ -139,6 +165,44 @@ export default function CreateWorkoutPlan() {
             }}
           />
 
+          <Text style={{ color: "#E5E7EB", marginBottom: 4, marginTop: 8 }}>
+            Scheduled Days (comma separated)
+          </Text>
+          <TextInput
+            placeholder="e.g. Monday, Wednesday, Friday"
+            placeholderTextColor="#6B7280"
+            value={scheduledDaysInput}
+            onChangeText={setScheduledDaysInput}
+            style={{
+              borderWidth: 1,
+              borderColor: "#1F2937",
+              padding: 12,
+              borderRadius: 12,
+              marginBottom: 12,
+              color: "white",
+              backgroundColor: "#020617",
+            }}
+          />
+
+          <Text style={{ color: "#E5E7EB", marginBottom: 4 }}>Coach Note (optional)</Text>
+          <TextInput
+            placeholder="Guidance or intent for this plan..."
+            placeholderTextColor="#6B7280"
+            value={note}
+            onChangeText={setNote}
+            multiline
+            style={{
+              borderWidth: 1,
+              borderColor: "#1F2937",
+              padding: 12,
+              borderRadius: 12,
+              marginBottom: 12,
+              color: "white",
+              backgroundColor: "#020617",
+              minHeight: 60,
+            }}
+          />
+
           <FlatList
             data={exercises}
             scrollEnabled={false}
@@ -172,7 +236,7 @@ export default function CreateWorkoutPlan() {
           </View>
         </View>
       </ScrollView>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 

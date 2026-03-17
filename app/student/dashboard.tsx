@@ -100,19 +100,29 @@ export default function StudentDashboard() {
         <View style={{ marginTop: 24 }}>
           <PrimaryButton
             title="Start Workout"
-            onPress={() => {
-              if (!plan) return;
-              router.push({
-                pathname: "/student/workoutExecution",
-                params: { workoutPlanId: plan.id },
-              });
-            }}
+            onPress={() =>
+              router.push(
+                plan
+                  ? {
+                      pathname: "/student/workoutExecution",
+                      params: { workoutPlanId: plan.id },
+                    }
+                  : "/student/workout"
+              )
+            }
           />
         </View>
         <View style={{ marginTop: 12 }}>
           <PrimaryButton
             title="View History"
             onPress={() => router.push("/student/workoutHistory")}
+            style={{ backgroundColor: "#1F2937" }}
+          />
+        </View>
+        <View style={{ marginTop: 12 }}>
+          <PrimaryButton
+            title="Today&apos;s Schedule"
+            onPress={() => router.push("/student/today")}
             style={{ backgroundColor: "#1F2937" }}
           />
         </View>

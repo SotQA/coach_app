@@ -1,16 +1,18 @@
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import {
-  View,
-  Text,
   ActivityIndicator,
-  ScrollView,
+  Text,
   TextInput,
+  View,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { PrimaryButton } from "../../components/PrimaryButton";
 import { authService } from "../../services/authService";
 import { workoutService } from "../../services/workoutService";
 import type { WorkoutPlan } from "../../types/Workout";
-import { PrimaryButton } from "../../components/PrimaryButton";
 
 type ExerciseEntry = {
   repsCompleted: string;
@@ -135,7 +137,6 @@ export default function WorkoutExecution() {
 
       console.log("[student/workoutExecution] submit success");
       setMessage("Workout saved to history.");
-      router.replace("/student/workoutHistory");
     } catch (e: any) {
       console.error("[student/workoutExecution] submit error", e);
       setError(e.message ?? "Failed to save workout.");
@@ -178,8 +179,12 @@ export default function WorkoutExecution() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#0F172A" }}>
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
+    <KeyboardAvoidingView
+      style={{ flex: 1, backgroundColor: "#0F172A" }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
+    >
+      <ScrollView contentContainerStyle={{ padding: 16 }} keyboardShouldPersistTaps="handled">
         <View
           style={{
             backgroundColor: "#111827",
@@ -255,13 +260,9 @@ export default function WorkoutExecution() {
         })}
 
         {message ? <Text style={{ color: "#6EE7B7", marginBottom: 12 }}>{message}</Text> : null}
-        {saving ? (
-          <ActivityIndicator />
-        ) : (
-          <PrimaryButton title="Complete Workout" onPress={handleSubmit} />
-        )}
+        {saving ? <ActivityIndicator /> : <PrimaryButton title="Submit Workout" onPress={handleSubmit} />}
       </ScrollView>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 

@@ -5,7 +5,7 @@ import { authService } from "../../services/authService";
 import { studentService } from "../../services/studentService";
 import { workoutService } from "../../services/workoutService";
 import type { StudentSummary } from "../../types/StudentSummary";
-import type { WorkoutPlan } from "../../types/Workout";
+import type { WorkoutPlan, WorkoutLog } from "../../types/Workout";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { WorkoutCard } from "../../components/WorkoutCard";
 
@@ -17,6 +17,7 @@ export default function StudentDetails() {
 
   const [student, setStudent] = useState<StudentSummary | null>(null);
   const [plans, setPlans] = useState<WorkoutPlan[]>([]);
+  const [logs, setLogs] = useState<WorkoutLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -60,6 +61,10 @@ export default function StudentDetails() {
         );
         console.log("[coach/studentDetails] fetched plans", workoutPlans.length);
         setPlans(workoutPlans);
+
+        const history = await workoutService.getWorkoutHistory(studentId);
+        console.log("[coach/studentDetails] fetched logs", history.length);
+        setLogs(history);
       } catch (e: any) {
         console.error("[coach/studentDetails] load error", e);
         setError(e.message ?? "Failed to load student details.");
@@ -110,6 +115,22 @@ export default function StudentDetails() {
       </View>
     );
   }
+
+  const strongestByExercise = useMemo(() => {
+    const best = new Map<string, number>();
+    for (const log of logs) {
+      if (typeof log.weight !== "number" || !Number.isFinite(log.weight)) continue;
+      const key = (log.exercise ?? "").trim();
+      if (!key) continue;
+      const current = best.get(key);
+      if (current === undefined || log.weight > current) {
+        best.set(key, log.weight);
+      }
+    }
+    return Array.from(best.entries()).sort((a, b) =>
+      a[0].localeCompare(b[0], undefined, { sensitivity: "base" })
+    );
+  }, [logs]);
 
   return (
     <View style={{ flex: 1, backgroundColor: "#0F172A" }}>
@@ -172,6 +193,73 @@ export default function StudentDetails() {
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => <WorkoutCard plan={item} />}
           />
+        )}
+
+        <Text
+          style={{
+            fontSize: 16,
+            fontWeight: "600",
+            marginTop: 24,
+            marginBottom: 8,
+            color: "#E5E7EB",
+          }}
+        >
+          Recent Workouts
+        </Text>
+        {logs.length === 0 ? (
+          <Text style={{ color: "#9CA3AF" }}>No workouts logged yet.</Text>
+        ) : (
+          logs.slice(0, 5).map((log) => (
+            <View
+              key={log.id}
+              style={{
+                borderRadius: 16,
+                padding: 12,
+                marginBottom: 8,
+                backgroundColor: "#020617",
+                borderWidth: 1,
+                borderColor: "#1F2937",
+              }}
+            >
+              <Text style={{ color: "#F9FAFB", fontWeight: "600" }}>{log.exercise}</Text>
+              <Text style={{ color: "#9CA3AF" }}>
+                {log.sets} sets × {log.reps} reps
+                {log.weight ? ` @ ${log.weight}kg` : ""}
+              </Text>
+            </View>
+          ))
+        )}
+
+        <Text
+          style={{
+            fontSize: 16,
+            fontWeight: "600",
+            marginTop: 24,
+            marginBottom: 8,
+            color: "#E5E7EB",
+          }}
+        >
+          Strongest Lifts
+        </Text>
+        {strongestByExercise.length === 0 ? (
+          <Text style={{ color: "#9CA3AF" }}>No lift data yet.</Text>
+        ) : (
+          strongestByExercise.map(([exercise, weight]) => (
+            <View
+              key={exercise}
+              style={{
+                borderRadius: 16,
+                padding: 12,
+                marginBottom: 8,
+                backgroundColor: "#020617",
+                borderWidth: 1,
+                borderColor: "#1F2937",
+              }}
+            >
+              <Text style={{ color: "#F9FAFB", fontWeight: "600" }}>{exercise}</Text>
+              <Text style={{ color: "#9CA3AF" }}>Best: {weight} kg</Text>
+            </View>
+          ))
         )}
       </ScrollView>
     </View>

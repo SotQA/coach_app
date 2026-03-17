@@ -4,6 +4,8 @@ import {
   Text,
   ActivityIndicator,
   ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { authService } from "../../services/authService";
@@ -120,8 +122,12 @@ export default function WorkoutScreen() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#0F172A" }}>
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
+    <KeyboardAvoidingView
+      style={{ flex: 1, backgroundColor: "#0F172A" }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
+    >
+      <ScrollView contentContainerStyle={{ padding: 16 }} keyboardShouldPersistTaps="handled">
         <Text
           style={{
             fontSize: 20,
@@ -143,11 +149,9 @@ export default function WorkoutScreen() {
         {message ? (
           <Text style={{ color: "#6EE7B7", marginTop: 8 }}>{message}</Text>
         ) : null}
-        {error ? (
-          <Text style={{ color: "#FCA5A5", marginTop: 8 }}>{error}</Text>
-        ) : null}
+        {error ? <Text style={{ color: "#FCA5A5", marginTop: 8 }}>{error}</Text> : null}
       </ScrollView>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
