@@ -63,6 +63,42 @@ export const workoutService = {
     });
   },
 
+  // Coach-scoped: retrieves all workout plans that belong to a coach.
+  async getWorkoutPlansForCoach(coachId: string): Promise<WorkoutPlan[]> {
+    const q = query(
+      collection(db, WORKOUT_PLANS_COLLECTION),
+      where("coachId", "==", coachId)
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map((doc) => {
+      const data = doc.data() as Omit<WorkoutPlan, "id">;
+      return {
+        id: doc.id,
+        ...data,
+      };
+    });
+  },
+
+  // Coach-scoped: retrieves all workout plans for a student owned by the coach.
+  async getWorkoutPlansForStudentAsCoach(
+    coachId: string,
+    studentId: string
+  ): Promise<WorkoutPlan[]> {
+    const q = query(
+      collection(db, WORKOUT_PLANS_COLLECTION),
+      where("coachId", "==", coachId),
+      where("studentId", "==", studentId)
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map((doc) => {
+      const data = doc.data() as Omit<WorkoutPlan, "id">;
+      return {
+        id: doc.id,
+        ...data,
+      };
+    });
+  },
+
   // Logs a single workout entry for the student.
   async logWorkoutEntry(
     payload: Omit<WorkoutLog, "id" | "date"> & { date?: string }

@@ -50,7 +50,10 @@ export default function StudentDetails() {
 
         setStudent(studentDoc);
 
-        const workoutPlans = await workoutService.getWorkoutPlansForStudent(studentId);
+        const workoutPlans = await workoutService.getWorkoutPlansForStudentAsCoach(
+          user.id,
+          studentId
+        );
         setPlans(workoutPlans);
       } catch (e: any) {
         setError(e.message ?? "Failed to load student details.");
