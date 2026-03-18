@@ -5,14 +5,12 @@ import {
   Text,
   TextInput,
   View,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
 } from "react-native";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { authService } from "../../services/authService";
 import { workoutService } from "../../services/workoutService";
 import type { WorkoutPlan } from "../../types/Workout";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 type ExerciseEntry = {
   repsCompleted: string;
@@ -180,12 +178,13 @@ export default function WorkoutExecution() {
   }
 
   return (
-    <KeyboardAvoidingView
+    <KeyboardAwareScrollView
       style={{ flex: 1, backgroundColor: "#0F172A" }}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
+      contentContainerStyle={{ padding: 16, paddingBottom: 48 }}
+      keyboardShouldPersistTaps="handled"
+      enableOnAndroid
+      extraScrollHeight={24}
     >
-      <ScrollView contentContainerStyle={{ padding: 16 }} keyboardShouldPersistTaps="handled">
         <View
           style={{
             backgroundColor: "#111827",
@@ -266,8 +265,7 @@ export default function WorkoutExecution() {
         ) : (
           <PrimaryButton title="Complete Workout" onPress={handleSubmit} />
         )}
-      </ScrollView>
-    </KeyboardAvoidingView>
+    </KeyboardAwareScrollView>
   );
 }
 

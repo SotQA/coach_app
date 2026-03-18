@@ -3,8 +3,6 @@ import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
-  KeyboardAvoidingView,
-  ScrollView,
   Text,
   TextInput,
   View,
@@ -14,6 +12,7 @@ import { PrimaryButton } from "../../components/PrimaryButton";
 import { authService } from "../../services/authService";
 import { workoutService } from "../../services/workoutService";
 import type { Exercise } from "../../types/Workout";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 // Screen for coaches to build a workout plan for a specific student.
 // Uses ExerciseInput to keep exercise editing logic reusable.
@@ -116,14 +115,13 @@ export default function CreateWorkoutPlan() {
   }
 
   return (
-    <KeyboardAvoidingView
+    <KeyboardAwareScrollView
       style={{ flex: 1, backgroundColor: "#0F172A" }}
-      behavior="padding"
+      contentContainerStyle={{ padding: 16, paddingBottom: 80 }}
+      keyboardShouldPersistTaps="handled"
+      enableOnAndroid
+      extraScrollHeight={24}
     >
-      <ScrollView
-        contentContainerStyle={{ padding: 16, paddingBottom: 80 }}
-        keyboardShouldPersistTaps="handled"
-      >
         <View
           style={{
             backgroundColor: "#111827",
@@ -232,8 +230,7 @@ export default function CreateWorkoutPlan() {
             ) : null}
           </View>
         </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+    </KeyboardAwareScrollView>
   );
 }
 

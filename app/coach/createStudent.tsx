@@ -4,14 +4,12 @@ import {
   Text,
   TextInput,
   ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { authService } from "../../services/authService";
 import { studentService } from "../../services/studentService";
 import { PrimaryButton } from "../../components/PrimaryButton";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 // Screen used by the coach to create a new student record
 // that will appear in their dashboard.
@@ -54,14 +52,13 @@ export default function CreateStudent() {
   };
 
   return (
-    <KeyboardAvoidingView
+    <KeyboardAwareScrollView
       style={{ flex: 1, backgroundColor: "#0F172A" }}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      contentContainerStyle={{ flexGrow: 1, padding: 16, paddingBottom: 48 }}
+      keyboardShouldPersistTaps="handled"
+      enableOnAndroid
+      extraScrollHeight={24}
     >
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1, padding: 16 }}
-        keyboardShouldPersistTaps="handled"
-      >
         <View
           style={{
             backgroundColor: "#111827",
@@ -134,8 +131,7 @@ export default function CreateStudent() {
             <Text style={{ color: "#FCA5A5", marginTop: 8 }}>{error}</Text>
           ) : null}
         </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+    </KeyboardAwareScrollView>
   );
 }
 

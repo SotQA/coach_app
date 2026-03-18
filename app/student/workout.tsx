@@ -3,9 +3,6 @@ import {
   View,
   Text,
   ActivityIndicator,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { authService } from "../../services/authService";
@@ -14,6 +11,7 @@ import type { AppUser } from "../../types/User";
 import type { Exercise } from "../../types/Workout";
 import { ExerciseInput } from "../../components/ExerciseInput";
 import { PrimaryButton } from "../../components/PrimaryButton";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 // Simple workout logging screen:
 // - Loads the current student
@@ -122,12 +120,13 @@ export default function WorkoutScreen() {
   }
 
   return (
-    <KeyboardAvoidingView
+    <KeyboardAwareScrollView
       style={{ flex: 1, backgroundColor: "#0F172A" }}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
+      contentContainerStyle={{ padding: 16, paddingBottom: 48 }}
+      keyboardShouldPersistTaps="handled"
+      enableOnAndroid
+      extraScrollHeight={24}
     >
-      <ScrollView contentContainerStyle={{ padding: 16 }} keyboardShouldPersistTaps="handled">
         <Text
           style={{
             fontSize: 20,
@@ -150,8 +149,7 @@ export default function WorkoutScreen() {
           <Text style={{ color: "#6EE7B7", marginTop: 8 }}>{message}</Text>
         ) : null}
         {error ? <Text style={{ color: "#FCA5A5", marginTop: 8 }}>{error}</Text> : null}
-      </ScrollView>
-    </KeyboardAvoidingView>
+    </KeyboardAwareScrollView>
   );
 }
 

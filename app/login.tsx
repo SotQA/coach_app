@@ -4,13 +4,11 @@ import {
   Text,
   TextInput,
   ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
 } from "react-native";
 import { Redirect, useRouter } from "expo-router";
 import { PrimaryButton } from "../components/PrimaryButton";
 import { useAuth } from "../context/AuthContext";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 // Login screen that authenticates with Firebase and routes the user
 // either to the coach dashboard or student dashboard based on Firestore role.
@@ -55,18 +53,18 @@ export default function Login() {
   }
 
   return (
-    <KeyboardAvoidingView
+    <KeyboardAwareScrollView
       style={{ flex: 1, backgroundColor: "#0F172A" }}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      contentContainerStyle={{
+        flexGrow: 1,
+        justifyContent: "center",
+        padding: 20,
+        paddingBottom: 48,
+      }}
+      keyboardShouldPersistTaps="handled"
+      enableOnAndroid
+      extraScrollHeight={24}
     >
-      <ScrollView
-        contentContainerStyle={{
-          flexGrow: 1,
-          justifyContent: "center",
-          padding: 20,
-        }}
-        keyboardShouldPersistTaps="handled"
-      >
         <View
           style={{
             backgroundColor: "#111827",
@@ -143,7 +141,6 @@ export default function Login() {
             <Text style={{ color: "#FCA5A5", marginTop: 8 }}>{error}</Text>
           ) : null}
         </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+    </KeyboardAwareScrollView>
   );
 }
