@@ -9,6 +9,9 @@ import { Redirect, useRouter } from "expo-router";
 import { PrimaryButton } from "../components/PrimaryButton";
 import { useAuth } from "../context/AuthContext";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { Colors } from "../theme/colors";
+import { Radius, Spacing } from "../theme/spacing";
+import { Typography } from "../theme/typography";
 
 // Login screen that authenticates with Firebase and routes the user
 // either to the coach dashboard or student dashboard based on Firestore role.
@@ -39,7 +42,7 @@ export default function Login() {
           flex: 1,
           justifyContent: "center",
           alignItems: "center",
-          backgroundColor: "#0F172A",
+          backgroundColor: Colors.bg,
         }}
       >
         <ActivityIndicator />
@@ -54,75 +57,70 @@ export default function Login() {
 
   return (
     <KeyboardAwareScrollView
-      style={{ flex: 1, backgroundColor: "#0F172A" }}
+      style={{ flex: 1, backgroundColor: Colors.bg }}
       contentContainerStyle={{
         flexGrow: 1,
         justifyContent: "center",
-        padding: 20,
+        padding: Spacing.lg,
         paddingBottom: 48,
       }}
       keyboardShouldPersistTaps="handled"
       enableOnAndroid
       extraScrollHeight={24}
     >
-        <View
-          style={{
-            backgroundColor: "#111827",
-            borderRadius: 24,
-            padding: 24,
-            shadowColor: "#000",
-            shadowOpacity: 0.25,
-            shadowRadius: 10,
-            shadowOffset: { width: 0, height: 8 },
-            elevation: 6,
-          }}
-        >
+      <View
+        style={{
+          backgroundColor: Colors.card,
+          borderRadius: Radius.md,
+          padding: Spacing.lg,
+          borderWidth: 1,
+          borderColor: Colors.border,
+        }}
+      >
           <Text
             style={{
-              fontSize: 24,
-              fontWeight: "700",
-              marginBottom: 8,
-              color: "white",
+              ...Typography.title,
+              marginBottom: Spacing.xs,
             }}
           >
             Welcome back
           </Text>
-          <Text style={{ color: "#9CA3AF", marginBottom: 20 }}>
+          <Text style={{ ...Typography.secondary, marginBottom: Spacing.lg }}>
             Log in to manage your coaching or stay on top of your workouts.
           </Text>
-          <Text style={{ color: "#E5E7EB", marginBottom: 4 }}>Email</Text>
+          <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Email</Text>
           <TextInput
             placeholder="you@example.com"
-            placeholderTextColor="#6B7280"
+            placeholderTextColor={Colors.textMuted}
             autoCapitalize="none"
             keyboardType="email-address"
             value={email}
             onChangeText={setEmail}
             style={{
               borderWidth: 1,
-              borderColor: "#1F2937",
-              borderRadius: 12,
-              marginBottom: 12,
+              borderColor: Colors.border,
+              borderRadius: Radius.sm,
+              marginBottom: Spacing.sm,
               padding: 12,
-              color: "white",
-              backgroundColor: "#020617",
+              color: Colors.text,
+              backgroundColor: Colors.surface,
             }}
           />
-          <Text style={{ color: "#E5E7EB", marginBottom: 4 }}>Password</Text>
+          <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Password</Text>
           <TextInput
             placeholder="••••••••"
-            placeholderTextColor="#6B7280"
+            placeholderTextColor={Colors.textMuted}
             value={password}
             onChangeText={setPassword}
             secureTextEntry
             style={{
               borderWidth: 1,
-              borderColor: "#1F2937",
-              borderRadius: 12,
-              marginBottom: 16,
+              borderColor: Colors.border,
+              borderRadius: Radius.sm,
+              marginBottom: Spacing.md,
               padding: 12,
-              color: "white",
-              backgroundColor: "#020617",
+              color: Colors.text,
+              backgroundColor: Colors.surface,
             }}
           />
           {loading ? (
@@ -133,14 +131,14 @@ export default function Login() {
               <PrimaryButton
                 title="Create account"
                 onPress={() => router.push("/signup")}
-                style={{ marginTop: 12, backgroundColor: "#1F2937" }}
+                style={{ marginTop: Spacing.sm, backgroundColor: Colors.border }}
               />
             </>
           )}
           {error ? (
-            <Text style={{ color: "#FCA5A5", marginTop: 8 }}>{error}</Text>
+            <Text style={{ color: Colors.danger, marginTop: Spacing.xs }}>{error}</Text>
           ) : null}
-        </View>
+      </View>
     </KeyboardAwareScrollView>
   );
 }

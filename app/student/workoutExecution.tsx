@@ -11,6 +11,9 @@ import { authService } from "../../services/authService";
 import { workoutService } from "../../services/workoutService";
 import type { WorkoutPlan } from "../../types/Workout";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { Colors } from "../../theme/colors";
+import { Radius, Spacing } from "../../theme/spacing";
+import { Typography } from "../../theme/typography";
 
 type ExerciseEntry = {
   repsCompleted: string;
@@ -151,7 +154,7 @@ export default function WorkoutExecution() {
           flex: 1,
           justifyContent: "center",
           alignItems: "center",
-          backgroundColor: "#0F172A",
+          backgroundColor: Colors.bg,
         }}
       >
         <ActivityIndicator />
@@ -161,8 +164,15 @@ export default function WorkoutExecution() {
 
   if (error) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", padding: 16, backgroundColor: "#0F172A" }}>
-        <Text style={{ color: "#FCA5A5", marginBottom: 12 }}>{error}</Text>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          padding: Spacing.md,
+          backgroundColor: Colors.bg,
+        }}
+      >
+        <Text style={{ color: Colors.danger, marginBottom: Spacing.sm }}>{error}</Text>
         <PrimaryButton title="Back" onPress={() => router.back()} />
       </View>
     );
@@ -170,8 +180,17 @@ export default function WorkoutExecution() {
 
   if (!plan) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", padding: 16, backgroundColor: "#0F172A" }}>
-        <Text style={{ color: "#FCA5A5", marginBottom: 12 }}>Workout plan not loaded.</Text>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          padding: Spacing.md,
+          backgroundColor: Colors.bg,
+        }}
+      >
+        <Text style={{ color: Colors.danger, marginBottom: Spacing.sm }}>
+          Workout plan not loaded.
+        </Text>
         <PrimaryButton title="Back" onPress={() => router.back()} />
       </View>
     );
@@ -179,92 +198,88 @@ export default function WorkoutExecution() {
 
   return (
     <KeyboardAwareScrollView
-      style={{ flex: 1, backgroundColor: "#0F172A" }}
-      contentContainerStyle={{ padding: 16, paddingBottom: 48 }}
+      style={{ flex: 1, backgroundColor: Colors.bg }}
+      contentContainerStyle={{ padding: Spacing.md, paddingBottom: Spacing.lg }}
       keyboardShouldPersistTaps="handled"
       enableOnAndroid
       extraScrollHeight={24}
     >
-        <View
-          style={{
-            backgroundColor: "#111827",
-            borderRadius: 24,
-            padding: 20,
-            marginBottom: 16,
-          }}
-        >
-          <Text style={{ fontSize: 22, fontWeight: "700", marginBottom: 4, color: "#F9FAFB" }}>
-            Workout Execution
-          </Text>
-          <Text style={{ color: "#9CA3AF" }}>Log completed reps and weight per exercise.</Text>
-        </View>
+      <View
+        style={{
+          backgroundColor: Colors.card,
+          borderRadius: Radius.md,
+          padding: 20,
+          marginBottom: Spacing.md,
+          borderWidth: 1,
+          borderColor: Colors.border,
+        }}
+      >
+        <Text style={{ ...Typography.title, fontSize: 22, marginBottom: 4 }}>Workout Execution</Text>
+        <Text style={Typography.secondary}>Log completed reps and weight per exercise.</Text>
+      </View>
 
-        {plan.exercises.map((exercise, idx) => {
-          const entry = entries[idx] ?? { repsCompleted: "", weight: "" };
-          return (
-            <View
-              key={`${exercise.name}-${idx}`}
+      {plan.exercises.map((exercise, idx) => {
+        const entry = entries[idx] ?? { repsCompleted: "", weight: "" };
+        return (
+          <View
+            key={`${exercise.name}-${idx}`}
+            style={{
+              backgroundColor: Colors.surface,
+              borderRadius: Radius.md,
+              padding: Spacing.md,
+              marginBottom: Spacing.sm,
+              borderWidth: 1,
+              borderColor: Colors.border,
+            }}
+          >
+            <Text style={{ ...Typography.section, marginBottom: 6 }}>{exercise.name}</Text>
+            <Text style={{ ...Typography.secondary, marginBottom: Spacing.sm }}>
+              Planned: {exercise.sets} sets × {exercise.reps} reps
+              {exercise.weight ? ` @ ${exercise.weight}kg` : ""}
+            </Text>
+
+            <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Completed Reps</Text>
+            <TextInput
+              value={entry.repsCompleted}
+              onChangeText={(v) => updateEntry(idx, { repsCompleted: v })}
+              keyboardType="number-pad"
+              placeholder={String(exercise.reps)}
+              placeholderTextColor={Colors.textMuted}
               style={{
-                backgroundColor: "#020617",
-                borderRadius: 20,
-                padding: 16,
-                marginBottom: 12,
                 borderWidth: 1,
-                borderColor: "#1F2937",
+                borderColor: Colors.border,
+                padding: 12,
+                borderRadius: Radius.sm,
+                marginBottom: Spacing.sm,
+                color: Colors.text,
+                backgroundColor: Colors.surface,
               }}
-            >
-              <Text style={{ color: "#F9FAFB", fontWeight: "700", marginBottom: 6 }}>
-                {exercise.name}
-              </Text>
-              <Text style={{ color: "#9CA3AF", marginBottom: 12 }}>
-                Planned: {exercise.sets} sets × {exercise.reps} reps
-                {exercise.weight ? ` @ ${exercise.weight}kg` : ""}
-              </Text>
+            />
 
-              <Text style={{ color: "#E5E7EB", marginBottom: 4 }}>Completed Reps</Text>
-              <TextInput
-                value={entry.repsCompleted}
-                onChangeText={(v) => updateEntry(idx, { repsCompleted: v })}
-                keyboardType="number-pad"
-                placeholder={String(exercise.reps)}
-                placeholderTextColor="#6B7280"
-                style={{
-                  borderWidth: 1,
-                  borderColor: "#1F2937",
-                  padding: 12,
-                  borderRadius: 12,
-                  marginBottom: 12,
-                  color: "white",
-                  backgroundColor: "#0B1220",
-                }}
-              />
+            <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Weight (kg)</Text>
+            <TextInput
+              value={entry.weight}
+              onChangeText={(v) => updateEntry(idx, { weight: v })}
+              keyboardType="numeric"
+              placeholder={exercise.weight ? String(exercise.weight) : "e.g. 60"}
+              placeholderTextColor={Colors.textMuted}
+              style={{
+                borderWidth: 1,
+                borderColor: Colors.border,
+                padding: 12,
+                borderRadius: Radius.sm,
+                color: Colors.text,
+                backgroundColor: Colors.surface,
+              }}
+            />
+          </View>
+        );
+      })}
 
-              <Text style={{ color: "#E5E7EB", marginBottom: 4 }}>Weight (kg)</Text>
-              <TextInput
-                value={entry.weight}
-                onChangeText={(v) => updateEntry(idx, { weight: v })}
-                keyboardType="numeric"
-                placeholder={exercise.weight ? String(exercise.weight) : "e.g. 60"}
-                placeholderTextColor="#6B7280"
-                style={{
-                  borderWidth: 1,
-                  borderColor: "#1F2937",
-                  padding: 12,
-                  borderRadius: 12,
-                  color: "white",
-                  backgroundColor: "#0B1220",
-                }}
-              />
-            </View>
-          );
-        })}
-
-        {message ? <Text style={{ color: "#6EE7B7", marginBottom: 12 }}>{message}</Text> : null}
-        {saving ? (
-          <ActivityIndicator />
-        ) : (
-          <PrimaryButton title="Complete Workout" onPress={handleSubmit} />
-        )}
+      {message ? (
+        <Text style={{ color: Colors.success, marginBottom: Spacing.sm }}>{message}</Text>
+      ) : null}
+      {saving ? <ActivityIndicator /> : <PrimaryButton title="Complete Workout" onPress={handleSubmit} />}
     </KeyboardAwareScrollView>
   );
 }

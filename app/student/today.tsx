@@ -7,6 +7,9 @@ import { authService } from "../../services/authService";
 import { workoutService } from "../../services/workoutService";
 import type { WorkoutPlan } from "../../types/Workout";
 import { useAuth } from "../../context/AuthContext";
+import { Colors } from "../../theme/colors";
+import { Radius, Spacing } from "../../theme/spacing";
+import { Typography } from "../../theme/typography";
 
 const DAY_NAMES = [
   "Sunday",
@@ -71,7 +74,7 @@ export default function TodayWorkout() {
           flex: 1,
           justifyContent: "center",
           alignItems: "center",
-          backgroundColor: "#0F172A",
+          backgroundColor: Colors.bg,
         }}
       >
         <ActivityIndicator />
@@ -86,31 +89,30 @@ export default function TodayWorkout() {
           flex: 1,
           justifyContent: "center",
           padding: 16,
-          backgroundColor: "#0F172A",
+          backgroundColor: Colors.bg,
         }}
       >
-        <Text style={{ color: "#FCA5A5", marginBottom: 8 }}>{error}</Text>
+        <Text style={{ color: Colors.danger, marginBottom: Spacing.xs }}>{error}</Text>
         <PrimaryButton title="Go to Login" onPress={() => router.replace("/login")} />
       </View>
     );
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#0F172A" }}>
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
+    <View style={{ flex: 1, backgroundColor: Colors.bg }}>
+      <ScrollView contentContainerStyle={{ padding: Spacing.md, paddingBottom: Spacing.lg }}>
         <View
           style={{
             flexDirection: "row",
             justifyContent: "space-between",
             alignItems: "center",
-            marginBottom: 8,
+            marginBottom: Spacing.sm,
           }}
         >
           <Text
             style={{
+              ...Typography.title,
               fontSize: 22,
-              fontWeight: "700",
-              color: "#F9FAFB",
             }}
           >
             Today&apos;s Workout ({todayName})
@@ -121,28 +123,45 @@ export default function TodayWorkout() {
               await logout();
               router.replace("/login");
             }}
-            style={{ paddingHorizontal: 12, backgroundColor: "#1F2937" }}
+            style={{
+              width: "auto",
+              paddingHorizontal: Spacing.sm,
+              paddingVertical: 12,
+              backgroundColor: Colors.border,
+              borderRadius: Radius.pill,
+            }}
+            textStyle={{ fontSize: 14, fontWeight: "700" }}
           />
         </View>
         {plans.length === 0 ? (
-          <>
-            <Text style={{ color: "#9CA3AF", marginBottom: 16 }}>
+          <View
+            style={{
+              backgroundColor: Colors.card,
+              borderRadius: Radius.md,
+              padding: Spacing.md,
+              borderWidth: 1,
+              borderColor: Colors.border,
+            }}
+          >
+            <Text style={{ ...Typography.secondary, marginBottom: Spacing.md }}>
               No workouts scheduled for today. Your coach hasn&apos;t assigned anything for this day yet.
             </Text>
             <PrimaryButton
               title="View History"
               onPress={() => router.push("/student/workoutHistory")}
-              style={{ backgroundColor: "#1F2937" }}
+              style={{ backgroundColor: Colors.border }}
             />
-          </>
+          </View>
         ) : (
           plans.map((plan) => (
-            <View key={plan.id} style={{ marginTop: 16 }}>
+            <View key={plan.id} style={{ marginTop: Spacing.md }}>
               <WorkoutCard plan={plan} />
               {plan.note ? (
-                <Text style={{ color: "#9CA3AF", marginTop: 8 }}>Coach note: {plan.note}</Text>
+                <Text style={{ ...Typography.secondary, marginTop: Spacing.xs }}>
+                  Coach note: {plan.note}
+                </Text>
               ) : null}
-              <View style={{ marginTop: 12 }}>
+              <View style={{ marginTop: Spacing.sm }}>
                 <PrimaryButton
                   title="Start Workout"
                   onPress={() =>

@@ -7,6 +7,9 @@ import type { AppUser } from "../../types/User";
 import type { WorkoutPlan } from "../../types/Workout";
 import { WorkoutCard } from "../../components/WorkoutCard";
 import { PrimaryButton } from "../../components/PrimaryButton";
+import { Colors } from "../../theme/colors";
+import { Radius, Spacing } from "../../theme/spacing";
+import { Typography } from "../../theme/typography";
 
 // Student dashboard:
 // - Loads the current student user
@@ -53,7 +56,7 @@ export default function StudentDashboard() {
           flex: 1,
           justifyContent: "center",
           alignItems: "center",
-          backgroundColor: "#0F172A",
+          backgroundColor: Colors.bg,
         }}
       >
         <ActivityIndicator />
@@ -68,24 +71,23 @@ export default function StudentDashboard() {
           flex: 1,
           justifyContent: "center",
           padding: 16,
-          backgroundColor: "#0F172A",
+          backgroundColor: Colors.bg,
         }}
       >
-        <Text style={{ color: "#FCA5A5", marginBottom: 8 }}>{error}</Text>
+        <Text style={{ color: Colors.danger, marginBottom: Spacing.xs }}>{error}</Text>
         <PrimaryButton title="Go to Login" onPress={() => router.replace("/login")} />
       </View>
     );
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#0F172A" }}>
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
+    <View style={{ flex: 1, backgroundColor: Colors.bg }}>
+      <ScrollView contentContainerStyle={{ padding: Spacing.md, paddingBottom: Spacing.lg }}>
         <Text
           style={{
+            ...Typography.title,
             fontSize: 22,
-            fontWeight: "700",
-            marginBottom: 12,
-            color: "#F9FAFB",
+            marginBottom: Spacing.sm,
           }}
         >
           Today&apos;s Workout
@@ -93,11 +95,19 @@ export default function StudentDashboard() {
         {plan ? (
           <WorkoutCard plan={plan} />
         ) : (
-          <Text style={{ color: "#9CA3AF" }}>
-            No workout plan assigned yet.
-          </Text>
+          <View
+            style={{
+              backgroundColor: Colors.card,
+              borderRadius: Radius.md,
+              padding: Spacing.md,
+              borderWidth: 1,
+              borderColor: Colors.border,
+            }}
+          >
+            <Text style={Typography.secondary}>No workout plan assigned yet.</Text>
+          </View>
         )}
-        <View style={{ marginTop: 24 }}>
+        <View style={{ marginTop: Spacing.lg }}>
           <PrimaryButton
             title="Start Workout"
             onPress={() =>
@@ -112,18 +122,18 @@ export default function StudentDashboard() {
             }
           />
         </View>
-        <View style={{ marginTop: 12 }}>
+        <View style={{ marginTop: Spacing.sm }}>
           <PrimaryButton
             title="View History"
             onPress={() => router.push("/student/workoutHistory")}
-            style={{ backgroundColor: "#1F2937" }}
+            style={{ backgroundColor: Colors.border }}
           />
         </View>
-        <View style={{ marginTop: 12 }}>
+        <View style={{ marginTop: Spacing.sm }}>
           <PrimaryButton
             title="Today&apos;s Schedule"
             onPress={() => router.push("/student/today")}
-            style={{ backgroundColor: "#1F2937" }}
+            style={{ backgroundColor: Colors.border }}
           />
         </View>
       </ScrollView>

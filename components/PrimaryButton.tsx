@@ -1,5 +1,8 @@
-import { FC } from "react";
-import { Text, TouchableOpacity, ViewStyle, TextStyle } from "react-native";
+import { FC, useRef } from "react";
+import { Animated, Pressable, Text, TextStyle, ViewStyle } from "react-native";
+import { Colors } from "../theme/colors";
+import { Radius, Spacing } from "../theme/spacing";
+import { Typography } from "../theme/typography";
 
 interface PrimaryButtonProps {
   title: string;
@@ -18,34 +21,48 @@ export const PrimaryButton: FC<PrimaryButtonProps> = ({
   disabled,
 }) => {
   const baseStyle: ViewStyle = {
-    borderRadius: 999,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: disabled ? "#A0AEC0" : "#2563EB",
+    width: "100%",
+    borderRadius: Radius.md,
+    paddingVertical: 15,
+    paddingHorizontal: Spacing.md,
+    backgroundColor: disabled ? Colors.disabled : Colors.primary,
     alignItems: "center",
     justifyContent: "center",
   };
 
+  const scale = useRef(new Animated.Value(1)).current;
+  const animateTo = (toValue: number) => {
+    Animated.spring(scale, {
+      toValue,
+      useNativeDriver: true,
+      speed: 30,
+      bounciness: 0,
+    }).start();
+  };
+
   return (
-    <TouchableOpacity
+    <Pressable
       onPress={onPress}
-      style={[baseStyle, style]}
       disabled={disabled}
-      activeOpacity={0.8}
+      onPressIn={() => animateTo(0.97)}
+      onPressOut={() => animateTo(1)}
+      style={{ width: "100%" }}
     >
-      <Text
-        style={[
-          {
-            color: "white",
-            fontWeight: "600",
-            fontSize: 16,
-          },
-          textStyle,
-        ]}
-      >
-        {title}
-      </Text>
-    </TouchableOpacity>
+      <Animated.View style={[baseStyle, style, { transform: [{ scale }] }]}>
+        <Text
+          style={[
+            {
+              ...Typography.section,
+              color: Colors.text,
+              textAlign: "center",
+            },
+            textStyle,
+          ]}
+        >
+          {title}
+        </Text>
+      </Animated.View>
+    </Pressable>
   );
 };
 

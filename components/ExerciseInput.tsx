@@ -1,6 +1,9 @@
 import { FC } from "react";
 import { View, Text, TextInput } from "react-native";
 import type { Exercise } from "../types/Workout";
+import { Colors } from "../theme/colors";
+import { Radius, Spacing } from "../theme/spacing";
+import { Typography } from "../theme/typography";
 
 interface ExerciseInputProps {
   value: Exercise;
@@ -25,81 +28,79 @@ export const ExerciseInput: FC<ExerciseInputProps> = ({ value, onChange }) => {
   return (
     <View
       style={{
-        marginVertical: 8,
-        padding: 12,
-        borderRadius: 16,
-        backgroundColor: "#020617",
+        marginVertical: Spacing.xs,
+        padding: Spacing.sm,
+        borderRadius: Radius.md,
+        backgroundColor: Colors.surface,
         borderWidth: 1,
-        borderColor: "#1F2937",
+        borderColor: Colors.border,
       }}
     >
-      <Text style={{ marginBottom: 4, color: "#E5E7EB", fontWeight: "500" }}>
-        Exercise Name
-      </Text>
+      <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Exercise Name</Text>
       <TextInput
         placeholder="Bench Press"
-        placeholderTextColor="#6B7280"
+        placeholderTextColor={Colors.textMuted}
         value={value.name}
         onChangeText={(text) => updateField("name", text)}
         style={{
           borderWidth: 1,
-          borderColor: "#1F2937",
-          padding: 10,
-          borderRadius: 10,
-          marginBottom: 10,
-          color: "white",
-          backgroundColor: "#020617",
+          borderColor: Colors.border,
+          padding: 12,
+          borderRadius: Radius.sm,
+          marginBottom: Spacing.sm,
+          color: Colors.text,
+          backgroundColor: Colors.surface,
         }}
       />
 
       <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
         <View style={{ flex: 1, marginRight: 4 }}>
-          <Text style={{ color: "#E5E7EB", marginBottom: 4 }}>Sets</Text>
+          <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Sets</Text>
           <TextInput
             keyboardType="numeric"
             value={String(value.sets)}
             onChangeText={(text) => updateField("sets", text)}
             style={{
               borderWidth: 1,
-              borderColor: "#1F2937",
-              padding: 10,
-              borderRadius: 10,
-              color: "white",
-              backgroundColor: "#020617",
+              borderColor: Colors.border,
+              padding: 12,
+              borderRadius: Radius.sm,
+              color: Colors.text,
+              backgroundColor: Colors.surface,
             }}
           />
         </View>
 
         <View style={{ flex: 1, marginHorizontal: 4 }}>
-          <Text style={{ color: "#E5E7EB", marginBottom: 4 }}>Reps</Text>
+          <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Reps</Text>
           <TextInput
             keyboardType="numeric"
             value={String(value.reps)}
             onChangeText={(text) => updateField("reps", text)}
             style={{
               borderWidth: 1,
-              borderColor: "#1F2937",
-              padding: 10,
-              borderRadius: 10,
-              color: "white",
-              backgroundColor: "#020617",
+              borderColor: Colors.border,
+              padding: 12,
+              borderRadius: Radius.sm,
+              color: Colors.text,
+              backgroundColor: Colors.surface,
             }}
           />
         </View>
 
         <View style={{ flex: 1, marginLeft: 4 }}>
-          <Text style={{ color: "#E5E7EB", marginBottom: 4 }}>Weight (kg)</Text>
+          <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Weight (kg)</Text>
           <TextInput
             keyboardType="numeric"
             value={String(value.weight ?? 0)}
             onChangeText={(text) => updateField("weight", text)}
             style={{
               borderWidth: 1,
-              borderColor: "#1F2937",
-              padding: 10,
-              borderRadius: 10,
-              color: "white",
-              backgroundColor: "#020617",
+              borderColor: Colors.border,
+              padding: 12,
+              borderRadius: Radius.sm,
+              color: Colors.text,
+              backgroundColor: Colors.surface,
             }}
           />
         </View>

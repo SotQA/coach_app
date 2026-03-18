@@ -13,6 +13,9 @@ import { authService } from "../../services/authService";
 import { workoutService } from "../../services/workoutService";
 import type { Exercise } from "../../types/Workout";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { Colors } from "../../theme/colors";
+import { Radius, Spacing } from "../../theme/spacing";
+import { Typography } from "../../theme/typography";
 
 // Screen for coaches to build a workout plan for a specific student.
 // Uses ExerciseInput to keep exercise editing logic reusable.
@@ -106,7 +109,7 @@ export default function CreateWorkoutPlan() {
           flex: 1,
           justifyContent: "center",
           alignItems: "center",
-          backgroundColor: "#0F172A",
+          backgroundColor: Colors.bg,
         }}
       >
         <ActivityIndicator />
@@ -116,84 +119,85 @@ export default function CreateWorkoutPlan() {
 
   return (
     <KeyboardAwareScrollView
-      style={{ flex: 1, backgroundColor: "#0F172A" }}
-      contentContainerStyle={{ padding: 16, paddingBottom: 80 }}
+      style={{ flex: 1, backgroundColor: Colors.bg }}
+      contentContainerStyle={{ padding: Spacing.md, paddingBottom: 80 }}
       keyboardShouldPersistTaps="handled"
       enableOnAndroid
       extraScrollHeight={24}
     >
-        <View
-          style={{
-            backgroundColor: "#111827",
-            borderRadius: 24,
-            padding: 20,
-          }}
-        >
+      <View
+        style={{
+          backgroundColor: Colors.card,
+          borderRadius: Radius.md,
+          padding: 20,
+          borderWidth: 1,
+          borderColor: Colors.border,
+        }}
+      >
           <Text
             style={{
-              fontSize: 20,
-              fontWeight: "700",
+              ...Typography.title,
+              fontSize: 22,
               marginBottom: 4,
-              color: "#F9FAFB",
             }}
           >
             Create Workout Plan
           </Text>
-          <Text style={{ marginBottom: 16, color: "#9CA3AF" }}>
+          <Text style={{ ...Typography.secondary, marginBottom: Spacing.md }}>
             For: {studentName}
           </Text>
 
-          <Text style={{ color: "#E5E7EB", marginBottom: 4 }}>Plan Name</Text>
+          <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Plan Name</Text>
           <TextInput
             placeholder="e.g. Strength Block A"
-            placeholderTextColor="#6B7280"
+            placeholderTextColor={Colors.textMuted}
             value={planName}
             onChangeText={setPlanName}
             style={{
               borderWidth: 1,
-              borderColor: "#1F2937",
+              borderColor: Colors.border,
               padding: 12,
-              borderRadius: 12,
-              marginBottom: 12,
-              color: "white",
-              backgroundColor: "#020617",
+              borderRadius: Radius.sm,
+              marginBottom: Spacing.sm,
+              color: Colors.text,
+              backgroundColor: Colors.surface,
             }}
           />
 
-          <Text style={{ color: "#E5E7EB", marginBottom: 4, marginTop: 8 }}>
+          <Text style={{ ...Typography.secondary, marginBottom: 6, marginTop: Spacing.xs }}>
             Scheduled Days (comma separated)
           </Text>
           <TextInput
             placeholder="e.g. Monday, Wednesday, Friday"
-            placeholderTextColor="#6B7280"
+            placeholderTextColor={Colors.textMuted}
             value={scheduledDaysInput}
             onChangeText={setScheduledDaysInput}
             style={{
               borderWidth: 1,
-              borderColor: "#1F2937",
+              borderColor: Colors.border,
               padding: 12,
-              borderRadius: 12,
-              marginBottom: 12,
-              color: "white",
-              backgroundColor: "#020617",
+              borderRadius: Radius.sm,
+              marginBottom: Spacing.sm,
+              color: Colors.text,
+              backgroundColor: Colors.surface,
             }}
           />
 
-          <Text style={{ color: "#E5E7EB", marginBottom: 4 }}>Coach Note (optional)</Text>
+          <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Coach Note (optional)</Text>
           <TextInput
             placeholder="Guidance or intent for this plan..."
-            placeholderTextColor="#6B7280"
+            placeholderTextColor={Colors.textMuted}
             value={note}
             onChangeText={setNote}
             multiline
             style={{
               borderWidth: 1,
-              borderColor: "#1F2937",
+              borderColor: Colors.border,
               padding: 12,
-              borderRadius: 12,
-              marginBottom: 12,
-              color: "white",
-              backgroundColor: "#020617",
+              borderRadius: Radius.sm,
+              marginBottom: Spacing.sm,
+              color: Colors.text,
+              backgroundColor: Colors.surface,
               minHeight: 60,
             }}
           />
@@ -209,27 +213,27 @@ export default function CreateWorkoutPlan() {
               />
             )}
             ListFooterComponent={
-              <View style={{ marginVertical: 8 }}>
+              <View style={{ marginVertical: Spacing.xs }}>
                 <PrimaryButton
                   title="Add Exercise"
                   onPress={addExercise}
-                  style={{ backgroundColor: "#1F2937" }}
+                  style={{ backgroundColor: Colors.border }}
                 />
               </View>
             }
           />
 
-          <View style={{ marginTop: 16 }}>
+          <View style={{ marginTop: Spacing.md }}>
             {loading ? (
               <ActivityIndicator />
             ) : (
               <PrimaryButton title="Save Plan" onPress={handleSavePlan} />
             )}
             {error ? (
-              <Text style={{ color: "#FCA5A5", marginTop: 8 }}>{error}</Text>
+              <Text style={{ color: Colors.danger, marginTop: Spacing.xs }}>{error}</Text>
             ) : null}
           </View>
-        </View>
+      </View>
     </KeyboardAwareScrollView>
   );
 }

@@ -8,6 +8,9 @@ import type { AppUser } from "../../types/User";
 import { StudentCard } from "../../components/StudentCard";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { useAuth } from "../../context/AuthContext";
+import { Colors } from "../../theme/colors";
+import { Radius, Spacing } from "../../theme/spacing";
+import { Typography } from "../../theme/typography";
 
 // Coach dashboard:
 // - Loads the current coach user
@@ -55,7 +58,7 @@ export default function CoachDashboard() {
           flex: 1,
           justifyContent: "center",
           alignItems: "center",
-          backgroundColor: "#0F172A",
+          backgroundColor: Colors.bg,
         }}
       >
         <ActivityIndicator />
@@ -70,44 +73,45 @@ export default function CoachDashboard() {
           flex: 1,
           justifyContent: "center",
           padding: 16,
-          backgroundColor: "#0F172A",
+          backgroundColor: Colors.bg,
         }}
       >
-        <Text style={{ color: "#FCA5A5", marginBottom: 8 }}>{error}</Text>
+        <Text style={{ color: Colors.danger, marginBottom: Spacing.xs }}>{error}</Text>
         <PrimaryButton title="Go to Login" onPress={() => router.replace("/login")} />
       </View>
     );
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#0F172A" }}>
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
+    <View style={{ flex: 1, backgroundColor: Colors.bg }}>
+      <ScrollView contentContainerStyle={{ padding: Spacing.md, paddingBottom: Spacing.lg }}>
         <View
           style={{
-            backgroundColor: "#111827",
-            borderRadius: 24,
+            backgroundColor: Colors.card,
+            borderRadius: Radius.md,
             padding: 20,
-            marginBottom: 16,
+            marginBottom: Spacing.md,
+            borderWidth: 1,
+            borderColor: Colors.border,
           }}
         >
           <Text
             style={{
+              ...Typography.title,
               fontSize: 22,
-              fontWeight: "700",
               marginBottom: 4,
-              color: "#F9FAFB",
             }}
           >
             Welcome, Coach
           </Text>
-          <Text style={{ color: "#9CA3AF", marginBottom: 16 }}>
+          <Text style={{ ...Typography.secondary, marginBottom: Spacing.md }}>
             Manage your students and assign workout plans.
           </Text>
           <PrimaryButton
             title="Create New Student"
             onPress={() => router.push("/coach/createStudent")}
           />
-          <View style={{ marginTop: 12 }}>
+          <View style={{ marginTop: Spacing.sm }}>
             <PrimaryButton
               title="Logout"
               onPress={async () => {
@@ -121,16 +125,14 @@ export default function CoachDashboard() {
 
         <Text
           style={{
-            fontSize: 16,
-            fontWeight: "600",
-            marginBottom: 8,
-            color: "#E5E7EB",
+            ...Typography.section,
+            marginBottom: Spacing.xs,
           }}
         >
           Your Students
         </Text>
         {students.length === 0 ? (
-          <Text style={{ color: "#9CA3AF" }}>
+          <Text style={Typography.secondary}>
             No students yet. Create one to get started.
           </Text>
         ) : (

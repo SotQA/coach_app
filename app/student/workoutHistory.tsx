@@ -5,6 +5,9 @@ import { authService } from "../../services/authService";
 import { workoutService } from "../../services/workoutService";
 import type { WorkoutLog } from "../../types/Workout";
 import { PrimaryButton } from "../../components/PrimaryButton";
+import { Colors } from "../../theme/colors";
+import { Radius, Spacing } from "../../theme/spacing";
+import { Typography } from "../../theme/typography";
 
 // Displays the student's historical workout logs in a simple list.
 export default function WorkoutHistory() {
@@ -101,7 +104,7 @@ export default function WorkoutHistory() {
           flex: 1,
           justifyContent: "center",
           alignItems: "center",
-          backgroundColor: "#0F172A",
+          backgroundColor: Colors.bg,
         }}
       >
         <ActivityIndicator />
@@ -116,29 +119,28 @@ export default function WorkoutHistory() {
           flex: 1,
           justifyContent: "center",
           padding: 16,
-          backgroundColor: "#0F172A",
+          backgroundColor: Colors.bg,
         }}
       >
-        <Text style={{ color: "#FCA5A5", marginBottom: 8 }}>{error}</Text>
+        <Text style={{ color: Colors.danger, marginBottom: Spacing.xs }}>{error}</Text>
         <PrimaryButton title="Go to Login" onPress={() => router.replace("/login")} />
       </View>
     );
   }
 
   return (
-    <View style={{ flex: 1, padding: 16, backgroundColor: "#0F172A" }}>
+    <View style={{ flex: 1, padding: Spacing.md, backgroundColor: Colors.bg }}>
       <Text
         style={{
-          fontSize: 20,
-          fontWeight: "700",
-          marginBottom: 12,
-          color: "#F9FAFB",
+          ...Typography.title,
+          fontSize: 22,
+          marginBottom: Spacing.sm,
         }}
       >
         Workout History
       </Text>
       {logs.length === 0 ? (
-        <Text style={{ color: "#9CA3AF" }}>No logs yet.</Text>
+        <Text style={Typography.secondary}>No workouts yet.</Text>
       ) : (
         <SectionList
           sections={sections}
@@ -147,16 +149,16 @@ export default function WorkoutHistory() {
           renderSectionHeader={({ section }) => (
             <View
               style={{
-                paddingVertical: 8,
-                paddingHorizontal: 12,
-                backgroundColor: "#111827",
-                borderRadius: 14,
-                marginBottom: 8,
+                paddingVertical: Spacing.xs,
+                paddingHorizontal: Spacing.sm,
+                backgroundColor: Colors.card,
+                borderRadius: Radius.md,
+                marginBottom: Spacing.xs,
                 borderWidth: 1,
-                borderColor: "#1F2937",
+                borderColor: Colors.border,
               }}
             >
-              <Text style={{ color: "#E5E7EB", fontWeight: "700" }}>{section.title}</Text>
+              <Text style={{ ...Typography.section, color: Colors.text }}>{section.title}</Text>
             </View>
           )}
           renderItem={({ item }: any) => {
@@ -171,19 +173,19 @@ export default function WorkoutHistory() {
             return (
               <View
                 style={{
-                  borderRadius: 16,
-                  padding: 12,
-                  marginBottom: 12,
-                  backgroundColor: "#020617",
+                  borderRadius: Radius.md,
+                  padding: Spacing.sm,
+                  marginBottom: Spacing.sm,
+                  backgroundColor: Colors.surface,
                   borderWidth: 1,
-                  borderColor: "#1F2937",
+                  borderColor: Colors.border,
                 }}
               >
-                <Text style={{ color: "#9CA3AF", marginBottom: 6 }}>Progression</Text>
-                <Text style={{ fontWeight: "800", color: "#F9FAFB", fontSize: 16 }}>
+                <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Progression</Text>
+                <Text style={{ ...Typography.section, fontSize: 16, fontWeight: "800" }}>
                   {item.progression}
                 </Text>
-                <Text style={{ color: "#6B7280", marginTop: 8 }}>
+                <Text style={{ color: Colors.textMuted, marginTop: Spacing.xs }}>
                   Sessions: {item.totalLogs} • Last: {lastText}
                 </Text>
               </View>

@@ -8,6 +8,9 @@ import type { StudentSummary } from "../../types/StudentSummary";
 import type { WorkoutPlan, WorkoutLog } from "../../types/Workout";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { WorkoutCard } from "../../components/WorkoutCard";
+import { Colors } from "../../theme/colors";
+import { Radius, Spacing } from "../../theme/spacing";
+import { Typography } from "../../theme/typography";
 
 export default function StudentDetails() {
   const router = useRouter();
@@ -83,7 +86,7 @@ export default function StudentDetails() {
           flex: 1,
           justifyContent: "center",
           alignItems: "center",
-          backgroundColor: "#0F172A",
+          backgroundColor: Colors.bg,
         }}
       >
         <ActivityIndicator />
@@ -98,10 +101,10 @@ export default function StudentDetails() {
           flex: 1,
           justifyContent: "center",
           padding: 16,
-          backgroundColor: "#0F172A",
+          backgroundColor: Colors.bg,
         }}
       >
-        <Text style={{ color: "#FCA5A5", marginBottom: 12 }}>{error}</Text>
+        <Text style={{ color: Colors.danger, marginBottom: Spacing.sm }}>{error}</Text>
         <PrimaryButton title="Back to Dashboard" onPress={() => router.replace("/coach/dashboard")} />
       </View>
     );
@@ -109,8 +112,8 @@ export default function StudentDetails() {
 
   if (!student) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", padding: 16, backgroundColor: "#0F172A" }}>
-        <Text style={{ color: "#FCA5A5", marginBottom: 12 }}>Student not loaded.</Text>
+      <View style={{ flex: 1, justifyContent: "center", padding: Spacing.md, backgroundColor: Colors.bg }}>
+        <Text style={{ color: Colors.danger, marginBottom: Spacing.sm }}>Student not loaded.</Text>
         <PrimaryButton title="Back to Dashboard" onPress={() => router.replace("/coach/dashboard")} />
       </View>
     );
@@ -133,27 +136,29 @@ export default function StudentDetails() {
   })();
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#0F172A" }}>
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
+    <View style={{ flex: 1, backgroundColor: Colors.bg }}>
+      <ScrollView contentContainerStyle={{ padding: Spacing.md, paddingBottom: Spacing.lg }}>
         <View
           style={{
-            backgroundColor: "#111827",
-            borderRadius: 24,
+            backgroundColor: Colors.card,
+            borderRadius: Radius.md,
             padding: 20,
-            marginBottom: 16,
+            marginBottom: Spacing.md,
+            borderWidth: 1,
+            borderColor: Colors.border,
           }}
         >
-          <Text style={{ fontSize: 22, fontWeight: "700", marginBottom: 8, color: "#F9FAFB" }}>
+          <Text style={{ ...Typography.title, fontSize: 22, marginBottom: Spacing.xs }}>
             Student Details
           </Text>
 
-          <Text style={{ color: "#9CA3AF" }}>Name</Text>
-          <Text style={{ color: "#F9FAFB", fontWeight: "600", marginBottom: 12 }}>
+          <Text style={Typography.secondary}>Name</Text>
+          <Text style={{ ...Typography.section, marginBottom: Spacing.sm }}>
             {student.email || "Student"}
           </Text>
 
-          <Text style={{ color: "#9CA3AF" }}>Email</Text>
-          <Text style={{ color: "#F9FAFB", fontWeight: "600", marginBottom: 16 }}>
+          <Text style={Typography.secondary}>Email</Text>
+          <Text style={{ ...Typography.section, marginBottom: Spacing.md }}>
             {student.email}
           </Text>
 
@@ -166,7 +171,7 @@ export default function StudentDetails() {
               })
             }
           />
-          <View style={{ marginTop: 12 }}>
+          <View style={{ marginTop: Spacing.sm }}>
             <PrimaryButton
               title="View Progress"
               onPress={() =>
@@ -175,17 +180,17 @@ export default function StudentDetails() {
                   params: { studentId: student.id },
                 })
               }
-              style={{ backgroundColor: "#1F2937" }}
+              style={{ backgroundColor: Colors.border }}
             />
           </View>
         </View>
 
-        <Text style={{ fontSize: 16, fontWeight: "600", marginBottom: 8, color: "#E5E7EB" }}>
+        <Text style={{ ...Typography.section, marginBottom: Spacing.xs }}>
           Workout Plans
         </Text>
 
         {plans.length === 0 ? (
-          <Text style={{ color: "#9CA3AF" }}>No workout plans yet.</Text>
+          <Text style={Typography.secondary}>No workout plans yet.</Text>
         ) : (
           <FlatList
             data={plans}
@@ -197,32 +202,30 @@ export default function StudentDetails() {
 
         <Text
           style={{
-            fontSize: 16,
-            fontWeight: "600",
-            marginTop: 24,
-            marginBottom: 8,
-            color: "#E5E7EB",
+            ...Typography.section,
+            marginTop: Spacing.lg,
+            marginBottom: Spacing.xs,
           }}
         >
           Recent Workouts
         </Text>
         {logs.length === 0 ? (
-          <Text style={{ color: "#9CA3AF" }}>No workouts logged yet.</Text>
+          <Text style={Typography.secondary}>No workouts logged yet.</Text>
         ) : (
           logs.slice(0, 5).map((log) => (
             <View
               key={log.id}
               style={{
-                borderRadius: 16,
-                padding: 12,
-                marginBottom: 8,
-                backgroundColor: "#020617",
+                borderRadius: Radius.md,
+                padding: Spacing.sm,
+                marginBottom: Spacing.xs,
+                backgroundColor: Colors.surface,
                 borderWidth: 1,
-                borderColor: "#1F2937",
+                borderColor: Colors.border,
               }}
             >
-              <Text style={{ color: "#F9FAFB", fontWeight: "600" }}>{log.exercise}</Text>
-              <Text style={{ color: "#9CA3AF" }}>
+              <Text style={Typography.section}>{log.exercise}</Text>
+              <Text style={Typography.secondary}>
                 {log.sets} sets × {log.reps} reps
                 {log.weight ? ` @ ${log.weight}kg` : ""}
               </Text>
@@ -232,32 +235,30 @@ export default function StudentDetails() {
 
         <Text
           style={{
-            fontSize: 16,
-            fontWeight: "600",
-            marginTop: 24,
-            marginBottom: 8,
-            color: "#E5E7EB",
+            ...Typography.section,
+            marginTop: Spacing.lg,
+            marginBottom: Spacing.xs,
           }}
         >
           Strongest Lifts
         </Text>
         {strongestByExercise.length === 0 ? (
-          <Text style={{ color: "#9CA3AF" }}>No lift data yet.</Text>
+          <Text style={Typography.secondary}>No lift data yet.</Text>
         ) : (
           strongestByExercise.map(([exercise, weight]) => (
             <View
               key={exercise}
               style={{
-                borderRadius: 16,
-                padding: 12,
-                marginBottom: 8,
-                backgroundColor: "#020617",
+                borderRadius: Radius.md,
+                padding: Spacing.sm,
+                marginBottom: Spacing.xs,
+                backgroundColor: Colors.surface,
                 borderWidth: 1,
-                borderColor: "#1F2937",
+                borderColor: Colors.border,
               }}
             >
-              <Text style={{ color: "#F9FAFB", fontWeight: "600" }}>{exercise}</Text>
-              <Text style={{ color: "#9CA3AF" }}>Best: {weight} kg</Text>
+              <Text style={Typography.section}>{exercise}</Text>
+              <Text style={Typography.secondary}>Best: {weight} kg</Text>
             </View>
           ))
         )}
