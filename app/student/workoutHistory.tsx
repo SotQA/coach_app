@@ -139,6 +139,13 @@ export default function WorkoutHistory() {
       >
         Workout History
       </Text>
+      <View style={{ marginBottom: Spacing.sm }}>
+        <PrimaryButton
+          title="Back"
+          onPress={() => router.back()}
+          style={{ width: "auto", backgroundColor: Colors.border, alignSelf: "flex-start" }}
+        />
+      </View>
       {logs.length === 0 ? (
         <Text style={Typography.secondary}>No workouts yet.</Text>
       ) : (

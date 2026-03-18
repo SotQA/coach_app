@@ -5,6 +5,9 @@ import { authService } from "../../services/authService";
 import { workoutService } from "../../services/workoutService";
 import type { WorkoutLog } from "../../types/Workout";
 import { PrimaryButton } from "../../components/PrimaryButton";
+import { Colors } from "../../theme/colors";
+import { Radius, Spacing } from "../../theme/spacing";
+import { Typography } from "../../theme/typography";
 
 const toMs = (value: any): number => {
   if (!value) return 0;
@@ -101,23 +104,29 @@ export default function ExerciseDetails() {
     .join(" → ");
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#0F172A" }}>
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
+    <View style={{ flex: 1, backgroundColor: Colors.bg }}>
+      <ScrollView contentContainerStyle={{ padding: Spacing.md }}>
         <Text
           style={{
+            ...Typography.title,
             fontSize: 22,
-            fontWeight: "700",
-            marginBottom: 8,
-            color: "#F9FAFB",
+            marginBottom: Spacing.xs,
           }}
         >
           {exerciseName || "Exercise"}
         </Text>
+        <View style={{ marginBottom: Spacing.sm }}>
+          <PrimaryButton
+            title="Back"
+            onPress={() => router.back()}
+            style={{ width: "auto", backgroundColor: Colors.border, alignSelf: "flex-start" }}
+          />
+        </View>
         {logs.length === 0 ? (
-          <Text style={{ color: "#9CA3AF" }}>No history for this exercise yet.</Text>
+          <Text style={Typography.secondary}>No history for this exercise yet.</Text>
         ) : (
           <>
-            <Text style={{ color: "#9CA3AF", marginBottom: 12 }}>
+            <Text style={{ color: Colors.textSecondary, marginBottom: Spacing.md }}>
               Progression (weight): {progression || "—"}
             </Text>
 
@@ -141,19 +150,19 @@ export default function ExerciseDetails() {
                 <View
                   key={log.id}
                   style={{
-                    borderRadius: 16,
-                    padding: 12,
-                    marginBottom: 8,
-                    backgroundColor: "#020617",
+                    borderRadius: Radius.md,
+                    padding: Spacing.sm,
+                    marginBottom: Spacing.sm,
+                    backgroundColor: Colors.surface,
                     borderWidth: 1,
-                    borderColor: "#1F2937",
+                    borderColor: Colors.border,
                   }}
                 >
-                  <Text style={{ color: "#F9FAFB", fontWeight: "600" }}>
+                  <Text style={{ color: Colors.text, fontWeight: "600" }}>
                     {log.sets} sets × {log.reps} reps
                     {log.weight ? ` @ ${log.weight}kg` : ""}
                   </Text>
-                  <Text style={{ color: "#6B7280", marginTop: 4 }}>
+                  <Text style={{ color: Colors.textMuted, marginTop: 4 }}>
                     {dateLabel} {timeLabel && `• ${timeLabel}`}
                   </Text>
                 </View>

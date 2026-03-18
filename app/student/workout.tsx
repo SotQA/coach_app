@@ -12,6 +12,9 @@ import type { Exercise } from "../../types/Workout";
 import { ExerciseInput } from "../../components/ExerciseInput";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { Colors } from "../../theme/colors";
+import { Radius, Spacing } from "../../theme/spacing";
+import { Typography } from "../../theme/typography";
 
 // Simple workout logging screen:
 // - Loads the current student
@@ -127,16 +130,16 @@ export default function WorkoutScreen() {
       enableOnAndroid
       extraScrollHeight={24}
     >
-        <Text
-          style={{
-            fontSize: 20,
-            fontWeight: "700",
-            marginBottom: 8,
-            color: "#F9FAFB",
-          }}
-        >
+        <Text style={{ ...Typography.title, fontSize: 22, marginBottom: Spacing.sm }}>
           Log Workout
         </Text>
+        <View style={{ marginBottom: Spacing.sm }}>
+          <PrimaryButton
+            title="Back"
+            onPress={() => router.back()}
+            style={{ width: "auto", backgroundColor: Colors.border, alignSelf: "flex-start" }}
+          />
+        </View>
         <ExerciseInput value={exercise} onChange={setExercise} />
         <View style={{ marginTop: 16 }}>
           {submitting ? (

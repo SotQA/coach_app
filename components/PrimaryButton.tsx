@@ -20,8 +20,10 @@ export const PrimaryButton: FC<PrimaryButtonProps> = ({
   textStyle,
   disabled,
 }) => {
+  const requestedWidth = (style as any)?.width as ViewStyle["width"] | undefined;
+  const containerWidth = requestedWidth ?? "100%";
+
   const baseStyle: ViewStyle = {
-    width: "100%",
     borderRadius: Radius.md,
     paddingVertical: 15,
     paddingHorizontal: Spacing.md,
@@ -46,9 +48,17 @@ export const PrimaryButton: FC<PrimaryButtonProps> = ({
       disabled={disabled}
       onPressIn={() => animateTo(0.97)}
       onPressOut={() => animateTo(1)}
-      style={{ width: "100%" }}
+      style={{ width: containerWidth }}
     >
-      <Animated.View style={[baseStyle, style, { transform: [{ scale }] }]}>
+      <Animated.View
+        style={[
+          baseStyle,
+          // Default to full width unless caller overrides.
+          { width: "100%" },
+          style,
+          { transform: [{ scale }] },
+        ]}
+      >
         <Text
           style={[
             {

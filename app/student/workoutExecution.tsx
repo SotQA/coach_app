@@ -217,6 +217,13 @@ export default function WorkoutExecution() {
         <Text style={{ ...Typography.title, fontSize: 22, marginBottom: 4 }}>Workout Execution</Text>
         <Text style={Typography.secondary}>Log completed reps and weight per exercise.</Text>
       </View>
+      <View style={{ marginBottom: Spacing.sm }}>
+        <PrimaryButton
+          title="Back"
+          onPress={() => router.back()}
+          style={{ width: "auto", backgroundColor: Colors.border, alignSelf: "flex-start" }}
+        />
+      </View>
 
       {plan.exercises.map((exercise, idx) => {
         const entry = entries[idx] ?? { repsCompleted: "", weight: "" };
