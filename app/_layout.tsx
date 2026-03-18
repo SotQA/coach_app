@@ -10,8 +10,8 @@ export default function Layout() {
         }}
       >
         <Stack.Screen name="index" options={{ title: "Gym Coach App" }} />
-        <Stack.Screen name="login" options={{ title: "Login" }} />
-        <Stack.Screen name="signup" options={{ title: "Sign Up" }} />
+        <Stack.Screen name="(auth)/login" options={{ title: "Login" }} />
+        <Stack.Screen name="(auth)/signup" options={{ title: "Sign Up" }} />
         <Stack.Screen name="coach/dashboard" options={{ title: "Coach Dashboard" }} />
         <Stack.Screen
           name="coach/studentDetails"

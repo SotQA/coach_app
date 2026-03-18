@@ -129,7 +129,16 @@ export default function CreateStudent() {
           {loading ? (
             <ActivityIndicator style={{ marginVertical: 12 }} />
           ) : (
-            <PrimaryButton title="Link Student" onPress={handleCreate} />
+            <>
+              <PrimaryButton title="Link Student" onPress={handleCreate} />
+              <View style={{ marginTop: Spacing.sm }}>
+                <PrimaryButton
+                  title="Back to Students"
+                  onPress={() => router.replace("/coach/dashboard")}
+                  style={{ backgroundColor: Colors.border }}
+                />
+              </View>
+            </>
           )}
           {error ? (
             <Text style={{ color: Colors.danger, marginTop: Spacing.xs }}>{error}</Text>

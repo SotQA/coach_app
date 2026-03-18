@@ -183,6 +183,14 @@ export default function StudentDetails() {
               style={{ backgroundColor: Colors.border }}
             />
           </View>
+
+          <View style={{ marginTop: Spacing.sm }}>
+            <PrimaryButton
+              title="Back to Students"
+              onPress={() => router.replace("/coach/dashboard")}
+              style={{ backgroundColor: Colors.border }}
+            />
+          </View>
         </View>
 
         <Text style={{ ...Typography.section, marginBottom: Spacing.xs }}>
