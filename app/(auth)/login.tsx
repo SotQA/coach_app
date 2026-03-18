@@ -21,7 +21,7 @@ export default function Login() {
     setSubmitting(true);
     try {
       const appUser = await login(email.trim(), password);
-      router.replace(appUser.role === "coach" ? "/coach/dashboard" : "/student/today");
+      router.replace(appUser.role === "coach" ? "/coach/dashboard" : "/student/workouts");
     } catch (e: any) {
       setError(e.message ?? "Failed to login.");
     } finally {

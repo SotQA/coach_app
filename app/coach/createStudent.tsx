@@ -13,6 +13,7 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
+import { ScreenLayout } from "../../components/ScreenLayout";
 
 // Screen used by the coach to create a new student record
 // that will appear in their dashboard.
@@ -55,13 +56,14 @@ export default function CreateStudent() {
   };
 
   return (
-    <KeyboardAwareScrollView
-      style={{ flex: 1, backgroundColor: Colors.bg }}
-      contentContainerStyle={{ flexGrow: 1, padding: Spacing.md, paddingBottom: 48 }}
-      keyboardShouldPersistTaps="handled"
-      enableOnAndroid
-      extraScrollHeight={24}
-    >
+    <ScreenLayout>
+      <KeyboardAwareScrollView
+        style={{ flex: 1, backgroundColor: Colors.bg }}
+        contentContainerStyle={{ flexGrow: 1, padding: Spacing.md, paddingBottom: 48 }}
+        keyboardShouldPersistTaps="handled"
+        enableOnAndroid
+        extraScrollHeight={24}
+      >
       <View
         style={{
           backgroundColor: Colors.card,
@@ -144,7 +146,8 @@ export default function CreateStudent() {
             <Text style={{ color: Colors.danger, marginTop: Spacing.xs }}>{error}</Text>
           ) : null}
       </View>
-    </KeyboardAwareScrollView>
+      </KeyboardAwareScrollView>
+    </ScreenLayout>
   );
 }
 

@@ -1,71 +1,48 @@
 import { useRouter } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { WorkoutCard } from "../../components/WorkoutCard";
 import { authService } from "../../services/authService";
 import { workoutService } from "../../services/workoutService";
 import type { WorkoutPlan } from "../../types/Workout";
-import { useAuth } from "../../context/AuthContext";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
-
-const DAY_NAMES = [
-  "Sunday",
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-];
+import { ScreenLayout } from "../../components/ScreenLayout";
 
 export default function TodayWorkout() {
   const router = useRouter();
-  const { logout } = useAuth();
   const [plans, setPlans] = useState<WorkoutPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const todayName = useMemo(() => DAY_NAMES[new Date().getDay()], []);
-
   useEffect(() => {
     const load = async () => {
-      console.log("[student/today] load start");
+      console.log("[student/workouts] load start");
       setLoading(true);
       try {
         setError(null);
         const user = await authService.getCurrentUserWithRole();
-        console.log("[student/today] currentUser.id", user?.id);
+        console.log("[student/workouts] currentUser.id", user?.id);
         if (!user || user.role !== "student") {
           setError("You must be logged in as a student.");
           return;
         }
 
-        const allPlans = await workoutService.getWorkoutPlansForStudent(user.id);
-        console.log("[student/today] allPlans", allPlans.length);
-
-        const todaysPlans = allPlans.filter((plan) => {
-          const days = (plan.scheduledDays ?? []) as string[];
-          if (!days || days.length === 0) {
-            // If no schedule is set, treat as not specifically scheduled.
-            return false;
-          }
-          return days.some((d) => d.trim().toLowerCase() === todayName.toLowerCase());
-        });
-
-        setPlans(todaysPlans);
+        const activePlans = await workoutService.getActiveWorkoutPlansForStudent(user.id);
+        console.log("[student/workouts] plans", activePlans.length);
+        setPlans(activePlans);
       } catch (e: any) {
-        console.error("[student/today] load error", e);
-        setError(e.message ?? "Failed to load today's workout.");
+        console.error("[student/workouts] load error", e);
+        setError(e.message ?? "Failed to load workouts.");
       } finally {
         setLoading(false);
       }
     };
 
     load();
-  }, [todayName]);
+  }, []);
 
   if (loading) {
     return (
@@ -99,8 +76,9 @@ export default function TodayWorkout() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: Colors.bg }}>
-      <ScrollView contentContainerStyle={{ padding: Spacing.md, paddingBottom: Spacing.lg }}>
+    <ScreenLayout>
+      <View style={{ flex: 1, backgroundColor: Colors.bg }}>
+        <ScrollView contentContainerStyle={{ padding: Spacing.md, paddingBottom: Spacing.lg }}>
         <View
           style={{
             flexDirection: "row",
@@ -115,23 +93,8 @@ export default function TodayWorkout() {
               fontSize: 22,
             }}
           >
-            Today&apos;s Workout ({todayName})
+            Your Workouts
           </Text>
-          <PrimaryButton
-            title="Logout"
-            onPress={async () => {
-              await logout();
-              router.replace("/login");
-            }}
-            style={{
-              width: "auto",
-              paddingHorizontal: Spacing.sm,
-              paddingVertical: 12,
-              backgroundColor: Colors.border,
-              borderRadius: Radius.pill,
-            }}
-            textStyle={{ fontSize: 14, fontWeight: "700" }}
-          />
         </View>
         {plans.length === 0 ? (
           <View
@@ -144,7 +107,7 @@ export default function TodayWorkout() {
             }}
           >
             <Text style={{ ...Typography.secondary, marginBottom: Spacing.md }}>
-              No workouts scheduled for today. Your coach hasn&apos;t assigned anything for this day yet.
+              No workouts yet. Your coach hasn&apos;t assigned any active plans.
             </Text>
             <PrimaryButton
               title="View History"
@@ -175,8 +138,9 @@ export default function TodayWorkout() {
             </View>
           ))
         )}
-      </ScrollView>
-    </View>
+        </ScrollView>
+      </View>
+    </ScreenLayout>
   );
 }
 

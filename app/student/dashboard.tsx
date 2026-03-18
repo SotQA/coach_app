@@ -10,6 +10,7 @@ import { PrimaryButton } from "../../components/PrimaryButton";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
+import { ScreenLayout } from "../../components/ScreenLayout";
 
 // Student dashboard:
 // - Loads the current student user
@@ -81,8 +82,9 @@ export default function StudentDashboard() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: Colors.bg }}>
-      <ScrollView contentContainerStyle={{ padding: Spacing.md, paddingBottom: Spacing.lg }}>
+    <ScreenLayout>
+      <View style={{ flex: 1, backgroundColor: Colors.bg }}>
+        <ScrollView contentContainerStyle={{ padding: Spacing.md, paddingBottom: Spacing.lg }}>
         <Text
           style={{
             ...Typography.title,
@@ -136,8 +138,9 @@ export default function StudentDashboard() {
             style={{ backgroundColor: Colors.border }}
           />
         </View>
-      </ScrollView>
-    </View>
+        </ScrollView>
+      </View>
+    </ScreenLayout>
   );
 }
 

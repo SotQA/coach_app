@@ -13,8 +13,10 @@ import { ExerciseInput } from "../../components/ExerciseInput";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Colors } from "../../theme/colors";
-import { Radius, Spacing } from "../../theme/spacing";
+import { Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
+import { ScreenLayout } from "../../components/ScreenLayout";
+import { BackButton } from "../../components/BackButton";
 
 // Simple workout logging screen:
 // - Loads the current student
@@ -123,36 +125,26 @@ export default function WorkoutScreen() {
   }
 
   return (
-    <KeyboardAwareScrollView
-      style={{ flex: 1, backgroundColor: "#0F172A" }}
-      contentContainerStyle={{ padding: 16, paddingBottom: 48 }}
-      keyboardShouldPersistTaps="handled"
-      enableOnAndroid
-      extraScrollHeight={24}
-    >
+    <ScreenLayout>
+      <KeyboardAwareScrollView
+        style={{ flex: 1, backgroundColor: Colors.bg }}
+        contentContainerStyle={{ padding: Spacing.md, paddingBottom: 48 }}
+        keyboardShouldPersistTaps="handled"
+        enableOnAndroid
+        extraScrollHeight={24}
+      >
+        <BackButton />
         <Text style={{ ...Typography.title, fontSize: 22, marginBottom: Spacing.sm }}>
           Log Workout
         </Text>
-        <View style={{ marginBottom: Spacing.sm }}>
-          <PrimaryButton
-            title="Back"
-            onPress={() => router.back()}
-            style={{ width: "auto", backgroundColor: Colors.border, alignSelf: "flex-start" }}
-          />
-        </View>
         <ExerciseInput value={exercise} onChange={setExercise} />
         <View style={{ marginTop: 16 }}>
-          {submitting ? (
-            <ActivityIndicator />
-          ) : (
-            <PrimaryButton title="Save Set" onPress={handleLogWorkout} />
-          )}
+          {submitting ? <ActivityIndicator /> : <PrimaryButton title="Save Set" onPress={handleLogWorkout} />}
         </View>
-        {message ? (
-          <Text style={{ color: "#6EE7B7", marginTop: 8 }}>{message}</Text>
-        ) : null}
-        {error ? <Text style={{ color: "#FCA5A5", marginTop: 8 }}>{error}</Text> : null}
-    </KeyboardAwareScrollView>
+        {message ? <Text style={{ color: Colors.success, marginTop: Spacing.xs }}>{message}</Text> : null}
+        {error ? <Text style={{ color: Colors.danger, marginTop: Spacing.xs }}>{error}</Text> : null}
+      </KeyboardAwareScrollView>
+    </ScreenLayout>
   );
 }
 

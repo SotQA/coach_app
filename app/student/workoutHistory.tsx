@@ -8,6 +8,8 @@ import { PrimaryButton } from "../../components/PrimaryButton";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
+import { BackButton } from "../../components/BackButton";
+import { ScreenLayout } from "../../components/ScreenLayout";
 
 // Displays the student's historical workout logs in a simple list.
 export default function WorkoutHistory() {
@@ -129,23 +131,18 @@ export default function WorkoutHistory() {
   }
 
   return (
-    <View style={{ flex: 1, padding: Spacing.md, backgroundColor: Colors.bg }}>
-      <Text
-        style={{
-          ...Typography.title,
-          fontSize: 22,
-          marginBottom: Spacing.sm,
-        }}
-      >
-        Workout History
-      </Text>
-      <View style={{ marginBottom: Spacing.sm }}>
-        <PrimaryButton
-          title="Back"
-          onPress={() => router.back()}
-          style={{ width: "auto", backgroundColor: Colors.border, alignSelf: "flex-start" }}
-        />
-      </View>
+    <ScreenLayout>
+      <View style={{ flex: 1, padding: Spacing.md, backgroundColor: Colors.bg }}>
+        <BackButton />
+        <Text
+          style={{
+            ...Typography.title,
+            fontSize: 22,
+            marginBottom: Spacing.sm,
+          }}
+        >
+          Workout History
+        </Text>
       {logs.length === 0 ? (
         <Text style={Typography.secondary}>No workouts yet.</Text>
       ) : (
@@ -200,7 +197,8 @@ export default function WorkoutHistory() {
           }}
         />
       )}
-    </View>
+      </View>
+    </ScreenLayout>
   );
 }
 

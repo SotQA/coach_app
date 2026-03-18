@@ -14,6 +14,8 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
+import { BackButton } from "../../components/BackButton";
+import { ScreenLayout } from "../../components/ScreenLayout";
 
 type ExerciseEntry = {
   repsCompleted: string;
@@ -197,33 +199,28 @@ export default function WorkoutExecution() {
   }
 
   return (
-    <KeyboardAwareScrollView
-      style={{ flex: 1, backgroundColor: Colors.bg }}
-      contentContainerStyle={{ padding: Spacing.md, paddingBottom: Spacing.lg }}
-      keyboardShouldPersistTaps="handled"
-      enableOnAndroid
-      extraScrollHeight={24}
-    >
-      <View
-        style={{
-          backgroundColor: Colors.card,
-          borderRadius: Radius.md,
-          padding: 20,
-          marginBottom: Spacing.md,
-          borderWidth: 1,
-          borderColor: Colors.border,
-        }}
+    <ScreenLayout>
+      <KeyboardAwareScrollView
+        style={{ flex: 1, backgroundColor: Colors.bg }}
+        contentContainerStyle={{ padding: Spacing.md, paddingBottom: Spacing.lg }}
+        keyboardShouldPersistTaps="handled"
+        enableOnAndroid
+        extraScrollHeight={24}
       >
-        <Text style={{ ...Typography.title, fontSize: 22, marginBottom: 4 }}>Workout Execution</Text>
-        <Text style={Typography.secondary}>Log completed reps and weight per exercise.</Text>
-      </View>
-      <View style={{ marginBottom: Spacing.sm }}>
-        <PrimaryButton
-          title="Back"
-          onPress={() => router.back()}
-          style={{ width: "auto", backgroundColor: Colors.border, alignSelf: "flex-start" }}
-        />
-      </View>
+        <BackButton />
+        <View
+          style={{
+            backgroundColor: Colors.card,
+            borderRadius: Radius.md,
+            padding: 20,
+            marginBottom: Spacing.md,
+            borderWidth: 1,
+            borderColor: Colors.border,
+          }}
+        >
+          <Text style={{ ...Typography.title, fontSize: 22, marginBottom: 4 }}>Workout Execution</Text>
+          <Text style={Typography.secondary}>Log completed reps and weight per exercise.</Text>
+        </View>
 
       {plan.exercises.map((exercise, idx) => {
         const entry = entries[idx] ?? { repsCompleted: "", weight: "" };
@@ -287,7 +284,8 @@ export default function WorkoutExecution() {
         <Text style={{ color: Colors.success, marginBottom: Spacing.sm }}>{message}</Text>
       ) : null}
       {saving ? <ActivityIndicator /> : <PrimaryButton title="Complete Workout" onPress={handleSubmit} />}
-    </KeyboardAwareScrollView>
+      </KeyboardAwareScrollView>
+    </ScreenLayout>
   );
 }
 

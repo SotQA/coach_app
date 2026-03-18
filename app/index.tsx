@@ -1,5 +1,5 @@
 import { Redirect } from "expo-router";
-import { View, Text, ActivityIndicator } from "react-native";
+import { View, ActivityIndicator } from "react-native";
 import { useAuth } from "../context/AuthContext";
 
 // Simple landing page that routes to login or signup.
@@ -22,7 +22,7 @@ export default function Home() {
   }
 
   if (user) {
-    const href = user.role === "coach" ? "/coach/dashboard" : "/student/today";
+    const href = user.role === "coach" ? "/coach/dashboard" : "/student/workouts";
     return <Redirect href={href} />;
   }
 

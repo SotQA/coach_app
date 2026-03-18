@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { View, Text, ActivityIndicator, FlatList, ScrollView } from "react-native";
+import { View, Text, ActivityIndicator, Alert, FlatList, ScrollView } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { authService } from "../../services/authService";
 import { studentService } from "../../services/studentService";
@@ -11,6 +11,8 @@ import { WorkoutCard } from "../../components/WorkoutCard";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
+import { BackButton } from "../../components/BackButton";
+import { ScreenLayout } from "../../components/ScreenLayout";
 
 export default function StudentDetails() {
   const router = useRouter();
@@ -23,6 +25,7 @@ export default function StudentDetails() {
   const [logs, setLogs] = useState<WorkoutLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deletingPlanId, setDeletingPlanId] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -136,8 +139,10 @@ export default function StudentDetails() {
   })();
 
   return (
-    <View style={{ flex: 1, backgroundColor: Colors.bg }}>
-      <ScrollView contentContainerStyle={{ padding: Spacing.md, paddingBottom: Spacing.lg }}>
+    <ScreenLayout>
+      <View style={{ flex: 1, backgroundColor: Colors.bg }}>
+        <ScrollView contentContainerStyle={{ padding: Spacing.md, paddingBottom: Spacing.lg }}>
+        <BackButton />
         <View
           style={{
             backgroundColor: Colors.card,
@@ -184,13 +189,6 @@ export default function StudentDetails() {
             />
           </View>
 
-          <View style={{ marginTop: Spacing.sm }}>
-            <PrimaryButton
-              title="Back to Students"
-              onPress={() => router.replace("/coach/dashboard")}
-              style={{ backgroundColor: Colors.border }}
-            />
-          </View>
         </View>
 
         <Text style={{ ...Typography.section, marginBottom: Spacing.xs }}>
@@ -201,10 +199,79 @@ export default function StudentDetails() {
           <Text style={Typography.secondary}>No workout plans yet.</Text>
         ) : (
           <FlatList
-            data={plans}
+            data={plans.filter((p) => p.isActive !== false)}
             scrollEnabled={false}
             keyExtractor={(item) => item.id}
-            renderItem={({ item }) => <WorkoutCard plan={item} />}
+            renderItem={({ item }) => (
+              <View style={{ marginBottom: Spacing.sm }}>
+                <WorkoutCard plan={item} />
+                <View style={{ flexDirection: "row", gap: Spacing.sm }}>
+                  <View style={{ flex: 1 }}>
+                    <PrimaryButton
+                      title="Open"
+                      onPress={() =>
+                        router.push({
+                          pathname: "/coach/workout",
+                          params: { workoutPlanId: item.id },
+                        })
+                      }
+                      style={{ backgroundColor: Colors.border }}
+                    />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <PrimaryButton
+                      title="Edit"
+                      onPress={() =>
+                        router.push({
+                          pathname: "/coach/editWorkout",
+                          params: { workoutPlanId: item.id },
+                        })
+                      }
+                      style={{ backgroundColor: Colors.border }}
+                    />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <PrimaryButton
+                      title={deletingPlanId === item.id ? "Deleting..." : "Delete"}
+                      onPress={() => {
+                        Alert.alert(
+                          "Delete workout?",
+                          "This will remove the workout from the student’s active list. You can’t undo this in the app.",
+                          [
+                            { text: "Cancel", style: "cancel" },
+                            {
+                              text: "Delete",
+                              style: "destructive",
+                              onPress: async () => {
+                                try {
+                                  setDeletingPlanId(item.id);
+                                  const user = await authService.getCurrentUserWithRole();
+                                  if (!user || user.role !== "coach") {
+                                    throw new Error("You must be logged in as a coach.");
+                                  }
+                                  await workoutService.deactivateWorkoutPlan(item.id, user.id);
+                                  setPlans((prev) =>
+                                    prev.map((p) =>
+                                      p.id === item.id ? { ...p, isActive: false } : p
+                                    )
+                                  );
+                                } catch (e: any) {
+                                  Alert.alert("Failed to delete", e.message ?? "Unknown error");
+                                } finally {
+                                  setDeletingPlanId(null);
+                                }
+                              },
+                            },
+                          ]
+                        );
+                      }}
+                      disabled={deletingPlanId !== null}
+                      style={{ backgroundColor: "#7F1D1D" }}
+                    />
+                  </View>
+                </View>
+              </View>
+            )}
           />
         )}
 
@@ -270,8 +337,9 @@ export default function StudentDetails() {
             </View>
           ))
         )}
-      </ScrollView>
-    </View>
+        </ScrollView>
+      </View>
+    </ScreenLayout>
   );
 }
 

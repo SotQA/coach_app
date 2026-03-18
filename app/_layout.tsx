@@ -25,12 +25,15 @@ export default function Layout() {
           name="coach/createWorkoutPlan"
           options={{ title: "Create Workout Plan" }}
         />
+        <Stack.Screen name="coach/workout" options={{ title: "Workout" }} />
+        <Stack.Screen name="coach/editWorkout" options={{ title: "Edit Workout" }} />
         <Stack.Screen name="coach/viewProgress" options={{ title: "Progress" }} />
         <Stack.Screen
           name="student/dashboard"
           options={{ title: "Student Dashboard" }}
         />
         <Stack.Screen name="student/today" options={{ title: "Today" }} />
+        <Stack.Screen name="student/workouts" options={{ title: "Your Workouts" }} />
         <Stack.Screen
           name="student/workout"
           options={{ title: "Workout" }}
@@ -47,6 +50,7 @@ export default function Layout() {
           name="student/exerciseDetails"
           options={{ title: "Exercise Details" }}
         />
+        <Stack.Screen name="student/progress" options={{ title: "Progress" }} />
       </Stack>
     </AuthProvider>
   );

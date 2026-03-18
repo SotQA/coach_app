@@ -16,6 +16,8 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
+import { BackButton } from "../../components/BackButton";
+import { ScreenLayout } from "../../components/ScreenLayout";
 
 // Screen for coaches to build a workout plan for a specific student.
 // Uses ExerciseInput to keep exercise editing logic reusable.
@@ -29,7 +31,7 @@ export default function CreateWorkoutPlan() {
   const [studentName] = useState(params.studentName ?? "Student");
   const [studentId] = useState(params.studentId ?? "");
   const [planName, setPlanName] = useState("Workout Plan");
-  const [scheduledDaysInput, setScheduledDaysInput] = useState("");
+  const [orderInput, setOrderInput] = useState("1");
   const [note, setNote] = useState("");
   const [exercises, setExercises] = useState<Exercise[]>([
     workoutService.createEmptyExercise(),
@@ -48,6 +50,16 @@ export default function CreateWorkoutPlan() {
           return;
         }
         setCoachId(user.id);
+
+        // Best-effort default ordering: append to the end.
+        if (studentId) {
+          const existing = await workoutService.getWorkoutPlansForStudentAsCoach(user.id, studentId);
+          const maxOrder = existing.reduce((max, p) => {
+            const n = typeof p.order === "number" && Number.isFinite(p.order) ? p.order : -1;
+            return Math.max(max, n);
+          }, -1);
+          setOrderInput(String(maxOrder + 1));
+        }
       } catch (e: any) {
         setError(e.message ?? "Failed to load user.");
       } finally {
@@ -80,18 +92,17 @@ export default function CreateWorkoutPlan() {
     setLoading(true);
     try {
       const name = planName.trim() || `Workout Plan for ${studentName}`;
-      const scheduledDays =
-        scheduledDaysInput
-          .split(",")
-          .map((d) => d.trim())
-          .filter((d) => d.length > 0) || [];
+      const parsedOrder = Number(orderInput);
+      const order = Number.isFinite(parsedOrder) ? parsedOrder : 0;
       await workoutService.createWorkoutPlan({
         coachId,
         studentId,
         name,
         exercises: exercises.filter((e) => e.name.trim().length > 0),
         createdAt: new Date(),
-        scheduledDays: scheduledDays.length ? scheduledDays : undefined,
+        updatedAt: new Date(),
+        isActive: true,
+        order,
         note: note.trim() || undefined,
       });
       router.replace("/coach/dashboard");
@@ -104,36 +115,40 @@ export default function CreateWorkoutPlan() {
 
   if (initializingUser) {
     return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
-          backgroundColor: Colors.bg,
-        }}
-      >
-        <ActivityIndicator />
-      </View>
+      <ScreenLayout>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: Colors.bg,
+          }}
+        >
+          <ActivityIndicator />
+        </View>
+      </ScreenLayout>
     );
   }
 
   return (
-    <KeyboardAwareScrollView
-      style={{ flex: 1, backgroundColor: Colors.bg }}
-      contentContainerStyle={{ padding: Spacing.md, paddingBottom: 80 }}
-      keyboardShouldPersistTaps="handled"
-      enableOnAndroid
-      extraScrollHeight={24}
-    >
-      <View
-        style={{
-          backgroundColor: Colors.card,
-          borderRadius: Radius.md,
-          padding: 20,
-          borderWidth: 1,
-          borderColor: Colors.border,
-        }}
+    <ScreenLayout>
+      <KeyboardAwareScrollView
+        style={{ flex: 1, backgroundColor: Colors.bg }}
+        contentContainerStyle={{ padding: Spacing.md, paddingBottom: 80 }}
+        keyboardShouldPersistTaps="handled"
+        enableOnAndroid
+        extraScrollHeight={24}
       >
+        <BackButton />
+        <View
+          style={{
+            backgroundColor: Colors.card,
+            borderRadius: Radius.md,
+            padding: 20,
+            borderWidth: 1,
+            borderColor: Colors.border,
+          }}
+        >
           <Text
             style={{
               ...Typography.title,
@@ -165,13 +180,14 @@ export default function CreateWorkoutPlan() {
           />
 
           <Text style={{ ...Typography.secondary, marginBottom: 6, marginTop: Spacing.xs }}>
-            Scheduled Days (comma separated)
+            Order
           </Text>
           <TextInput
-            placeholder="e.g. Monday, Wednesday, Friday"
+            placeholder="e.g. 1"
             placeholderTextColor={Colors.textMuted}
-            value={scheduledDaysInput}
-            onChangeText={setScheduledDaysInput}
+            value={orderInput}
+            onChangeText={setOrderInput}
+            keyboardType="number-pad"
             style={{
               borderWidth: 1,
               borderColor: Colors.border,
@@ -233,8 +249,9 @@ export default function CreateWorkoutPlan() {
               <Text style={{ color: Colors.danger, marginTop: Spacing.xs }}>{error}</Text>
             ) : null}
           </View>
-      </View>
-    </KeyboardAwareScrollView>
+        </View>
+      </KeyboardAwareScrollView>
+    </ScreenLayout>
   );
 }
 

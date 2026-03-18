@@ -12,7 +12,21 @@ export interface WorkoutPlan {
   name: string;
   exercises: Exercise[];
   createdAt: any;
-  // Optional list of scheduled days for this plan, e.g. ["Monday", "Wednesday"].
+  /**
+   * Ordering for workout plans in the student list.
+   * Lower numbers appear first.
+   */
+  order?: number;
+  /**
+   * Whether the plan is currently active for the student.
+   * Legacy plans may not have this field; treat missing as active in UI.
+   */
+  isActive?: boolean;
+  /**
+   * Last updated timestamp (Date, ISO string, or Firestore Timestamp-like).
+   */
+  updatedAt?: any;
+  // Legacy field (deprecated): day-based scheduling.
   scheduledDays?: string[];
   // Optional note from the coach for this plan.
   note?: string;

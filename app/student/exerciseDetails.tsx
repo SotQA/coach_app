@@ -8,6 +8,8 @@ import { PrimaryButton } from "../../components/PrimaryButton";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
+import { ScreenLayout } from "../../components/ScreenLayout";
+import { BackButton } from "../../components/BackButton";
 
 const toMs = (value: any): number => {
   if (!value) return 0;
@@ -104,8 +106,10 @@ export default function ExerciseDetails() {
     .join(" → ");
 
   return (
-    <View style={{ flex: 1, backgroundColor: Colors.bg }}>
-      <ScrollView contentContainerStyle={{ padding: Spacing.md }}>
+    <ScreenLayout>
+      <View style={{ flex: 1, backgroundColor: Colors.bg }}>
+        <ScrollView contentContainerStyle={{ padding: Spacing.md }}>
+        <BackButton />
         <Text
           style={{
             ...Typography.title,
@@ -115,13 +119,6 @@ export default function ExerciseDetails() {
         >
           {exerciseName || "Exercise"}
         </Text>
-        <View style={{ marginBottom: Spacing.sm }}>
-          <PrimaryButton
-            title="Back"
-            onPress={() => router.back()}
-            style={{ width: "auto", backgroundColor: Colors.border, alignSelf: "flex-start" }}
-          />
-        </View>
         {logs.length === 0 ? (
           <Text style={Typography.secondary}>No history for this exercise yet.</Text>
         ) : (
@@ -170,8 +167,9 @@ export default function ExerciseDetails() {
             })}
           </>
         )}
-      </ScrollView>
-    </View>
+        </ScrollView>
+      </View>
+    </ScreenLayout>
   );
 }
 

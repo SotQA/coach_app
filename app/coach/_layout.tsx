@@ -26,7 +26,7 @@ export default function CoachLayout() {
   }
 
   if (user.role !== "coach") {
-    return <Redirect href="/student/today" />;
+    return <Redirect href="/student/workouts" />;
   }
 
   return <Slot />;
