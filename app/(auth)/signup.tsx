@@ -2,7 +2,7 @@ import { useState } from "react";
 import { View, Text, TextInput, ActivityIndicator, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import type { UserRole } from "../../types/User";
+import type { Sex, UserRole } from "../../types/User";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { useAuth } from "../../context/AuthContext";
 import { Colors } from "../../theme/colors";
@@ -15,14 +15,41 @@ export default function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<UserRole>("coach");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
+  const [sex, setSex] = useState<Sex>("other");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  const validate = (): string | null => {
+    const e = email.trim();
+    if (!e || !/^\S+@\S+\.\S+$/.test(e)) return "Please enter a valid email address.";
+    if (!firstName.trim()) return "First name is required.";
+    if (!lastName.trim()) return "Last name is required.";
+    if (!dateOfBirth.trim()) return "Date of birth is required.";
+    return null;
+  };
 
   const handleSignup = async () => {
     setError(null);
     setSubmitting(true);
     try {
-      const appUser = await signup(email.trim(), password, role);
+      const validationError = validate();
+      if (validationError) {
+        setError(validationError);
+        return;
+      }
+
+      const appUser = await signup(
+        email.trim(),
+        password,
+        role,
+        firstName.trim(),
+        lastName.trim(),
+        dateOfBirth.trim(),
+        sex
+      );
       router.replace(appUser.role === "coach" ? "/coach/dashboard" : "/student/workouts");
     } catch (e: any) {
       setError(e.message ?? "Failed to sign up.");
@@ -61,6 +88,32 @@ export default function Signup() {
         >
           {label}
         </Text>
+      </Pressable>
+    );
+  };
+
+  const SexButton = ({
+    value,
+    label,
+  }: {
+    value: Sex;
+    label: string;
+  }) => {
+    const selected = sex === value;
+    return (
+      <Pressable
+        onPress={() => setSex(value)}
+        style={{
+          flex: 1,
+          padding: Spacing.sm,
+          borderWidth: 1,
+          borderColor: selected ? Colors.primary : Colors.border,
+          borderRadius: Radius.pill,
+          marginHorizontal: 4,
+          backgroundColor: selected ? Colors.primary : Colors.surface,
+        }}
+      >
+        <Text style={{ textAlign: "center", fontWeight: "600", color: Colors.text }}>{label}</Text>
       </Pressable>
     );
   };
@@ -147,10 +200,71 @@ export default function Signup() {
           }}
         />
 
+        <Text style={{ ...Typography.secondary, marginBottom: 6, marginTop: Spacing.md }}>First Name</Text>
+        <TextInput
+          placeholder="First name"
+          placeholderTextColor={Colors.textMuted}
+          value={firstName}
+          onChangeText={setFirstName}
+          autoCapitalize="words"
+          style={{
+            borderWidth: 1,
+            borderColor: Colors.border,
+            borderRadius: Radius.sm,
+            marginBottom: Spacing.sm,
+            padding: 12,
+            color: Colors.text,
+            backgroundColor: Colors.surface,
+          }}
+        />
+
+        <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Last Name</Text>
+        <TextInput
+          placeholder="Last name"
+          placeholderTextColor={Colors.textMuted}
+          value={lastName}
+          onChangeText={setLastName}
+          autoCapitalize="words"
+          style={{
+            borderWidth: 1,
+            borderColor: Colors.border,
+            borderRadius: Radius.sm,
+            marginBottom: Spacing.sm,
+            padding: 12,
+            color: Colors.text,
+            backgroundColor: Colors.surface,
+          }}
+        />
+
+        <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Date of Birth</Text>
+        <TextInput
+          placeholder="YYYY-MM-DD"
+          placeholderTextColor={Colors.textMuted}
+          value={dateOfBirth}
+          onChangeText={setDateOfBirth}
+          maxLength={10}
+          style={{
+            borderWidth: 1,
+            borderColor: Colors.border,
+            borderRadius: Radius.sm,
+            marginBottom: Spacing.md,
+            padding: 12,
+            color: Colors.text,
+            backgroundColor: Colors.surface,
+          }}
+        />
+
         <Text style={{ ...Typography.secondary, marginBottom: Spacing.xs }}>I am a</Text>
         <View style={{ flexDirection: "row", marginBottom: Spacing.lg }}>
           <RoleButton value="coach" label="Coach" />
           <RoleButton value="student" label="Student" />
+        </View>
+
+        <Text style={{ ...Typography.secondary, marginBottom: Spacing.xs }}>Sex</Text>
+        <View style={{ flexDirection: "row", marginBottom: Spacing.lg }}>
+          <SexButton value="male" label="Male" />
+          <SexButton value="female" label="Female" />
+          <SexButton value="other" label="Other" />
         </View>
 
         {submitting ? (

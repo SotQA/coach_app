@@ -70,10 +70,24 @@ export default function StudentProfile() {
             borderColor: Colors.border,
           }}
         >
+          <Text style={Typography.secondary}>Full name</Text>
+          <Text style={{ ...Typography.section, marginBottom: Spacing.sm }}>
+            {user && (user.firstName || user.lastName) ? `${user.firstName} ${user.lastName}`.trim() : "—"}
+          </Text>
+
           <Text style={Typography.secondary}>Email</Text>
           <Text style={{ ...Typography.section, marginBottom: Spacing.sm }}>{user?.email ?? "—"}</Text>
+
           <Text style={Typography.secondary}>Role</Text>
-          <Text style={Typography.section}>{user?.role ?? "—"}</Text>
+          <Text style={{ ...Typography.section, marginBottom: Spacing.sm }}>{user?.role ?? "—"}</Text>
+
+          <Text style={Typography.secondary}>Date of birth</Text>
+          <Text style={{ ...Typography.section, marginBottom: Spacing.sm }}>{user?.dateOfBirth ?? "—"}</Text>
+
+          <Text style={Typography.secondary}>Sex</Text>
+          <Text style={Typography.section}>
+            {user?.sex ? String(user.sex).charAt(0).toUpperCase() + String(user.sex).slice(1) : "—"}
+          </Text>
         </View>
 
         <View style={{ marginTop: Spacing.lg }}>

@@ -14,13 +14,21 @@ import {
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "../firebase/firebaseConfig";
-import type { AppUser, SignupPayload, UserRole } from "../types/User";
+import type { AppUser, UserRole, Sex } from "../types/User";
 
 type AuthContextValue = {
   user: AppUser | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<AppUser>;
-  signup: (email: string, password: string, role: UserRole) => Promise<AppUser>;
+  signup: (
+    email: string,
+    password: string,
+    role: UserRole,
+    firstName: string,
+    lastName: string,
+    dateOfBirth: string,
+    sex: Sex
+  ) => Promise<AppUser>;
   logout: () => Promise<void>;
 };
 
@@ -28,10 +36,19 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 const USERS_COLLECTION = "users";
 
-const mapToAppUser = (user: User, role: AppUser["role"]): AppUser => ({
+const normalizeSex = (value: any): Sex => {
+  if (value === "male" || value === "female" || value === "other") return value;
+  return "other";
+};
+
+const mapToAppUser = (user: User, data: any): AppUser => ({
   id: user.uid,
-  email: user.email ?? "",
-  role,
+  email: data?.email ?? user.email ?? "",
+  role: data?.role as AppUser["role"],
+  firstName: data?.firstName ?? "",
+  lastName: data?.lastName ?? "",
+  dateOfBirth: data?.dateOfBirth ?? "",
+  sex: normalizeSex(data?.sex),
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -56,8 +73,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return;
         }
 
-        const data = snap.data() as { role: AppUser["role"]; email: string };
-        setUser(mapToAppUser(firebaseUser, data.role));
+        const data = snap.data() as any;
+        setUser(mapToAppUser(firebaseUser, data));
       } catch (e) {
         console.error("[AuthProvider] Failed to resolve user role", e);
         setUser(null);
@@ -79,23 +96,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!snap.exists()) {
       throw new Error("User profile not found.");
     }
-    const data = snap.data() as { role: AppUser["role"]; email: string };
-    const appUser = mapToAppUser(firebaseUser, data.role);
+    const data = snap.data() as any;
+    const appUser = mapToAppUser(firebaseUser, data);
     setUser(appUser);
     return appUser;
   };
 
-  const signup = async (email: string, password: string, role: UserRole): Promise<AppUser> => {
+  const signup = async (
+    email: string,
+    password: string,
+    role: UserRole,
+    firstName: string,
+    lastName: string,
+    dateOfBirth: string,
+    sex: Sex
+  ): Promise<AppUser> => {
     const normalizedEmail = email.trim().toLowerCase();
     const credential = await createUserWithEmailAndPassword(auth, normalizedEmail, password);
     const { user: firebaseUser } = credential;
 
+    const createdAt = new Date().toISOString();
     await setDoc(doc(db, USERS_COLLECTION, firebaseUser.uid), {
       email: normalizedEmail,
       role,
+      firstName,
+      lastName,
+      dateOfBirth,
+      sex,
+      createdAt,
     });
 
-    const appUser = mapToAppUser(firebaseUser, role);
+    const appUser = mapToAppUser(firebaseUser, {
+      email: normalizedEmail,
+      role,
+      firstName,
+      lastName,
+      dateOfBirth,
+      sex,
+      createdAt,
+    });
     setUser(appUser);
     return appUser;
   };

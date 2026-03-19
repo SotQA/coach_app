@@ -6,31 +6,55 @@ import {
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "../firebase/firebaseConfig";
-import type { AppUser, SignupPayload } from "../types/User";
+import type { AppUser, SignupPayload, Sex } from "../types/User";
 
 const USERS_COLLECTION = "users";
 
+const normalizeSex = (value: any): Sex => {
+  if (value === "male" || value === "female" || value === "other") return value;
+  return "other";
+};
+
 // Maps a Firebase Auth user + Firestore user document into our domain AppUser type.
-const mapToAppUser = (user: User, role: AppUser["role"]): AppUser => ({
+const mapToAppUser = (user: User, role: AppUser["role"], data: any): AppUser => ({
   id: user.uid,
-  email: user.email ?? "",
+  email: data?.email ?? user.email ?? "",
   role,
+  firstName: data?.firstName ?? "",
+  lastName: data?.lastName ?? "",
+  dateOfBirth: data?.dateOfBirth ?? "",
+  sex: normalizeSex(data?.sex),
 });
 
 export const authService = {
   // Creates a new Firebase Auth user and stores the role in the "users" collection.
-  async signup({ email, password, role }: SignupPayload): Promise<AppUser> {
+  async signup({ email, password, role, firstName, lastName, dateOfBirth, sex }: SignupPayload): Promise<AppUser> {
     const normalizedEmail = email.trim().toLowerCase();
     const credential = await createUserWithEmailAndPassword(auth, normalizedEmail, password);
     const { user } = credential;
 
-    // Store user metadata in Firestore so we can look up the role later.
+    const createdAt = new Date().toISOString();
+
+    // Store full user profile in Firestore so we can look up the user later.
     await setDoc(doc(db, USERS_COLLECTION, user.uid), {
       email: normalizedEmail,
       role,
+      firstName,
+      lastName,
+      dateOfBirth,
+      sex,
+      createdAt,
     });
 
-    return mapToAppUser(user, role);
+    return mapToAppUser(user, role, {
+      email: normalizedEmail,
+      role,
+      firstName,
+      lastName,
+      dateOfBirth,
+      sex,
+      createdAt,
+    });
   },
 
   // Signs in with email/password and looks up the user role from Firestore.
@@ -45,9 +69,8 @@ export const authService = {
       throw new Error("User profile not found.");
     }
 
-    const data = docSnap.data() as { email: string; role: AppUser["role"] };
-
-    return mapToAppUser(user, data.role);
+    const data = docSnap.data() as any;
+    return mapToAppUser(user, data.role as AppUser["role"], data);
   },
 
   // Subscribes to Firebase Auth state and resolves with the current AppUser (including role) if available.
@@ -73,8 +96,8 @@ export const authService = {
               return;
             }
 
-            const data = docSnap.data() as { role: AppUser["role"]; email: string };
-            resolve(mapToAppUser(user, data.role));
+            const data = docSnap.data() as any;
+            resolve(mapToAppUser(user, data.role as AppUser["role"], data));
             unsubscribe();
           } catch (error) {
             reject(error);
