@@ -4,6 +4,11 @@ export interface Exercise {
   // Stored in Firestore as string (Firestore previously stored as int64).
   reps: string;
   weight?: number;
+  // Advanced training fields (stored on workout plans).
+  rest: string;
+  tempo: string;
+  // Null means empty / not set.
+  rpe: number | null;
 }
 
 export interface WorkoutPlan {
@@ -37,11 +42,25 @@ export interface WorkoutLog {
   id: string;
   studentId: string;
   workoutPlanId: string;
-  exercise: string;
-  sets: number;
-  // Stored in Firestore as string (Firestore previously stored as int64).
-  reps: string;
+  workoutName: string;
+  exercises: WorkoutLogExercise[];
+  completedAt: any;
+  // Legacy fields (for backward compatibility with older workout logs).
+  exercise?: string;
+  sets?: number;
+  reps?: string;
   weight?: number;
-  date: any;
+  date?: any;
+}
+
+export interface WorkoutLogExercise {
+  name: string;
+  sets: number;
+  repsPlanned: string;
+  repsDone: string;
+  weight: number | null;
+  rest: string;
+  tempo: string;
+  rpe: number | null;
 }
 

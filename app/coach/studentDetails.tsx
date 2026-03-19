@@ -125,12 +125,14 @@ export default function StudentDetails() {
   const strongestByExercise = (() => {
     const best = new Map<string, number>();
     for (const log of logs) {
-      if (typeof log.weight !== "number" || !Number.isFinite(log.weight)) continue;
-      const key = (log.exercise ?? "").trim();
-      if (!key) continue;
-      const current = best.get(key);
-      if (current === undefined || log.weight > current) {
-        best.set(key, log.weight);
+      for (const ex of log.exercises ?? []) {
+        if (typeof ex.weight !== "number" || !Number.isFinite(ex.weight)) continue;
+        const key = (ex.name ?? "").trim();
+        if (!key) continue;
+        const current = best.get(key);
+        if (current === undefined || ex.weight > current) {
+          best.set(key, ex.weight);
+        }
       }
     }
     return Array.from(best.entries()).sort((a, b) =>
@@ -299,11 +301,13 @@ export default function StudentDetails() {
                 borderColor: Colors.border,
               }}
             >
-              <Text style={Typography.section}>{log.exercise}</Text>
-              <Text style={Typography.secondary}>
-                {log.sets} sets × {log.reps} reps
-                {log.weight ? ` @ ${log.weight}kg` : ""}
-              </Text>
+              <Text style={Typography.section}>{log.workoutName || "Workout"}</Text>
+              {(log.exercises ?? []).slice(0, 2).map((ex, i) => (
+                <Text key={`${log.id}-${i}`} style={Typography.secondary}>
+                  {ex.name}: {ex.repsPlanned || "—"} → {ex.repsDone} reps
+                  {ex.weight != null ? ` @ ${ex.weight}kg` : ""}
+                </Text>
+              ))}
             </View>
           ))
         )}

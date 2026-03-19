@@ -72,7 +72,9 @@ export default function WorkoutExecution() {
         setPlan(loaded);
         setEntries(
           loaded.exercises.map((ex) => ({
-            repsCompleted: String(ex.reps ?? ""),
+            // `reps` can be planned ranges like "8-12", so do not prefill
+            // completed reps with planned text (it breaks numeric validation).
+            repsCompleted: "",
             weight: String(ex.weight ?? ""),
           }))
         );
@@ -114,29 +116,45 @@ export default function WorkoutExecution() {
       }
 
       // One workoutLogs entry per exercise (simple & query-friendly).
-      await Promise.all(
-        plan.exercises.map((exercise, idx) => {
-          const entry = entries[idx] ?? { repsCompleted: "", weight: "" };
-          const repsCompleted = Number(entry.repsCompleted);
-          const weight = entry.weight.trim() === "" ? undefined : Number(entry.weight);
+      const completedExercises = plan.exercises.map((exercise, idx) => {
+        const entry = entries[idx] ?? { repsCompleted: "", weight: "" };
+        const repsDone = entry.repsCompleted.trim();
+        const weightText = entry.weight.trim();
+        const normalizedWeightText = weightText.replace(",", ".");
+        const weight = normalizedWeightText === "" ? null : Number(normalizedWeightText);
 
-          if (!Number.isFinite(repsCompleted) || repsCompleted < 0) {
-            throw new Error(`Invalid reps for "${exercise.name}".`);
-          }
-          if (weight !== undefined && (!Number.isFinite(weight) || weight < 0)) {
-            throw new Error(`Invalid weight for "${exercise.name}".`);
-          }
+        // Accept formats like "10" or "7-12", reject negatives/empty.
+        const isNumberReps = /^\d+$/.test(repsDone);
+        const isRangeReps = /^\d+\s*-\s*\d+$/.test(repsDone);
+        if (!repsDone || (!isNumberReps && !isRangeReps)) {
+          throw new Error(`Reps done for "${exercise.name}" must be a positive number or range (e.g. 7-12).`);
+        }
+        if (repsDone.startsWith("-")) {
+          throw new Error(`Reps done for "${exercise.name}" cannot be negative.`);
+        }
+        if (weight !== null && (!Number.isFinite(weight) || weight < 0)) {
+          throw new Error(`Weight for "${exercise.name}" must be >= 0.`);
+        }
 
-          return workoutService.logWorkoutEntry({
-            studentId: user.id,
-            workoutPlanId: plan.id,
-            exercise: exercise.name,
-            sets: exercise.sets,
-            reps: String(repsCompleted),
-            weight,
-          });
-        })
-      );
+        return {
+          name: exercise.name,
+          sets: exercise.sets,
+          repsPlanned: String(exercise.reps ?? ""),
+          repsDone,
+          weight,
+          rest: exercise.rest ?? "",
+          tempo: exercise.tempo ?? "",
+          rpe: exercise.rpe ?? null,
+        };
+      });
+
+      await workoutService.logCompletedWorkout({
+        studentId: user.id,
+        workoutPlanId: plan.id,
+        workoutName: plan.name,
+        exercises: completedExercises,
+        completedAt: new Date().toISOString(),
+      });
 
       console.log("[student/workoutExecution] submit success");
       setMessage("Workout saved to history.");
@@ -224,6 +242,17 @@ export default function WorkoutExecution() {
 
       {plan.exercises.map((exercise, idx) => {
         const entry = entries[idx] ?? { repsCompleted: "", weight: "" };
+        const metaParts: string[] = [];
+        if (exercise.rest && exercise.rest.trim() !== "") {
+          metaParts.push(`Rest: ${exercise.rest}s`);
+        }
+        if (exercise.tempo && exercise.tempo.trim() !== "") {
+          metaParts.push(`Tempo: ${exercise.tempo}`);
+        }
+        if (exercise.rpe !== null && exercise.rpe !== undefined) {
+          metaParts.push(`RPE: ${exercise.rpe}`);
+        }
+
         return (
           <View
             key={`${exercise.name}-${idx}`}
@@ -237,10 +266,18 @@ export default function WorkoutExecution() {
             }}
           >
             <Text style={{ ...Typography.section, marginBottom: 6 }}>{exercise.name}</Text>
-            <Text style={{ ...Typography.secondary, marginBottom: Spacing.sm }}>
+            <Text style={{ ...Typography.secondary, marginBottom: Spacing.xs }}>
               Planned: {exercise.sets} sets × {exercise.reps} reps
-              {exercise.weight ? ` @ ${exercise.weight}kg` : ""}
             </Text>
+            {exercise.weight != null && Number.isFinite(exercise.weight) ? (
+              <Text style={{ ...Typography.secondary, marginBottom: Spacing.sm }}>
+                Weight: {exercise.weight}kg
+              </Text>
+            ) : null}
+
+            {metaParts.length ? (
+              <Text style={{ ...Typography.secondary, marginBottom: Spacing.sm }}>{metaParts.join(" • ")}</Text>
+            ) : null}
 
             <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Completed Reps</Text>
             <TextInput

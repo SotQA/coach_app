@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, TextInput, ActivityIndicator, Pressable } from "react-native";
+import { Platform, View, Text, TextInput, ActivityIndicator, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import type { Sex, UserRole } from "../../types/User";
@@ -8,6 +8,7 @@ import { useAuth } from "../../context/AuthContext";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 export default function Signup() {
   const router = useRouter();
@@ -18,9 +19,31 @@ export default function Signup() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
-  const [sex, setSex] = useState<Sex>("other");
+  const [sex, setSex] = useState<Sex>("male");
+  const [dobPickerOpen, setDobPickerOpen] = useState(false);
+  const [dobDraft, setDobDraft] = useState<Date | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  const parseYMD = (value: string): Date | null => {
+    const parts = value.split("-");
+    if (parts.length !== 3) return null;
+    const [y, m, d] = parts.map((p) => Number(p));
+    if (!Number.isFinite(y) || !Number.isFinite(m) || !Number.isFinite(d)) return null;
+    if (m < 1 || m > 12) return null;
+    if (d < 1 || d > 31) return null;
+    return new Date(y, m - 1, d);
+  };
+
+  const formatYMD = (value: Date): string => {
+    const y = value.getFullYear();
+    const m = String(value.getMonth() + 1).padStart(2, "0");
+    const d = String(value.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  };
+
+  const dobValue = dateOfBirth ? parseYMD(dateOfBirth) ?? new Date(2000, 0, 1) : new Date(2000, 0, 1);
+  const activeDobValue = dobDraft ?? dobValue;
 
   const validate = (): string | null => {
     const e = email.trim();
@@ -114,6 +137,27 @@ export default function Signup() {
         }}
       >
         <Text style={{ textAlign: "center", fontWeight: "600", color: Colors.text }}>{label}</Text>
+      </Pressable>
+    );
+  };
+
+  const DobButton = () => {
+    const formatted = dateOfBirth || "";
+    return (
+      <Pressable
+        onPress={() => setDobPickerOpen(true)}
+        style={{
+          borderWidth: 1,
+          borderColor: Colors.border,
+          borderRadius: Radius.sm,
+          marginBottom: Spacing.md,
+          padding: 12,
+          backgroundColor: Colors.surface,
+        }}
+      >
+        <Text style={{ color: formatted ? Colors.text : Colors.textMuted }}>
+          {formatted ? formatted : "Select date"}
+        </Text>
       </Pressable>
     );
   };
@@ -237,22 +281,72 @@ export default function Signup() {
         />
 
         <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Date of Birth</Text>
-        <TextInput
-          placeholder="YYYY-MM-DD"
-          placeholderTextColor={Colors.textMuted}
-          value={dateOfBirth}
-          onChangeText={setDateOfBirth}
-          maxLength={10}
-          style={{
-            borderWidth: 1,
-            borderColor: Colors.border,
-            borderRadius: Radius.sm,
-            marginBottom: Spacing.md,
-            padding: 12,
-            color: Colors.text,
-            backgroundColor: Colors.surface,
-          }}
-        />
+        <DobButton />
+
+        {dobPickerOpen ? (
+          <DateTimePicker
+            value={activeDobValue}
+            mode="date"
+            // Use `spinner` on iOS for stability (some iOS builds crash with `calendar`).
+            // We still prevent wrong auto-selection by committing only on `Apply`.
+            display={Platform.OS === "ios" ? "spinner" : "default"}
+            onChange={(event, selectedDate) => {
+              // Keep picker open until user taps Apply (iOS/web-like behavior),
+              // but on Android we also respect native set/dismiss events.
+              if (selectedDate) {
+                setDobDraft(selectedDate);
+              }
+
+              if (Platform.OS === "android") {
+                if (event?.type === "set" && selectedDate) {
+                  setDateOfBirth(formatYMD(selectedDate));
+                  setDobDraft(null);
+                  setDobPickerOpen(false);
+                } else if (event?.type === "dismissed") {
+                  setDobDraft(null);
+                  setDobPickerOpen(false);
+                }
+              }
+            }}
+          />
+        ) : null}
+
+        {dobPickerOpen && Platform.OS === "ios" ? (
+          <View style={{ flexDirection: "row", gap: Spacing.sm, marginBottom: Spacing.lg, alignItems: "center" }}>
+            <PrimaryButton
+              title="Apply"
+              onPress={() => {
+                if (!dobDraft) return;
+                setDateOfBirth(formatYMD(dobDraft));
+                setDobDraft(null);
+                setDobPickerOpen(false);
+              }}
+              style={{ width: "auto" }}
+            />
+            <Pressable
+              onPress={() => {
+                setDobDraft(null);
+                setDobPickerOpen(false);
+              }}
+              style={{
+                paddingVertical: 15,
+                paddingHorizontal: Spacing.md,
+                borderRadius: Radius.md,
+                backgroundColor: Colors.surface,
+                borderWidth: 1,
+                borderColor: Colors.border,
+              }}
+            >
+              <Text style={{ ...Typography.section, color: Colors.textMuted, fontWeight: "700" }}>Cancel</Text>
+            </Pressable>
+          </View>
+        ) : null}
+
+        <Text style={{ ...Typography.secondary, marginBottom: Spacing.xs }}>Sex</Text>
+        <View style={{ flexDirection: "row", marginBottom: Spacing.lg }}>
+          <SexButton value="male" label="Male" />
+          <SexButton value="female" label="Female" />
+        </View>
 
         <Text style={{ ...Typography.secondary, marginBottom: Spacing.xs }}>I am a</Text>
         <View style={{ flexDirection: "row", marginBottom: Spacing.lg }}>
@@ -260,17 +354,20 @@ export default function Signup() {
           <RoleButton value="student" label="Student" />
         </View>
 
-        <Text style={{ ...Typography.secondary, marginBottom: Spacing.xs }}>Sex</Text>
-        <View style={{ flexDirection: "row", marginBottom: Spacing.lg }}>
-          <SexButton value="male" label="Male" />
-          <SexButton value="female" label="Female" />
-          <SexButton value="other" label="Other" />
-        </View>
-
         {submitting ? (
           <ActivityIndicator style={{ marginVertical: 12 }} />
         ) : (
-          <PrimaryButton title="Sign Up" onPress={handleSignup} />
+          <>
+            <PrimaryButton title="Sign Up" onPress={handleSignup} />
+            <View style={{ marginTop: Spacing.sm }}>
+              <PrimaryButton
+                title="Back to Login"
+                onPress={() => router.replace("/login")}
+                style={{ width: "auto", backgroundColor: Colors.border }}
+                textStyle={{ fontSize: 14, fontWeight: "700" }}
+              />
+            </View>
+          </>
         )}
 
         {error ? (

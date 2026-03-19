@@ -94,11 +94,46 @@ export default function CreateWorkoutPlan() {
       const name = planName.trim() || `Workout Plan for ${studentName}`;
       const parsedOrder = Number(orderInput);
       const order = Number.isFinite(parsedOrder) ? parsedOrder : 0;
+
+      const sanitizedExercises = exercises
+        .map((e) => {
+          const rest = (e.rest ?? "").trim();
+          const tempo = (e.tempo ?? "").trim();
+          const rpe = e.rpe === null || e.rpe === undefined ? null : e.rpe;
+
+          return {
+            ...e,
+            name: (e.name ?? "").trim(),
+            reps: (e.reps ?? "").trim(),
+            rest,
+            tempo,
+            rpe: rpe === null ? null : rpe,
+          };
+        })
+        .filter((e) => e.name.length > 0);
+
+      for (const ex of sanitizedExercises) {
+        if (ex.rest !== "") {
+          const n = Number(ex.rest);
+          if (!Number.isFinite(n) || n < 0) {
+            throw new Error(`Rest for "${ex.name}" must be a number >= 0.`);
+          }
+        }
+        if (ex.tempo.length > 20) {
+          throw new Error(`Tempo for "${ex.name}" must be at most 20 characters.`);
+        }
+        if (ex.rpe !== null) {
+          if (!Number.isFinite(ex.rpe) || ex.rpe < 1 || ex.rpe > 10) {
+            throw new Error(`RPE for "${ex.name}" must be between 1 and 10.`);
+          }
+        }
+      }
+
       await workoutService.createWorkoutPlan({
         coachId,
         studentId,
         name,
-        exercises: exercises.filter((e) => e.name.trim().length > 0),
+        exercises: sanitizedExercises,
         createdAt: new Date(),
         updatedAt: new Date(),
         isActive: true,

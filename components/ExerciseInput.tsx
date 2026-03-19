@@ -8,16 +8,32 @@ import { Typography } from "../theme/typography";
 interface ExerciseInputProps {
   value: Exercise;
   onChange: (value: Exercise) => void;
+  // Keep the simple layout for student set-logging.
+  showAdvancedFields?: boolean;
 }
 
 // Small controlled input component used for both creating workout plans
 // and logging a workout. Keeps form markup reusable.
-export const ExerciseInput: FC<ExerciseInputProps> = ({ value, onChange }) => {
+export const ExerciseInput: FC<ExerciseInputProps> = ({
+  value,
+  onChange,
+  showAdvancedFields = true,
+}) => {
   const updateField = (field: keyof Exercise, fieldValue: string) => {
     // Firestore stores `reps` as a string. We keep it as-is for reps,
     // while still parsing numeric fields that should remain numbers.
-    const parsedValue =
-      field === "sets" || field === "weight" ? Number(fieldValue) : fieldValue;
+    let parsedValue: any;
+
+    if (field === "sets" || field === "weight") {
+      parsedValue = Number(fieldValue);
+    } else if (field === "rpe") {
+      const trimmed = fieldValue.trim();
+      parsedValue = trimmed === "" ? null : Number(trimmed);
+      if (!Number.isFinite(parsedValue)) parsedValue = null;
+    } else {
+      // name, reps, rest, tempo
+      parsedValue = fieldValue;
+    }
 
     onChange({
       ...value,
@@ -106,6 +122,66 @@ export const ExerciseInput: FC<ExerciseInputProps> = ({ value, onChange }) => {
           />
         </View>
       </View>
+
+      {showAdvancedFields ? (
+        <>
+          <View style={{ flexDirection: "row", marginTop: Spacing.xs }}>
+            <View style={{ flex: 1, marginRight: 4 }}>
+              <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Rest (seconds)</Text>
+              <TextInput
+                keyboardType="numeric"
+                value={value.rest ?? ""}
+                onChangeText={(text) => updateField("rest", text)}
+                placeholder=""
+                style={{
+                  borderWidth: 1,
+                  borderColor: Colors.border,
+                  padding: 12,
+                  borderRadius: Radius.sm,
+                  color: Colors.text,
+                  backgroundColor: Colors.surface,
+                }}
+              />
+            </View>
+
+            <View style={{ flex: 1, marginLeft: 4 }}>
+              <Text style={{ ...Typography.secondary, marginBottom: 6 }}>RPE (1-10)</Text>
+              <TextInput
+                keyboardType="numeric"
+                value={value.rpe === null || value.rpe === undefined ? "" : String(value.rpe)}
+                onChangeText={(text) => updateField("rpe", text)}
+                placeholder=""
+                style={{
+                  borderWidth: 1,
+                  borderColor: Colors.border,
+                  padding: 12,
+                  borderRadius: Radius.sm,
+                  color: Colors.text,
+                  backgroundColor: Colors.surface,
+                }}
+              />
+            </View>
+          </View>
+
+          <View style={{ marginTop: Spacing.xs }}>
+            <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Tempo (e.g. 3-1-1)</Text>
+            <TextInput
+              value={value.tempo ?? ""}
+              onChangeText={(text) => updateField("tempo", text)}
+              placeholder=""
+              maxLength={20}
+              style={{
+                borderWidth: 1,
+                borderColor: Colors.border,
+                padding: 12,
+                borderRadius: Radius.sm,
+                color: Colors.text,
+                backgroundColor: Colors.surface,
+              }}
+            />
+          </View>
+        </>
+      ) : null}
     </View>
   );
 };

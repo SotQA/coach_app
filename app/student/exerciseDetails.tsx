@@ -51,12 +51,12 @@ export default function ExerciseDetails() {
           return;
         }
         const history = await workoutService.getWorkoutHistory(user.id);
-        const filtered = history.filter(
-          (log) => log.exercise?.trim().toLowerCase() === exerciseName.toLowerCase()
+        const filtered = history.filter((log) =>
+          (log.exercises ?? []).some(
+            (ex) => ex.name?.trim().toLowerCase() === exerciseName.toLowerCase()
+          )
         );
-        setLogs(
-          filtered.sort((a, b) => toMs(a.date) - toMs(b.date))
-        );
+        setLogs(filtered.sort((a, b) => toMs((a as any).completedAt ?? a.date) - toMs((b as any).completedAt ?? b.date)));
       } catch (e: any) {
         console.error("[student/exerciseDetails] load error", e);
         setError(e.message ?? "Failed to load exercise history.");
@@ -128,7 +128,7 @@ export default function ExerciseDetails() {
             </Text>
 
             {logs.map((log) => {
-              const ms = toMs(log.date);
+              const ms = toMs((log as any).completedAt ?? log.date);
               const dateLabel = ms
                 ? new Date(ms).toLocaleDateString(undefined, {
                     year: "numeric",
@@ -155,10 +155,16 @@ export default function ExerciseDetails() {
                     borderColor: Colors.border,
                   }}
                 >
-                  <Text style={{ color: Colors.text, fontWeight: "600" }}>
-                    {log.sets} sets × {log.reps} reps
-                    {log.weight ? ` @ ${log.weight}kg` : ""}
-                  </Text>
+                  {(log.exercises ?? [])
+                    .filter((ex) => ex.name?.trim().toLowerCase() === exerciseName.toLowerCase())
+                    .map((ex, i) => (
+                      <View key={`${log.id}-${i}`} style={{ marginBottom: i === 0 ? 0 : Spacing.xs }}>
+                        <Text style={{ color: Colors.text, fontWeight: "600" }}>
+                          {ex.sets} sets × {ex.repsPlanned} → {ex.repsDone} reps
+                          {ex.weight != null ? ` @ ${ex.weight}kg` : ""}
+                        </Text>
+                      </View>
+                    ))}
                   <Text style={{ color: Colors.textMuted, marginTop: 4 }}>
                     {dateLabel} {timeLabel && `• ${timeLabel}`}
                   </Text>

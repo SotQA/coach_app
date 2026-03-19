@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { View, Text, ActivityIndicator, SectionList } from "react-native";
+import { View, Text, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
 import { authService } from "../../services/authService";
 import { workoutService } from "../../services/workoutService";
@@ -32,42 +32,28 @@ export default function WorkoutHistory() {
     return 0;
   };
 
-  const sections = useMemo(() => {
-    // Group by exercise name, then show progression over time.
-    const byExercise = new Map<string, WorkoutLog[]>();
-    for (const log of logs) {
-      const key = (log.exercise ?? "").trim() || "Unknown exercise";
-      const list = byExercise.get(key) ?? [];
-      list.push(log);
-      byExercise.set(key, list);
-    }
+  const normalizedLogs = useMemo(() => {
+    return logs.map((log) => {
+      const exercises = Array.isArray(log.exercises) && log.exercises.length
+        ? log.exercises
+        : [
+            {
+              name: log.exercise ?? "Exercise",
+              sets: log.sets ?? 0,
+              repsPlanned: String(log.reps ?? ""),
+              repsDone: String(log.reps ?? ""),
+              weight: log.weight ?? null,
+              rest: "",
+              tempo: "",
+              rpe: null,
+            },
+          ];
 
-    const exerciseNames = Array.from(byExercise.keys()).sort((a, b) =>
-      a.localeCompare(b, undefined, { sensitivity: "base" })
-    );
-
-    return exerciseNames.map((name) => {
-      const items = [...(byExercise.get(name) ?? [])].sort(
-        (a, b) => toMs(a.date) - toMs(b.date)
-      );
-
-      const weights = items
-        .map((x) => x.weight)
-        .filter((w): w is number => typeof w === "number" && Number.isFinite(w));
-
-      // Keep duplicates (80 → 80 → 85) as that’s still meaningful progression.
-      const progression = weights.length ? weights.map((w) => String(w)).join(" → ") : "—";
-
+      const when = (log as any).completedAt ?? (log as any).date;
       return {
-        title: name,
-        data: [
-          {
-            id: `progression:${name}`,
-            progression,
-            totalLogs: items.length,
-            lastMs: items.length ? toMs(items[items.length - 1].date) : 0,
-          },
-        ],
+        ...log,
+        exercises,
+        _ms: toMs(when),
       };
     });
   }, [logs]);
@@ -141,59 +127,50 @@ export default function WorkoutHistory() {
         >
           Workout History
         </Text>
-      {logs.length === 0 ? (
+      {normalizedLogs.length === 0 ? (
         <Text style={Typography.secondary}>No workouts yet.</Text>
       ) : (
-        <SectionList
-          sections={sections}
-          keyExtractor={(item) => item.id}
-          stickySectionHeadersEnabled
-          renderSectionHeader={({ section }) => (
+        normalizedLogs.map((log) => {
+          const dateText = log._ms
+            ? new Date(log._ms).toLocaleDateString(undefined, {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              })
+            : "—";
+          return (
             <View
+              key={log.id}
               style={{
-                paddingVertical: Spacing.xs,
-                paddingHorizontal: Spacing.sm,
-                backgroundColor: Colors.card,
                 borderRadius: Radius.md,
-                marginBottom: Spacing.xs,
+                padding: Spacing.sm,
+                marginBottom: Spacing.sm,
+                backgroundColor: Colors.surface,
                 borderWidth: 1,
                 borderColor: Colors.border,
               }}
             >
-              <Text style={{ ...Typography.section, color: Colors.text }}>{section.title}</Text>
-            </View>
-          )}
-          renderItem={({ item }: any) => {
-            const lastText = item.lastMs
-              ? new Date(item.lastMs).toLocaleDateString(undefined, {
-                  year: "numeric",
-                  month: "short",
-                  day: "numeric",
-                })
-              : "—";
+              <Text style={{ ...Typography.section, marginBottom: 4 }}>
+                {log.workoutName || "Workout"}
+              </Text>
+              <Text style={{ ...Typography.secondary, marginBottom: Spacing.xs }}>
+                Completed: {dateText}
+              </Text>
 
-            return (
-              <View
-                style={{
-                  borderRadius: Radius.md,
-                  padding: Spacing.sm,
-                  marginBottom: Spacing.sm,
-                  backgroundColor: Colors.surface,
-                  borderWidth: 1,
-                  borderColor: Colors.border,
-                }}
-              >
-                <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Progression</Text>
-                <Text style={{ ...Typography.section, fontSize: 16, fontWeight: "800" }}>
-                  {item.progression}
-                </Text>
-                <Text style={{ color: Colors.textMuted, marginTop: Spacing.xs }}>
-                  Sessions: {item.totalLogs} • Last: {lastText}
-                </Text>
-              </View>
-            );
-          }}
-        />
+              {log.exercises.map((ex, i) => (
+                <View key={`${log.id}-${ex.name}-${i}`} style={{ marginTop: 6 }}>
+                  <Text style={{ ...Typography.section, fontSize: 15 }}>{ex.name}</Text>
+                  <Text style={Typography.secondary}>
+                    {ex.repsPlanned || "—"} → {ex.repsDone} reps
+                  </Text>
+                  {ex.weight !== null && ex.weight !== undefined ? (
+                    <Text style={Typography.secondary}>{ex.weight}kg</Text>
+                  ) : null}
+                </View>
+              ))}
+            </View>
+          );
+        })
       )}
       </View>
     </ScreenLayout>

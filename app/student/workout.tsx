@@ -77,10 +77,14 @@ export default function WorkoutScreen() {
       await workoutService.logWorkoutEntry({
         studentId: student.id,
         workoutPlanId,
+        workoutName: "Workout",
         exercise: exercise.name,
         sets: exercise.sets,
         reps: exercise.reps,
         weight: exercise.weight,
+        rest: exercise.rest,
+        tempo: exercise.tempo,
+        rpe: exercise.rpe,
       });
       console.log("[student/workout] submit success");
       setMessage("Workout logged!");
@@ -137,7 +141,7 @@ export default function WorkoutScreen() {
         <Text style={{ ...Typography.title, fontSize: 22, marginBottom: Spacing.sm }}>
           Log Workout
         </Text>
-        <ExerciseInput value={exercise} onChange={setExercise} />
+        <ExerciseInput value={exercise} onChange={setExercise} showAdvancedFields={false} />
         <View style={{ marginTop: 16 }}>
           {submitting ? <ActivityIndicator /> : <PrimaryButton title="Save Set" onPress={handleLogWorkout} />}
         </View>

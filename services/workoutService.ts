@@ -12,7 +12,7 @@ import {
   type QueryDocumentSnapshot,
 } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
-import type { Exercise, WorkoutLog, WorkoutPlan } from "../types/Workout";
+import type { Exercise, WorkoutLog, WorkoutLogExercise, WorkoutPlan } from "../types/Workout";
 
 const WORKOUT_PLANS_COLLECTION = "workoutPlans";
 const WORKOUT_LOGS_COLLECTION = "workoutLogs";
@@ -67,30 +67,93 @@ const toMs = (value: any): number => {
   return 0;
 };
 
+const normalizeExercise = (ex: any): Exercise => {
+  const reps = ex?.reps != null ? String(ex.reps) : "";
+  const rest = ex?.rest != null ? String(ex.rest) : "";
+  const tempo = ex?.tempo != null ? String(ex.tempo) : "";
+  const rpeRaw = ex?.rpe;
+  const rpe =
+    rpeRaw == null || rpeRaw === "" ? null : Number.isFinite(Number(rpeRaw)) ? Number(rpeRaw) : null;
+
+  const weight =
+    ex?.weight == null || ex?.weight === "" ? undefined : Number.isFinite(Number(ex.weight)) ? Number(ex.weight) : undefined;
+
+  const sets = Number.isFinite(Number(ex?.sets)) ? Number(ex.sets) : 0;
+
+  return {
+    name: ex?.name != null ? String(ex.name) : "",
+    sets,
+    reps,
+    weight,
+    rest,
+    tempo,
+    rpe,
+  };
+};
+
+const normalizePlanData = (id: string, data: any): WorkoutPlan => ({
+  id,
+  ...data,
+  // Normalize exercise fields to match our UI + Firestore contract.
+  exercises: Array.isArray(data?.exercises) ? data.exercises.map(normalizeExercise) : [],
+});
+
 const mapPlanDoc = (snap: QueryDocumentSnapshot): WorkoutPlan => {
   const data = snap.data() as any;
+  return normalizePlanData(snap.id, data);
+};
+
+const normalizeLoggedExercise = (ex: any): WorkoutLogExercise => {
+  const sets = Number.isFinite(Number(ex?.sets)) ? Number(ex.sets) : 0;
+  const repsPlanned = ex?.repsPlanned != null ? String(ex.repsPlanned) : ex?.reps != null ? String(ex.reps) : "";
+  const repsDone =
+    ex?.repsDone != null
+      ? String(ex.repsDone)
+      : ex?.reps != null
+        ? String(ex.reps)
+        : "";
+  const weight =
+    ex?.weight == null || ex?.weight === "" ? null : Number.isFinite(Number(ex.weight)) ? Number(ex.weight) : null;
+  const rpe =
+    ex?.rpe == null || ex?.rpe === "" ? null : Number.isFinite(Number(ex.rpe)) ? Number(ex.rpe) : null;
+
   return {
-    id: snap.id,
-    ...data,
-    // Normalize exercise reps to string for UI + Firestore compatibility.
-    exercises: Array.isArray(data.exercises)
-      ? data.exercises.map((ex: any) => ({
-          ...ex,
-          reps: ex.reps != null ? String(ex.reps) : "",
-        }))
-      : [],
-  } as WorkoutPlan;
+    name: ex?.name != null ? String(ex.name) : ex?.exercise != null ? String(ex.exercise) : "Exercise",
+    sets,
+    repsPlanned,
+    repsDone,
+    weight,
+    rest: ex?.rest != null ? String(ex.rest) : "",
+    tempo: ex?.tempo != null ? String(ex.tempo) : "",
+    rpe,
+  };
 };
 
 const mapLogDoc = (snap: QueryDocumentSnapshot): WorkoutLog => {
   const data = snap.data() as any;
+  const exercises: WorkoutLogExercise[] = Array.isArray(data.exercises)
+    ? data.exercises.map(normalizeLoggedExercise)
+    : [
+        normalizeLoggedExercise({
+          name: data.exercise,
+          sets: data.sets,
+          repsPlanned: data.reps,
+          repsDone: data.reps,
+          weight: data.weight,
+        }),
+      ];
+
   return {
     id: snap.id,
     studentId: data.studentId,
     workoutPlanId: data.workoutPlanId,
+    workoutName: data.workoutName != null ? String(data.workoutName) : "Workout",
+    exercises,
+    completedAt: data.completedAt ?? data.date,
+    // Keep legacy fields available for older consumers while migrating.
     exercise: data.exercise,
     sets: data.sets,
-    reps: data.reps != null ? String(data.reps) : "",
+    reps: data.reps != null ? String(data.reps) : undefined,
     weight: data.weight,
     date: data.date,
   };
@@ -151,10 +214,8 @@ export const workoutService = {
     const ref = doc(db, WORKOUT_PLANS_COLLECTION, planId);
     const snap = await getDoc(ref);
     if (!snap.exists()) return null;
-    return {
-      id: snap.id,
-      ...(snap.data() as Omit<WorkoutPlan, "id">),
-    };
+    const data = snap.data() as any;
+    return normalizePlanData(snap.id, data);
   },
 
   // Retrieves all workout plans for a student.
@@ -249,29 +310,97 @@ export const workoutService = {
     await updateDoc(ref, updateData as any);
   },
 
-  // Logs a single workout entry for the student.
+  // Logs a single workout entry for backward compatibility.
+  // Writes using the new schema (`workoutName`, `exercises[]`, `completedAt`).
   async logWorkoutEntry(
-    payload: Omit<WorkoutLog, "id" | "date"> & { date?: Date }
+    payload: {
+      studentId: string;
+      workoutPlanId: string;
+      workoutName?: string;
+      exercise: string;
+      sets: number;
+      reps: string;
+      weight?: number;
+      rest?: string;
+      tempo?: string;
+      rpe?: number | null;
+      completedAt?: string;
+    }
   ): Promise<WorkoutLog> {
     assertNonEmpty(payload.studentId, "studentId (Firebase Auth UID)");
     assertNonEmpty(payload.workoutPlanId, "workoutPlanId");
-    const date = payload.date ?? new Date();
-    const ref = await addDoc(collection(db, WORKOUT_LOGS_COLLECTION), {
-      ...sanitizeForFirestore(payload as any),
-      date,
+    const completedAt = payload.completedAt ?? new Date().toISOString();
+    const entry: WorkoutLogExercise = {
+      name: payload.exercise,
+      sets: payload.sets,
+      repsPlanned: String(payload.reps ?? ""),
+      repsDone: String(payload.reps ?? ""),
+      weight: payload.weight ?? null,
+      rest: payload.rest ?? "",
+      tempo: payload.tempo ?? "",
+      rpe: payload.rpe ?? null,
+    };
+
+    const dataToWrite = sanitizeForFirestore({
+      studentId: payload.studentId,
+      workoutPlanId: payload.workoutPlanId,
+      workoutName: payload.workoutName ?? "Workout",
+      exercises: [entry],
+      completedAt,
     });
+
+    const ref = await addDoc(collection(db, WORKOUT_LOGS_COLLECTION), dataToWrite);
 
     return {
       id: ref.id,
-      ...payload,
-      date,
+      studentId: payload.studentId,
+      workoutPlanId: payload.workoutPlanId,
+      workoutName: payload.workoutName ?? "Workout",
+      exercises: [entry],
+      completedAt,
+    };
+  },
+
+  // Logs a full completed workout with all exercises (new schema).
+  async logCompletedWorkout(payload: {
+    studentId: string;
+    workoutPlanId: string;
+    workoutName: string;
+    exercises: WorkoutLogExercise[];
+    completedAt?: string;
+  }): Promise<WorkoutLog> {
+    assertNonEmpty(payload.studentId, "studentId (Firebase Auth UID)");
+    assertNonEmpty(payload.workoutPlanId, "workoutPlanId");
+
+    const completedAt = payload.completedAt ?? new Date().toISOString();
+    const dataToWrite = sanitizeForFirestore({
+      studentId: payload.studentId,
+      workoutPlanId: payload.workoutPlanId,
+      workoutName: payload.workoutName?.trim() || "Workout",
+      exercises: payload.exercises.map(normalizeLoggedExercise),
+      completedAt,
+    });
+
+    const ref = await addDoc(collection(db, WORKOUT_LOGS_COLLECTION), dataToWrite);
+
+    return {
+      id: ref.id,
+      studentId: payload.studentId,
+      workoutPlanId: payload.workoutPlanId,
+      workoutName: payload.workoutName?.trim() || "Workout",
+      exercises: payload.exercises.map(normalizeLoggedExercise),
+      completedAt,
     };
   },
 
   // Returns all workout logs for a student, sorted newest-first by date.
   async getWorkoutHistory(studentId: string): Promise<WorkoutLog[]> {
     const logs = await listWorkoutLogs([where("studentId", "==", studentId)]);
-    return logs.sort((a, b) => toMs(b.date) - toMs(a.date));
+    return logs.sort((a, b) => {
+      const bMs = toMs((b as any).completedAt ?? (b as any).date);
+      const aMs = toMs((a as any).completedAt ?? (a as any).date);
+      return bMs - aMs;
+    });
   },
 
   // Helper used by coach screens when building workout plans interactively.
@@ -281,6 +410,9 @@ export const workoutService = {
       sets: 3,
       reps: "10",
       weight: 0,
+      rest: "",
+      tempo: "",
+      rpe: null,
     };
   },
 };
