@@ -132,7 +132,7 @@ export default function WorkoutExecution() {
             workoutPlanId: plan.id,
             exercise: exercise.name,
             sets: exercise.sets,
-            reps: repsCompleted,
+            reps: String(repsCompleted),
             weight,
           });
         })
@@ -246,7 +246,8 @@ export default function WorkoutExecution() {
             <TextInput
               value={entry.repsCompleted}
               onChangeText={(v) => updateEntry(idx, { repsCompleted: v })}
-              keyboardType="number-pad"
+              // Allow pasting string reps; we validate/convert on submit.
+              keyboardType="default"
               placeholder={String(exercise.reps)}
               placeholderTextColor={Colors.textMuted}
               style={{

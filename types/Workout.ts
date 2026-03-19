@@ -1,7 +1,8 @@
 export interface Exercise {
   name: string;
   sets: number;
-  reps: number;
+  // Stored in Firestore as string (Firestore previously stored as int64).
+  reps: string;
   weight?: number;
 }
 
@@ -38,8 +39,8 @@ export interface WorkoutLog {
   workoutPlanId: string;
   exercise: string;
   sets: number;
-  // Number of reps completed for this log entry.
-  reps: number;
+  // Stored in Firestore as string (Firestore previously stored as int64).
+  reps: string;
   weight?: number;
   date: any;
 }

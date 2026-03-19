@@ -16,7 +16,7 @@ export default function TestScreen() {
         studentId: user.id,
         exercise: "Bench Press",
         sets: 4,
-        reps: 10,
+        reps: "10",
         weight: 80,
         date: new Date()
       });

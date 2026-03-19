@@ -4,7 +4,6 @@ import { useRouter } from "expo-router";
 import { authService } from "../../../services/authService";
 import { studentService } from "../../../services/studentService";
 import type { StudentSummary } from "../../../types/StudentSummary";
-import type { AppUser } from "../../../types/User";
 import { StudentCard } from "../../../components/StudentCard";
 import { PrimaryButton } from "../../../components/PrimaryButton";
 import { Colors } from "../../../theme/colors";
@@ -14,7 +13,6 @@ import { ScreenLayout } from "../../../components/ScreenLayout";
 
 export default function CoachDashboard() {
   const router = useRouter();
-  const [, setCoach] = useState<AppUser | null>(null);
   const [students, setStudents] = useState<StudentSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +29,6 @@ export default function CoachDashboard() {
           setError("You must be logged in as a coach.");
           return;
         }
-        setCoach(user);
         const data = await studentService.getStudentsForCoach(user.id);
         console.log("[coach/dashboard] students", data.length);
         setStudents(data);
@@ -102,12 +99,38 @@ export default function CoachDashboard() {
                 marginBottom: 4,
               }}
             >
-              Welcome, Coach
+              Your Roster
             </Text>
             <Text style={{ ...Typography.secondary, marginBottom: Spacing.md }}>
-              Manage your students and assign workout plans.
+              Manage your students, create workout plans, and track progress.
             </Text>
-            <PrimaryButton title="Create New Student" onPress={() => router.push("/coach/createStudent")} />
+            <View
+              style={{
+                flexDirection: "row",
+                gap: Spacing.sm,
+                marginBottom: Spacing.sm,
+              }}
+            >
+              <View
+                style={{
+                  flex: 1,
+                  paddingVertical: 10,
+                  paddingHorizontal: Spacing.sm,
+                  borderRadius: Radius.pill,
+                  backgroundColor: Colors.surface,
+                  borderWidth: 1,
+                  borderColor: Colors.border,
+                }}
+              >
+                <Text style={{ ...Typography.section, fontWeight: "800" }}>{students.length}</Text>
+                <Text style={{ ...Typography.secondary, marginTop: 2 }}>Students</Text>
+              </View>
+            </View>
+
+            <PrimaryButton
+              title="Create Student"
+              onPress={() => router.push("/coach/createStudent")}
+            />
           </View>
 
           <Text
@@ -116,10 +139,22 @@ export default function CoachDashboard() {
               marginBottom: Spacing.xs,
             }}
           >
-            Your Students
+            Students
           </Text>
           {students.length === 0 ? (
-            <Text style={Typography.secondary}>No students yet. Create one to get started.</Text>
+            <View
+              style={{
+                backgroundColor: Colors.card,
+                borderRadius: Radius.md,
+                padding: Spacing.md,
+                borderWidth: 1,
+                borderColor: Colors.border,
+              }}
+            >
+              <Text style={Typography.secondary}>
+                No students yet. Create your first student to start assigning workout plans.
+              </Text>
+            </View>
           ) : (
             <FlatList
               data={students}

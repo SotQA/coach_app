@@ -67,15 +67,34 @@ const toMs = (value: any): number => {
   return 0;
 };
 
-const mapPlanDoc = (snap: QueryDocumentSnapshot): WorkoutPlan => ({
-  id: snap.id,
-  ...(snap.data() as Omit<WorkoutPlan, "id">),
-});
+const mapPlanDoc = (snap: QueryDocumentSnapshot): WorkoutPlan => {
+  const data = snap.data() as any;
+  return {
+    id: snap.id,
+    ...data,
+    // Normalize exercise reps to string for UI + Firestore compatibility.
+    exercises: Array.isArray(data.exercises)
+      ? data.exercises.map((ex: any) => ({
+          ...ex,
+          reps: ex.reps != null ? String(ex.reps) : "",
+        }))
+      : [],
+  } as WorkoutPlan;
+};
 
-const mapLogDoc = (snap: QueryDocumentSnapshot): WorkoutLog => ({
-  id: snap.id,
-  ...(snap.data() as Omit<WorkoutLog, "id">),
-});
+const mapLogDoc = (snap: QueryDocumentSnapshot): WorkoutLog => {
+  const data = snap.data() as any;
+  return {
+    id: snap.id,
+    studentId: data.studentId,
+    workoutPlanId: data.workoutPlanId,
+    exercise: data.exercise,
+    sets: data.sets,
+    reps: data.reps != null ? String(data.reps) : "",
+    weight: data.weight,
+    date: data.date,
+  };
+};
 
 async function listWorkoutPlans(constraints: QueryConstraint[]): Promise<WorkoutPlan[]> {
   const q = query(collection(db, WORKOUT_PLANS_COLLECTION), ...constraints);
@@ -260,7 +279,7 @@ export const workoutService = {
     return {
       name: "",
       sets: 3,
-      reps: 10,
+      reps: "10",
       weight: 0,
     };
   },

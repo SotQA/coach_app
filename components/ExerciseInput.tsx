@@ -14,10 +14,10 @@ interface ExerciseInputProps {
 // and logging a workout. Keeps form markup reusable.
 export const ExerciseInput: FC<ExerciseInputProps> = ({ value, onChange }) => {
   const updateField = (field: keyof Exercise, fieldValue: string) => {
+    // Firestore stores `reps` as a string. We keep it as-is for reps,
+    // while still parsing numeric fields that should remain numbers.
     const parsedValue =
-      field === "sets" || field === "reps" || field === "weight"
-        ? Number(fieldValue)
-        : fieldValue;
+      field === "sets" || field === "weight" ? Number(fieldValue) : fieldValue;
 
     onChange({
       ...value,
@@ -74,7 +74,8 @@ export const ExerciseInput: FC<ExerciseInputProps> = ({ value, onChange }) => {
         <View style={{ flex: 1, marginHorizontal: 4 }}>
           <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Reps</Text>
           <TextInput
-            keyboardType="numeric"
+            // `reps` is stored in Firestore as a string, so allow full text input/paste.
+            keyboardType="default"
             value={String(value.reps)}
             onChangeText={(text) => updateField("reps", text)}
             style={{

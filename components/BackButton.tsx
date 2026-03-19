@@ -31,7 +31,7 @@ export function BackButton({
       return;
     }
 
-    router.replace(user.role === "coach" ? fallbackCoachHref : fallbackStudentHref);
+    router.replace((user.role === "coach" ? fallbackCoachHref : fallbackStudentHref) as any);
   };
 
   return (

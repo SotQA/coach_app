@@ -3,11 +3,16 @@ import { View, Text, ActivityIndicator } from "react-native";
 import { authService } from "../../../services/authService";
 import type { AppUser } from "../../../types/User";
 import { ScreenLayout } from "../../../components/ScreenLayout";
+import { PrimaryButton } from "../../../components/PrimaryButton";
+import { useAuth } from "../../../context/AuthContext";
+import { useRouter } from "expo-router";
 import { Colors } from "../../../theme/colors";
 import { Radius, Spacing } from "../../../theme/spacing";
 import { Typography } from "../../../theme/typography";
 
 export default function StudentProfile() {
+  const router = useRouter();
+  const { logout } = useAuth();
   const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -69,6 +74,18 @@ export default function StudentProfile() {
           <Text style={{ ...Typography.section, marginBottom: Spacing.sm }}>{user?.email ?? "—"}</Text>
           <Text style={Typography.secondary}>Role</Text>
           <Text style={Typography.section}>{user?.role ?? "—"}</Text>
+        </View>
+
+        <View style={{ marginTop: Spacing.lg }}>
+          <PrimaryButton
+            title="Logout"
+            onPress={async () => {
+              await logout();
+              router.replace("/login");
+            }}
+            style={{ width: "auto", backgroundColor: Colors.border, alignSelf: "flex-start" }}
+            textStyle={{ fontSize: 14, fontWeight: "700" }}
+          />
         </View>
       </View>
     </ScreenLayout>

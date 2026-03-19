@@ -8,7 +8,6 @@ import { PrimaryButton } from "../../components/PrimaryButton";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
-import { BackButton } from "../../components/BackButton";
 import { ScreenLayout } from "../../components/ScreenLayout";
 
 // Displays the student's historical workout logs in a simple list.
@@ -133,7 +132,6 @@ export default function WorkoutHistory() {
   return (
     <ScreenLayout>
       <View style={{ flex: 1, padding: Spacing.md, backgroundColor: Colors.bg }}>
-        <BackButton />
         <Text
           style={{
             ...Typography.title,
