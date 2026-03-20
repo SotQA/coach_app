@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { View, Text, ActivityIndicator } from "react-native";
+import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { authService } from "../../services/authService";
 import { workoutService } from "../../services/workoutService";
 import type { WorkoutLog } from "../../types/Workout";
 import { PrimaryButton } from "../../components/PrimaryButton";
+import { BackButton } from "../../components/BackButton";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
@@ -117,7 +118,15 @@ export default function WorkoutHistory() {
 
   return (
     <ScreenLayout>
-      <View style={{ flex: 1, padding: Spacing.md, backgroundColor: Colors.bg }}>
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          padding: Spacing.md,
+          backgroundColor: Colors.bg,
+        }}
+      >
+        <View style={{ flex: 1 }}>
+          <BackButton />
         <Text
           style={{
             ...Typography.title,
@@ -172,7 +181,15 @@ export default function WorkoutHistory() {
           );
         })
       )}
-      </View>
+          <View style={{ marginTop: Spacing.lg }}>
+            <PrimaryButton
+              title="View Workouts"
+              onPress={() => router.replace("/student/workouts")}
+              style={{ backgroundColor: Colors.border }}
+            />
+          </View>
+        </View>
+      </ScrollView>
     </ScreenLayout>
   );
 }
