@@ -172,6 +172,7 @@ export default function CreateWorkoutPlan() {
         contentContainerStyle={{ padding: Spacing.md, paddingBottom: 80 }}
         keyboardShouldPersistTaps="handled"
         enableOnAndroid
+        enableResetScrollToCoords={false}
         extraScrollHeight={24}
       >
         <BackButton />

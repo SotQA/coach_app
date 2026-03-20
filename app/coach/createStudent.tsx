@@ -62,6 +62,7 @@ export default function CreateStudent() {
         contentContainerStyle={{ flexGrow: 1, padding: Spacing.md, paddingBottom: 48 }}
         keyboardShouldPersistTaps="handled"
         enableOnAndroid
+        enableResetScrollToCoords={false}
         extraScrollHeight={24}
       >
       <View

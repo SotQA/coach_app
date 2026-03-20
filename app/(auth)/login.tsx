@@ -58,6 +58,7 @@ export default function Login() {
       }}
       keyboardShouldPersistTaps="handled"
       enableOnAndroid
+      enableResetScrollToCoords={false}
       extraScrollHeight={24}
     >
       <View

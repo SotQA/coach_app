@@ -13,7 +13,8 @@ interface StudentCardProps {
 
 // Simple card for displaying basic student information with an optional action.
 export const StudentCard: FC<StudentCardProps> = ({ student, onPress }) => {
-  const label = student.email || "Student";
+  const fullName = [student.firstName, student.lastName].filter(Boolean).join(" ").trim();
+  const header = fullName || student.email || "Student";
   return (
     <View
       style={{
@@ -25,11 +26,9 @@ export const StudentCard: FC<StudentCardProps> = ({ student, onPress }) => {
         borderColor: Colors.border,
       }}
     >
-      <Text style={{ ...Typography.section, marginBottom: 2 }}>{label}</Text>
+      <Text style={{ ...Typography.section, marginBottom: 2 }}>{header}</Text>
       {student.email ? (
-        <Text style={{ ...Typography.secondary, marginBottom: Spacing.sm }}>
-          {student.email}
-        </Text>
+        <Text style={{ ...Typography.secondary, marginBottom: Spacing.sm }}>{student.email}</Text>
       ) : null}
       {onPress ? (
         <PrimaryButton

@@ -223,6 +223,7 @@ export default function WorkoutExecution() {
         contentContainerStyle={{ padding: Spacing.md, paddingBottom: Spacing.lg }}
         keyboardShouldPersistTaps="handled"
         enableOnAndroid
+        enableResetScrollToCoords={false}
         extraScrollHeight={24}
       >
         <BackButton />

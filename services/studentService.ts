@@ -22,6 +22,8 @@ const assertNonEmpty = (value: string, label: string) => {
 const mapStudentDoc = (snap: { id: string; data: () => any }): StudentSummary => {
   const data = snap.data() as {
     email?: string;
+    firstName?: string;
+    lastName?: string;
     role?: string;
     coachId?: string;
   };
@@ -30,6 +32,8 @@ const mapStudentDoc = (snap: { id: string; data: () => any }): StudentSummary =>
     id: snap.id,
     email: data.email ?? "",
     coachId: data.coachId,
+    firstName: data.firstName,
+    lastName: data.lastName,
   };
 };
 

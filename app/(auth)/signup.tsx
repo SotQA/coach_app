@@ -191,6 +191,7 @@ export default function Signup() {
       }}
       keyboardShouldPersistTaps="handled"
       enableOnAndroid
+      enableResetScrollToCoords={false}
       extraScrollHeight={24}
     >
       <View

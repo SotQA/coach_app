@@ -122,6 +122,9 @@ export default function StudentDetails() {
     );
   }
 
+  const studentFullName = [student.firstName, student.lastName].filter(Boolean).join(" ").trim();
+  const displayName = studentFullName || "Student";
+
   const strongestByExercise = (() => {
     const best = new Map<string, number>();
     for (const log of logs) {
@@ -161,7 +164,7 @@ export default function StudentDetails() {
 
           <Text style={Typography.secondary}>Name</Text>
           <Text style={{ ...Typography.section, marginBottom: Spacing.sm }}>
-            {student.email || "Student"}
+            {displayName}
           </Text>
 
           <Text style={Typography.secondary}>Email</Text>
@@ -174,7 +177,7 @@ export default function StudentDetails() {
             onPress={() =>
               router.push({
                 pathname: "/coach/createWorkoutPlan",
-                params: { studentId: student.id, studentName: student.email || "Student" },
+                params: { studentId: student.id, studentName: displayName },
               })
             }
           />
