@@ -174,6 +174,10 @@ export default function CreateWorkoutPlan() {
         enableOnAndroid
         enableResetScrollToCoords={false}
         extraScrollHeight={24}
+        // Reduce the "bounce" when moving focus between two inputs
+        // while the keyboard remains open.
+        extraHeight={0}
+        keyboardOpeningTime={0}
       >
         <BackButton />
         <View

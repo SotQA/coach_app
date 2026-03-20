@@ -27,6 +27,16 @@ export default function StudentDetails() {
   const [error, setError] = useState<string | null>(null);
   const [deletingPlanId, setDeletingPlanId] = useState<string | null>(null);
 
+  const sortedPlans = useMemo(() => {
+    const getOrder = (p: WorkoutPlan) =>
+      typeof p.order === "number" && Number.isFinite(p.order) ? p.order : Number.MAX_SAFE_INTEGER;
+
+    return plans
+      .filter((p) => p.isActive !== false)
+      .slice()
+      .sort((a, b) => getOrder(a) - getOrder(b));
+  }, [plans]);
+
   useEffect(() => {
     const load = async () => {
       console.log("[coach/studentDetails] load start", { studentId });
@@ -200,11 +210,11 @@ export default function StudentDetails() {
           Workout Plans
         </Text>
 
-        {plans.length === 0 ? (
+        {sortedPlans.length === 0 ? (
           <Text style={Typography.secondary}>No workout plans yet.</Text>
         ) : (
           <FlatList
-            data={plans.filter((p) => p.isActive !== false)}
+            data={sortedPlans}
             scrollEnabled={false}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (

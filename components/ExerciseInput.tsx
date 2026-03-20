@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useEffect, useState } from "react";
 import { View, Text, TextInput } from "react-native";
 import type { Exercise } from "../types/Workout";
 import { Colors } from "../theme/colors";
@@ -19,13 +19,41 @@ export const ExerciseInput: FC<ExerciseInputProps> = ({
   onChange,
   showAdvancedFields = true,
 }) => {
+  // Keep a draft string for weight so typing "," (locale decimal separator)
+  // doesn't instantly “disappear” due to parsing from the numeric value.
+  const [weightText, setWeightText] = useState<string>(String(value.weight ?? 0));
+  const [weightFocused, setWeightFocused] = useState(false);
+
+  useEffect(() => {
+    if (!weightFocused) {
+      setWeightText(String(value.weight ?? 0));
+    }
+  }, [value.weight, weightFocused]);
+
   const updateField = (field: keyof Exercise, fieldValue: string) => {
     // Firestore stores `reps` as a string. We keep it as-is for reps,
     // while still parsing numeric fields that should remain numbers.
     let parsedValue: any;
 
     if (field === "sets" || field === "weight") {
-      parsedValue = Number(fieldValue);
+      // Normalize decimal separators and guard against transient invalid values
+      // (e.g. users typing just "." or locale-specific commas) so we never
+      // write `NaN` into state (which then renders as "NaN" in the input).
+      const trimmed = fieldValue.trim();
+      if (trimmed === "") {
+        parsedValue = field === "sets" ? 0 : 0;
+      } else if (field === "sets") {
+        // Keep sets as an integer-ish numeric input.
+        const cleaned = trimmed.replace(/[^0-9-]/g, "");
+        const n = Number(cleaned);
+        parsedValue = Number.isFinite(n) ? n : (value.sets ?? 0);
+      } else {
+        // Weight: allow floats with '.' (and normalize ',' -> '.').
+        const normalized = trimmed.replace(/,/g, ".");
+        const cleaned = normalized.replace(/[^0-9.]/g, "");
+        const n = Number(cleaned);
+        parsedValue = Number.isFinite(n) ? n : (value.weight ?? 0);
+      }
     } else if (field === "rpe") {
       const trimmed = fieldValue.trim();
       parsedValue = trimmed === "" ? null : Number(trimmed);
@@ -109,8 +137,24 @@ export const ExerciseInput: FC<ExerciseInputProps> = ({
           <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Weight (kg)</Text>
           <TextInput
             keyboardType="numeric"
-            value={String(value.weight ?? 0)}
-            onChangeText={(text) => updateField("weight", text)}
+            value={weightText}
+            onChangeText={(text) => {
+              setWeightText(text);
+              updateField("weight", text);
+            }}
+            onFocus={() => setWeightFocused(true)}
+            onBlur={() => {
+              setWeightFocused(false);
+              // Normalize commas to dots and drop trailing-only separators when possible.
+              const normalized = weightText.trim().replace(/,/g, ".");
+              const cleaned = normalized.replace(/[^0-9.]/g, "");
+              const n = Number(cleaned);
+              if (Number.isFinite(n)) {
+                setWeightText(String(n));
+              } else {
+                setWeightText(String(value.weight ?? 0));
+              }
+            }}
             style={{
               borderWidth: 1,
               borderColor: Colors.border,
