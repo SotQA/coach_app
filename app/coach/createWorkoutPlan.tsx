@@ -11,12 +11,12 @@ import { ExerciseInput } from "../../components/ExerciseInput";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { authService } from "../../services/authService";
 import { workoutService } from "../../services/workoutService";
+import { exerciseTemplateService } from "../../services/exerciseTemplateService";
 import type { Exercise } from "../../types/Workout";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
-import { BackButton } from "../../components/BackButton";
 import { ScreenLayout } from "../../components/ScreenLayout";
 
 // Screen for coaches to build a workout plan for a specific student.
@@ -140,6 +140,9 @@ export default function CreateWorkoutPlan() {
         order,
         note: note.trim() || undefined,
       });
+      await Promise.all(
+        sanitizedExercises.map((e) => exerciseTemplateService.upsertNameIfNeeded(e.name))
+      );
       router.replace("/coach/dashboard");
     } catch (e: any) {
       setError(e.message ?? "Failed to save workout plan.");
@@ -179,7 +182,6 @@ export default function CreateWorkoutPlan() {
         extraHeight={0}
         keyboardOpeningTime={0}
       >
-        <BackButton />
         <View
           style={{
             backgroundColor: Colors.card,

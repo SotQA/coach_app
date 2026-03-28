@@ -308,19 +308,35 @@ export default function StudentDetails() {
               style={{
                 borderRadius: Radius.md,
                 padding: Spacing.sm,
-                marginBottom: Spacing.xs,
+                marginBottom: Spacing.sm,
                 backgroundColor: Colors.surface,
                 borderWidth: 1,
                 borderColor: Colors.border,
               }}
             >
               <Text style={Typography.section}>{log.workoutName || "Workout"}</Text>
+              {typeof log.totalVolume === "number" && log.totalVolume > 0 ? (
+                <Text style={{ ...Typography.secondary, fontSize: 12 }}>
+                  Volume: {log.totalVolume} kg
+                </Text>
+              ) : null}
               {(log.exercises ?? []).slice(0, 2).map((ex, i) => (
                 <Text key={`${log.id}-${i}`} style={Typography.secondary}>
                   {ex.name}: {ex.repsPlanned || "—"} → {ex.repsDone} reps
                   {ex.weight != null ? ` @ ${ex.weight}kg` : ""}
+                  {ex.isPr ? " 🔥" : ""}
                 </Text>
               ))}
+              <PrimaryButton
+                title={log.coachFeedback ? "Edit feedback" : "Add feedback"}
+                onPress={() =>
+                  router.push({
+                    pathname: "/coach/workoutLogFeedback",
+                    params: { logId: log.id },
+                  })
+                }
+                style={{ backgroundColor: Colors.border, marginTop: Spacing.sm }}
+              />
             </View>
           ))
         )}

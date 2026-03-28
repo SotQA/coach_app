@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Text, View, ScrollView } from "react-native";
+import { ActivityIndicator, Alert, Text, View, ScrollView } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { WorkoutCard } from "../../components/WorkoutCard";
@@ -20,6 +20,7 @@ export default function CoachWorkout() {
   const [plan, setPlan] = useState<WorkoutPlan | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [duplicating, setDuplicating] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -107,7 +108,7 @@ export default function CoachWorkout() {
 
         <WorkoutCard plan={plan} />
 
-        <View style={{ marginTop: Spacing.md }}>
+        <View style={{ marginTop: Spacing.md, gap: Spacing.sm }}>
           <PrimaryButton
             title="Edit Workout"
             onPress={() =>
@@ -116,6 +117,36 @@ export default function CoachWorkout() {
                 params: { workoutPlanId: plan.id },
               })
             }
+          />
+          <PrimaryButton
+            title={duplicating ? "Duplicating…" : "Duplicate plan"}
+            onPress={async () => {
+              try {
+                const user = await authService.getCurrentUserWithRole();
+                if (!user || user.role !== "coach") {
+                  Alert.alert("Sign in required", "You must be logged in as a coach.");
+                  return;
+                }
+                setDuplicating(true);
+                const copy = await workoutService.duplicateWorkoutPlan(plan.id, user.id);
+                Alert.alert("Plan duplicated", "Opening the new copy.", [
+                  {
+                    text: "OK",
+                    onPress: () =>
+                      router.replace({
+                        pathname: "/coach/workout",
+                        params: { workoutPlanId: copy.id },
+                      }),
+                  },
+                ]);
+              } catch (e: any) {
+                Alert.alert("Could not duplicate", e?.message ?? "Something went wrong.");
+              } finally {
+                setDuplicating(false);
+              }
+            }}
+            style={{ backgroundColor: Colors.border }}
+            disabled={duplicating}
           />
         </View>
         </ScrollView>

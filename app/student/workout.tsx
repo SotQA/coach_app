@@ -16,7 +16,6 @@ import { Colors } from "../../theme/colors";
 import { Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
 import { ScreenLayout } from "../../components/ScreenLayout";
-import { BackButton } from "../../components/BackButton";
 
 // Simple workout logging screen:
 // - Loads the current student
@@ -138,7 +137,6 @@ export default function WorkoutScreen() {
         enableResetScrollToCoords={false}
         extraScrollHeight={24}
       >
-        <BackButton />
         <Text style={{ ...Typography.title, fontSize: 22, marginBottom: Spacing.sm }}>
           Log Workout
         </Text>

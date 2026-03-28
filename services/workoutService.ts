@@ -13,9 +13,11 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import type { Exercise, WorkoutLog, WorkoutLogExercise, WorkoutPlan } from "../types/Workout";
+import { computeTotalVolume } from "../utils/workoutMetrics";
 
 const WORKOUT_PLANS_COLLECTION = "workoutPlans";
 const WORKOUT_LOGS_COLLECTION = "workoutLogs";
+const USERS_COLLECTION = "users";
 
 /**
  * Firestore does not support `undefined` values inside document data.
@@ -117,6 +119,12 @@ const normalizeLoggedExercise = (ex: any): WorkoutLogExercise => {
   const rpe =
     ex?.rpe == null || ex?.rpe === "" ? null : Number.isFinite(Number(ex.rpe)) ? Number(ex.rpe) : null;
 
+  const volumeRaw = ex?.volume;
+  const volume =
+    volumeRaw != null && volumeRaw !== "" && Number.isFinite(Number(volumeRaw))
+      ? Number(volumeRaw)
+      : undefined;
+
   return {
     name: ex?.name != null ? String(ex.name) : ex?.exercise != null ? String(ex.exercise) : "Exercise",
     sets,
@@ -126,6 +134,8 @@ const normalizeLoggedExercise = (ex: any): WorkoutLogExercise => {
     rest: ex?.rest != null ? String(ex.rest) : "",
     tempo: ex?.tempo != null ? String(ex.tempo) : "",
     rpe,
+    volume,
+    isPr: ex?.isPr === true,
   };
 };
 
@@ -143,6 +153,7 @@ const mapLogDoc = (snap: QueryDocumentSnapshot): WorkoutLog => {
         }),
       ];
 
+  const totalVol = data.totalVolume;
   return {
     id: snap.id,
     studentId: data.studentId,
@@ -150,6 +161,16 @@ const mapLogDoc = (snap: QueryDocumentSnapshot): WorkoutLog => {
     workoutName: data.workoutName != null ? String(data.workoutName) : "Workout",
     exercises,
     completedAt: data.completedAt ?? data.date,
+    totalVolume:
+      totalVol != null && totalVol !== "" && Number.isFinite(Number(totalVol))
+        ? Number(totalVol)
+        : undefined,
+    coachFeedback:
+      data.coachFeedback != null && String(data.coachFeedback).trim() !== ""
+        ? String(data.coachFeedback)
+        : undefined,
+    feedbackCreatedAt:
+      data.feedbackCreatedAt != null ? String(data.feedbackCreatedAt) : undefined,
     // Keep legacy fields available for older consumers while migrating.
     exercise: data.exercise,
     sets: data.sets,
@@ -285,6 +306,37 @@ export const workoutService = {
     });
   },
 
+  /** Clone a plan for the same student with a new id and fresh timestamps. */
+  async duplicateWorkoutPlan(planId: string, coachId: string): Promise<WorkoutPlan> {
+    assertNonEmpty(planId, "workoutPlanId");
+    assertNonEmpty(coachId, "coachId (Firebase Auth UID)");
+
+    const existing = await this.getWorkoutPlanById(planId);
+    if (!existing) throw new Error("Workout plan not found.");
+    if (existing.coachId !== coachId) throw new Error("You don't have access to this workout plan.");
+
+    const siblings = await this.getWorkoutPlansForStudentAsCoach(coachId, existing.studentId);
+    const maxOrder = siblings.reduce((max, p) => {
+      const n = typeof p.order === "number" && Number.isFinite(p.order) ? p.order : -1;
+      return Math.max(max, n);
+    }, -1);
+
+    const copyName = `${(existing.name ?? "Workout Plan").replace(/\s*\(Copy(?: \d+)?\)\s*$/i, "").trim()} (Copy)`;
+    const exercisesClone: Exercise[] = (existing.exercises ?? []).map((e) => ({ ...e }));
+
+    return this.createWorkoutPlan({
+      coachId: existing.coachId,
+      studentId: existing.studentId,
+      name: copyName,
+      exercises: exercisesClone,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      isActive: true,
+      order: maxOrder + 1,
+      note: existing.note,
+    });
+  },
+
   /**
    * Updates an existing workout plan (coach-owned).
    * Does NOT change `isActive` or `order` unless explicitly provided.
@@ -361,6 +413,50 @@ export const workoutService = {
     };
   },
 
+  async getWorkoutLogById(logId: string): Promise<WorkoutLog | null> {
+    assertNonEmpty(logId, "workoutLogId");
+    const ref = doc(db, WORKOUT_LOGS_COLLECTION, logId);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return null;
+    return mapLogDoc(snap as unknown as QueryDocumentSnapshot);
+  },
+
+  /**
+   * Coach leaves feedback on a student's completed workout (validates coach owns student).
+   */
+  async updateWorkoutLogFeedback(logId: string, coachId: string, feedback: string): Promise<void> {
+    assertNonEmpty(logId, "workoutLogId");
+    assertNonEmpty(coachId, "coachId (Firebase Auth UID)");
+    const text = feedback.trim();
+    if (!text) throw new Error("Feedback cannot be empty.");
+
+    const logRef = doc(db, WORKOUT_LOGS_COLLECTION, logId);
+    const logSnap = await getDoc(logRef);
+    if (!logSnap.exists()) throw new Error("Workout log not found.");
+
+    const logData = logSnap.data() as any;
+    const studentId = logData.studentId;
+    if (!studentId || typeof studentId !== "string") {
+      throw new Error("Invalid workout log.");
+    }
+
+    const userRef = doc(db, USERS_COLLECTION, studentId);
+    const userSnap = await getDoc(userRef);
+    if (!userSnap.exists()) throw new Error("Student not found.");
+    const profile = userSnap.data() as any;
+    if (profile.coachId !== coachId) {
+      throw new Error("You can only add feedback for your own students.");
+    }
+
+    await updateDoc(
+      logRef,
+      sanitizeForFirestore({
+        coachFeedback: text,
+        feedbackCreatedAt: new Date().toISOString(),
+      }) as any
+    );
+  },
+
   // Logs a full completed workout with all exercises (new schema).
   async logCompletedWorkout(payload: {
     studentId: string;
@@ -368,17 +464,32 @@ export const workoutService = {
     workoutName: string;
     exercises: WorkoutLogExercise[];
     completedAt?: string;
+    totalVolume?: number;
   }): Promise<WorkoutLog> {
     assertNonEmpty(payload.studentId, "studentId (Firebase Auth UID)");
     assertNonEmpty(payload.workoutPlanId, "workoutPlanId");
 
     const completedAt = payload.completedAt ?? new Date().toISOString();
+    const normalizedExercises = payload.exercises.map((ex) => {
+      const base = normalizeLoggedExercise(ex);
+      return {
+        ...base,
+        volume: ex.volume ?? base.volume,
+        isPr: ex.isPr === true,
+      };
+    });
+    const totalVolume =
+      typeof payload.totalVolume === "number" && Number.isFinite(payload.totalVolume)
+        ? payload.totalVolume
+        : computeTotalVolume(normalizedExercises);
+
     const dataToWrite = sanitizeForFirestore({
       studentId: payload.studentId,
       workoutPlanId: payload.workoutPlanId,
       workoutName: payload.workoutName?.trim() || "Workout",
-      exercises: payload.exercises.map(normalizeLoggedExercise),
+      exercises: normalizedExercises,
       completedAt,
+      totalVolume,
     });
 
     const ref = await addDoc(collection(db, WORKOUT_LOGS_COLLECTION), dataToWrite);
@@ -388,8 +499,9 @@ export const workoutService = {
       studentId: payload.studentId,
       workoutPlanId: payload.workoutPlanId,
       workoutName: payload.workoutName?.trim() || "Workout",
-      exercises: payload.exercises.map(normalizeLoggedExercise),
+      exercises: normalizedExercises,
       completedAt,
+      totalVolume,
     };
   },
 

@@ -6,11 +6,11 @@ import { ExerciseInput } from "../../components/ExerciseInput";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { authService } from "../../services/authService";
 import { workoutService } from "../../services/workoutService";
+import { exerciseTemplateService } from "../../services/exerciseTemplateService";
 import type { Exercise } from "../../types/Workout";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
-import { BackButton } from "../../components/BackButton";
 import { ScreenLayout } from "../../components/ScreenLayout";
 
 export default function EditWorkout() {
@@ -19,6 +19,7 @@ export default function EditWorkout() {
   const workoutPlanId = useMemo(() => String(params.workoutPlanId ?? "").trim(), [params]);
 
   const [planName, setPlanName] = useState("");
+  const [planNote, setPlanNote] = useState("");
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -55,6 +56,7 @@ export default function EditWorkout() {
         }
 
         setPlanName(plan.name ?? "Workout Plan");
+        setPlanNote(plan.note?.trim() ?? "");
         setExercises(Array.isArray(plan.exercises) && plan.exercises.length ? plan.exercises : [
           workoutService.createEmptyExercise(),
         ]);
@@ -129,7 +131,12 @@ export default function EditWorkout() {
       await workoutService.updateWorkoutPlan(workoutPlanId, coachId, {
         name: trimmedName,
         exercises: normalizedExercises,
+        note: planNote.trim(),
       });
+
+      await Promise.all(
+        normalizedExercises.map((e) => exerciseTemplateService.upsertNameIfNeeded(e.name))
+      );
 
       router.back();
     } catch (e: any) {
@@ -166,7 +173,6 @@ export default function EditWorkout() {
         enableResetScrollToCoords={false}
         extraScrollHeight={24}
       >
-        <BackButton />
         <View
           style={{
             backgroundColor: Colors.card,
@@ -189,9 +195,28 @@ export default function EditWorkout() {
             borderColor: Colors.border,
             padding: 12,
             borderRadius: Radius.sm,
+            marginBottom: Spacing.sm,
+            color: Colors.text,
+            backgroundColor: Colors.surface,
+          }}
+        />
+
+        <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Coach note (optional)</Text>
+        <TextInput
+          value={planNote}
+          onChangeText={setPlanNote}
+          placeholder="Intent, cues, or progression notes…"
+          placeholderTextColor={Colors.textMuted}
+          multiline
+          style={{
+            borderWidth: 1,
+            borderColor: Colors.border,
+            padding: 12,
+            borderRadius: Radius.sm,
             marginBottom: Spacing.md,
             color: Colors.text,
             backgroundColor: Colors.surface,
+            minHeight: 72,
           }}
         />
 

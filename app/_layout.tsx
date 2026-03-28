@@ -1,5 +1,7 @@
 import { Stack } from "expo-router";
 import { AuthProvider } from "../context/AuthContext";
+import { BackButton } from "../components/BackButton";
+import { Colors } from "../theme/colors";
 
 export default function Layout() {
   return (
@@ -7,6 +9,11 @@ export default function Layout() {
       <Stack
         screenOptions={{
           headerTitleAlign: "center",
+          headerStyle: { backgroundColor: Colors.bg },
+          headerTintColor: Colors.text,
+          headerTitleStyle: { color: Colors.text },
+          headerShadowVisible: false,
+          headerLeft: () => <BackButton hideIfNoBack />,
         }}
       >
         <Stack.Screen name="index" options={{ title: "Gym Coach App" }} />
@@ -27,6 +34,10 @@ export default function Layout() {
         />
         <Stack.Screen name="coach/workout" options={{ title: "Workout" }} />
         <Stack.Screen name="coach/editWorkout" options={{ title: "Edit Workout" }} />
+        <Stack.Screen
+          name="coach/workoutLogFeedback"
+          options={{ title: "Workout feedback" }}
+        />
         <Stack.Screen name="coach/viewProgress" options={{ title: "Progress" }} />
         <Stack.Screen
           name="student/dashboard"

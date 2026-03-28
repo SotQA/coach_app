@@ -9,7 +9,9 @@ import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  signInWithCredential,
   signOut,
+  GoogleAuthProvider,
   type User,
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
@@ -20,6 +22,7 @@ type AuthContextValue = {
   user: AppUser | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<AppUser>;
+  loginWithGoogleIdToken: (payload: { idToken: string }) => Promise<AppUser>;
   signup: (
     email: string,
     password: string,
@@ -50,6 +53,14 @@ const mapToAppUser = (user: User, data: any): AppUser => ({
   dateOfBirth: data?.dateOfBirth ?? "",
   sex: normalizeSex(data?.sex),
 });
+
+const splitDisplayName = (displayName: string | null | undefined) => {
+  const raw = (displayName ?? "").trim();
+  if (!raw) return { firstName: "", lastName: "" };
+  const parts = raw.split(/\s+/).filter(Boolean);
+  if (parts.length === 1) return { firstName: parts[0], lastName: "" };
+  return { firstName: parts[0], lastName: parts.slice(1).join(" ") };
+};
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null);
@@ -102,6 +113,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return appUser;
   };
 
+  const loginWithGoogleIdToken = async ({ idToken }: { idToken: string }): Promise<AppUser> => {
+    const token = (idToken ?? "").trim();
+    if (!token) {
+      throw new Error("Missing Google ID token.");
+    }
+
+    const credential = GoogleAuthProvider.credential(token);
+    const result = await signInWithCredential(auth, credential);
+    const firebaseUser = result.user;
+
+    const userRef = doc(db, USERS_COLLECTION, firebaseUser.uid);
+    const snap = await getDoc(userRef);
+
+    if (!snap.exists()) {
+      // New user: create a minimal profile doc so role-based routing works.
+      // Default role = student (can be extended later with a role-picker).
+      const normalizedEmail = (firebaseUser.email ?? "").trim().toLowerCase();
+      const { firstName, lastName } = splitDisplayName(firebaseUser.displayName);
+      const createdAt = new Date().toISOString();
+
+      await setDoc(userRef, {
+        email: normalizedEmail,
+        role: "student",
+        firstName,
+        lastName,
+        dateOfBirth: "",
+        sex: "other",
+        createdAt,
+        authProvider: "google",
+      });
+    }
+
+    const latest = await getDoc(userRef);
+    if (!latest.exists()) {
+      throw new Error("User profile not found after Google sign-in.");
+    }
+
+    const data = latest.data() as any;
+    const appUser = mapToAppUser(firebaseUser, data);
+    setUser(appUser);
+    return appUser;
+  };
+
   const signup = async (
     email: string,
     password: string,
@@ -145,7 +199,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, loginWithGoogleIdToken, signup, logout }}>
       {children}
     </AuthContext.Provider>
   );

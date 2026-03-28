@@ -1,18 +1,25 @@
-import { Pressable, Text } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../context/AuthContext";
 import { Colors } from "../theme/colors";
-import { Radius, Spacing } from "../theme/spacing";
+import { Radius } from "../theme/spacing";
 import { Typography } from "../theme/typography";
 
 type BackButtonProps = {
   fallbackCoachHref?: string;
   fallbackStudentHref?: string;
+  /**
+   * When used in a navigation header, only render if there is a back stack.
+   * Prevents showing a "Back" chip on root screens.
+   */
+  hideIfNoBack?: boolean;
 };
 
 export function BackButton({
   fallbackCoachHref = "/coach/dashboard",
   fallbackStudentHref = "/student/workouts",
+  hideIfNoBack = false,
 }: BackButtonProps) {
   const router = useRouter();
   const { user } = useAuth();
@@ -34,6 +41,10 @@ export function BackButton({
     router.replace((user.role === "coach" ? fallbackCoachHref : fallbackStudentHref) as any);
   };
 
+  const canGoBack =
+    typeof (router as any).canGoBack === "function" ? (router as any).canGoBack() : false;
+  if (hideIfNoBack && !canGoBack) return null;
+
   return (
     <Pressable
       onPress={handleBack}
@@ -41,15 +52,25 @@ export function BackButton({
         alignSelf: "flex-start",
         flexDirection: "row",
         alignItems: "center",
-        gap: 6,
+        gap: 8,
         paddingVertical: 10,
-        paddingHorizontal: Spacing.sm,
+        paddingHorizontal: 14,
         borderRadius: Radius.pill,
-        backgroundColor: Colors.border,
+        backgroundColor: Colors.card,
+        borderWidth: 1,
+        borderColor: Colors.border,
+        // Subtle chip shadow like native back buttons.
+        shadowColor: "#000",
+        shadowOpacity: 0.18,
+        shadowRadius: 10,
+        shadowOffset: { width: 0, height: 6 },
+        elevation: 3,
         opacity: pressed ? 0.85 : 1,
       })}
     >
-      <Text style={{ color: Colors.text, fontSize: 16, fontWeight: "900" }}>‹</Text>
+      <View style={{ marginLeft: -2 }}>
+        <Ionicons name="chevron-back" size={18} color={Colors.text} />
+      </View>
       <Text style={{ ...Typography.secondary, color: Colors.text, fontWeight: "700" }}>Back</Text>
     </Pressable>
   );

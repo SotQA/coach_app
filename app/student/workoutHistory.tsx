@@ -1,11 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import { authService } from "../../services/authService";
 import { workoutService } from "../../services/workoutService";
-import type { WorkoutLog } from "../../types/Workout";
+import type { WorkoutLog, WorkoutLogExercise } from "../../types/Workout";
+import { computeExerciseVolume } from "../../utils/workoutMetrics";
+import { formatLogWhen } from "../../utils/formatLogWhen";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { BackButton } from "../../components/BackButton";
+import { EmptyState } from "../../components/EmptyState";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
@@ -137,7 +141,11 @@ export default function WorkoutHistory() {
           Workout History
         </Text>
       {normalizedLogs.length === 0 ? (
-        <Text style={Typography.secondary}>No workouts yet.</Text>
+        <EmptyState
+          icon="calendar-outline"
+          title="No workouts yet"
+          subtitle="Complete a workout from your plan to see it here."
+        />
       ) : (
         normalizedLogs.map((log) => {
           const dateText = log._ms
@@ -159,24 +167,73 @@ export default function WorkoutHistory() {
                 borderColor: Colors.border,
               }}
             >
-              <Text style={{ ...Typography.section, marginBottom: 4 }}>
-                {log.workoutName || "Workout"}
-              </Text>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                <Ionicons name="barbell-outline" size={20} color={Colors.primary} />
+                <Text style={{ ...Typography.section, flex: 1 }}>{log.workoutName || "Workout"}</Text>
+              </View>
               <Text style={{ ...Typography.secondary, marginBottom: Spacing.xs }}>
                 Completed: {dateText}
               </Text>
+              {typeof log.totalVolume === "number" && Number.isFinite(log.totalVolume) && log.totalVolume > 0 ? (
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: Spacing.xs }}>
+                  <Ionicons name="analytics-outline" size={16} color={Colors.textMuted} />
+                  <Text style={Typography.secondary}>Total volume: {log.totalVolume} kg</Text>
+                </View>
+              ) : null}
 
-              {log.exercises.map((ex, i) => (
-                <View key={`${log.id}-${ex.name}-${i}`} style={{ marginTop: 6 }}>
-                  <Text style={{ ...Typography.section, fontSize: 15 }}>{ex.name}</Text>
-                  <Text style={Typography.secondary}>
-                    {ex.repsPlanned || "—"} → {ex.repsDone} reps
-                  </Text>
-                  {ex.weight !== null && ex.weight !== undefined ? (
-                    <Text style={Typography.secondary}>{ex.weight}kg</Text>
+              {log.coachFeedback ? (
+                <View
+                  style={{
+                    marginTop: Spacing.xs,
+                    marginBottom: Spacing.sm,
+                    padding: Spacing.sm,
+                    borderRadius: Radius.sm,
+                    backgroundColor: Colors.surface,
+                    borderWidth: 1,
+                    borderColor: Colors.primary,
+                  }}
+                >
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                    <Ionicons name="chatbubble-ellipses-outline" size={16} color={Colors.success} />
+                    <Text style={{ ...Typography.section, fontSize: 14, color: Colors.success }}>
+                      Coach feedback
+                    </Text>
+                  </View>
+                  <Text style={{ ...Typography.secondary, color: Colors.text }}>{log.coachFeedback}</Text>
+                  {log.feedbackCreatedAt ? (
+                    <Text style={{ ...Typography.secondary, fontSize: 11, marginTop: 4 }}>
+                      {formatLogWhen(log.feedbackCreatedAt)}
+                    </Text>
                   ) : null}
                 </View>
-              ))}
+              ) : null}
+
+              {log.exercises.map((ex, i) => {
+                const exRow = ex as WorkoutLogExercise;
+                const vol =
+                  typeof exRow.volume === "number" && Number.isFinite(exRow.volume)
+                    ? exRow.volume
+                    : computeExerciseVolume(exRow.sets, exRow.repsDone, exRow.weight);
+                return (
+                  <View key={`${log.id}-${ex.name}-${i}`} style={{ marginTop: 6 }}>
+                    <View style={{ flexDirection: "row", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
+                      <Text style={{ ...Typography.section, fontSize: 15 }}>{ex.name}</Text>
+                      {exRow.isPr ? (
+                        <Text style={{ color: Colors.success, fontWeight: "700" }}>🔥 PR</Text>
+                      ) : null}
+                    </View>
+                    <Text style={Typography.secondary}>
+                      {ex.repsPlanned || "—"} → {ex.repsDone} reps
+                    </Text>
+                    {ex.weight !== null && ex.weight !== undefined ? (
+                      <Text style={Typography.secondary}>{ex.weight} kg</Text>
+                    ) : null}
+                    {vol > 0 ? (
+                      <Text style={{ ...Typography.secondary, fontSize: 12 }}>Volume: {vol} kg</Text>
+                    ) : null}
+                  </View>
+                );
+              })}
             </View>
           );
         })

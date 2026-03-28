@@ -1,6 +1,8 @@
-import { FC, useEffect, useState } from "react";
-import { View, Text, TextInput } from "react-native";
+import { FC, useEffect, useRef, useState } from "react";
+import { View, Text, TextInput, Pressable } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import type { Exercise } from "../types/Workout";
+import { exerciseTemplateService } from "../services/exerciseTemplateService";
 import { Colors } from "../theme/colors";
 import { Radius, Spacing } from "../theme/spacing";
 import { Typography } from "../theme/typography";
@@ -10,6 +12,8 @@ interface ExerciseInputProps {
   onChange: (value: Exercise) => void;
   // Keep the simple layout for student set-logging.
   showAdvancedFields?: boolean;
+  /** Load name suggestions from `exerciseTemplates` (coach plan builder). */
+  enableNameSuggestions?: boolean;
 }
 
 // Small controlled input component used for both creating workout plans
@@ -18,17 +22,48 @@ export const ExerciseInput: FC<ExerciseInputProps> = ({
   value,
   onChange,
   showAdvancedFields = true,
+  enableNameSuggestions = true,
 }) => {
   // Keep a draft string for weight so typing "," (locale decimal separator)
   // doesn't instantly “disappear” due to parsing from the numeric value.
   const [weightText, setWeightText] = useState<string>(String(value.weight ?? 0));
   const [weightFocused, setWeightFocused] = useState(false);
+  const [nameSuggestions, setNameSuggestions] = useState<string[]>([]);
+  const suggestTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!weightFocused) {
       setWeightText(String(value.weight ?? 0));
     }
   }, [value.weight, weightFocused]);
+
+  useEffect(() => {
+    if (!enableNameSuggestions) {
+      setNameSuggestions([]);
+      return;
+    }
+    if (suggestTimer.current) clearTimeout(suggestTimer.current);
+    const name = (value.name ?? "").trim();
+    if (name.length < 1) {
+      setNameSuggestions([]);
+      return;
+    }
+    suggestTimer.current = setTimeout(async () => {
+      try {
+        const rows = await exerciseTemplateService.searchByPrefix(name, 10);
+        const lower = name.toLowerCase();
+        const names = rows
+          .map((r) => r.name)
+          .filter((n) => n && n.toLowerCase() !== lower);
+        setNameSuggestions(names);
+      } catch {
+        setNameSuggestions([]);
+      }
+    }, 200);
+    return () => {
+      if (suggestTimer.current) clearTimeout(suggestTimer.current);
+    };
+  }, [value.name, enableNameSuggestions]);
 
   const updateField = (field: keyof Exercise, fieldValue: string) => {
     // Firestore stores `reps` as a string. We keep it as-is for reps,
@@ -86,16 +121,43 @@ export const ExerciseInput: FC<ExerciseInputProps> = ({
         placeholderTextColor={Colors.textMuted}
         value={value.name}
         onChangeText={(text) => updateField("name", text)}
+        autoCorrect={false}
+        autoCapitalize="words"
         style={{
           borderWidth: 1,
           borderColor: Colors.border,
           padding: 12,
           borderRadius: Radius.sm,
-          marginBottom: Spacing.sm,
+          marginBottom: nameSuggestions.length ? 4 : Spacing.sm,
           color: Colors.text,
           backgroundColor: Colors.surface,
         }}
       />
+      {enableNameSuggestions && nameSuggestions.length > 0 ? (
+        <View style={{ marginBottom: Spacing.sm }}>
+          {nameSuggestions.slice(0, 6).map((s) => (
+            <Pressable
+              key={s}
+              onPress={() => onChange({ ...value, name: s })}
+              style={({ pressed }) => ({
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 8,
+                paddingVertical: 8,
+                paddingHorizontal: 10,
+                borderRadius: Radius.sm,
+                backgroundColor: pressed ? Colors.border : Colors.card,
+                marginBottom: 4,
+                borderWidth: 1,
+                borderColor: Colors.border,
+              })}
+            >
+              <Ionicons name="flash-outline" size={16} color={Colors.textMuted} />
+              <Text style={{ ...Typography.secondary, color: Colors.text, flex: 1 }}>{s}</Text>
+            </Pressable>
+          ))}
+        </View>
+      ) : null}
 
       <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
         <View style={{ flex: 1, marginRight: 4 }}>

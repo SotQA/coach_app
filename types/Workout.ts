@@ -45,6 +45,11 @@ export interface WorkoutLog {
   workoutName: string;
   exercises: WorkoutLogExercise[];
   completedAt: any;
+  /** Sum of per-exercise volume (sets × reps × weight) for this session. */
+  totalVolume?: number;
+  /** Coach feedback on a completed workout. */
+  coachFeedback?: string;
+  feedbackCreatedAt?: string;
   // Legacy fields (for backward compatibility with older workout logs).
   exercise?: string;
   sets?: number;
@@ -62,5 +67,9 @@ export interface WorkoutLogExercise {
   rest: string;
   tempo: string;
   rpe: number | null;
+  /** sets × reps (numeric) × weight (kg). */
+  volume?: number;
+  /** True when logged weight exceeds previous best for this exercise name. */
+  isPr?: boolean;
 }
 

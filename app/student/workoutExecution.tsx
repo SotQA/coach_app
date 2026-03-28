@@ -2,6 +2,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Text,
   TextInput,
   View,
@@ -9,18 +10,30 @@ import {
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { authService } from "../../services/authService";
 import { workoutService } from "../../services/workoutService";
-import type { WorkoutPlan } from "../../types/Workout";
+import type { WorkoutLog, WorkoutPlan } from "../../types/Workout";
+import {
+  buildBestWeightMapFromLogs,
+  computeExerciseVolume,
+  computeTotalVolume,
+  normalizeExerciseName,
+} from "../../utils/workoutMetrics";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
-import { BackButton } from "../../components/BackButton";
 import { ScreenLayout } from "../../components/ScreenLayout";
 
 type ExerciseEntry = {
   repsCompleted: string;
   weight: string;
 };
+
+function parseKgInput(text: string): number | null {
+  const t = text.trim().replace(",", ".");
+  if (t === "") return null;
+  const n = Number(t);
+  return Number.isFinite(n) && n >= 0 ? n : null;
+}
 
 export default function WorkoutExecution() {
   const router = useRouter();
@@ -31,6 +44,7 @@ export default function WorkoutExecution() {
   );
 
   const [plan, setPlan] = useState<WorkoutPlan | null>(null);
+  const [priorLogs, setPriorLogs] = useState<WorkoutLog[]>([]);
   const [entries, setEntries] = useState<ExerciseEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -69,6 +83,9 @@ export default function WorkoutExecution() {
           return;
         }
 
+        const history = await workoutService.getWorkoutHistory(user.id);
+        setPriorLogs(Array.isArray(history) ? history : []);
+
         setPlan(loaded);
         setEntries(
           loaded.exercises.map((ex) => ({
@@ -88,6 +105,11 @@ export default function WorkoutExecution() {
 
     load();
   }, [workoutPlanId]);
+
+  const bestWeightByExercise = useMemo(
+    () => buildBestWeightMapFromLogs(priorLogs),
+    [priorLogs]
+  );
 
   const updateEntry = (index: number, patch: Partial<ExerciseEntry>) => {
     setEntries((prev) => {
@@ -115,7 +137,6 @@ export default function WorkoutExecution() {
         return;
       }
 
-      // One workoutLogs entry per exercise (simple & query-friendly).
       const completedExercises = plan.exercises.map((exercise, idx) => {
         const entry = entries[idx] ?? { repsCompleted: "", weight: "" };
         const repsDone = entry.repsCompleted.trim();
@@ -136,6 +157,16 @@ export default function WorkoutExecution() {
           throw new Error(`Weight for "${exercise.name}" must be >= 0.`);
         }
 
+        const exKey = normalizeExerciseName(exercise.name);
+        const prevBest = bestWeightByExercise.get(exKey);
+        const isPr =
+          weight !== null &&
+          Number.isFinite(weight) &&
+          weight > 0 &&
+          (prevBest === undefined || weight > prevBest);
+
+        const volume = computeExerciseVolume(exercise.sets, repsDone, weight);
+
         return {
           name: exercise.name,
           sets: exercise.sets,
@@ -145,8 +176,13 @@ export default function WorkoutExecution() {
           rest: exercise.rest ?? "",
           tempo: exercise.tempo ?? "",
           rpe: exercise.rpe ?? null,
+          volume,
+          isPr,
         };
       });
+
+      const totalVolume = computeTotalVolume(completedExercises);
+      const prNames = completedExercises.filter((e) => e.isPr).map((e) => e.name);
 
       await workoutService.logCompletedWorkout({
         studentId: user.id,
@@ -154,9 +190,13 @@ export default function WorkoutExecution() {
         workoutName: plan.name,
         exercises: completedExercises,
         completedAt: new Date().toISOString(),
+        totalVolume,
       });
 
       console.log("[student/workoutExecution] submit success");
+      if (prNames.length > 0) {
+        Alert.alert("Great session!", `🔥 New PR on: ${prNames.join(", ")}`);
+      }
       setMessage("Workout saved to history.");
       router.replace("/student/workoutHistory");
     } catch (e: any) {
@@ -226,7 +266,6 @@ export default function WorkoutExecution() {
         enableResetScrollToCoords={false}
         extraScrollHeight={24}
       >
-        <BackButton />
         <View
           style={{
             backgroundColor: Colors.card,
@@ -243,6 +282,10 @@ export default function WorkoutExecution() {
 
       {plan.exercises.map((exercise, idx) => {
         const entry = entries[idx] ?? { repsCompleted: "", weight: "" };
+        const kg = parseKgInput(entry.weight);
+        const prev = bestWeightByExercise.get(normalizeExerciseName(exercise.name));
+        const showPrHint =
+          kg !== null && kg > 0 && (prev === undefined || kg > prev);
         const metaParts: string[] = [];
         if (exercise.rest && exercise.rest.trim() !== "") {
           metaParts.push(`Rest: ${exercise.rest}s`);
@@ -315,6 +358,11 @@ export default function WorkoutExecution() {
                 backgroundColor: Colors.surface,
               }}
             />
+            {showPrHint ? (
+              <Text style={{ color: Colors.success, marginTop: Spacing.xs, fontWeight: "600" }}>
+                🔥 New PR!
+              </Text>
+            ) : null}
           </View>
         );
       })}

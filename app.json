@@ -9,7 +9,8 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.sergey.gymcoachapp"
     },
     "android": {
       "adaptiveIcon": {
@@ -41,6 +42,11 @@
       ],
       "@react-native-community/datetimepicker"
     ],
+    "extra": {
+      "googleWebClientId": "915193499412-v3qiq1jcq8kfpqo29os02scvujdqpgu3.apps.googleusercontent.com",
+      "googleAndroidClientId": "",
+      "googleIosClientId": "915193499412-ghogd0kh7abhlhmo75vu7j9nptp5qb04.apps.googleusercontent.com"
+    },
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
