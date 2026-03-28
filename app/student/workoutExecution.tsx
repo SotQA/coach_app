@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -24,6 +24,7 @@ import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
 import { ScreenLayout } from "../../components/ScreenLayout";
+import { formatElapsedForTimer } from "../../utils/workoutDuration";
 
 type SetDraft = { reps: string; weight: string };
 type ExerciseDraft = { sets: SetDraft[] };
@@ -59,6 +60,9 @@ export default function WorkoutExecution() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  /** Wall-clock start when workout is ready (after plan loads). */
+  const sessionStartMsRef = useRef<number | null>(null);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
   useEffect(() => {
     const load = async () => {
@@ -117,6 +121,22 @@ export default function WorkoutExecution() {
 
     load();
   }, [workoutPlanId]);
+
+  // Session timer: starts when plan is ready; 1s tick; cleared on unmount or plan change.
+  useEffect(() => {
+    if (!plan) {
+      sessionStartMsRef.current = null;
+      setElapsedSeconds(0);
+      return;
+    }
+    const start = Date.now();
+    sessionStartMsRef.current = start;
+    setElapsedSeconds(0);
+    const id = setInterval(() => {
+      setElapsedSeconds(Math.floor((Date.now() - start) / 1000));
+    }, 1000);
+    return () => clearInterval(id);
+  }, [plan?.id]);
 
   const bestWeightByExercise = useMemo(
     () => buildBestWeightMapFromLogs(priorLogs),
@@ -204,6 +224,10 @@ export default function WorkoutExecution() {
       const totalVolume = computeTotalVolume(completedExercises);
       const prNames = completedExercises.filter((e) => e.isPr).map((e) => e.name);
 
+      const started = sessionStartMsRef.current;
+      const durationSeconds =
+        started != null ? Math.max(0, Math.floor((Date.now() - started) / 1000)) : 0;
+
       await workoutService.logCompletedWorkout({
         studentId: user.id,
         workoutPlanId: plan.id,
@@ -211,6 +235,7 @@ export default function WorkoutExecution() {
         exercises: completedExercises,
         completedAt: new Date().toISOString(),
         totalVolume,
+        durationSeconds,
       });
 
       if (prNames.length > 0) {
@@ -289,13 +314,39 @@ export default function WorkoutExecution() {
           style={{
             backgroundColor: Colors.card,
             borderRadius: Radius.md,
-            padding: 20,
+            padding: 16,
             marginBottom: Spacing.md,
             borderWidth: 1,
             borderColor: Colors.border,
           }}
         >
-          <Text style={{ ...Typography.title, fontSize: 22, marginBottom: 4 }}>Workout Execution</Text>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: Spacing.sm,
+              paddingBottom: Spacing.sm,
+              borderBottomWidth: 1,
+              borderBottomColor: Colors.border,
+            }}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+              <Ionicons name="time-outline" size={22} color={Colors.primary} />
+              <Text style={{ ...Typography.section, color: Colors.textMuted }}>Workout Time</Text>
+            </View>
+            <Text
+              style={{
+                fontVariant: ["tabular-nums"],
+                fontSize: 22,
+                fontWeight: "700",
+                color: Colors.text,
+              }}
+            >
+              {formatElapsedForTimer(elapsedSeconds)}
+            </Text>
+          </View>
+          <Text style={{ ...Typography.title, fontSize: 20, marginBottom: 4 }}>Workout Execution</Text>
           <Text style={Typography.secondary}>Log each set: reps and weight (optional for bodyweight).</Text>
         </View>
 
@@ -328,7 +379,7 @@ export default function WorkoutExecution() {
             >
               <Text style={{ ...Typography.section, marginBottom: 6 }}>{exercise.name}</Text>
               <Text style={{ ...Typography.secondary, marginBottom: Spacing.xs }}>
-                Planned: {exercise.sets} × {exercise.reps}
+                Planned: {exercise.sets} x {exercise.reps}
               </Text>
               {exercise.weight != null && Number.isFinite(exercise.weight) ? (
                 <Text style={{ ...Typography.secondary, marginBottom: Spacing.sm }}>

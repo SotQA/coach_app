@@ -7,6 +7,7 @@ import { normalizeLoggedExercise, workoutService } from "../../services/workoutS
 import type { WorkoutLog, WorkoutLogExercise } from "../../types/Workout";
 import { computeExerciseVolumeFromLoggedSets } from "../../utils/workoutMetrics";
 import { formatLogWhen } from "../../utils/formatLogWhen";
+import { formatDurationForHistory } from "../../utils/workoutDuration";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { BackButton } from "../../components/BackButton";
 import { EmptyState } from "../../components/EmptyState";
@@ -153,6 +154,7 @@ export default function WorkoutHistory() {
                 day: "numeric",
               })
             : "—";
+          const durationLabel = formatDurationForHistory(log.durationSeconds);
           return (
             <View
               key={log.id}
@@ -172,6 +174,12 @@ export default function WorkoutHistory() {
               <Text style={{ ...Typography.secondary, marginBottom: Spacing.xs }}>
                 Completed: {dateText}
               </Text>
+              {durationLabel ? (
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: Spacing.xs }}>
+                  <Ionicons name="timer-outline" size={16} color={Colors.textMuted} />
+                  <Text style={Typography.secondary}>Duration: {durationLabel}</Text>
+                </View>
+              ) : null}
               {typeof log.totalVolume === "number" && Number.isFinite(log.totalVolume) && log.totalVolume > 0 ? (
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: Spacing.xs }}>
                   <Ionicons name="analytics-outline" size={16} color={Colors.textMuted} />

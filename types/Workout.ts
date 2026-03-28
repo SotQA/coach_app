@@ -50,6 +50,8 @@ export interface WorkoutLog {
   /** Coach feedback on a completed workout. */
   coachFeedback?: string;
   feedbackCreatedAt?: string;
+  /** Wall-clock workout length (execution screen → complete), seconds. */
+  durationSeconds?: number;
   // Legacy fields (for backward compatibility with older workout logs).
   exercise?: string;
   sets?: number;

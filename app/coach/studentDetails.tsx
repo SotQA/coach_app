@@ -7,6 +7,7 @@ import { workoutService } from "../../services/workoutService";
 import type { StudentSummary } from "../../types/StudentSummary";
 import type { WorkoutPlan, WorkoutLog, WorkoutLogExercise } from "../../types/Workout";
 import { getSessionMaxWeightFromLogExercise } from "../../utils/workoutMetrics";
+import { formatDurationForHistory } from "../../utils/workoutDuration";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { WorkoutCard } from "../../components/WorkoutCard";
 import { Colors } from "../../theme/colors";
@@ -304,7 +305,9 @@ export default function StudentDetails() {
         {logs.length === 0 ? (
           <Text style={Typography.secondary}>No workouts logged yet.</Text>
         ) : (
-          logs.slice(0, 5).map((log) => (
+          logs.slice(0, 5).map((log) => {
+            const durationLabel = formatDurationForHistory(log.durationSeconds);
+            return (
             <View
               key={log.id}
               style={{
@@ -317,6 +320,11 @@ export default function StudentDetails() {
               }}
             >
               <Text style={Typography.section}>{log.workoutName || "Workout"}</Text>
+              {durationLabel ? (
+                <Text style={{ ...Typography.secondary, fontSize: 12 }}>
+                  Duration: {durationLabel}
+                </Text>
+              ) : null}
               {typeof log.totalVolume === "number" && log.totalVolume > 0 ? (
                 <Text style={{ ...Typography.secondary, fontSize: 12 }}>
                   Volume: {log.totalVolume} kg
@@ -346,7 +354,8 @@ export default function StudentDetails() {
                 style={{ backgroundColor: Colors.border, marginTop: Spacing.sm }}
               />
             </View>
-          ))
+            );
+          })
         )}
 
         <Text

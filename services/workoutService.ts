@@ -185,6 +185,10 @@ const mapLogDoc = (snap: QueryDocumentSnapshot): WorkoutLog => {
         : undefined,
     feedbackCreatedAt:
       data.feedbackCreatedAt != null ? String(data.feedbackCreatedAt) : undefined,
+    durationSeconds:
+      data.durationSeconds != null && data.durationSeconds !== "" && Number.isFinite(Number(data.durationSeconds))
+        ? Math.max(0, Math.floor(Number(data.durationSeconds)))
+        : undefined,
     // Keep legacy fields available for older consumers while migrating.
     exercise: data.exercise,
     sets: data.sets,
@@ -488,6 +492,7 @@ export const workoutService = {
     exercises: WorkoutLogExercise[];
     completedAt?: string;
     totalVolume?: number;
+    durationSeconds?: number;
   }): Promise<WorkoutLog> {
     assertNonEmpty(payload.studentId, "studentId (Firebase Auth UID)");
     assertNonEmpty(payload.workoutPlanId, "workoutPlanId");
@@ -506,6 +511,11 @@ export const workoutService = {
         ? payload.totalVolume
         : computeTotalVolume(normalizedExercises);
 
+    const durationSeconds =
+      typeof payload.durationSeconds === "number" && Number.isFinite(payload.durationSeconds)
+        ? Math.max(0, Math.floor(payload.durationSeconds))
+        : undefined;
+
     const dataToWrite = sanitizeForFirestore({
       studentId: payload.studentId,
       workoutPlanId: payload.workoutPlanId,
@@ -513,6 +523,7 @@ export const workoutService = {
       exercises: normalizedExercises,
       completedAt,
       totalVolume,
+      ...(durationSeconds !== undefined ? { durationSeconds } : {}),
     });
 
     const ref = await addDoc(collection(db, WORKOUT_LOGS_COLLECTION), dataToWrite);
@@ -525,6 +536,7 @@ export const workoutService = {
       exercises: normalizedExercises,
       completedAt,
       totalVolume,
+      ...(durationSeconds !== undefined ? { durationSeconds } : {}),
     };
   },
 
