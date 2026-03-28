@@ -8,6 +8,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import * as Haptics from "expo-haptics";
 import { Ionicons } from "@expo/vector-icons";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { authService } from "../../services/authService";
@@ -24,7 +25,10 @@ import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
 import { ScreenLayout } from "../../components/ScreenLayout";
-import { formatElapsedForTimer } from "../../utils/workoutDuration";
+import {
+  formatElapsedForTimer,
+  parseRestSeconds,
+} from "../../utils/workoutDuration";
 
 type SetDraft = { reps: string; weight: string };
 type ExerciseDraft = { sets: SetDraft[] };
@@ -42,6 +46,20 @@ function setIsDone(d: SetDraft): boolean {
   if (d.weight.trim() === "") return true;
   const w = parseKgInput(d.weight);
   return w !== null;
+}
+
+const REST_FALLBACK_SEC = 60;
+
+function getNextSetFocus(
+  exIdx: number,
+  setIdx: number,
+  plan: WorkoutPlan,
+  drafts: ExerciseDraft[]
+): { ex: number; set: number } | null {
+  const nSets = drafts[exIdx]?.sets.length ?? 0;
+  if (setIdx + 1 < nSets) return { ex: exIdx, set: setIdx + 1 };
+  if (exIdx + 1 < plan.exercises.length) return { ex: exIdx + 1, set: 0 };
+  return null;
 }
 
 export default function WorkoutExecution() {
@@ -63,6 +81,19 @@ export default function WorkoutExecution() {
   /** Wall-clock start when workout is ready (after plan loads). */
   const sessionStartMsRef = useRef<number | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+
+  type RestPhase = "idle" | "running" | "paused";
+  const [restPhase, setRestPhase] = useState<RestPhase>("idle");
+  const [restRemainingSec, setRestRemainingSec] = useState(0);
+  const restEndMsRef = useRef<number | null>(null);
+  const restFinishFiredRef = useRef(false);
+  const restAfterSetRef = useRef<{ ex: number; set: number } | null>(null);
+  const prevDoneSetsRef = useRef<boolean[][] | null>(null);
+  const prevFocusExRef = useRef(0);
+  const planRef = useRef<WorkoutPlan | null>(null);
+  const draftsRef = useRef<ExerciseDraft[]>([]);
+  planRef.current = plan;
+  draftsRef.current = drafts;
 
   useEffect(() => {
     const load = async () => {
@@ -138,6 +169,85 @@ export default function WorkoutExecution() {
     return () => clearInterval(id);
   }, [plan?.id]);
 
+  useEffect(() => {
+    if (!plan?.id) return;
+    restEndMsRef.current = null;
+    restFinishFiredRef.current = false;
+    restAfterSetRef.current = null;
+    setRestPhase("idle");
+    setRestRemainingSec(0);
+    prevDoneSetsRef.current = null;
+  }, [plan?.id]);
+
+  useEffect(() => {
+    if (!plan) return;
+    const prev = prevFocusExRef.current;
+    if (prev !== focus.ex) {
+      restEndMsRef.current = null;
+      restFinishFiredRef.current = false;
+      restAfterSetRef.current = null;
+      setRestPhase("idle");
+      setRestRemainingSec(0);
+    }
+    prevFocusExRef.current = focus.ex;
+  }, [plan, focus.ex]);
+
+  useEffect(() => {
+    if (!plan) return;
+    const current = drafts.map((d) => d.sets.map(setIsDone));
+    const prev = prevDoneSetsRef.current;
+    if (!prev) {
+      prevDoneSetsRef.current = current;
+      return;
+    }
+    let newest: { ex: number; set: number } | null = null;
+    for (let ex = 0; ex < current.length; ex++) {
+      for (let s = 0; s < (current[ex]?.length ?? 0); s++) {
+        if (current[ex][s] && !prev[ex]?.[s]) {
+          newest = { ex, set: s };
+        }
+      }
+    }
+    prevDoneSetsRef.current = current;
+    if (!newest) return;
+    const sec = parseRestSeconds(plan.exercises[newest.ex]?.rest);
+    if (sec == null || sec <= 0) return;
+    restAfterSetRef.current = { ex: newest.ex, set: newest.set };
+    restEndMsRef.current = Date.now() + sec * 1000;
+    restFinishFiredRef.current = false;
+    setRestRemainingSec(sec);
+    setRestPhase("running");
+  }, [drafts, plan]);
+
+  useEffect(() => {
+    if (restPhase !== "running" || restEndMsRef.current == null) return;
+    restFinishFiredRef.current = false;
+    const tick = () => {
+      const end = restEndMsRef.current;
+      if (end == null) return;
+      const left = Math.max(0, Math.ceil((end - Date.now()) / 1000));
+      setRestRemainingSec(left);
+      if (left <= 0 && !restFinishFiredRef.current) {
+        restFinishFiredRef.current = true;
+        restEndMsRef.current = null;
+        setRestPhase("idle");
+        setRestRemainingSec(0);
+        void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+        const after = restAfterSetRef.current;
+        restAfterSetRef.current = null;
+        const p = planRef.current;
+        const dr = draftsRef.current;
+        if (after && p) {
+          const next = getNextSetFocus(after.ex, after.set, p, dr);
+          if (next) setFocus(next);
+        }
+      }
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [restPhase]);
+
   const bestWeightByExercise = useMemo(
     () => buildBestWeightMapFromLogs(priorLogs),
     [priorLogs]
@@ -153,6 +263,72 @@ export default function WorkoutExecution() {
             }
       )
     );
+  };
+
+  const defaultRestSecForFocus = useMemo(() => {
+    if (!plan) return REST_FALLBACK_SEC;
+    return parseRestSeconds(plan.exercises[focus.ex]?.rest) ?? REST_FALLBACK_SEC;
+  }, [plan, focus.ex]);
+
+  const displayRestSeconds =
+    restPhase === "idle" && restRemainingSec === 0 ? defaultRestSecForFocus : restRemainingSec;
+
+  const pauseRest = () => {
+    if (restPhase !== "running") return;
+    const end = restEndMsRef.current;
+    const left =
+      end != null ? Math.max(0, Math.ceil((end - Date.now()) / 1000)) : restRemainingSec;
+    restEndMsRef.current = null;
+    setRestRemainingSec(left);
+    setRestPhase("paused");
+  };
+
+  const startOrResumeRest = () => {
+    if (!plan) return;
+    if (restPhase === "running") return;
+    if (restPhase === "paused") {
+      if (restRemainingSec <= 0) return;
+      restEndMsRef.current = Date.now() + restRemainingSec * 1000;
+      restFinishFiredRef.current = false;
+      setRestPhase("running");
+      return;
+    }
+    const seconds = parseRestSeconds(plan.exercises[focus.ex]?.rest) ?? REST_FALLBACK_SEC;
+    if (seconds <= 0) return;
+    restAfterSetRef.current = { ex: focus.ex, set: focus.set };
+    restEndMsRef.current = Date.now() + seconds * 1000;
+    restFinishFiredRef.current = false;
+    setRestRemainingSec(seconds);
+    setRestPhase("running");
+  };
+
+  const resetRestTimer = () => {
+    if (!plan) return;
+    restEndMsRef.current = null;
+    restFinishFiredRef.current = false;
+    const seconds = parseRestSeconds(plan.exercises[focus.ex]?.rest) ?? REST_FALLBACK_SEC;
+    setRestRemainingSec(seconds);
+    setRestPhase("paused");
+  };
+
+  const skipRest = () => {
+    if (!plan) return;
+    const anchor = restAfterSetRef.current ?? { ex: focus.ex, set: focus.set };
+    restEndMsRef.current = null;
+    restFinishFiredRef.current = false;
+    restAfterSetRef.current = null;
+    setRestPhase("idle");
+    const next = getNextSetFocus(anchor.ex, anchor.set, plan, drafts);
+    if (next) {
+      setFocus(next);
+      setRestRemainingSec(
+        parseRestSeconds(plan.exercises[next.ex]?.rest) ?? REST_FALLBACK_SEC
+      );
+    } else {
+      setRestRemainingSec(
+        parseRestSeconds(plan.exercises[focus.ex]?.rest) ?? REST_FALLBACK_SEC
+      );
+    }
   };
 
   const handleSubmit = async () => {
@@ -175,20 +351,23 @@ export default function WorkoutExecution() {
         }
 
         const loggedSets: LoggedSet[] = draft.sets.map((d, si) => {
-          const r = Number(String(d.reps).trim());
-          if (!Number.isFinite(r) || r <= 0 || !Number.isInteger(r)) {
+          const raw = String(d.reps).trim();
+          const r = raw === "" ? 0 : Number(raw);
+          if (!Number.isFinite(r) || !Number.isInteger(r) || r < 0) {
             throw new Error(
-              `Set ${si + 1} (${exercise.name}): enter whole-number reps greater than 0.`
+              `Set ${si + 1} (${exercise.name}): use a whole number for reps (0 skips the set).`
             );
           }
-          const trimmedW = d.weight.trim();
           let weightOut: number | null = null;
-          if (trimmedW !== "") {
-            const w = parseKgInput(d.weight);
-            if (w === null) {
-              throw new Error(`Set ${si + 1} (${exercise.name}): invalid weight.`);
+          if (r > 0) {
+            const trimmedW = d.weight.trim();
+            if (trimmedW !== "") {
+              const w = parseKgInput(d.weight);
+              if (w === null) {
+                throw new Error(`Set ${si + 1} (${exercise.name}): invalid weight.`);
+              }
+              weightOut = w;
             }
-            weightOut = w;
           }
 
           return {
@@ -202,7 +381,9 @@ export default function WorkoutExecution() {
         const prevBest = bestWeightByExercise.get(exKey);
         const maxKg = Math.max(
           0,
-          ...loggedSets.map((s) => (s.weight != null && Number.isFinite(s.weight) ? s.weight : 0))
+          ...loggedSets
+            .filter((s) => s.reps > 0)
+            .map((s) => (s.weight != null && Number.isFinite(s.weight) ? s.weight : 0))
         );
         const isPr =
           maxKg > 0 && (prevBest === undefined || maxKg > prevBest);
@@ -350,6 +531,112 @@ export default function WorkoutExecution() {
           <Text style={Typography.secondary}>Log each set: reps and weight (optional for bodyweight).</Text>
         </View>
 
+        <View
+          style={{
+            backgroundColor: Colors.card,
+            borderRadius: Radius.md,
+            padding: 16,
+            marginBottom: Spacing.md,
+            borderWidth: restPhase === "running" ? 2 : 1,
+            borderColor: restPhase === "running" ? Colors.primary : Colors.border,
+          }}
+        >
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: Spacing.sm,
+            }}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+              <Ionicons name="hourglass-outline" size={22} color={Colors.primary} />
+              <Text style={{ ...Typography.section, color: Colors.textMuted }}>Rest</Text>
+            </View>
+            <Text
+              style={{
+                fontVariant: ["tabular-nums"],
+                fontSize: 22,
+                fontWeight: "700",
+                color: restPhase === "running" ? Colors.success : Colors.text,
+              }}
+            >
+              {formatElapsedForTimer(displayRestSeconds)}
+            </Text>
+          </View>
+          <Text style={{ ...Typography.secondary, fontSize: 12, marginBottom: Spacing.sm }}>
+            {restPhase === "running"
+              ? "Time remaining until next set."
+              : restPhase === "paused"
+                ? "Paused — Start to resume."
+                : `Idle — target ${defaultRestSecForFocus}s for the focused exercise, or complete a set to auto-start.`}
+          </Text>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+            <Pressable
+              onPress={startOrResumeRest}
+              disabled={restPhase === "running" || (restPhase === "paused" && restRemainingSec <= 0)}
+              style={{
+                paddingVertical: 10,
+                paddingHorizontal: 14,
+                borderRadius: Radius.sm,
+                borderWidth: 1,
+                borderColor:
+                  restPhase === "running" || (restPhase === "paused" && restRemainingSec <= 0)
+                    ? Colors.border
+                    : Colors.primary,
+                opacity:
+                  restPhase === "running" || (restPhase === "paused" && restRemainingSec <= 0) ? 0.45 : 1,
+                backgroundColor: Colors.surface,
+              }}
+            >
+              <Text style={{ color: Colors.text, fontWeight: "600", fontSize: 13 }}>
+                {restPhase === "paused" ? "Resume" : "Start"}
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={pauseRest}
+              disabled={restPhase !== "running"}
+              style={{
+                paddingVertical: 10,
+                paddingHorizontal: 14,
+                borderRadius: Radius.sm,
+                borderWidth: 1,
+                borderColor: restPhase !== "running" ? Colors.border : Colors.primary,
+                opacity: restPhase !== "running" ? 0.45 : 1,
+                backgroundColor: Colors.surface,
+              }}
+            >
+              <Text style={{ color: Colors.text, fontWeight: "600", fontSize: 13 }}>Pause</Text>
+            </Pressable>
+            <Pressable
+              onPress={resetRestTimer}
+              style={{
+                paddingVertical: 10,
+                paddingHorizontal: 14,
+                borderRadius: Radius.sm,
+                borderWidth: 1,
+                borderColor: Colors.primary,
+                backgroundColor: Colors.surface,
+              }}
+            >
+              <Text style={{ color: Colors.text, fontWeight: "600", fontSize: 13 }}>Reset</Text>
+            </Pressable>
+            <Pressable
+              onPress={skipRest}
+              style={{
+                paddingVertical: 10,
+                paddingHorizontal: 14,
+                borderRadius: Radius.sm,
+                borderWidth: 1,
+                borderColor: Colors.primary,
+                backgroundColor: Colors.surface,
+              }}
+            >
+              <Text style={{ color: Colors.text, fontWeight: "600", fontSize: 13 }}>Skip</Text>
+            </Pressable>
+          </View>
+        </View>
+
         {plan.exercises.map((exercise, exIdx) => {
           const draft = drafts[exIdx];
           const sets = draft?.sets ?? [];
@@ -401,7 +688,7 @@ export default function WorkoutExecution() {
                       marginBottom: Spacing.sm,
                       padding: Spacing.sm,
                       borderRadius: Radius.sm,
-                      borderWidth: 2,
+                      borderWidth: active ? 3 : 2,
                       borderColor: active ? Colors.primary : Colors.border,
                       backgroundColor: active ? Colors.card : "transparent",
                     }}

@@ -1,3 +1,16 @@
+/**
+ * Parse coach-entered rest string (seconds), e.g. "90" → 90.
+ * Empty or invalid → null.
+ */
+export function parseRestSeconds(rest: string | undefined | null): number | null {
+  if (rest == null) return null;
+  const t = String(rest).trim();
+  if (t === "") return null;
+  const n = Number(t);
+  if (!Number.isFinite(n) || n <= 0) return null;
+  return Math.min(Math.floor(n), 24 * 3600);
+}
+
 /** Live timer: mm:ss, or hh:mm:ss when ≥ 1 hour. */
 export function formatElapsedForTimer(totalSeconds: number): string {
   const s = Math.max(0, Math.floor(totalSeconds));
