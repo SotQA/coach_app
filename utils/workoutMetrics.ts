@@ -1,4 +1,4 @@
-import type { WorkoutLog, WorkoutLogExercise } from "../types/Workout";
+import type { LoggedSet, WorkoutLog, WorkoutLogExercise } from "../types/Workout";
 
 export function normalizeExerciseName(name: string): string {
   return String(name ?? "")
@@ -6,7 +6,7 @@ export function normalizeExerciseName(name: string): string {
     .toLowerCase();
 }
 
-/** Reps for volume: single number, or average of a range like "8-12". */
+/** Reps for volume heuristics: single number, or average of a range like "8-12". */
 export function parseRepsNumericForVolume(repsDone: string): number {
   const t = String(repsDone ?? "").trim();
   if (/^\d+$/.test(t)) return Number(t);
@@ -15,24 +15,102 @@ export function parseRepsNumericForVolume(repsDone: string): number {
   return 0;
 }
 
-export function computeExerciseVolume(
-  sets: number,
-  repsDone: string,
-  weight: number | null
-): number {
-  if (weight === null || !Number.isFinite(weight) || weight < 0) return 0;
-  const r = parseRepsNumericForVolume(repsDone);
-  if (r <= 0 || !Number.isFinite(sets) || sets <= 0) return 0;
-  return Math.round(sets * r * weight * 100) / 100;
+function isLoggedSetRow(x: unknown): x is Record<string, unknown> {
+  return typeof x === "object" && x !== null;
 }
 
-export function computeTotalVolume(exercises: Pick<WorkoutLogExercise, "volume">[]): number {
+/** True when `sets` is the new per-set log array. */
+export function isPerSetLogArray(sets: unknown): sets is unknown[] {
+  return Array.isArray(sets) && sets.length > 0 && isLoggedSetRow(sets[0]);
+}
+
+/** Volume = sum over sets of (reps × weight); null/zero weight contributes 0. */
+export function computeExerciseVolumeFromLoggedSets(sets: LoggedSet[] | undefined): number {
+  if (!Array.isArray(sets) || sets.length === 0) return 0;
   let t = 0;
-  for (const ex of exercises) {
-    const v = ex.volume;
-    if (typeof v === "number" && Number.isFinite(v)) t += v;
+  for (const s of sets) {
+    const r = s.reps;
+    const w = s.weight;
+    if (!Number.isFinite(r) || r <= 0) continue;
+    if (w == null || !Number.isFinite(w) || w < 0) continue;
+    t += r * w;
   }
   return Math.round(t * 100) / 100;
+}
+
+export function computeTotalVolume(exercises: WorkoutLogExercise[]): number {
+  let total = 0;
+  for (const ex of exercises) {
+    const v =
+      typeof ex.volume === "number" && Number.isFinite(ex.volume)
+        ? ex.volume
+        : computeExerciseVolumeFromLoggedSets(ex.sets);
+    total += v;
+  }
+  return Math.round(total * 100) / 100;
+}
+
+/** Max weight used in the session for this exercise (for PRs / charts). */
+export function getSessionMaxWeightFromLogExercise(ex: WorkoutLogExercise): number | null {
+  if (Array.isArray(ex.sets) && ex.sets.length > 0) {
+    const row0 = ex.sets[0];
+    if (typeof row0 === "object" && row0 !== null && "reps" in row0) {
+      let m = -Infinity;
+      for (const s of ex.sets) {
+        if (s.weight != null && Number.isFinite(s.weight)) m = Math.max(m, s.weight);
+      }
+      return Number.isFinite(m) && m !== -Infinity ? m : null;
+    }
+  }
+  const legacy = (ex as { weight?: unknown }).weight;
+  if (typeof legacy === "number" && Number.isFinite(legacy)) return legacy;
+  return null;
+}
+
+/**
+ * Convert legacy log exercise (repsDone + single weight + set count) into per-set rows.
+ * Evenly splits integer total reps across sets when repsDone is a plain number string.
+ */
+export function legacyExerciseToLoggedSets(ex: {
+  sets?: unknown;
+  repsDone?: unknown;
+  reps?: unknown;
+  weight?: unknown;
+}): LoggedSet[] {
+  const setCountRaw = Number(ex?.sets);
+  const setCount = Number.isFinite(setCountRaw) && setCountRaw > 0 ? Math.floor(setCountRaw) : 1;
+
+  const repsStr =
+    ex?.repsDone != null ? String(ex.repsDone) : ex?.reps != null ? String(ex.reps) : "";
+  const wRaw = ex?.weight;
+  const w =
+    wRaw == null || wRaw === ""
+      ? null
+      : Number.isFinite(Number(wRaw))
+        ? Number(wRaw)
+        : null;
+
+  const trimmed = repsStr.trim();
+  let perSetReps: number[] = [];
+
+  if (/^\d+$/.test(trimmed)) {
+    const total = Number(trimmed);
+    const base = Math.floor(total / setCount);
+    let rem = total - base * setCount;
+    for (let i = 0; i < setCount; i++) {
+      perSetReps.push(base + (rem > 0 ? 1 : 0));
+      if (rem > 0) rem -= 1;
+    }
+  } else {
+    const avg = parseRepsNumericForVolume(trimmed);
+    perSetReps = Array(setCount).fill(Math.max(0, avg));
+  }
+
+  return perSetReps.map((reps, i) => ({
+    setNumber: i + 1,
+    reps: Math.max(0, reps),
+    weight: w,
+  }));
 }
 
 /** Max logged weight per exercise name across history (for PR detection). */
@@ -46,18 +124,25 @@ export function buildBestWeightMapFromLogs(logs: WorkoutLog[]): Map<string, numb
         : [
             {
               name: (log as any).exercise ?? "Exercise",
-              weight: (log as any).weight ?? null,
+              repsPlanned: String((log as any).reps ?? ""),
+              sets: legacyExerciseToLoggedSets({
+                sets: (log as any).sets ?? 1,
+                repsDone: (log as any).reps,
+                weight: (log as any).weight,
+              }),
+              rest: "",
+              tempo: "",
+              rpe: null,
             } as WorkoutLogExercise,
           ];
 
     for (const ex of list) {
       const key = normalizeExerciseName(ex.name);
       if (!key) continue;
-      const w = ex.weight;
-      if (w == null || !Number.isFinite(Number(w))) continue;
-      const n = Number(w);
+      const maxW = getSessionMaxWeightFromLogExercise(ex as WorkoutLogExercise);
+      if (maxW == null) continue;
       const prev = map.get(key) ?? 0;
-      if (n > prev) map.set(key, n);
+      if (maxW > prev) map.set(key, maxW);
     }
   }
 

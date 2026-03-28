@@ -3,7 +3,8 @@ import { View, Text, ActivityIndicator, ScrollView } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { authService } from "../../services/authService";
 import { workoutService } from "../../services/workoutService";
-import type { WorkoutLog } from "../../types/Workout";
+import type { WorkoutLog, WorkoutLogExercise } from "../../types/Workout";
+import { getSessionMaxWeightFromLogExercise } from "../../utils/workoutMetrics";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
@@ -100,7 +101,12 @@ export default function ExerciseDetails() {
   }
 
   const progression = logs
-    .map((log) => log.weight)
+    .map((log) => {
+      const match = (log.exercises ?? []).find(
+        (ex) => ex.name?.trim().toLowerCase() === exerciseName.toLowerCase()
+      );
+      return match ? getSessionMaxWeightFromLogExercise(match as WorkoutLogExercise) : null;
+    })
     .filter((w): w is number => typeof w === "number" && Number.isFinite(w))
     .map((w) => String(w))
     .join(" → ");
@@ -159,10 +165,18 @@ export default function ExerciseDetails() {
                     .filter((ex) => ex.name?.trim().toLowerCase() === exerciseName.toLowerCase())
                     .map((ex, i) => (
                       <View key={`${log.id}-${i}`} style={{ marginBottom: i === 0 ? 0 : Spacing.xs }}>
-                        <Text style={{ color: Colors.text, fontWeight: "600" }}>
-                          {ex.sets} sets × {ex.repsPlanned} → {ex.repsDone} reps
-                          {ex.weight != null ? ` @ ${ex.weight}kg` : ""}
+                        <Text style={{ color: Colors.text, fontWeight: "600", marginBottom: 4 }}>
+                          Planned: {ex.repsPlanned || "—"}
                         </Text>
+                        {(ex.sets ?? []).map((s) => {
+                          const w =
+                            s.weight != null && Number.isFinite(s.weight) ? `${s.weight}kg` : "BW";
+                          return (
+                            <Text key={`${log.id}-${i}-${s.setNumber}`} style={{ color: Colors.text }}>
+                              Set {s.setNumber}: {w} × {s.reps}
+                            </Text>
+                          );
+                        })}
                       </View>
                     ))}
                   <Text style={{ color: Colors.textMuted, marginTop: 4 }}>

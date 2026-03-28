@@ -12,8 +12,14 @@ import {
   type QueryDocumentSnapshot,
 } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
-import type { Exercise, WorkoutLog, WorkoutLogExercise, WorkoutPlan } from "../types/Workout";
-import { computeTotalVolume } from "../utils/workoutMetrics";
+import type { Exercise, LoggedSet, WorkoutLog, WorkoutLogExercise, WorkoutPlan } from "../types/Workout";
+import {
+  computeExerciseVolumeFromLoggedSets,
+  computeTotalVolume,
+  isPerSetLogArray,
+  legacyExerciseToLoggedSets,
+  parseRepsNumericForVolume,
+} from "../utils/workoutMetrics";
 
 const WORKOUT_PLANS_COLLECTION = "workoutPlans";
 const WORKOUT_LOGS_COLLECTION = "workoutLogs";
@@ -105,39 +111,47 @@ const mapPlanDoc = (snap: QueryDocumentSnapshot): WorkoutPlan => {
   return normalizePlanData(snap.id, data);
 };
 
-const normalizeLoggedExercise = (ex: any): WorkoutLogExercise => {
-  const sets = Number.isFinite(Number(ex?.sets)) ? Number(ex.sets) : 0;
-  const repsPlanned = ex?.repsPlanned != null ? String(ex.repsPlanned) : ex?.reps != null ? String(ex.reps) : "";
-  const repsDone =
-    ex?.repsDone != null
-      ? String(ex.repsDone)
-      : ex?.reps != null
-        ? String(ex.reps)
-        : "";
-  const weight =
-    ex?.weight == null || ex?.weight === "" ? null : Number.isFinite(Number(ex.weight)) ? Number(ex.weight) : null;
+/** Normalize one exercise row from Firestore (new per-set schema or legacy). */
+export function normalizeLoggedExercise(ex: any): WorkoutLogExercise {
+  const repsPlanned =
+    ex?.repsPlanned != null ? String(ex.repsPlanned) : ex?.reps != null ? String(ex.reps) : "";
   const rpe =
     ex?.rpe == null || ex?.rpe === "" ? null : Number.isFinite(Number(ex.rpe)) ? Number(ex.rpe) : null;
+
+  let setList: LoggedSet[];
+  if (isPerSetLogArray(ex?.sets)) {
+    setList = (ex.sets as any[]).map((s: any, i: number) => ({
+      setNumber: Number.isFinite(Number(s?.setNumber)) ? Number(s.setNumber) : i + 1,
+      reps: Number.isFinite(Number(s?.reps)) ? Math.max(0, Math.round(Number(s.reps))) : 0,
+      weight:
+        s?.weight == null || s?.weight === ""
+          ? null
+          : Number.isFinite(Number(s.weight))
+            ? Number(s.weight)
+            : null,
+    }));
+    setList = setList.map((s, i) => ({ ...s, setNumber: i + 1 }));
+  } else {
+    setList = legacyExerciseToLoggedSets(ex);
+  }
 
   const volumeRaw = ex?.volume;
   const volume =
     volumeRaw != null && volumeRaw !== "" && Number.isFinite(Number(volumeRaw))
       ? Number(volumeRaw)
-      : undefined;
+      : computeExerciseVolumeFromLoggedSets(setList);
 
   return {
     name: ex?.name != null ? String(ex.name) : ex?.exercise != null ? String(ex.exercise) : "Exercise",
-    sets,
     repsPlanned,
-    repsDone,
-    weight,
+    sets: setList,
     rest: ex?.rest != null ? String(ex.rest) : "",
     tempo: ex?.tempo != null ? String(ex.tempo) : "",
     rpe,
     volume,
     isPr: ex?.isPr === true,
   };
-};
+}
 
 const mapLogDoc = (snap: QueryDocumentSnapshot): WorkoutLog => {
   const data = snap.data() as any;
@@ -150,7 +164,7 @@ const mapLogDoc = (snap: QueryDocumentSnapshot): WorkoutLog => {
           repsPlanned: data.reps,
           repsDone: data.reps,
           weight: data.weight,
-        }),
+        } as any),
       ];
 
   const totalVol = data.totalVolume;
@@ -382,16 +396,25 @@ export const workoutService = {
     assertNonEmpty(payload.studentId, "studentId (Firebase Auth UID)");
     assertNonEmpty(payload.workoutPlanId, "workoutPlanId");
     const completedAt = payload.completedAt ?? new Date().toISOString();
-    const entry: WorkoutLogExercise = {
+    const repsStr = String(payload.reps ?? "").trim();
+    const repsOne = /^\d+$/.test(repsStr)
+      ? Number(repsStr)
+      : Math.max(1, Math.round(parseRepsNumericForVolume(repsStr) || 1));
+
+    const entry: WorkoutLogExercise = normalizeLoggedExercise({
       name: payload.exercise,
-      sets: payload.sets,
       repsPlanned: String(payload.reps ?? ""),
-      repsDone: String(payload.reps ?? ""),
-      weight: payload.weight ?? null,
+      sets: [
+        {
+          setNumber: 1,
+          reps: repsOne,
+          weight: payload.weight ?? null,
+        },
+      ],
       rest: payload.rest ?? "",
       tempo: payload.tempo ?? "",
       rpe: payload.rpe ?? null,
-    };
+    });
 
     const dataToWrite = sanitizeForFirestore({
       studentId: payload.studentId,

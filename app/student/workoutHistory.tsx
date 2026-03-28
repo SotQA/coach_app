@@ -3,9 +3,9 @@ import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { authService } from "../../services/authService";
-import { workoutService } from "../../services/workoutService";
+import { normalizeLoggedExercise, workoutService } from "../../services/workoutService";
 import type { WorkoutLog, WorkoutLogExercise } from "../../types/Workout";
-import { computeExerciseVolume } from "../../utils/workoutMetrics";
+import { computeExerciseVolumeFromLoggedSets } from "../../utils/workoutMetrics";
 import { formatLogWhen } from "../../utils/formatLogWhen";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { BackButton } from "../../components/BackButton";
@@ -39,20 +39,18 @@ export default function WorkoutHistory() {
 
   const normalizedLogs = useMemo(() => {
     return logs.map((log) => {
-      const exercises = Array.isArray(log.exercises) && log.exercises.length
-        ? log.exercises
-        : [
-            {
-              name: log.exercise ?? "Exercise",
-              sets: log.sets ?? 0,
-              repsPlanned: String(log.reps ?? ""),
-              repsDone: String(log.reps ?? ""),
-              weight: log.weight ?? null,
-              rest: "",
-              tempo: "",
-              rpe: null,
-            },
-          ];
+      const exercises: WorkoutLogExercise[] =
+        Array.isArray(log.exercises) && log.exercises.length > 0
+          ? log.exercises
+          : [
+              normalizeLoggedExercise({
+                name: log.exercise ?? "Exercise",
+                sets: log.sets ?? 1,
+                repsPlanned: String(log.reps ?? ""),
+                repsDone: String(log.reps ?? ""),
+                weight: log.weight ?? null,
+              } as any),
+            ];
 
       const when = (log as any).completedAt ?? (log as any).date;
       return {
@@ -213,23 +211,31 @@ export default function WorkoutHistory() {
                 const vol =
                   typeof exRow.volume === "number" && Number.isFinite(exRow.volume)
                     ? exRow.volume
-                    : computeExerciseVolume(exRow.sets, exRow.repsDone, exRow.weight);
+                    : computeExerciseVolumeFromLoggedSets(exRow.sets);
                 return (
-                  <View key={`${log.id}-${ex.name}-${i}`} style={{ marginTop: 6 }}>
+                  <View key={`${log.id}-${ex.name}-${i}`} style={{ marginTop: 8 }}>
                     <View style={{ flexDirection: "row", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
                       <Text style={{ ...Typography.section, fontSize: 15 }}>{ex.name}</Text>
                       {exRow.isPr ? (
                         <Text style={{ color: Colors.success, fontWeight: "700" }}>🔥 PR</Text>
                       ) : null}
                     </View>
-                    <Text style={Typography.secondary}>
-                      {ex.repsPlanned || "—"} → {ex.repsDone} reps
+                    <Text style={{ ...Typography.secondary, marginBottom: 4 }}>
+                      Planned: {ex.repsPlanned || "—"}
                     </Text>
-                    {ex.weight !== null && ex.weight !== undefined ? (
-                      <Text style={Typography.secondary}>{ex.weight} kg</Text>
-                    ) : null}
+                    {(exRow.sets ?? []).map((s) => {
+                      const wLabel =
+                        s.weight != null && Number.isFinite(s.weight) ? `${s.weight}kg` : "BW";
+                      return (
+                        <Text key={`${log.id}-${i}-${s.setNumber}`} style={Typography.secondary}>
+                          Set {s.setNumber}: {wLabel} x {s.reps}
+                        </Text>
+                      );
+                    })}
                     {vol > 0 ? (
-                      <Text style={{ ...Typography.secondary, fontSize: 12 }}>Volume: {vol} kg</Text>
+                      <Text style={{ ...Typography.secondary, fontSize: 12, marginTop: 4 }}>
+                        Volume: {vol} kg
+                      </Text>
                     ) : null}
                   </View>
                 );

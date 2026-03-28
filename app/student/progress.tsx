@@ -11,6 +11,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
 import type { WorkoutLog, WorkoutLogExercise } from "../../types/Workout";
+import { getSessionMaxWeightFromLogExercise } from "../../utils/workoutMetrics";
 import { authService } from "../../services/authService";
 import { workoutService } from "../../services/workoutService";
 import { BackButton } from "../../components/BackButton";
@@ -114,8 +115,8 @@ export default function ProgressScreen() {
         const key = exName.toLowerCase();
         if (!key) continue;
 
-        const w = (ex as WorkoutLogExercise).weight;
-        if (typeof w !== "number" || !Number.isFinite(w) || w === null) continue;
+        const w = getSessionMaxWeightFromLogExercise(ex as WorkoutLogExercise);
+        if (w == null) continue;
 
         if (!seriesByKey[key]) {
           seriesByKey[key] = { name: exName, weights: [], datesMs: [] };
@@ -170,7 +171,8 @@ export default function ProgressScreen() {
       const bestLiftKg = (() => {
         const weights: number[] = [];
         for (const ex of log.exercises ?? []) {
-          if (typeof ex.weight === "number" && Number.isFinite(ex.weight)) weights.push(ex.weight);
+          const w = getSessionMaxWeightFromLogExercise(ex as WorkoutLogExercise);
+          if (w != null) weights.push(w);
         }
         return weights.length ? Math.max(...weights) : null;
       })();

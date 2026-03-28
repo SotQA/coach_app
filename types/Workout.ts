@@ -58,18 +58,24 @@ export interface WorkoutLog {
   date?: any;
 }
 
+/** One logged work set (Firestore + app model). */
+export interface LoggedSet {
+  setNumber: number;
+  reps: number;
+  weight: number | null;
+}
+
 export interface WorkoutLogExercise {
   name: string;
-  sets: number;
   repsPlanned: string;
-  repsDone: string;
-  weight: number | null;
+  /** Per-set log (canonical). Legacy docs are normalized into this shape when read. */
+  sets: LoggedSet[];
   rest: string;
   tempo: string;
   rpe: number | null;
-  /** sets × reps (numeric) × weight (kg). */
+  /** Sum of reps×weight over logged sets. */
   volume?: number;
-  /** True when logged weight exceeds previous best for this exercise name. */
+  /** True when max weight this session beats prior best for this exercise. */
   isPr?: boolean;
 }
 

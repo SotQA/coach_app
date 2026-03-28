@@ -5,7 +5,8 @@ import { authService } from "../../services/authService";
 import { studentService } from "../../services/studentService";
 import { workoutService } from "../../services/workoutService";
 import type { StudentSummary } from "../../types/StudentSummary";
-import type { WorkoutPlan, WorkoutLog } from "../../types/Workout";
+import type { WorkoutPlan, WorkoutLog, WorkoutLogExercise } from "../../types/Workout";
+import { getSessionMaxWeightFromLogExercise } from "../../utils/workoutMetrics";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { WorkoutCard } from "../../components/WorkoutCard";
 import { Colors } from "../../theme/colors";
@@ -139,12 +140,13 @@ export default function StudentDetails() {
     const best = new Map<string, number>();
     for (const log of logs) {
       for (const ex of log.exercises ?? []) {
-        if (typeof ex.weight !== "number" || !Number.isFinite(ex.weight)) continue;
+        const w = getSessionMaxWeightFromLogExercise(ex as WorkoutLogExercise);
+        if (w == null) continue;
         const key = (ex.name ?? "").trim();
         if (!key) continue;
         const current = best.get(key);
-        if (current === undefined || ex.weight > current) {
-          best.set(key, ex.weight);
+        if (current === undefined || w > current) {
+          best.set(key, w);
         }
       }
     }
@@ -320,13 +322,19 @@ export default function StudentDetails() {
                   Volume: {log.totalVolume} kg
                 </Text>
               ) : null}
-              {(log.exercises ?? []).slice(0, 2).map((ex, i) => (
-                <Text key={`${log.id}-${i}`} style={Typography.secondary}>
-                  {ex.name}: {ex.repsPlanned || "—"} → {ex.repsDone} reps
-                  {ex.weight != null ? ` @ ${ex.weight}kg` : ""}
-                  {ex.isPr ? " 🔥" : ""}
-                </Text>
-              ))}
+              {(log.exercises ?? []).slice(0, 2).map((ex, i) => {
+                const s0 = ex.sets?.[0];
+                const w0 =
+                  s0 && s0.weight != null && Number.isFinite(s0.weight) ? `${s0.weight}kg` : s0 ? "BW" : "";
+                const tail = s0 ? ` · Set 1: ${w0} × ${s0.reps}` : "";
+                return (
+                  <Text key={`${log.id}-${i}`} style={Typography.secondary}>
+                    {ex.name}
+                    {ex.isPr ? " 🔥" : ""}
+                    {tail}
+                  </Text>
+                );
+              })}
               <PrimaryButton
                 title={log.coachFeedback ? "Edit feedback" : "Add feedback"}
                 onPress={() =>
