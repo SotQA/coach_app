@@ -11,7 +11,7 @@ import {
 import * as Haptics from "expo-haptics";
 import { Ionicons } from "@expo/vector-icons";
 import { PrimaryButton } from "../../components/PrimaryButton";
-import { authService } from "../../services/authService";
+import { useAuth } from "../../context/AuthContext";
 import { workoutService } from "../../services/workoutService";
 import type { LoggedSet, WorkoutLog, WorkoutPlan } from "../../types/Workout";
 import {
@@ -64,6 +64,7 @@ function getNextSetFocus(
 
 export default function WorkoutExecution() {
   const router = useRouter();
+  const { user: authUser } = useAuth();
   const params = useLocalSearchParams<{ workoutPlanId?: string }>();
   const workoutPlanId = useMemo(
     () => String(params.workoutPlanId ?? "").trim(),
@@ -109,8 +110,7 @@ export default function WorkoutExecution() {
           return;
         }
 
-        const user = await authService.getCurrentUserWithRole();
-        if (!user || user.role !== "student") {
+        if (!authUser || authUser.role !== "student") {
           setError("You must be logged in as a student.");
           return;
         }
@@ -121,12 +121,12 @@ export default function WorkoutExecution() {
           return;
         }
 
-        if (loaded.studentId !== user.id) {
+        if (loaded.studentId !== authUser.id) {
           setError("You don't have access to this workout plan.");
           return;
         }
 
-        const history = await workoutService.getWorkoutHistory(user.id);
+        const history = await workoutService.getWorkoutHistory(authUser.id);
         setPriorLogs(Array.isArray(history) ? history : []);
 
         setPlan(loaded);
@@ -151,7 +151,7 @@ export default function WorkoutExecution() {
     };
 
     load();
-  }, [workoutPlanId]);
+  }, [workoutPlanId, authUser?.id, authUser?.role]);
 
   // Session timer: starts when plan is ready; 1s tick; cleared on unmount or plan change.
   useEffect(() => {
@@ -338,8 +338,7 @@ export default function WorkoutExecution() {
     setError(null);
     setMessage(null);
     try {
-      const user = await authService.getCurrentUserWithRole();
-      if (!user || user.role !== "student") {
+      if (!authUser || authUser.role !== "student") {
         setError("You must be logged in as a student.");
         return;
       }
@@ -410,7 +409,7 @@ export default function WorkoutExecution() {
         started != null ? Math.max(0, Math.floor((Date.now() - started) / 1000)) : 0;
 
       await workoutService.logCompletedWorkout({
-        studentId: user.id,
+        studentId: authUser.id,
         workoutPlanId: plan.id,
         workoutName: plan.name,
         exercises: completedExercises,

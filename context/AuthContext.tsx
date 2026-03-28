@@ -75,12 +75,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return;
         }
 
+        setLoading(true);
         const docRef = doc(db, USERS_COLLECTION, firebaseUser.uid);
         const snap = await getDoc(docRef);
 
         if (!snap.exists()) {
+          await signOut(auth);
           setUser(null);
-          setLoading(false);
           return;
         }
 
@@ -105,12 +106,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const docRef = doc(db, USERS_COLLECTION, firebaseUser.uid);
     const snap = await getDoc(docRef);
     if (!snap.exists()) {
+      await signOut(auth);
       throw new Error("User profile not found.");
     }
     const data = snap.data() as any;
-    const appUser = mapToAppUser(firebaseUser, data);
-    setUser(appUser);
-    return appUser;
+    return mapToAppUser(firebaseUser, data);
   };
 
   const loginWithGoogleIdToken = async ({ idToken }: { idToken: string }): Promise<AppUser> => {
@@ -151,9 +151,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     const data = latest.data() as any;
-    const appUser = mapToAppUser(firebaseUser, data);
-    setUser(appUser);
-    return appUser;
+    return mapToAppUser(firebaseUser, data);
   };
 
   const signup = async (
@@ -180,7 +178,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       createdAt,
     });
 
-    const appUser = mapToAppUser(firebaseUser, {
+    return mapToAppUser(firebaseUser, {
       email: normalizedEmail,
       role,
       firstName,
@@ -189,13 +187,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       sex,
       createdAt,
     });
-    setUser(appUser);
-    return appUser;
   };
 
   const logout = async () => {
     await signOut(auth);
-    setUser(null);
   };
 
   return (

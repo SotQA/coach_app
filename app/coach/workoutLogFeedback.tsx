@@ -11,7 +11,7 @@ import {
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { ScreenLayout } from "../../components/ScreenLayout";
-import { authService } from "../../services/authService";
+import { useAuth } from "../../context/AuthContext";
 import { workoutService } from "../../services/workoutService";
 import type { WorkoutLog } from "../../types/Workout";
 import { Colors } from "../../theme/colors";
@@ -21,6 +21,7 @@ import { formatLogWhen } from "../../utils/formatLogWhen";
 
 export default function WorkoutLogFeedback() {
   const router = useRouter();
+  const { user } = useAuth();
   const params = useLocalSearchParams<{ logId?: string }>();
   const logId = useMemo(() => String(params.logId ?? "").trim(), [params]);
 
@@ -40,7 +41,6 @@ export default function WorkoutLogFeedback() {
           setError("Missing workout log.");
           return;
         }
-        const user = await authService.getCurrentUserWithRole();
         if (!user || user.role !== "coach") {
           setError("You must be logged in as a coach.");
           return;
@@ -60,7 +60,7 @@ export default function WorkoutLogFeedback() {
       }
     };
     load();
-  }, [logId]);
+  }, [logId, user?.id, user?.role]);
 
   const handleSave = async () => {
     if (!coachId || !logId) return;

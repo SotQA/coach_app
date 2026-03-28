@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { Platform } from "react-native";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -14,5 +15,24 @@ const firebaseConfig = {
 
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
+
+/**
+ * Persist auth session on iOS/Android (AsyncStorage). Web uses default browser persistence.
+ */
+function createAuth() {
+  if (Platform.OS === "web") {
+    return getAuth(app);
+  }
+  try {
+    const AsyncStorage = require("@react-native-async-storage/async-storage").default;
+    const { initializeAuth, getReactNativePersistence } = require("firebase/auth");
+    return initializeAuth(app, {
+      persistence: getReactNativePersistence(AsyncStorage),
+    });
+  } catch {
+    return getAuth(app);
+  }
+}
+
+export const auth = createAuth();
 export const db = getFirestore(app);

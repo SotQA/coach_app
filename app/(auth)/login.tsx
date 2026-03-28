@@ -74,8 +74,7 @@ export default function Login() {
     setError(null);
     setSubmitting(true);
     try {
-      const appUser = await login(email.trim(), password);
-      router.replace(appUser.role === "coach" ? "/coach/dashboard" : "/student/workouts");
+      await login(email.trim(), password);
     } catch (e: any) {
       setError(e.message ?? "Failed to login.");
     } finally {
@@ -116,8 +115,7 @@ export default function Login() {
         throw new Error("Google sign-in did not return an ID token.");
       }
 
-      const appUser = await loginWithGoogleIdToken({ idToken });
-      router.replace(appUser.role === "coach" ? "/coach/dashboard" : "/student/workouts");
+      await loginWithGoogleIdToken({ idToken });
     } catch (e: any) {
       console.error("[login] google sign-in error", e);
       setError(e.message ?? "Google sign-in failed.");

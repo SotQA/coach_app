@@ -3,7 +3,7 @@ import { ActivityIndicator, Alert, Text, View, ScrollView } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { WorkoutCard } from "../../components/WorkoutCard";
-import { authService } from "../../services/authService";
+import { useAuth } from "../../context/AuthContext";
 import { workoutService } from "../../services/workoutService";
 import type { WorkoutPlan } from "../../types/Workout";
 import { Colors } from "../../theme/colors";
@@ -14,6 +14,7 @@ import { BackButton } from "../../components/BackButton";
 
 export default function CoachWorkout() {
   const router = useRouter();
+  const { user } = useAuth();
   const params = useLocalSearchParams<{ workoutPlanId?: string }>();
   const workoutPlanId = useMemo(() => String(params.workoutPlanId ?? "").trim(), [params]);
 
@@ -33,7 +34,6 @@ export default function CoachWorkout() {
           return;
         }
 
-        const user = await authService.getCurrentUserWithRole();
         if (!user || user.role !== "coach") {
           setError("You must be logged in as a coach.");
           return;
@@ -59,7 +59,7 @@ export default function CoachWorkout() {
     };
 
     load();
-  }, [workoutPlanId]);
+  }, [workoutPlanId, user?.id, user?.role]);
 
   if (loading) {
     return (
@@ -122,7 +122,6 @@ export default function CoachWorkout() {
             title={duplicating ? "Duplicating…" : "Duplicate plan"}
             onPress={async () => {
               try {
-                const user = await authService.getCurrentUserWithRole();
                 if (!user || user.role !== "coach") {
                   Alert.alert("Sign in required", "You must be logged in as a coach.");
                   return;

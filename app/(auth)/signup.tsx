@@ -64,7 +64,7 @@ export default function Signup() {
         return;
       }
 
-      const appUser = await signup(
+      await signup(
         email.trim(),
         password,
         role,
@@ -73,7 +73,6 @@ export default function Signup() {
         dateOfBirth.trim(),
         sex
       );
-      router.replace(appUser.role === "coach" ? "/coach/dashboard" : "/student/workouts");
     } catch (e: any) {
       setError(e.message ?? "Failed to sign up.");
     } finally {

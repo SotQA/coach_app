@@ -1,12 +1,29 @@
 import { Stack } from "expo-router";
-import { AuthProvider } from "../context/AuthContext";
+import { ActivityIndicator, View } from "react-native";
+import { AuthProvider, useAuth } from "../context/AuthContext";
 import { BackButton } from "../components/BackButton";
 import { Colors } from "../theme/colors";
 
-export default function Layout() {
+function RootNavigator() {
+  const { loading } = useAuth();
+
+  if (loading) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: Colors.bg,
+        }}
+      >
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
   return (
-    <AuthProvider>
-      <Stack
+    <Stack
         screenOptions={{
           headerTitleAlign: "center",
           headerStyle: { backgroundColor: Colors.bg },
@@ -63,6 +80,13 @@ export default function Layout() {
         />
         <Stack.Screen name="student/progress" options={{ title: "Progress" }} />
       </Stack>
+  );
+}
+
+export default function Layout() {
+  return (
+    <AuthProvider>
+      <RootNavigator />
     </AuthProvider>
   );
 }

@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { ExerciseInput } from "../../components/ExerciseInput";
 import { PrimaryButton } from "../../components/PrimaryButton";
-import { authService } from "../../services/authService";
+import { useAuth } from "../../context/AuthContext";
 import { workoutService } from "../../services/workoutService";
 import { exerciseTemplateService } from "../../services/exerciseTemplateService";
 import type { Exercise } from "../../types/Workout";
@@ -15,6 +15,7 @@ import { ScreenLayout } from "../../components/ScreenLayout";
 
 export default function EditWorkout() {
   const router = useRouter();
+  const { user } = useAuth();
   const params = useLocalSearchParams<{ workoutPlanId?: string }>();
   const workoutPlanId = useMemo(() => String(params.workoutPlanId ?? "").trim(), [params]);
 
@@ -38,7 +39,6 @@ export default function EditWorkout() {
           return;
         }
 
-        const user = await authService.getCurrentUserWithRole();
         if (!user || user.role !== "coach") {
           setError("You must be logged in as a coach.");
           return;
@@ -69,7 +69,7 @@ export default function EditWorkout() {
     };
 
     load();
-  }, [workoutPlanId]);
+  }, [workoutPlanId, user?.id, user?.role]);
 
   const updateExercise = (index: number, exercise: Exercise) => {
     setExercises((prev) => {

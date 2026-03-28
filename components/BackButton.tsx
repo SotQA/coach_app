@@ -22,7 +22,7 @@ export function BackButton({
   hideIfNoBack = false,
 }: BackButtonProps) {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
 
   const handleBack = () => {
     const canGoBack =
@@ -34,7 +34,7 @@ export function BackButton({
     }
 
     if (!user) {
-      router.replace("/login");
+      if (!loading) router.replace("/login");
       return;
     }
 

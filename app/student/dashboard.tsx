@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { View, Text, ActivityIndicator, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
-import { authService } from "../../services/authService";
+import { useAuth } from "../../context/AuthContext";
 import { workoutService } from "../../services/workoutService";
 import type { AppUser } from "../../types/User";
 import type { WorkoutPlan } from "../../types/Workout";
@@ -18,6 +18,7 @@ import { ScreenLayout } from "../../components/ScreenLayout";
 // - Navigates to workout and history screens
 export default function StudentDashboard() {
   const router = useRouter();
+  const { user } = useAuth();
   const [, setStudent] = useState<AppUser | null>(null);
   const [plan, setPlan] = useState<WorkoutPlan | null>(null);
   const [loading, setLoading] = useState(true);
@@ -29,7 +30,6 @@ export default function StudentDashboard() {
       setLoading(true);
       try {
         setError(null);
-        const user = await authService.getCurrentUserWithRole();
         console.log("[student/dashboard] currentUser.id", user?.id);
         if (!user || user.role !== "student") {
           setError("You must be logged in as a student.");
@@ -48,7 +48,7 @@ export default function StudentDashboard() {
     };
 
     load();
-  }, []);
+  }, [user?.id, user?.role]);
 
   if (loading) {
     return (

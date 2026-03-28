@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { WorkoutCard } from "../../components/WorkoutCard";
-import { authService } from "../../services/authService";
+import { useAuth } from "../../context/AuthContext";
 import { workoutService } from "../../services/workoutService";
 import type { WorkoutPlan } from "../../types/Workout";
 import { Colors } from "../../theme/colors";
@@ -13,6 +13,7 @@ import { ScreenLayout } from "../../components/ScreenLayout";
 
 export default function TodayWorkout() {
   const router = useRouter();
+  const { user } = useAuth();
   const [plans, setPlans] = useState<WorkoutPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +24,6 @@ export default function TodayWorkout() {
       setLoading(true);
       try {
         setError(null);
-        const user = await authService.getCurrentUserWithRole();
         console.log("[student/workouts] currentUser.id", user?.id);
         if (!user || user.role !== "student") {
           setError("You must be logged in as a student.");
@@ -42,7 +42,7 @@ export default function TodayWorkout() {
     };
 
     load();
-  }, []);
+  }, [user?.id, user?.role]);
 
   if (loading) {
     return (

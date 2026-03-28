@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { View, Text, ActivityIndicator, ScrollView } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { authService } from "../../services/authService";
+import { useAuth } from "../../context/AuthContext";
 import { workoutService } from "../../services/workoutService";
 import type { WorkoutLog, WorkoutLogExercise } from "../../types/Workout";
 import { getSessionMaxWeightFromLogExercise } from "../../utils/workoutMetrics";
@@ -28,6 +28,7 @@ const toMs = (value: any): number => {
 
 export default function ExerciseDetails() {
   const router = useRouter();
+  const { user } = useAuth();
   const params = useLocalSearchParams<{ name?: string }>();
   const exerciseName = useMemo(() => (params.name ?? "").toString().trim(), [params]);
 
@@ -41,7 +42,6 @@ export default function ExerciseDetails() {
       setLoading(true);
       try {
         setError(null);
-        const user = await authService.getCurrentUserWithRole();
         console.log("[student/exerciseDetails] currentUser", user);
         if (!user || user.role !== "student") {
           setError("You must be logged in as a student.");
@@ -67,7 +67,7 @@ export default function ExerciseDetails() {
     };
 
     load();
-  }, [exerciseName]);
+  }, [exerciseName, user?.id, user?.role]);
 
   if (loading) {
     return (

@@ -6,7 +6,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { authService } from "../../services/authService";
+import { useAuth } from "../../context/AuthContext";
 import { studentService } from "../../services/studentService";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
@@ -19,6 +19,7 @@ import { ScreenLayout } from "../../components/ScreenLayout";
 // that will appear in their dashboard.
 export default function CreateStudent() {
   const router = useRouter();
+  const { user } = useAuth();
   const [studentUid, setStudentUid] = useState("");
   const [studentEmail, setStudentEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -28,7 +29,6 @@ export default function CreateStudent() {
     setError(null);
     setLoading(true);
     try {
-      const user = await authService.getCurrentUserWithRole();
       if (!user || user.role !== "coach") {
         setError("You must be logged in as a coach.");
         return;

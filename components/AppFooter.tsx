@@ -1,5 +1,4 @@
 import { View } from "react-native";
-import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PrimaryButton } from "./PrimaryButton";
 import { useAuth } from "../context/AuthContext";
@@ -9,7 +8,6 @@ import { Spacing } from "../theme/spacing";
 export const APP_FOOTER_HEIGHT = 56;
 
 export function AppFooter() {
-  const router = useRouter();
   const insets = useSafeAreaInsets();
   const { logout } = useAuth();
 
@@ -31,10 +29,7 @@ export function AppFooter() {
       <View style={{ height: APP_FOOTER_HEIGHT }}>
         <PrimaryButton
           title="Logout"
-          onPress={async () => {
-            await logout();
-            router.replace("/login");
-          }}
+          onPress={() => logout()}
         />
       </View>
     </View>

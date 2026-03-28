@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { View, Text, ActivityIndicator, Alert, FlatList, ScrollView } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { authService } from "../../services/authService";
+import { useAuth } from "../../context/AuthContext";
 import { studentService } from "../../services/studentService";
 import { workoutService } from "../../services/workoutService";
 import type { StudentSummary } from "../../types/StudentSummary";
@@ -18,6 +18,7 @@ import { ScreenLayout } from "../../components/ScreenLayout";
 
 export default function StudentDetails() {
   const router = useRouter();
+  const { user } = useAuth();
   const params = useLocalSearchParams<{ studentId?: string }>();
 
   const studentId = useMemo(() => String(params.studentId ?? "").trim(), [params]);
@@ -51,7 +52,6 @@ export default function StudentDetails() {
           return;
         }
 
-        const user = await authService.getCurrentUserWithRole();
         console.log("[coach/studentDetails] currentUser", user);
         if (!user || user.role !== "coach") {
           setError("You must be logged in as a coach.");
@@ -92,7 +92,7 @@ export default function StudentDetails() {
     };
 
     load();
-  }, [studentId]);
+  }, [studentId, user?.id, user?.role]);
 
   if (loading) {
     return (
@@ -263,7 +263,6 @@ export default function StudentDetails() {
                               onPress: async () => {
                                 try {
                                   setDeletingPlanId(item.id);
-                                  const user = await authService.getCurrentUserWithRole();
                                   if (!user || user.role !== "coach") {
                                     throw new Error("You must be logged in as a coach.");
                                   }

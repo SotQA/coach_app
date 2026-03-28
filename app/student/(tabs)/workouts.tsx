@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Pressable, Text, View, ActivityIndicator, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
-import { authService } from "../../../services/authService";
+import { useAuth } from "../../../context/AuthContext";
 import { workoutService } from "../../../services/workoutService";
 import type { WorkoutPlan } from "../../../types/Workout";
 import { Colors } from "../../../theme/colors";
@@ -13,6 +13,7 @@ import { ScreenLayout } from "../../../components/ScreenLayout";
 
 export default function StudentWorkouts() {
   const router = useRouter();
+  const { user } = useAuth();
   const [plans, setPlans] = useState<WorkoutPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -22,7 +23,6 @@ export default function StudentWorkouts() {
     setLoading(true);
     try {
       setError(null);
-      const user = await authService.getCurrentUserWithRole();
       console.log("[student/workouts] currentUser.id", user?.id);
       if (!user || user.role !== "student") {
         setError("You must be logged in as a student.");
@@ -37,7 +37,7 @@ export default function StudentWorkouts() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user?.id, user?.role]);
 
   useEffect(() => {
     load();

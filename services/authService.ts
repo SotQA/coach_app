@@ -1,9 +1,4 @@
-import {
-  createUserWithEmailAndPassword,
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  User,
-} from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, User } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "../firebase/firebaseConfig";
 import type { AppUser, SignupPayload, Sex } from "../types/User";
@@ -73,43 +68,17 @@ export const authService = {
     return mapToAppUser(user, data.role as AppUser["role"], data);
   },
 
-  // Subscribes to Firebase Auth state and resolves with the current AppUser (including role) if available.
-  // This keeps screens simple and centralizes the Firestore role lookup.
-  getCurrentUserWithRole(): Promise<AppUser | null> {
-    return new Promise((resolve, reject) => {
-      const unsubscribe = onAuthStateChanged(
-        auth,
-        async (user) => {
-          try {
-            if (!user) {
-              resolve(null);
-              unsubscribe();
-              return;
-            }
-
-            const docRef = doc(db, USERS_COLLECTION, user.uid);
-            const docSnap = await getDoc(docRef);
-
-            if (!docSnap.exists()) {
-              resolve(null);
-              unsubscribe();
-              return;
-            }
-
-            const data = docSnap.data() as any;
-            resolve(mapToAppUser(user, data.role as AppUser["role"], data));
-            unsubscribe();
-          } catch (error) {
-            reject(error);
-            unsubscribe();
-          }
-        },
-        (error) => {
-          reject(error);
-          unsubscribe();
-        }
-      );
-    });
+  /**
+   * Non-React helpers only: reads `auth.currentUser` + Firestore profile.
+   * UI should use `useAuth()` from AuthContext (single source of truth).
+   */
+  async getCurrentUserWithRole(): Promise<AppUser | null> {
+    const user = auth.currentUser;
+    if (!user) return null;
+    const docSnap = await getDoc(doc(db, USERS_COLLECTION, user.uid));
+    if (!docSnap.exists()) return null;
+    const data = docSnap.data() as any;
+    return mapToAppUser(user, data.role as AppUser["role"], data);
   },
 };
 

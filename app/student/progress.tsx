@@ -12,7 +12,7 @@ import { useRouter } from "expo-router";
 
 import type { WorkoutLog, WorkoutLogExercise } from "../../types/Workout";
 import { getSessionMaxWeightFromLogExercise } from "../../utils/workoutMetrics";
-import { authService } from "../../services/authService";
+import { useAuth } from "../../context/AuthContext";
 import { workoutService } from "../../services/workoutService";
 import { BackButton } from "../../components/BackButton";
 import { PrimaryButton } from "../../components/PrimaryButton";
@@ -68,6 +68,7 @@ const collapseConsecutiveDuplicates = (values: number[], dates: number[]) => {
 
 export default function ProgressScreen() {
   const router = useRouter();
+  const { user } = useAuth();
   const { width: windowWidth } = useWindowDimensions();
 
   const [logs, setLogs] = useState<WorkoutLog[]>([]);
@@ -81,7 +82,6 @@ export default function ProgressScreen() {
       setLoading(true);
       setError(null);
       try {
-        const user = await authService.getCurrentUserWithRole();
         if (!user || user.role !== "student") {
           setError("You must be logged in as a student.");
           return;
@@ -98,7 +98,7 @@ export default function ProgressScreen() {
     };
 
     load();
-  }, []);
+  }, [user?.id, user?.role]);
 
   const processed = useMemo(() => {
     const logsAsc = [...logs].sort((a, b) => toMs((a as any).completedAt ?? (a as any).date) - toMs((b as any).completedAt ?? (b as any).date));

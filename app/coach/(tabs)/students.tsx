@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { View, Text, FlatList, ActivityIndicator, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
-import { authService } from "../../../services/authService";
+import { useAuth } from "../../../context/AuthContext";
 import { studentService } from "../../../services/studentService";
 import type { StudentSummary } from "../../../types/StudentSummary";
 import { StudentCard } from "../../../components/StudentCard";
@@ -13,22 +13,23 @@ import { ScreenLayout } from "../../../components/ScreenLayout";
 
 export default function CoachStudents() {
   const router = useRouter();
+  const { user } = useAuth();
   const [students, setStudents] = useState<StudentSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!user || user.role !== "coach") {
+      setLoading(false);
+      return;
+    }
+
     const loadData = async () => {
       console.log("[coach/students] load start");
       setLoading(true);
       try {
         setError(null);
-        const user = await authService.getCurrentUserWithRole();
-        console.log("[coach/students] currentUser.id", user?.id);
-        if (!user || user.role !== "coach") {
-          setError("You must be logged in as a coach.");
-          return;
-        }
+        console.log("[coach/students] currentUser.id", user.id);
         const data = await studentService.getStudentsForCoach(user.id);
         console.log("[coach/students] students", data.length);
         setStudents(data);
@@ -41,7 +42,7 @@ export default function CoachStudents() {
     };
 
     loadData();
-  }, []);
+  }, [user]);
 
   if (loading) {
     return (

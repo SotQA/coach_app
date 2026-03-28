@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { authService } from "../../services/authService";
+import { useAuth } from "../../context/AuthContext";
 import { normalizeLoggedExercise, workoutService } from "../../services/workoutService";
 import type { WorkoutLog, WorkoutLogExercise } from "../../types/Workout";
 import { computeExerciseVolumeFromLoggedSets } from "../../utils/workoutMetrics";
@@ -19,6 +19,7 @@ import { ScreenLayout } from "../../components/ScreenLayout";
 // Displays the student's historical workout logs in a simple list.
 export default function WorkoutHistory() {
   const router = useRouter();
+  const { user } = useAuth();
   const [logs, setLogs] = useState<WorkoutLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -68,7 +69,6 @@ export default function WorkoutHistory() {
       setLoading(true);
       try {
         setError(null);
-        const user = await authService.getCurrentUserWithRole();
         console.log("[student/workoutHistory] currentUser", user);
         if (!user || user.role !== "student") {
           setError("You must be logged in as a student.");
@@ -86,7 +86,7 @@ export default function WorkoutHistory() {
     };
 
     load();
-  }, []);
+  }, [user?.id, user?.role]);
 
   if (loading) {
     return (

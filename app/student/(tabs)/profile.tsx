@@ -1,60 +1,16 @@
-import { useEffect, useState } from "react";
-import { View, Text, ActivityIndicator } from "react-native";
-import { authService } from "../../../services/authService";
-import type { AppUser } from "../../../types/User";
+import { View, Text } from "react-native";
 import { ScreenLayout } from "../../../components/ScreenLayout";
 import { PrimaryButton } from "../../../components/PrimaryButton";
 import { useAuth } from "../../../context/AuthContext";
-import { useRouter } from "expo-router";
 import { Colors } from "../../../theme/colors";
 import { Radius, Spacing } from "../../../theme/spacing";
 import { Typography } from "../../../theme/typography";
 
 export default function StudentProfile() {
-  const router = useRouter();
-  const { logout } = useAuth();
-  const [user, setUser] = useState<AppUser | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { user, logout } = useAuth();
 
-  useEffect(() => {
-    const load = async () => {
-      setLoading(true);
-      try {
-        setError(null);
-        const u = await authService.getCurrentUserWithRole();
-        if (!u || u.role !== "student") {
-          setError("You must be logged in as a student.");
-          return;
-        }
-        setUser(u);
-      } catch (e: any) {
-        setError(e.message ?? "Failed to load profile.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, []);
-
-  if (loading) {
-    return (
-      <ScreenLayout>
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: Colors.bg }}>
-          <ActivityIndicator />
-        </View>
-      </ScreenLayout>
-    );
-  }
-
-  if (error) {
-    return (
-      <ScreenLayout>
-        <View style={{ flex: 1, justifyContent: "center", padding: Spacing.md, backgroundColor: Colors.bg }}>
-          <Text style={{ color: Colors.danger }}>{error}</Text>
-        </View>
-      </ScreenLayout>
-    );
+  if (!user) {
+    return null;
   }
 
   return (
@@ -72,31 +28,28 @@ export default function StudentProfile() {
         >
           <Text style={Typography.secondary}>Full name</Text>
           <Text style={{ ...Typography.section, marginBottom: Spacing.sm }}>
-            {user && (user.firstName || user.lastName) ? `${user.firstName} ${user.lastName}`.trim() : "—"}
+            {user.firstName || user.lastName ? `${user.firstName} ${user.lastName}`.trim() : "—"}
           </Text>
 
           <Text style={Typography.secondary}>Email</Text>
-          <Text style={{ ...Typography.section, marginBottom: Spacing.sm }}>{user?.email ?? "—"}</Text>
+          <Text style={{ ...Typography.section, marginBottom: Spacing.sm }}>{user.email ?? "—"}</Text>
 
           <Text style={Typography.secondary}>Role</Text>
-          <Text style={{ ...Typography.section, marginBottom: Spacing.sm }}>{user?.role ?? "—"}</Text>
+          <Text style={{ ...Typography.section, marginBottom: Spacing.sm }}>{user.role ?? "—"}</Text>
 
           <Text style={Typography.secondary}>Date of birth</Text>
-          <Text style={{ ...Typography.section, marginBottom: Spacing.sm }}>{user?.dateOfBirth ?? "—"}</Text>
+          <Text style={{ ...Typography.section, marginBottom: Spacing.sm }}>{user.dateOfBirth ?? "—"}</Text>
 
           <Text style={Typography.secondary}>Sex</Text>
           <Text style={Typography.section}>
-            {user?.sex ? String(user.sex).charAt(0).toUpperCase() + String(user.sex).slice(1) : "—"}
+            {user.sex ? String(user.sex).charAt(0).toUpperCase() + String(user.sex).slice(1) : "—"}
           </Text>
         </View>
 
         <View style={{ marginTop: Spacing.lg }}>
           <PrimaryButton
             title="Logout"
-            onPress={async () => {
-              await logout();
-              router.replace("/login");
-            }}
+            onPress={() => logout()}
             style={{ width: "auto", backgroundColor: Colors.border, alignSelf: "flex-start" }}
             textStyle={{ fontSize: 14, fontWeight: "700" }}
           />
@@ -105,4 +58,3 @@ export default function StudentProfile() {
     </ScreenLayout>
   );
 }
-

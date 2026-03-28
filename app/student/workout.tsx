@@ -5,7 +5,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { authService } from "../../services/authService";
+import { useAuth } from "../../context/AuthContext";
 import { workoutService } from "../../services/workoutService";
 import type { AppUser } from "../../types/User";
 import type { Exercise } from "../../types/Workout";
@@ -23,6 +23,7 @@ import { ScreenLayout } from "../../components/ScreenLayout";
 // - Uses ExerciseInput to keep UI consistent with coach's plan builder
 export default function WorkoutScreen() {
   const router = useRouter();
+  const { user: authUser } = useAuth();
   const [student, setStudent] = useState<AppUser | null>(null);
   const [workoutPlanId, setWorkoutPlanId] = useState<string | null>(null);
   const [exercise, setExercise] = useState<Exercise>(
@@ -38,14 +39,13 @@ export default function WorkoutScreen() {
       console.log("[student/workout] load start");
       try {
         setError(null);
-        const user = await authService.getCurrentUserWithRole();
-        console.log("[student/workout] currentUser.id", user?.id);
-        if (!user || user.role !== "student") {
+        console.log("[student/workout] currentUser.id", authUser?.id);
+        if (!authUser || authUser.role !== "student") {
           setError("You must be logged in as a student.");
           return;
         }
-        setStudent(user);
-        const plan = await workoutService.getWorkoutPlanForStudent(user.id);
+        setStudent(authUser);
+        const plan = await workoutService.getWorkoutPlanForStudent(authUser.id);
         console.log("[student/workout] workoutPlan", plan?.id ?? null);
         setWorkoutPlanId(plan?.id ?? null);
       } catch (e: any) {
@@ -57,7 +57,7 @@ export default function WorkoutScreen() {
     };
 
     loadUser();
-  }, []);
+  }, [authUser?.id, authUser?.role]);
 
   const handleLogWorkout = async () => {
     if (!student) return;
