@@ -12,7 +12,7 @@ interface PrimaryButtonProps {
   disabled?: boolean;
 }
 
-// Simple shared primary button with consistent rounded styling and color.
+// Primary = lime fill + dark label; callers can override `style.backgroundColor` for secondary rows.
 export const PrimaryButton: FC<PrimaryButtonProps> = ({
   title,
   onPress,
@@ -23,14 +23,24 @@ export const PrimaryButton: FC<PrimaryButtonProps> = ({
   const requestedWidth = (style as any)?.width as ViewStyle["width"] | undefined;
   const containerWidth = requestedWidth ?? "100%";
 
+  const customBg = style?.backgroundColor;
+  const usesPrimaryFill =
+    !disabled && (customBg === undefined || customBg === Colors.primary);
+
   const baseStyle: ViewStyle = {
-    borderRadius: Radius.md,
+    borderRadius: Radius.lg,
     paddingVertical: 15,
     paddingHorizontal: Spacing.md,
     backgroundColor: disabled ? Colors.disabled : Colors.primary,
     alignItems: "center",
     justifyContent: "center",
   };
+
+  const defaultLabelColor = disabled
+    ? Colors.textMuted
+    : usesPrimaryFill
+      ? Colors.onPrimary
+      : Colors.text;
 
   const scale = useRef(new Animated.Value(1)).current;
   const animateTo = (toValue: number) => {
@@ -53,7 +63,6 @@ export const PrimaryButton: FC<PrimaryButtonProps> = ({
       <Animated.View
         style={[
           baseStyle,
-          // Default to full width unless caller overrides.
           { width: "100%" },
           style,
           { transform: [{ scale }] },
@@ -63,7 +72,7 @@ export const PrimaryButton: FC<PrimaryButtonProps> = ({
           style={[
             {
               ...Typography.section,
-              color: Colors.text,
+              color: defaultLabelColor,
               textAlign: "center",
             },
             textStyle,
@@ -75,4 +84,3 @@ export const PrimaryButton: FC<PrimaryButtonProps> = ({
     </Pressable>
   );
 };
-

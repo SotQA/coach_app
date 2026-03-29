@@ -1,21 +1,22 @@
 export const Colors = {
-  // Base
-  bg: "#0F172A",
-  card: "#111827",
-  surface: "#020617",
-  border: "#1F2937",
+  // Base — dark mode + lime accent (coach dashboard design)
+  bg: "#080808",
+  card: "#1C1C1E",
+  surface: "#2C2C2E",
+  border: "#38383A",
+  tabBar: "#101012",
 
   // Text
-  text: "#F9FAFB",
-  textSecondary: "#9CA3AF",
-  textMuted: "#6B7280",
+  text: "#FFFFFF",
+  textSecondary: "#AEAEB2",
+  textMuted: "#8E8E93",
 
   // Brand / status
-  primary: "#2563EB",
-  danger: "#FCA5A5",
-  success: "#6EE7B7",
+  primary: "#D4FF44",
+  onPrimary: "#0A0A0A",
+  danger: "#FF453A",
+  success: "#34C759",
 
   // Button
-  disabled: "#A0AEC0",
+  disabled: "#48484A",
 } as const;
-

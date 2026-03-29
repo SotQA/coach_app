@@ -103,7 +103,7 @@ export default function WorkoutScreen() {
           flex: 1,
           justifyContent: "center",
           alignItems: "center",
-          backgroundColor: "#0F172A",
+          backgroundColor: Colors.bg,
         }}
       >
         <ActivityIndicator />
@@ -118,7 +118,7 @@ export default function WorkoutScreen() {
           flex: 1,
           justifyContent: "center",
           padding: 16,
-          backgroundColor: "#0F172A",
+          backgroundColor: Colors.bg,
         }}
       >
         <Text style={{ color: "#FCA5A5", marginBottom: 8 }}>{error}</Text>

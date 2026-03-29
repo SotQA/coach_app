@@ -18,10 +18,10 @@ export const StudentCard: FC<StudentCardProps> = ({ student, onPress }) => {
   return (
     <View
       style={{
-        borderRadius: Radius.md,
+        borderRadius: Radius.lg,
         padding: Spacing.md,
         marginVertical: Spacing.xs,
-        backgroundColor: Colors.surface,
+        backgroundColor: Colors.card,
         borderWidth: 1,
         borderColor: Colors.border,
       }}

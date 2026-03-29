@@ -11,7 +11,7 @@ export default function StudentTabsLayout() {
           backgroundColor: Colors.card,
           borderTopColor: Colors.border,
         },
-        tabBarActiveTintColor: Colors.text,
+        tabBarActiveTintColor: Colors.primary,
         tabBarInactiveTintColor: Colors.textMuted,
       }}
     >

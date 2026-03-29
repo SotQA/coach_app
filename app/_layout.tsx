@@ -17,7 +17,7 @@ function RootNavigator() {
           backgroundColor: Colors.bg,
         }}
       >
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color={Colors.primary} />
       </View>
     );
   }
