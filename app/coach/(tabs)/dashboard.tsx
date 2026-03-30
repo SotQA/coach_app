@@ -222,69 +222,75 @@ export default function CoachDashboard() {
 
           <View
             style={{
-              width: "100%",
-              backgroundColor: Colors.card,
-              borderRadius: Radius.lg,
-              padding: Spacing.lg,
+              flexDirection: "row",
+              alignItems: "stretch",
+              gap: Spacing.md,
               marginBottom: Spacing.md,
-              borderWidth: 1,
-              borderColor: Colors.border,
             }}
           >
-            <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.md }}>
-              <View style={{ flex: 1 }}>
-                <View
-                  style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: 22,
-                    backgroundColor: Colors.surface,
-                    alignItems: "center",
-                    justifyContent: "center",
-                    marginBottom: Spacing.md,
-                  }}
-                >
-                  <Ionicons name="people" size={22} color={Colors.primary} />
-                </View>
-                <Text style={{ fontSize: 40, fontWeight: "800", color: Colors.text }}>{students.length}</Text>
-                <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4 }}>
-                  Total Students
-                </Text>
-              </View>
-
+            <View
+              style={{
+                flex: 1,
+                backgroundColor: Colors.card,
+                borderRadius: Radius.lg,
+                padding: Spacing.md,
+                borderWidth: 1,
+                borderColor: Colors.border,
+              }}
+            >
               <View
                 style={{
-                  width: 1,
-                  alignSelf: "stretch",
-                  backgroundColor: Colors.border,
-                  opacity: 0.8,
+                  width: 36,
+                  height: 36,
+                  borderRadius: 18,
+                  backgroundColor: Colors.surface,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: Spacing.sm,
                 }}
-              />
-
-              <View style={{ flex: 1 }}>
-                <View
-                  style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: 22,
-                    backgroundColor: Colors.surface,
-                    alignItems: "center",
-                    justifyContent: "center",
-                    marginBottom: Spacing.md,
-                  }}
-                >
-                  <Ionicons name="barbell-outline" size={22} color={Colors.primary} />
-                </View>
-                <Text style={{ fontSize: 40, fontWeight: "800", color: Colors.text }}>
-                  {workoutsCompletedToday}
-                </Text>
-                <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4 }}>
-                  Workouts Completed
-                </Text>
-                <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 2 }}>
-                  Today
-                </Text>
+              >
+                <Ionicons name="people" size={18} color={Colors.primary} />
               </View>
+              <Text style={{ fontSize: 32, fontWeight: "800", color: Colors.text, lineHeight: 36 }}>
+                {students.length}
+              </Text>
+              <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 2 }}>
+                Total Students
+              </Text>
+            </View>
+
+            <View
+              style={{
+                flex: 1,
+                backgroundColor: Colors.card,
+                borderRadius: Radius.lg,
+                padding: Spacing.md,
+                borderWidth: 1,
+                borderColor: Colors.border,
+              }}
+            >
+              <View
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 18,
+                  backgroundColor: Colors.surface,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: Spacing.sm,
+                }}
+              >
+                <Ionicons name="barbell-outline" size={18} color="#64D2FF" />
+              </View>
+              <Text style={{ fontSize: 32, fontWeight: "800", color: Colors.text, lineHeight: 36 }}>
+                {workoutsCompletedToday}
+              </Text>
+              <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 2 }}>
+                Workouts Completed
+              </Text>
+              <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 2 }}>
+                Today
+              </Text>
             </View>
           </View>
 
