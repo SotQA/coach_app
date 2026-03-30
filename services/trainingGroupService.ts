@@ -2,6 +2,7 @@ import {
   addDoc,
   collection,
   doc,
+  getDoc,
   getDocs,
   limit,
   orderBy,
@@ -120,6 +121,14 @@ export const trainingGroupService = {
     assertNonEmpty(groupId, "groupId");
     const ref = doc(db, TRAINING_GROUPS_COLLECTION, groupId);
     await updateDoc(ref, sanitizeForFirestore({ updatedAt: new Date() }) as any);
+  },
+
+  async getTrainingGroupById(groupId: string): Promise<TrainingGroup | null> {
+    assertNonEmpty(groupId, "groupId");
+    const ref = doc(db, TRAINING_GROUPS_COLLECTION, groupId);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return null;
+    return mapGroupDoc(snap as unknown as QueryDocumentSnapshot);
   },
 
   async getTrainingGroupsForStudent(coachId: string, studentId: string): Promise<TrainingGroup[]> {

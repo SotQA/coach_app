@@ -38,6 +38,8 @@ export default function CoachLayout() {
           headerLeft: () => null,
         }}
       />
+      <Stack.Screen name="selectTrainingGroup" options={{ title: "Select Training Group" }} />
+      <Stack.Screen name="createTrainingGroup" options={{ title: "Create Training Group" }} />
       <Stack.Screen name="createWorkoutPlan" options={{ title: "Create Workout Plan" }} />
       <Stack.Screen name="workout" options={{ title: "Workout" }} />
       <Stack.Screen name="editWorkout" options={{ title: "Edit Workout" }} />
