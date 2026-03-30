@@ -1,5 +1,5 @@
 import { Platform, View } from "react-native";
-import { Tabs, useRouter, Stack } from "expo-router";
+import { Tabs, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Colors } from "../../../theme/colors";
@@ -19,11 +19,9 @@ export default function CoachTabsLayout() {
       : { elevation: 10 };
 
   return (
-    <>
-      <Stack.Screen options={{ headerShown: false }} />
-      <Tabs
-        screenOptions={{
-          headerShown: false,
+    <Tabs
+      screenOptions={{
+        headerShown: false,
         tabBarStyle: {
           backgroundColor: Colors.tabBar,
           borderTopColor: Colors.border,
@@ -35,8 +33,8 @@ export default function CoachTabsLayout() {
         tabBarActiveTintColor: Colors.primary,
         tabBarInactiveTintColor: Colors.textMuted,
         tabBarLabelStyle: { fontSize: 11, fontWeight: "600" },
-        }}
-      >
+      }}
+    >
       <Tabs.Screen
         name="dashboard"
         options={{
@@ -106,7 +104,6 @@ export default function CoachTabsLayout() {
           ),
         }}
       />
-      </Tabs>
-    </>
+    </Tabs>
   );
 }

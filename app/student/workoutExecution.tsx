@@ -457,7 +457,6 @@ export default function WorkoutExecution() {
         }}
       >
         <Text style={{ color: Colors.danger, marginBottom: Spacing.sm }}>{error}</Text>
-        <PrimaryButton title="Back" onPress={() => router.back()} />
       </View>
     );
   }
@@ -475,7 +474,6 @@ export default function WorkoutExecution() {
         <Text style={{ color: Colors.danger, marginBottom: Spacing.sm }}>
           Workout plan not loaded.
         </Text>
-        <PrimaryButton title="Back" onPress={() => router.back()} />
       </View>
     );
   }

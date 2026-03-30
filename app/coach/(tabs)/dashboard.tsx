@@ -143,7 +143,8 @@ export default function CoachDashboard() {
           contentContainerStyle={{
             paddingHorizontal: Spacing.md,
             paddingBottom: Spacing.xl,
-            paddingTop: Spacing.sm,
+            // Give the header (avatar + name) more breathing room below the notch.
+            paddingTop: Spacing.lg,
           }}
         >
           <View

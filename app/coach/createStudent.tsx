@@ -20,7 +20,6 @@ import { ScreenLayout } from "../../components/ScreenLayout";
 export default function CreateStudent() {
   const router = useRouter();
   const { user } = useAuth();
-  const [studentUid, setStudentUid] = useState("");
   const [studentEmail, setStudentEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,18 +33,14 @@ export default function CreateStudent() {
         return;
       }
 
-      const uid = studentUid.trim();
       const email = studentEmail.trim();
 
-      if (email) {
-        await studentService.assignStudentToCoachByEmail(email, user.id);
-      } else {
-        if (!uid) {
-          setError("Enter a student email or UID.");
-          return;
-        }
-        await studentService.assignStudentToCoach(uid, user.id);
+      if (!email) {
+        setError("Enter a student email.");
+        return;
       }
+
+      await studentService.assignStudentToCoachByEmail(email, user.id);
 
       router.replace("/coach/dashboard");
     } catch (e: any) {
@@ -59,7 +54,17 @@ export default function CreateStudent() {
     <ScreenLayout>
       <KeyboardAwareScrollView
         style={{ flex: 1, backgroundColor: Colors.bg }}
-        contentContainerStyle={{ flexGrow: 1, padding: Spacing.md, paddingBottom: 48 }}
+        contentContainerStyle={{
+          flexGrow: 1,
+          padding: Spacing.md,
+          paddingBottom: 48,
+          backgroundColor: Colors.bg,
+        }}
+        // Prevent iOS bounce/overscroll revealing white during swipe-back.
+        bounces={false}
+        alwaysBounceVertical={false}
+        // Prevent Android glow/overscroll.
+        overScrollMode="never"
         keyboardShouldPersistTaps="handled"
         enableOnAndroid
         enableResetScrollToCoords={false}
@@ -85,7 +90,7 @@ export default function CreateStudent() {
             Create Student
           </Text>
           <Text style={{ ...Typography.secondary, marginBottom: Spacing.md }}>
-            Link an existing student account to your roster using their Firebase Auth UID.
+            Link an existing student account to your roster.
           </Text>
           <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Student Email</Text>
           <TextInput
@@ -105,28 +110,8 @@ export default function CreateStudent() {
               backgroundColor: Colors.surface,
             }}
           />
-          <Text style={{ ...Typography.secondary, marginBottom: Spacing.sm }}>
-            Or link by UID below.
-          </Text>
-          <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Student UID</Text>
-          <TextInput
-            placeholder="Firebase Auth UID"
-            placeholderTextColor={Colors.textMuted}
-            autoCapitalize="none"
-            value={studentUid}
-            onChangeText={setStudentUid}
-            style={{
-              borderWidth: 1,
-              borderColor: Colors.border,
-              padding: 12,
-              borderRadius: Radius.sm,
-              marginBottom: Spacing.sm,
-              color: Colors.text,
-              backgroundColor: Colors.surface,
-            }}
-          />
           <Text style={{ ...Typography.secondary, marginBottom: Spacing.md }}>
-            The student must have already signed up. This sets `users/{studentUid}.coachId` to you.
+            The student must have already signed up with this email.
           </Text>
 
           {loading ? (
@@ -136,8 +121,8 @@ export default function CreateStudent() {
               <PrimaryButton title="Link Student" onPress={handleCreate} />
               <View style={{ marginTop: Spacing.sm }}>
                 <PrimaryButton
-                  title="Back to Students"
-                  onPress={() => router.replace("/coach/dashboard")}
+                  title="Cancel"
+                  onPress={() => router.back()}
                   style={{ backgroundColor: Colors.border }}
                 />
               </View>

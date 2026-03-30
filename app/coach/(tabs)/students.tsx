@@ -68,7 +68,13 @@ export default function CoachStudents() {
   return (
     <ScreenLayout>
       <View style={{ flex: 1, backgroundColor: Colors.bg }}>
-        <ScrollView contentContainerStyle={{ padding: Spacing.md, paddingBottom: Spacing.lg }}>
+        <ScrollView
+          contentContainerStyle={{
+            padding: Spacing.md,
+            paddingBottom: Spacing.lg,
+            paddingTop: Spacing.lg,
+          }}
+        >
           <View
             style={{
               backgroundColor: Colors.card,

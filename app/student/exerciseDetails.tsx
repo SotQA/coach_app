@@ -94,7 +94,6 @@ export default function ExerciseDetails() {
         }}
       >
         <Text style={{ color: "#FCA5A5", marginBottom: 8 }}>{error}</Text>
-        <PrimaryButton title="Back" onPress={() => router.back()} />
       </View>
     );
   }

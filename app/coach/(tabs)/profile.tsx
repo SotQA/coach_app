@@ -54,7 +54,11 @@ export default function CoachProfile() {
     <ScreenLayout>
       <ScrollView
         style={{ flex: 1, backgroundColor: Colors.bg }}
-        contentContainerStyle={{ padding: Spacing.md, paddingBottom: Spacing.lg }}
+        contentContainerStyle={{
+          padding: Spacing.md,
+          paddingBottom: Spacing.lg,
+          paddingTop: Spacing.lg,
+        }}
       >
         <ProfileCard style={{ alignItems: "center", paddingVertical: 20, marginBottom: Spacing.sm }}>
           <Text style={{ ...Typography.title, fontSize: 28, textAlign: "center" }}>{fullName}</Text>

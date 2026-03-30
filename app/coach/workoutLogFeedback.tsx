@@ -93,7 +93,6 @@ export default function WorkoutLogFeedback() {
     return (
       <View style={{ flex: 1, justifyContent: "center", padding: Spacing.md, backgroundColor: Colors.bg }}>
         <Text style={{ color: Colors.danger, marginBottom: Spacing.sm }}>{error}</Text>
-        <PrimaryButton title="Back" onPress={() => router.back()} />
       </View>
     );
   }

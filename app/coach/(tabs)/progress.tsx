@@ -7,7 +7,15 @@ import { ScreenLayout } from "../../../components/ScreenLayout";
 export default function CoachProgressTab() {
   return (
     <ScreenLayout>
-      <View style={{ flex: 1, backgroundColor: Colors.bg, padding: Spacing.md }}>
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: Colors.bg,
+          paddingHorizontal: Spacing.md,
+          paddingBottom: Spacing.md,
+          paddingTop: Spacing.lg,
+        }}
+      >
         <View
           style={{
             backgroundColor: Colors.card,
