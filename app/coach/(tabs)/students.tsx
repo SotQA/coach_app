@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
-import { View, Text, FlatList, ActivityIndicator, ScrollView } from "react-native";
+import { useEffect, useMemo, useState } from "react";
+import { View, Text, FlatList, ActivityIndicator, ScrollView, TextInput, Pressable } from "react-native";
 import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../../context/AuthContext";
 import { studentService } from "../../../services/studentService";
 import type { StudentSummary } from "../../../types/StudentSummary";
@@ -15,8 +16,26 @@ export default function CoachStudents() {
   const router = useRouter();
   const { user } = useAuth();
   const [students, setStudents] = useState<StudentSummary[]>([]);
+  const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const filteredStudents = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return students;
+    return students.filter((s) => {
+      const fullName = `${s.firstName ?? ""} ${s.lastName ?? ""}`.trim().toLowerCase();
+      const email = (s.email ?? "").trim().toLowerCase();
+      return (fullName && fullName.includes(q)) || (email && email.includes(q));
+    });
+  }, [students, query]);
+
+  const coachInitials = useMemo(() => {
+    const a = user?.firstName?.trim()?.[0] ?? "";
+    const b = user?.lastName?.trim()?.[0] ?? "";
+    const s = `${a}${b}`.toUpperCase();
+    return s || "C";
+  }, [user?.firstName, user?.lastName]);
 
   useEffect(() => {
     if (!user || user.role !== "coach") {
@@ -70,50 +89,100 @@ export default function CoachStudents() {
       <View style={{ flex: 1, backgroundColor: Colors.bg }}>
         <ScrollView
           contentContainerStyle={{
-            padding: Spacing.md,
+            paddingHorizontal: Spacing.md,
             paddingBottom: Spacing.lg,
             paddingTop: Spacing.lg,
           }}
         >
           <View
             style={{
-              backgroundColor: Colors.card,
-              borderRadius: Radius.md,
-              padding: 20,
-              marginBottom: Spacing.md,
-              borderWidth: 1,
-              borderColor: Colors.border,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+              paddingBottom: Spacing.md,
+              marginBottom: Spacing.sm,
+              borderBottomWidth: 1,
+              borderBottomColor: Colors.border,
             }}
           >
-            <Text style={{ ...Typography.title, fontSize: 22, marginBottom: 4 }}>Students</Text>
-            <Text style={{ ...Typography.secondary, marginBottom: Spacing.md }}>
-              Tap a student to view plans and progress.
-            </Text>
-
-            <View
-              style={{
-                flexDirection: "row",
-                gap: Spacing.sm,
-                marginBottom: Spacing.sm,
-              }}
-            >
-              <View
-                style={{
-                  flex: 1,
-                  paddingVertical: 10,
-                  paddingHorizontal: Spacing.sm,
-                  borderRadius: Radius.pill,
+            <View style={{ flexDirection: "row", alignItems: "center", flex: 1, gap: Spacing.sm }}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Open profile settings"
+                onPress={() => router.push("/coach/profile")}
+                style={({ pressed }) => ({
+                  width: 52,
+                  height: 52,
+                  borderRadius: 26,
+                  borderWidth: 2,
+                  borderColor: Colors.primary,
                   backgroundColor: Colors.surface,
-                  borderWidth: 1,
-                  borderColor: Colors.border,
-                }}
+                  alignItems: "center",
+                  justifyContent: "center",
+                  opacity: pressed ? 0.9 : 1,
+                })}
               >
-                <Text style={{ ...Typography.section, fontWeight: "800" }}>{students.length}</Text>
-                <Text style={{ ...Typography.secondary, marginTop: 2 }}>Students</Text>
+                <Text style={{ ...Typography.section, fontSize: 18, fontWeight: "900" }}>{coachInitials}</Text>
+              </Pressable>
+              <View style={{ flex: 1 }}>
+                <Text style={{ ...Typography.title, fontSize: 22 }}>Students</Text>
+                <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 2 }}>
+                  {students.length} Active Students
+                </Text>
               </View>
             </View>
 
-            <PrimaryButton title="Create Student" onPress={() => router.push("/coach/createStudent")} />
+            <View style={{ flexDirection: "row", gap: Spacing.sm }}>
+              <PrimaryButton
+                title="Add Student"
+                onPress={() => router.push("/coach/createStudent")}
+                style={{
+                  width: 44,
+                  height: 44,
+                  paddingHorizontal: 0,
+                  borderRadius: 22,
+                  backgroundColor: Colors.card,
+                  borderWidth: 1,
+                  borderColor: Colors.border,
+                }}
+                textStyle={{ color: "transparent" }}
+                leftIcon={<Ionicons name="person-add-outline" size={20} color={Colors.primary} />}
+              />
+            </View>
+          </View>
+
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: Spacing.sm,
+              backgroundColor: Colors.card,
+              borderRadius: Radius.lg,
+              borderWidth: 1,
+              borderColor: Colors.border,
+              paddingHorizontal: Spacing.sm,
+              paddingVertical: 12,
+              marginBottom: Spacing.md,
+            }}
+          >
+            <Ionicons name="search" size={18} color={Colors.textMuted} />
+            <TextInput
+              value={query}
+              onChangeText={setQuery}
+              placeholder="Search students…"
+              placeholderTextColor={Colors.textMuted}
+              autoCapitalize="none"
+              style={{
+                flex: 1,
+                color: Colors.text,
+                ...Typography.section,
+                fontWeight: "600",
+                paddingVertical: 0,
+              }}
+            />
+            {query.trim() ? (
+              <Ionicons name="close-circle" size={18} color={Colors.textMuted} onPress={() => setQuery("")} />
+            ) : null}
           </View>
 
           {students.length === 0 ? (
@@ -132,12 +201,20 @@ export default function CoachStudents() {
             </View>
           ) : (
             <FlatList
-              data={students}
+              data={filteredStudents}
               scrollEnabled={false}
               keyExtractor={(item) => item.id}
               renderItem={({ item }) => (
                 <StudentCard
                   student={item}
+                  actionTitle="Plan Workout"
+                  secondaryActionTitle="View Profile"
+                  onSecondaryPress={() =>
+                    router.push({
+                      pathname: "/coach/studentDetails",
+                      params: { studentId: item.id },
+                    })
+                  }
                   onPress={() =>
                     router.push({
                       pathname: "/coach/studentDetails",
