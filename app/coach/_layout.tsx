@@ -30,7 +30,7 @@ export default function CoachLayout() {
       }}
     >
       <Stack.Screen name="(tabs)" options={{ headerShown: false, title: "Back" }} />
-      <Stack.Screen name="studentDetails" options={{ title: "Student Details" }} />
+      <Stack.Screen name="studentDetails" options={{ headerShown: false }} />
       <Stack.Screen
         name="createStudent"
         options={{

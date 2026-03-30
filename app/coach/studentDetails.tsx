@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { View, Text, ActivityIndicator, Alert, FlatList, ScrollView } from "react-native";
+import { View, Text, ActivityIndicator, Alert, FlatList, ScrollView, Pressable } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../context/AuthContext";
 import { studentService } from "../../services/studentService";
+import { trainingGroupService } from "../../services/trainingGroupService";
 import { workoutService } from "../../services/workoutService";
 import type { StudentSummary } from "../../types/StudentSummary";
 import type { WorkoutPlan, WorkoutLog, WorkoutLogExercise } from "../../types/Workout";
@@ -25,6 +27,7 @@ export default function StudentDetails() {
   const [student, setStudent] = useState<StudentSummary | null>(null);
   const [plans, setPlans] = useState<WorkoutPlan[]>([]);
   const [logs, setLogs] = useState<WorkoutLog[]>([]);
+  const [latestGroupName, setLatestGroupName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deletingPlanId, setDeletingPlanId] = useState<string | null>(null);
@@ -71,6 +74,14 @@ export default function StudentDetails() {
         }
 
         setStudent(studentDoc);
+
+        // Latest training group for header display.
+        try {
+          const g = await trainingGroupService.getLatestTrainingGroupForStudent(user.id, studentId);
+          setLatestGroupName(g?.name?.trim() ? g.name.trim() : null);
+        } catch {
+          setLatestGroupName(null);
+        }
 
         const workoutPlans = await workoutService.getWorkoutPlansForStudentAsCoach(
           user.id,
@@ -135,6 +146,8 @@ export default function StudentDetails() {
 
   const studentFullName = [student.firstName, student.lastName].filter(Boolean).join(" ").trim();
   const displayName = studentFullName || "Student";
+  const initials =
+    `${student.firstName?.trim()?.[0] ?? ""}${student.lastName?.trim()?.[0] ?? ""}`.toUpperCase() || "S";
 
   const strongestByExercise = (() => {
     const best = new Map<string, number>();
@@ -158,54 +171,94 @@ export default function StudentDetails() {
   return (
     <ScreenLayout>
       <View style={{ flex: 1, backgroundColor: Colors.bg }}>
-        <ScrollView contentContainerStyle={{ padding: Spacing.md, paddingBottom: Spacing.lg }}>
-        <View
-          style={{
-            backgroundColor: Colors.card,
-            borderRadius: Radius.md,
-            padding: 20,
-            marginBottom: Spacing.md,
-            borderWidth: 1,
-            borderColor: Colors.border,
-          }}
-        >
-          <Text style={{ ...Typography.title, fontSize: 22, marginBottom: Spacing.xs }}>
-            Student Details
-          </Text>
+        <ScrollView contentContainerStyle={{ padding: Spacing.md, paddingBottom: Spacing.lg, paddingTop: Spacing.lg }}>
+          {/* Top bar (screenshot-style). */}
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: Spacing.md,
+            }}
+          >
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Back"
+              onPress={() => router.back()}
+              style={({ pressed }) => ({
+                width: 40,
+                height: 40,
+                borderRadius: 20,
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: Colors.card,
+                borderWidth: 1,
+                borderColor: Colors.border,
+                opacity: pressed ? 0.9 : 1,
+              })}
+            >
+              <Ionicons name="chevron-back" size={20} color={Colors.text} />
+            </Pressable>
 
-          <Text style={Typography.secondary}>Name</Text>
-          <Text style={{ ...Typography.section, marginBottom: Spacing.sm }}>
-            {displayName}
-          </Text>
+            <Text style={{ ...Typography.section, fontWeight: "900" }}>Student Profile</Text>
 
-          <Text style={Typography.secondary}>Email</Text>
-          <Text style={{ ...Typography.section, marginBottom: Spacing.md }}>
-            {student.email}
-          </Text>
-
-          <PrimaryButton
-            title="Create Workout Plan"
-            onPress={() =>
-              router.push({
-                pathname: "/coach/createWorkoutPlan",
-                params: { studentId: student.id, studentName: displayName },
-              })
-            }
-          />
-          <View style={{ marginTop: Spacing.sm }}>
-            <PrimaryButton
-              title="View Progress"
-              onPress={() =>
-                router.push({
-                  pathname: "/coach/viewProgress",
-                  params: { studentId: student.id },
-                })
-              }
-              style={{ backgroundColor: Colors.border }}
-            />
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="More"
+              onPress={() => {}}
+              style={({ pressed }) => ({
+                width: 40,
+                height: 40,
+                borderRadius: 20,
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: Colors.card,
+                borderWidth: 1,
+                borderColor: Colors.border,
+                opacity: pressed ? 0.9 : 1,
+              })}
+            >
+              <Ionicons name="ellipsis-horizontal" size={20} color={Colors.textMuted} />
+            </Pressable>
           </View>
 
-        </View>
+          {/* Profile hero (no Injuries/Notes, no Quick Actions). */}
+          <View
+            style={{
+              backgroundColor: Colors.card,
+              borderRadius: Radius.lg,
+              padding: Spacing.lg,
+              marginBottom: Spacing.md,
+              borderWidth: 1,
+              borderColor: Colors.border,
+            }}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.md }}>
+              <View
+                style={{
+                  width: 64,
+                  height: 64,
+                  borderRadius: 32,
+                  backgroundColor: Colors.surface,
+                  borderWidth: 2,
+                  borderColor: Colors.primary,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Text style={{ ...Typography.section, fontSize: 22, fontWeight: "900" }}>{initials}</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ ...Typography.title, fontSize: 22 }}>{displayName}</Text>
+                <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4 }}>
+                  {latestGroupName ? latestGroupName : "No training split assigned"}
+                </Text>
+                <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4 }}>
+                  {student.email}
+                </Text>
+              </View>
+            </View>
+          </View>
 
         <Text style={{ ...Typography.section, marginBottom: Spacing.xs }}>
           Workout Plans
