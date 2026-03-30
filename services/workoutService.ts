@@ -96,6 +96,7 @@ const normalizeExercise = (ex: any): Exercise => {
     rest,
     tempo,
     rpe,
+    coachNote: ex?.coachNote != null && String(ex.coachNote).trim() !== "" ? String(ex.coachNote) : undefined,
   };
 };
 
@@ -105,6 +106,12 @@ const normalizePlanData = (id: string, data: any): WorkoutPlan => ({
   // Keep group fields optional (legacy plans may not have them).
   groupId: data?.groupId != null ? String(data.groupId) : undefined,
   groupName: data?.groupName != null ? String(data.groupName) : undefined,
+  estimatedDurationMinutes:
+    data?.estimatedDurationMinutes == null || data.estimatedDurationMinutes === ""
+      ? undefined
+      : Number.isFinite(Number(data.estimatedDurationMinutes))
+        ? Math.max(0, Math.floor(Number(data.estimatedDurationMinutes)))
+        : undefined,
   // Normalize exercise fields to match our UI + Firestore contract.
   exercises: Array.isArray(data?.exercises) ? data.exercises.map(normalizeExercise) : [],
 });

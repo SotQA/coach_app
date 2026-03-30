@@ -5,6 +5,7 @@ import { AuthProvider, useAuth } from "../context/AuthContext";
 import * as SystemUI from "expo-system-ui";
 import { DarkTheme, ThemeProvider } from "@react-navigation/native";
 import { Colors } from "../theme/colors";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 function RootNavigator() {
   const { loading } = useAuth();
@@ -54,10 +55,12 @@ export default function Layout() {
   };
 
   return (
-    <AuthProvider>
-      <ThemeProvider value={navTheme}>
-        <RootNavigator />
-      </ThemeProvider>
-    </AuthProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <AuthProvider>
+        <ThemeProvider value={navTheme}>
+          <RootNavigator />
+        </ThemeProvider>
+      </AuthProvider>
+    </GestureHandlerRootView>
   );
 }

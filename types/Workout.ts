@@ -9,6 +9,8 @@ export interface Exercise {
   tempo: string;
   // Null means empty / not set.
   rpe: number | null;
+  // Optional per-exercise coach note (stored on workout plans).
+  coachNote?: string;
 }
 
 export interface WorkoutPlan {
@@ -42,6 +44,8 @@ export interface WorkoutPlan {
   scheduledDays?: string[];
   // Optional note from the coach for this plan.
   note?: string;
+  // Optional estimated duration in minutes.
+  estimatedDurationMinutes?: number;
 }
 
 export interface WorkoutLog {
