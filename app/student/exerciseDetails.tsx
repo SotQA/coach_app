@@ -10,7 +10,6 @@ import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
 import { ScreenLayout } from "../../components/ScreenLayout";
-import { BackButton } from "../../components/BackButton";
 
 const toMs = (value: any): number => {
   if (!value) return 0;
@@ -115,7 +114,6 @@ export default function ExerciseDetails() {
     <ScreenLayout>
       <View style={{ flex: 1, backgroundColor: Colors.bg }}>
         <ScrollView contentContainerStyle={{ padding: Spacing.md }}>
-        <BackButton />
         <Text
           style={{
             ...Typography.title,

@@ -9,7 +9,6 @@ import { computeExerciseVolumeFromLoggedSets } from "../../utils/workoutMetrics"
 import { formatLogWhen } from "../../utils/formatLogWhen";
 import { formatDurationForHistory } from "../../utils/workoutDuration";
 import { PrimaryButton } from "../../components/PrimaryButton";
-import { BackButton } from "../../components/BackButton";
 import { EmptyState } from "../../components/EmptyState";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
@@ -129,7 +128,6 @@ export default function WorkoutHistory() {
         }}
       >
         <View style={{ flex: 1 }}>
-          <BackButton />
         <Text
           style={{
             ...Typography.title,

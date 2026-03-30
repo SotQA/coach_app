@@ -13,7 +13,6 @@ import { WorkoutCard } from "../../components/WorkoutCard";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
-import { BackButton } from "../../components/BackButton";
 import { ScreenLayout } from "../../components/ScreenLayout";
 
 export default function StudentDetails() {
@@ -160,7 +159,6 @@ export default function StudentDetails() {
     <ScreenLayout>
       <View style={{ flex: 1, backgroundColor: Colors.bg }}>
         <ScrollView contentContainerStyle={{ padding: Spacing.md, paddingBottom: Spacing.lg }}>
-        <BackButton />
         <View
           style={{
             backgroundColor: Colors.card,

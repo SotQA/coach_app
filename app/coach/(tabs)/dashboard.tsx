@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import {
   View,
   Text,
-  FlatList,
   ActivityIndicator,
   ScrollView,
   Pressable,
@@ -11,8 +10,8 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../../context/AuthContext";
 import { studentService } from "../../../services/studentService";
+import { workoutService } from "../../../services/workoutService";
 import type { StudentSummary } from "../../../types/StudentSummary";
-import { StudentCard } from "../../../components/StudentCard";
 import { PrimaryButton } from "../../../components/PrimaryButton";
 import { Colors } from "../../../theme/colors";
 import { Radius, Spacing } from "../../../theme/spacing";
@@ -37,6 +36,7 @@ export default function CoachDashboard() {
   const router = useRouter();
   const { user } = useAuth();
   const [students, setStudents] = useState<StudentSummary[]>([]);
+  const [workoutsCompletedToday, setWorkoutsCompletedToday] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -61,6 +61,32 @@ export default function CoachDashboard() {
         setError(null);
         const data = await studentService.getStudentsForCoach(user.id);
         setStudents(data);
+
+        const start = new Date();
+        start.setHours(0, 0, 0, 0);
+        const end = new Date(start);
+        end.setDate(end.getDate() + 1);
+        const startMs = start.getTime();
+        const endMs = end.getTime();
+
+        const logsByStudent = await Promise.all(
+          data.map(async (s) => {
+            try {
+              return await workoutService.getWorkoutHistory(s.id);
+            } catch {
+              return [];
+            }
+          })
+        );
+        const count = logsByStudent
+          .flat()
+          .filter((l: any) => {
+            const when = l?.completedAt ?? l?.date;
+            if (!when) return false;
+            const ms = new Date(String(when)).getTime();
+            return Number.isFinite(ms) && ms >= startMs && ms < endMs;
+          }).length;
+        setWorkoutsCompletedToday(count);
       } catch (e: any) {
         console.error("[coach/dashboard] load error", e);
         setError(e.message ?? "Failed to load dashboard.");
@@ -132,8 +158,11 @@ export default function CoachDashboard() {
             }}
           >
             <View style={{ flexDirection: "row", alignItems: "center", flex: 1, gap: Spacing.sm }}>
-              <View
-                style={{
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Open profile settings"
+                onPress={() => router.push("/coach/profile")}
+                style={({ pressed }) => ({
                   width: 52,
                   height: 52,
                   borderRadius: 26,
@@ -142,10 +171,11 @@ export default function CoachDashboard() {
                   backgroundColor: Colors.surface,
                   alignItems: "center",
                   justifyContent: "center",
-                }}
+                  opacity: pressed ? 0.9 : 1,
+                })}
               >
                 <Text style={{ ...Typography.section, fontSize: 18, fontWeight: "800" }}>{ini}</Text>
-              </View>
+              </Pressable>
               <View style={{ flex: 1 }}>
                 <Text style={{ ...Typography.title, fontSize: 22 }}>{name}</Text>
                 <Text style={{ ...Typography.secondary, color: Colors.primary, marginTop: 2, fontWeight: "600" }}>
@@ -198,29 +228,61 @@ export default function CoachDashboard() {
               borderColor: Colors.border,
             }}
           >
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
-                marginBottom: Spacing.md,
-              }}
-            >
+            <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.md }}>
+              <View style={{ flex: 1 }}>
+                <View
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 22,
+                    backgroundColor: Colors.surface,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginBottom: Spacing.md,
+                  }}
+                >
+                  <Ionicons name="people" size={22} color={Colors.primary} />
+                </View>
+                <Text style={{ fontSize: 40, fontWeight: "800", color: Colors.text }}>{students.length}</Text>
+                <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4 }}>
+                  Total Students
+                </Text>
+              </View>
+
               <View
                 style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: 22,
-                  backgroundColor: Colors.surface,
-                  alignItems: "center",
-                  justifyContent: "center",
+                  width: 1,
+                  alignSelf: "stretch",
+                  backgroundColor: Colors.border,
+                  opacity: 0.8,
                 }}
-              >
-                <Ionicons name="people" size={22} color={Colors.primary} />
+              />
+
+              <View style={{ flex: 1 }}>
+                <View
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 22,
+                    backgroundColor: Colors.surface,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginBottom: Spacing.md,
+                  }}
+                >
+                  <Ionicons name="barbell-outline" size={22} color={Colors.primary} />
+                </View>
+                <Text style={{ fontSize: 40, fontWeight: "800", color: Colors.text }}>
+                  {workoutsCompletedToday}
+                </Text>
+                <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4 }}>
+                  Workouts Completed
+                </Text>
+                <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 2 }}>
+                  Today
+                </Text>
               </View>
             </View>
-            <Text style={{ fontSize: 40, fontWeight: "800", color: Colors.text }}>{students.length}</Text>
-            <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4 }}>Total Students</Text>
           </View>
 
           <Pressable
@@ -245,39 +307,7 @@ export default function CoachDashboard() {
             <Text style={{ ...Typography.section, fontWeight: "700" }}>Add Student</Text>
           </Pressable>
 
-          <Text style={{ ...Typography.section, marginBottom: Spacing.xs }}>Students</Text>
-          {students.length === 0 ? (
-            <View
-              style={{
-                backgroundColor: Colors.card,
-                borderRadius: Radius.lg,
-                padding: Spacing.md,
-                borderWidth: 1,
-                borderColor: Colors.border,
-              }}
-            >
-              <Text style={{ ...Typography.secondary, color: Colors.textMuted }}>
-                No students yet. Use Add Student to link your first athlete.
-              </Text>
-            </View>
-          ) : (
-            <FlatList
-              data={students}
-              scrollEnabled={false}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => (
-                <StudentCard
-                  student={item}
-                  onPress={() =>
-                    router.push({
-                      pathname: "/coach/studentDetails",
-                      params: { studentId: item.id },
-                    })
-                  }
-                />
-              )}
-            />
-          )}
+          {/* Students list removed (available in Students tab). */}
         </ScrollView>
       </View>
     </ScreenLayout>

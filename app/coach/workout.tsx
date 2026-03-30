@@ -10,7 +10,6 @@ import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
 import { ScreenLayout } from "../../components/ScreenLayout";
-import { BackButton } from "../../components/BackButton";
 
 export default function CoachWorkout() {
   const router = useRouter();
@@ -91,7 +90,6 @@ export default function CoachWorkout() {
     <ScreenLayout>
       <View style={{ flex: 1, backgroundColor: Colors.bg }}>
         <ScrollView contentContainerStyle={{ padding: Spacing.md, paddingBottom: Spacing.lg }}>
-        <BackButton />
         <View
           style={{
             backgroundColor: Colors.card,

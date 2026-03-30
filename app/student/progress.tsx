@@ -14,7 +14,6 @@ import type { WorkoutLog, WorkoutLogExercise } from "../../types/Workout";
 import { getSessionMaxWeightFromLogExercise } from "../../utils/workoutMetrics";
 import { useAuth } from "../../context/AuthContext";
 import { workoutService } from "../../services/workoutService";
-import { BackButton } from "../../components/BackButton";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { ScreenLayout } from "../../components/ScreenLayout";
 import { Colors } from "../../theme/colors";
@@ -282,7 +281,6 @@ export default function ProgressScreen() {
     <ScreenLayout>
       <ScrollView contentContainerStyle={{ padding: Spacing.md, paddingBottom: Spacing.lg, backgroundColor: Colors.bg }}>
         <View style={{ marginBottom: Spacing.md }}>
-          <BackButton />
           <Text style={{ ...Typography.title, fontSize: 22, marginTop: Spacing.sm }}>
             Progress
           </Text>
