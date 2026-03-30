@@ -5,6 +5,8 @@ import {
   ActivityIndicator,
   ScrollView,
   Pressable,
+  Platform,
+  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -286,27 +288,67 @@ export default function CoachDashboard() {
             </View>
           </View>
 
-          <Pressable
-            onPress={() => router.push("/coach/createStudent")}
-            style={({ pressed }) => ({
-              width: "100%",
+          <View
+            style={{
               flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
+              alignItems: "stretch",
               gap: Spacing.sm,
-              paddingVertical: 16,
-              paddingHorizontal: Spacing.md,
-              borderRadius: Radius.lg,
-              backgroundColor: Colors.card,
-              borderWidth: 1,
-              borderColor: Colors.border,
               marginBottom: Spacing.lg,
-              opacity: pressed ? 0.92 : 1,
-            })}
+            }}
           >
-            <Ionicons name="person-add-outline" size={22} color={Colors.primary} />
-            <Text style={{ ...Typography.section, fontWeight: "700" }}>Add Student</Text>
-          </Pressable>
+            <Pressable
+              onPress={() =>
+                Alert.alert("Coming soon", "Start Log will be available in a future update.")
+              }
+              style={({ pressed }) => ({
+                flex: 1,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: Spacing.sm,
+                paddingVertical: 16,
+                paddingHorizontal: Spacing.sm,
+                borderRadius: Radius.lg,
+                backgroundColor: Colors.primary,
+                opacity: pressed ? 0.92 : 1,
+                ...(Platform.OS === "ios"
+                  ? {
+                      shadowColor: Colors.primary,
+                      shadowOffset: { width: 0, height: 6 },
+                      shadowOpacity: 0.45,
+                      shadowRadius: 10,
+                    }
+                  : { elevation: 8 }),
+              })}
+            >
+              <Ionicons name="play" size={18} color={Colors.onPrimary} />
+              <Text style={{ ...Typography.section, fontWeight: "800", color: Colors.onPrimary }}>
+                Start Log
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={() => router.push("/coach/createStudent")}
+              style={({ pressed }) => ({
+                flex: 1,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: Spacing.sm,
+                paddingVertical: 16,
+                paddingHorizontal: Spacing.sm,
+                borderRadius: Radius.lg,
+                backgroundColor: Colors.card,
+                borderWidth: 1,
+                borderColor: Colors.border,
+                opacity: pressed ? 0.92 : 1,
+              })}
+            >
+              <Ionicons name="person-add-outline" size={22} color={Colors.primary} />
+              <Text style={{ ...Typography.section, fontWeight: "700", color: Colors.text }}>
+                Add Student
+              </Text>
+            </Pressable>
+          </View>
 
           {/* Students list removed (available in Students tab). */}
         </ScrollView>
