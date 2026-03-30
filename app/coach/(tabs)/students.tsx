@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../../context/AuthContext";
 import { studentService } from "../../../services/studentService";
+import { trainingGroupService } from "../../../services/trainingGroupService";
 import type { StudentSummary } from "../../../types/StudentSummary";
 import { StudentCard } from "../../../components/StudentCard";
 import { PrimaryButton } from "../../../components/PrimaryButton";
@@ -17,6 +18,7 @@ export default function CoachStudents() {
   const { user } = useAuth();
   const [students, setStudents] = useState<StudentSummary[]>([]);
   const [query, setQuery] = useState("");
+  const [latestGroupByStudentId, setLatestGroupByStudentId] = useState<Record<string, string | null>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -52,6 +54,25 @@ export default function CoachStudents() {
         const data = await studentService.getStudentsForCoach(user.id);
         console.log("[coach/students] students", data.length);
         setStudents(data);
+
+        // Fetch latest training group for each student (fast UI: list renders immediately).
+        const nextMap: Record<string, string | null> = {};
+        const concurrency = 8;
+        let idx = 0;
+        const worker = async () => {
+          while (idx < data.length) {
+            const i = idx++;
+            const s = data[i];
+            try {
+              const g = await trainingGroupService.getLatestTrainingGroupForStudent(user.id, s.id);
+              nextMap[s.id] = g?.name?.trim() ? g.name.trim() : null;
+            } catch {
+              nextMap[s.id] = null;
+            }
+          }
+        };
+        await Promise.all(Array.from({ length: Math.min(concurrency, data.length) }, worker));
+        setLatestGroupByStudentId(nextMap);
       } catch (e: any) {
         console.error("[coach/students] load error", e);
         setError(e.message ?? "Failed to load students.");
@@ -209,6 +230,7 @@ export default function CoachStudents() {
                   student={item}
                   actionTitle="Plan Workout"
                   secondaryActionTitle="View Profile"
+                  currentSplitName={latestGroupByStudentId[item.id] ?? null}
                   onSecondaryPress={() =>
                     router.push({
                       pathname: "/coach/studentDetails",
@@ -217,8 +239,11 @@ export default function CoachStudents() {
                   }
                   onPress={() =>
                     router.push({
-                      pathname: "/coach/studentDetails",
-                      params: { studentId: item.id },
+                      pathname: "/coach/createWorkoutPlan",
+                      params: {
+                        studentId: item.id,
+                        studentName: [item.firstName, item.lastName].filter(Boolean).join(" ").trim() || "Student",
+                      },
                     })
                   }
                 />

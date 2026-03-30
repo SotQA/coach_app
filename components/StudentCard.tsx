@@ -19,6 +19,7 @@ interface StudentCardProps {
    */
   secondaryActionTitle?: string;
   onSecondaryPress?: () => void;
+  currentSplitName?: string | null;
 }
 
 // Simple card for displaying basic student information with an optional action.
@@ -28,6 +29,7 @@ export const StudentCard: FC<StudentCardProps> = ({
   actionTitle = "Plan Workout",
   secondaryActionTitle,
   onSecondaryPress,
+  currentSplitName,
 }) => {
   const fullName = [student.firstName, student.lastName].filter(Boolean).join(" ").trim();
   const header = fullName || student.email || "Student";
@@ -64,11 +66,11 @@ export const StudentCard: FC<StudentCardProps> = ({
         </View>
         <View style={{ flex: 1 }}>
           <Text style={{ ...Typography.section, fontSize: 16, fontWeight: "800" }}>{header}</Text>
-          {student.email ? (
-            <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 2 }}>
-              {student.email}
-            </Text>
-          ) : null}
+          <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 2 }}>
+            {currentSplitName
+              ? `Current Split: ${currentSplitName}`
+              : "No training split assigned"}
+          </Text>
         </View>
         <Pressable
           accessibilityRole="button"

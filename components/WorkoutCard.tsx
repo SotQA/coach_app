@@ -12,6 +12,9 @@ interface WorkoutCardProps {
 // Displays a simple summary of a workout plan and its exercises.
 export const WorkoutCard: FC<WorkoutCardProps> = ({ plan }) => {
   const title = (plan.name ?? "").toString().trim() || "Workout Plan";
+  const groupLabel =
+    (plan.groupName ?? "").toString().trim() ||
+    (plan.groupId ? "Training Group" : "Legacy Plan");
   return (
     <View
       style={{
@@ -31,6 +34,9 @@ export const WorkoutCard: FC<WorkoutCardProps> = ({ plan }) => {
         }}
       >
         {title}
+      </Text>
+      <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: Spacing.sm }}>
+        {groupLabel}
       </Text>
       {plan.exercises.map((exercise, index) => (
         <View

@@ -1,8 +1,9 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
+  Pressable,
   Text,
   TextInput,
   View,
@@ -10,9 +11,11 @@ import {
 import { ExerciseInput } from "../../components/ExerciseInput";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { useAuth } from "../../context/AuthContext";
+import { trainingGroupService } from "../../services/trainingGroupService";
 import { workoutService } from "../../services/workoutService";
 import { exerciseTemplateService } from "../../services/exerciseTemplateService";
 import type { Exercise } from "../../types/Workout";
+import type { TrainingGroup, TrainingGroupType } from "../../types/TrainingGroup";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
@@ -31,6 +34,13 @@ export default function CreateWorkoutPlan() {
 
   const [studentName] = useState(params.studentName ?? "Student");
   const [studentId] = useState(params.studentId ?? "");
+  const [step, setStep] = useState<1 | 2>(1);
+  const [groups, setGroups] = useState<TrainingGroup[]>([]);
+  const [groupsLoading, setGroupsLoading] = useState(true);
+  const [selectedGroup, setSelectedGroup] = useState<TrainingGroup | null>(null);
+  const [groupType, setGroupType] = useState<TrainingGroupType>("PPL");
+  const [customGroupName, setCustomGroupName] = useState("");
+  const [workoutsPerWeek, setWorkoutsPerWeek] = useState("4");
   const [planName, setPlanName] = useState("Workout Plan");
   const [orderInput, setOrderInput] = useState("1");
   const [note, setNote] = useState("");
@@ -51,15 +61,28 @@ export default function CreateWorkoutPlan() {
         }
         setCoachId(user.id);
 
-        // Best-effort default ordering: append to the end.
-        if (studentId) {
-          const existing = await workoutService.getWorkoutPlansForStudentAsCoach(user.id, studentId);
-          const maxOrder = existing.reduce((max, p) => {
-            const n = typeof p.order === "number" && Number.isFinite(p.order) ? p.order : -1;
-            return Math.max(max, n);
-          }, -1);
-          setOrderInput(String(maxOrder + 1));
+        if (!studentId) {
+          setError("Missing student context.");
+          return;
         }
+
+        // Load training groups (latest first) for step 1.
+        setGroupsLoading(true);
+        try {
+          const existingGroups = await trainingGroupService.getTrainingGroupsForStudent(user.id, studentId);
+          setGroups(existingGroups);
+          setSelectedGroup(existingGroups[0] ?? null);
+        } finally {
+          setGroupsLoading(false);
+        }
+
+        // Best-effort default ordering: append to the end.
+        const existing = await workoutService.getWorkoutPlansForStudentAsCoach(user.id, studentId);
+        const maxOrder = existing.reduce((max, p) => {
+          const n = typeof p.order === "number" && Number.isFinite(p.order) ? p.order : -1;
+          return Math.max(max, n);
+        }, -1);
+        setOrderInput(String(maxOrder + 1));
       } catch (e: any) {
         setError(e.message ?? "Failed to load user.");
       } finally {
@@ -69,6 +92,38 @@ export default function CreateWorkoutPlan() {
 
     init();
   }, [user?.id, user?.role, studentId]);
+
+  const resolvedGroupName = useMemo(() => {
+    if (!selectedGroup) return null;
+    return selectedGroup.name?.trim() || null;
+  }, [selectedGroup]);
+
+  const handleCreateGroup = async () => {
+    if (!coachId || !studentId) {
+      setError("Missing coach or student information.");
+      return;
+    }
+    setError(null);
+    setLoading(true);
+    try {
+      const baseName = groupType === "Custom" ? customGroupName.trim() : String(groupType);
+      const wpw = Number(workoutsPerWeek);
+      const created = await trainingGroupService.createTrainingGroup({
+        coachId,
+        studentId,
+        type: groupType,
+        name: baseName,
+        workoutsPerWeek: Number.isFinite(wpw) ? wpw : 4,
+      });
+      setGroups((prev) => [created, ...prev]);
+      setSelectedGroup(created);
+      setStep(2);
+    } catch (e: any) {
+      setError(e.message ?? "Failed to create training group.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const updateExercise = (index: number, exercise: Exercise) => {
     setExercises((prev) => {
@@ -85,6 +140,11 @@ export default function CreateWorkoutPlan() {
   const handleSavePlan = async () => {
     if (!coachId || !studentId) {
       setError("Missing coach or student information.");
+      return;
+    }
+    if (!selectedGroup) {
+      setError("Select or create a training group first.");
+      setStep(1);
       return;
     }
 
@@ -132,6 +192,8 @@ export default function CreateWorkoutPlan() {
       await workoutService.createWorkoutPlan({
         coachId,
         studentId,
+        groupId: selectedGroup.id,
+        groupName: selectedGroup.name?.trim() || "Legacy Plan",
         name,
         exercises: sanitizedExercises,
         createdAt: new Date(),
@@ -140,6 +202,8 @@ export default function CreateWorkoutPlan() {
         order,
         note: note.trim() || undefined,
       });
+      // Mark group as recently used.
+      trainingGroupService.touchUpdatedAt(selectedGroup.id).catch(() => {});
       await Promise.all(
         sanitizedExercises.map((e) => exerciseTemplateService.upsertNameIfNeeded(e.name))
       );
@@ -177,8 +241,6 @@ export default function CreateWorkoutPlan() {
         enableOnAndroid
         enableResetScrollToCoords={false}
         extraScrollHeight={24}
-        // Reduce the "bounce" when moving focus between two inputs
-        // while the keyboard remains open.
         extraHeight={0}
         keyboardOpeningTime={0}
       >
@@ -203,6 +265,174 @@ export default function CreateWorkoutPlan() {
           <Text style={{ ...Typography.secondary, marginBottom: Spacing.md }}>
             For: {studentName}
           </Text>
+
+          <View style={{ flexDirection: "row", gap: Spacing.sm, marginBottom: Spacing.md }}>
+            <View style={{ flex: 1 }}>
+              <PrimaryButton
+                title="1) Training Group"
+                onPress={() => setStep(1)}
+                style={{ backgroundColor: step === 1 ? Colors.primary : Colors.border }}
+                textStyle={{ fontWeight: "900" }}
+              />
+            </View>
+            <View style={{ flex: 1 }}>
+              <PrimaryButton
+                title="2) Workout Plan"
+                onPress={() => {
+                  if (!selectedGroup) {
+                    setError("Select or create a training group first.");
+                    setStep(1);
+                    return;
+                  }
+                  setStep(2);
+                }}
+                style={{ backgroundColor: step === 2 ? Colors.primary : Colors.border }}
+                textStyle={{ fontWeight: "900" }}
+              />
+            </View>
+          </View>
+
+          {step === 1 ? (
+            <>
+              <Text style={{ ...Typography.section, marginBottom: Spacing.xs }}>Choose a training group</Text>
+              {groupsLoading ? (
+                <ActivityIndicator />
+              ) : groups.length === 0 ? (
+                <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: Spacing.sm }}>
+                  No training groups yet.
+                </Text>
+              ) : (
+                <View style={{ gap: Spacing.xs, marginBottom: Spacing.sm }}>
+                  {groups.slice(0, 6).map((g) => {
+                    const selected = selectedGroup?.id === g.id;
+                    return (
+                      <Pressable
+                        key={g.id}
+                        onPress={() => setSelectedGroup(g)}
+                        style={({ pressed }) => ({
+                          paddingVertical: 12,
+                          paddingHorizontal: Spacing.sm,
+                          borderRadius: Radius.lg,
+                          backgroundColor: selected ? Colors.surface : Colors.bg,
+                          borderWidth: 1,
+                          borderColor: selected ? Colors.primary : Colors.border,
+                          opacity: pressed ? 0.9 : 1,
+                        })}
+                      >
+                        <Text style={{ ...Typography.section, fontWeight: "800" }}>{g.name}</Text>
+                        <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 2 }}>
+                          {String(g.type)} · {g.workoutsPerWeek} / week
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              )}
+
+              <View style={{ marginTop: Spacing.sm }}>
+                <PrimaryButton
+                  title={selectedGroup ? "Continue with selected group" : "Continue"}
+                  onPress={() => {
+                    if (!selectedGroup) {
+                      setError("Select or create a training group.");
+                      return;
+                    }
+                    setStep(2);
+                  }}
+                  style={{ backgroundColor: Colors.border }}
+                />
+              </View>
+
+              <View style={{ marginTop: Spacing.lg }}>
+                <Text style={{ ...Typography.section, marginBottom: Spacing.xs }}>Or create a new one</Text>
+                <View style={{ flexDirection: "row", flexWrap: "wrap", gap: Spacing.xs, marginBottom: Spacing.sm }}>
+                  {trainingGroupService.presetTypes.map((t) => {
+                    const active = t === groupType;
+                    return (
+                      <Pressable
+                        key={t}
+                        onPress={() => setGroupType(t)}
+                        style={({ pressed }) => ({
+                          paddingVertical: 10,
+                          paddingHorizontal: 12,
+                          borderRadius: Radius.pill,
+                          backgroundColor: active ? Colors.primary : Colors.surface,
+                          borderWidth: 1,
+                          borderColor: active ? Colors.primary : Colors.border,
+                          opacity: pressed ? 0.9 : 1,
+                        })}
+                      >
+                        <Text style={{ ...Typography.secondary, color: active ? Colors.onPrimary : Colors.text }}>
+                          {t}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+
+                {groupType === "Custom" ? (
+                  <>
+                    <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Custom name</Text>
+                    <TextInput
+                      placeholder="e.g. Hypertrophy Block A"
+                      placeholderTextColor={Colors.textMuted}
+                      value={customGroupName}
+                      onChangeText={setCustomGroupName}
+                      style={{
+                        borderWidth: 1,
+                        borderColor: Colors.border,
+                        padding: 12,
+                        borderRadius: Radius.sm,
+                        marginBottom: Spacing.sm,
+                        color: Colors.text,
+                        backgroundColor: Colors.surface,
+                      }}
+                    />
+                  </>
+                ) : null}
+
+                <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Workouts / week</Text>
+                <TextInput
+                  placeholder="e.g. 4"
+                  placeholderTextColor={Colors.textMuted}
+                  value={workoutsPerWeek}
+                  onChangeText={setWorkoutsPerWeek}
+                  keyboardType="number-pad"
+                  style={{
+                    borderWidth: 1,
+                    borderColor: Colors.border,
+                    padding: 12,
+                    borderRadius: Radius.sm,
+                    marginBottom: Spacing.sm,
+                    color: Colors.text,
+                    backgroundColor: Colors.surface,
+                  }}
+                />
+
+                <PrimaryButton
+                  title={loading ? "Creating…" : "Create group"}
+                  onPress={handleCreateGroup}
+                  disabled={loading}
+                />
+              </View>
+            </>
+          ) : (
+            <>
+              <View
+                style={{
+                  backgroundColor: Colors.surface,
+                  borderRadius: Radius.lg,
+                  borderWidth: 1,
+                  borderColor: Colors.border,
+                  padding: Spacing.sm,
+                  marginBottom: Spacing.md,
+                }}
+              >
+                <Text style={{ ...Typography.secondary, color: Colors.textMuted }}>Training Group</Text>
+                <Text style={{ ...Typography.section, fontWeight: "800", marginTop: 2 }}>
+                  {resolvedGroupName ?? "Legacy Plan"}
+                </Text>
+              </View>
 
           <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Plan Name</Text>
           <TextInput
@@ -291,6 +521,8 @@ export default function CreateWorkoutPlan() {
               <Text style={{ color: Colors.danger, marginTop: Spacing.xs }}>{error}</Text>
             ) : null}
           </View>
+            </>
+          )}
         </View>
       </KeyboardAwareScrollView>
     </ScreenLayout>

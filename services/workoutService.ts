@@ -102,6 +102,9 @@ const normalizeExercise = (ex: any): Exercise => {
 const normalizePlanData = (id: string, data: any): WorkoutPlan => ({
   id,
   ...data,
+  // Keep group fields optional (legacy plans may not have them).
+  groupId: data?.groupId != null ? String(data.groupId) : undefined,
+  groupName: data?.groupName != null ? String(data.groupName) : undefined,
   // Normalize exercise fields to match our UI + Firestore contract.
   exercises: Array.isArray(data?.exercises) ? data.exercises.map(normalizeExercise) : [],
 });

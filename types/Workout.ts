@@ -15,6 +15,12 @@ export interface WorkoutPlan {
   id: string;
   coachId: string;
   studentId: string;
+  /**
+   * Training group/split this plan belongs to (new system).
+   * Missing on legacy plans.
+   */
+  groupId?: string;
+  groupName?: string;
   name: string;
   exercises: Exercise[];
   createdAt: any;
