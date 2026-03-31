@@ -1,5 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
-import { View, Text, FlatList, ActivityIndicator, ScrollView, TextInput, Pressable } from "react-native";
+import {
+  View,
+  Text,
+  FlatList,
+  ActivityIndicator,
+  ScrollView,
+  TextInput,
+  Pressable,
+  Platform,
+} from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../../context/AuthContext";
@@ -7,7 +16,6 @@ import { studentService } from "../../../services/studentService";
 import { trainingGroupService } from "../../../services/trainingGroupService";
 import type { StudentSummary } from "../../../types/StudentSummary";
 import { StudentCard } from "../../../components/StudentCard";
-import { PrimaryButton } from "../../../components/PrimaryButton";
 import { Colors } from "../../../theme/colors";
 import { Radius, Spacing } from "../../../theme/spacing";
 import { Typography } from "../../../theme/typography";
@@ -151,24 +159,6 @@ export default function CoachStudents() {
                   {students.length} Active Students
                 </Text>
               </View>
-            </View>
-
-            <View style={{ flexDirection: "row", gap: Spacing.sm }}>
-              <PrimaryButton
-                title="Add Student"
-                onPress={() => router.push("/coach/createStudent")}
-                style={{
-                  width: 44,
-                  height: 44,
-                  paddingHorizontal: 0,
-                  borderRadius: 22,
-                  backgroundColor: Colors.card,
-                  borderWidth: 1,
-                  borderColor: Colors.border,
-                }}
-                textStyle={{ color: "transparent" }}
-                leftIcon={<Ionicons name="person-add-outline" size={20} color={Colors.primary} />}
-              />
             </View>
           </View>
 

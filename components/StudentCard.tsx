@@ -1,6 +1,5 @@
 import { FC } from "react";
-import { Pressable, View, Text } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Platform, Pressable, View, Text } from "react-native";
 import type { StudentSummary } from "../types/StudentSummary";
 import { PrimaryButton } from "./PrimaryButton";
 import { Colors } from "../theme/colors";
@@ -72,20 +71,6 @@ export const StudentCard: FC<StudentCardProps> = ({
               : "No training split assigned"}
           </Text>
         </View>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="More actions"
-          style={({ pressed }) => ({
-            width: 36,
-            height: 36,
-            borderRadius: 18,
-            alignItems: "center",
-            justifyContent: "center",
-            opacity: pressed ? 0.85 : 1,
-          })}
-        >
-          <Ionicons name="ellipsis-vertical" size={18} color={Colors.textMuted} />
-        </Pressable>
       </View>
 
       {showTwoButtons ? (
@@ -108,17 +93,34 @@ export const StudentCard: FC<StudentCardProps> = ({
             />
           </View>
           <View style={{ flex: 1, minWidth: 0 }}>
-            <PrimaryButton
-              title={actionTitle}
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={actionTitle}
               onPress={onPress}
-              style={{
+              style={({ pressed }) => ({
                 width: "100%",
-                borderRadius: Radius.md,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
                 paddingVertical: 11,
                 paddingHorizontal: Spacing.xs,
-              }}
-              textStyle={{ fontWeight: "800", fontSize: 13, color: Colors.onPrimary }}
-            />
+                borderRadius: Radius.md,
+                backgroundColor: Colors.primary,
+                opacity: pressed ? 0.92 : 1,
+                ...(Platform.OS === "ios"
+                  ? {
+                      shadowColor: Colors.primary,
+                      shadowOffset: { width: 0, height: 6 },
+                      shadowOpacity: 0.45,
+                      shadowRadius: 10,
+                    }
+                  : { elevation: 8 }),
+              })}
+            >
+              <Text style={{ ...Typography.section, fontWeight: "800", fontSize: 13, color: Colors.onPrimary }}>
+                {actionTitle}
+              </Text>
+            </Pressable>
           </View>
         </View>
       ) : onPress ? (
