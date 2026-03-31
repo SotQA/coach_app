@@ -1,5 +1,5 @@
-import { useMemo, useRef } from "react";
-import { Pressable, Text, TextInput, View } from "react-native";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Platform, Pressable, Text, TextInput, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "../theme/colors";
 import { Radius, Spacing } from "../theme/spacing";
@@ -50,6 +50,15 @@ export function ExerciseCard({
   dragHandleProps,
 }: Props) {
   const nameRef = useRef<TextInput | null>(null);
+  const [weightText, setWeightText] = useState<string>(
+    value.weight == null ? "" : String(value.weight)
+  );
+  const [weightFocused, setWeightFocused] = useState(false);
+
+  useEffect(() => {
+    if (weightFocused) return;
+    setWeightText(value.weight == null ? "" : String(value.weight));
+  }, [value.weight, weightFocused]);
 
   const summary = useMemo(() => toSummary(value), [value]);
 
@@ -61,7 +70,13 @@ export function ExerciseCard({
     return Number.isFinite(n) ? n : value.sets;
   };
   const parseFloatSafe = (t: string) => {
-    const cleaned = t.trim().replace(/,/g, ".").replace(/[^0-9.]/g, "");
+    const cleaned = t
+      .trim()
+      .replace(/,/g, ".")
+      // keep only digits and dots
+      .replace(/[^0-9.]/g, "")
+      // collapse multiple dots → single dot
+      .replace(/\.(?=.*\.)/g, "");
     const n = Number(cleaned);
     return Number.isFinite(n) ? n : value.weight ?? undefined;
   };
@@ -234,9 +249,35 @@ export function ExerciseCard({
             <View style={{ flex: 1 }}>
               <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Weight (kg)</Text>
               <TextInput
-                keyboardType="decimal-pad"
-                value={value.weight == null ? "" : String(value.weight)}
-                onChangeText={(t) => update({ weight: t.trim() === "" ? undefined : parseFloatSafe(t) })}
+                // iOS supports decimal-pad; Android may show a numeric keyboard with locale comma.
+                keyboardType={Platform.OS === "ios" ? "decimal-pad" : "numeric"}
+                inputMode="decimal"
+                value={weightText}
+                onChangeText={(t) => {
+                  setWeightText(t);
+                  const trimmed = t.trim();
+                  if (trimmed === "") {
+                    update({ weight: undefined });
+                    return;
+                  }
+                  const parsed = parseFloatSafe(trimmed);
+                  // Only commit numeric values; keep draft text for intermediate states like "7."
+                  if (parsed !== undefined) update({ weight: parsed });
+                }}
+                onFocus={() => setWeightFocused(true)}
+                onBlur={() => {
+                  setWeightFocused(false);
+                  const trimmed = weightText.trim();
+                  if (trimmed === "") {
+                    setWeightText("");
+                    update({ weight: undefined });
+                    return;
+                  }
+                  const parsed = parseFloatSafe(trimmed);
+                  if (parsed === undefined) return;
+                  setWeightText(String(parsed));
+                  update({ weight: parsed });
+                }}
                 placeholder="50"
                 placeholderTextColor={Colors.textMuted}
                 style={{
