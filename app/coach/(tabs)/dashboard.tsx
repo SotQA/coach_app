@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   Pressable,
   Platform,
   Alert,
+  RefreshControl,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -40,6 +41,7 @@ export default function CoachDashboard() {
   const [students, setStudents] = useState<StudentSummary[]>([]);
   const [workoutsCompletedToday, setWorkoutsCompletedToday] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const todayLine = useMemo(() => {
@@ -100,6 +102,47 @@ export default function CoachDashboard() {
     loadData();
   }, [user]);
 
+  const onRefresh = useCallback(async () => {
+    if (!user || user.role !== "coach") return;
+    setRefreshing(true);
+    try {
+      setError(null);
+      const data = await studentService.getStudentsForCoach(user.id);
+      setStudents(data);
+
+      const start = new Date();
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(start);
+      end.setDate(end.getDate() + 1);
+      const startMs = start.getTime();
+      const endMs = end.getTime();
+
+      const logsByStudent = await Promise.all(
+        data.map(async (s) => {
+          try {
+            return await workoutService.getWorkoutHistory(s.id);
+          } catch {
+            return [];
+          }
+        })
+      );
+      const count = logsByStudent
+        .flat()
+        .filter((l: any) => {
+          const when = l?.completedAt ?? l?.date;
+          if (!when) return false;
+          const ms = new Date(String(when)).getTime();
+          return Number.isFinite(ms) && ms >= startMs && ms < endMs;
+        }).length;
+      setWorkoutsCompletedToday(count);
+    } catch (e: any) {
+      console.error("[coach/dashboard] refresh error", e);
+      setError(e.message ?? "Failed to refresh dashboard.");
+    } finally {
+      setRefreshing(false);
+    }
+  }, [user?.id, user?.role]);
+
   if (loading) {
     return (
       <ScreenLayout>
@@ -142,6 +185,15 @@ export default function CoachDashboard() {
     <ScreenLayout>
       <View style={{ flex: 1, backgroundColor: Colors.bg }}>
         <ScrollView
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={Colors.primary}
+              colors={[Colors.primary]}
+              progressBackgroundColor={Colors.card}
+            />
+          }
           contentContainerStyle={{
             paddingHorizontal: Spacing.md,
             paddingBottom: Spacing.xl,

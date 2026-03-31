@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { View, Text, ActivityIndicator, Alert, FlatList, ScrollView, Pressable } from "react-native";
+import { View, Text, ActivityIndicator, Alert, ScrollView, Pressable } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../context/AuthContext";
@@ -250,6 +250,39 @@ export default function StudentDetails() {
     </View>
   );
 
+  const startOfWeekMs = (nowMs: number): number => {
+    const d = new Date(nowMs);
+    const day = d.getDay(); // 0 Sun ... 6 Sat
+    const diffToMonday = (day + 6) % 7; // Mon => 0
+    d.setDate(d.getDate() - diffToMonday);
+    d.setHours(0, 0, 0, 0);
+    return d.getTime();
+  };
+
+  const planById = (() => {
+    const m = new Map<string, WorkoutPlan>();
+    for (const p of plans) m.set(p.id, p);
+    return m;
+  })();
+
+  const weeklyProgress = (() => {
+    const wpw = latestGroup?.workoutsPerWeek ?? 0;
+    if (!latestGroup?.id || !wpw || wpw <= 0) {
+      return { completed: 0, target: wpw, ratio: 0 };
+    }
+    const now = Date.now();
+    const start = startOfWeekMs(now);
+    const end = now;
+    const completed = logs.filter((l) => {
+      const ms = toMs((l as any).completedAt ?? (l as any).date);
+      if (ms < start || ms > end) return false;
+      const plan = planById.get(l.workoutPlanId);
+      return plan?.groupId === latestGroup.id;
+    }).length;
+    const ratio = Math.max(0, Math.min(1, completed / wpw));
+    return { completed, target: wpw, ratio };
+  })();
+
   const RowAction = ({
     icon,
     label,
@@ -420,7 +453,7 @@ export default function StudentDetails() {
                     style={{
                       paddingVertical: 6,
                       paddingHorizontal: 10,
-                      borderRadius: Radius.pill,
+                      borderRadius: 10,
                       backgroundColor: Colors.surface,
                       borderWidth: 1,
                       borderColor: Colors.border,
@@ -434,7 +467,7 @@ export default function StudentDetails() {
                     style={{
                       paddingVertical: 6,
                       paddingHorizontal: 10,
-                      borderRadius: Radius.pill,
+                      borderRadius: 10,
                       backgroundColor: Colors.surface,
                       borderWidth: 1,
                       borderColor: Colors.border,
@@ -448,7 +481,7 @@ export default function StudentDetails() {
                     style={{
                       paddingVertical: 6,
                       paddingHorizontal: 10,
-                      borderRadius: Radius.pill,
+                      borderRadius: 10,
                       backgroundColor: Colors.surface,
                       borderWidth: 1,
                       borderColor: Colors.border,
@@ -517,46 +550,117 @@ export default function StudentDetails() {
           </View>
 
           {/* Active training group card */}
-          <Text style={{ ...Typography.section, marginBottom: Spacing.xs }}>Active training group</Text>
-          <View
-            style={{
+          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+            <Text style={{ ...Typography.section }}>Assigned Program</Text>
+            {latestGroup ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Change training split"
+                onPress={() =>
+                  router.push({
+                    pathname: "/coach/selectTrainingGroup",
+                    params: { studentId, studentName: displayName, selectedGroupId: latestGroup.id },
+                  })
+                }
+                style={({ pressed }) => ({ opacity: pressed ? 0.9 : 1 })}
+              >
+                <Text style={{ ...Typography.secondary, color: Colors.primary, fontWeight: "800" }}>Change</Text>
+              </Pressable>
+            ) : null}
+          </View>
+
+          <Pressable
+            onPress={() => {
+              if (!latestGroup?.id) return;
+              router.push({
+                pathname: "/coach/assignedWorkouts",
+                params: {
+                  studentId,
+                  studentName: displayName,
+                  groupId: latestGroup.id,
+                  groupName: latestGroup.name,
+                },
+              });
+            }}
+            style={({ pressed }) => ({
               backgroundColor: Colors.card,
               borderRadius: Radius.lg,
               padding: Spacing.md,
               borderWidth: 1,
               borderColor: Colors.border,
               marginBottom: Spacing.md,
-            }}
+              opacity: pressed ? 0.96 : 1,
+            })}
           >
             {latestGroup ? (
               <>
-                <Text style={{ ...Typography.title, fontSize: 18 }}>{latestGroup.name}</Text>
-                <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4 }}>
-                  Type: {String(latestGroup.type || "Custom")}
-                </Text>
-                <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 2 }}>
-                  Workouts/week: {latestGroup.workoutsPerWeek || "—"}
-                </Text>
-                <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 2 }}>
-                  Week info: —
-                </Text>
-                <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 2 }}>
-                  Dates: —
-                </Text>
-                <PrimaryButton
-                  title="Manage Split"
-                  onPress={() =>
-                    router.push({
-                      pathname: "/coach/selectTrainingGroup",
-                      params: { studentId, studentName: displayName, selectedGroupId: latestGroup.id },
-                    })
-                  }
-                  style={{ backgroundColor: Colors.border, marginTop: Spacing.md }}
-                />
+                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: Spacing.md }}>
+                  <View style={{ flex: 1, minWidth: 0 }}>
+                    <Text style={{ ...Typography.title, fontSize: 18 }}>{latestGroup.name}</Text>
+                    <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4 }}>
+                      {latestGroup.workoutsPerWeek ? `${latestGroup.workoutsPerWeek} days/week` : "Days/week —"}
+                    </Text>
+                  </View>
+                  <View
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 20,
+                      backgroundColor: Colors.surface,
+                      borderWidth: 1,
+                      borderColor: Colors.border,
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Ionicons name="flash" size={18} color={Colors.primary} />
+                  </View>
+                </View>
+
+                <View style={{ marginTop: Spacing.md }}>
+                  <View
+                    style={{
+                      height: 8,
+                      borderRadius: 999,
+                      backgroundColor: "rgba(255,255,255,0.10)",
+                      overflow: "hidden",
+                    }}
+                  >
+                    <View
+                      style={{
+                        width: `${Math.round(weeklyProgress.ratio * 100)}%`,
+                        height: "100%",
+                        backgroundColor: Colors.primary,
+                      }}
+                    />
+                  </View>
+                  <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 8 }}>
+                    <Text style={{ ...Typography.secondary, color: Colors.textMuted }}>
+                      Progress
+                    </Text>
+                    <Text style={{ ...Typography.secondary, color: Colors.textMuted }}>
+                      {weeklyProgress.target ? `${weeklyProgress.completed} of ${weeklyProgress.target} this week` : "—"}
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={{ marginTop: Spacing.sm, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+                  <Text style={{ ...Typography.secondary, color: Colors.textMuted }}>
+                    Tap to view assigned workouts
+                  </Text>
+                  <Ionicons
+                    name="chevron-forward"
+                    size={18}
+                    color={Colors.textMuted}
+                  />
+                </View>
               </>
             ) : (
               <>
-                <Text style={{ ...Typography.secondary, color: Colors.textMuted }}>No active training split</Text>
+                <Text style={{ ...Typography.title, fontSize: 18 }}>No active training split</Text>
+                <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 6 }}>
+                  Create a split to start assigning workouts.
+                </Text>
                 <PrimaryButton
                   title="Create New Group"
                   onPress={() =>
@@ -569,127 +673,7 @@ export default function StudentDetails() {
                 />
               </>
             )}
-          </View>
-
-          {/* Assigned workouts */}
-          <Text style={{ ...Typography.section, marginBottom: Spacing.xs }}>Assigned workouts</Text>
-
-          {sortedPlans.length === 0 ? (
-            <View
-              style={{
-                backgroundColor: Colors.card,
-                borderRadius: Radius.lg,
-                padding: Spacing.md,
-                borderWidth: 1,
-                borderColor: Colors.border,
-                marginBottom: Spacing.md,
-              }}
-            >
-              <Text style={{ ...Typography.secondary, color: Colors.textMuted }}>
-                No workouts assigned yet
-              </Text>
-            </View>
-          ) : (
-            <FlatList
-              data={sortedPlans}
-              scrollEnabled={false}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => {
-                const lastCompleted = logs.find((l) => l.workoutPlanId === item.id);
-                const lastCompletedMs = lastCompleted ? toMs((lastCompleted as any).completedAt ?? (lastCompleted as any).date) : 0;
-                const lastCompletedLabel =
-                  lastCompletedMs > 0
-                    ? new Date(lastCompletedMs).toLocaleDateString(undefined, { month: "short", day: "numeric" })
-                    : null;
-                return (
-                  <View
-                    style={{
-                      backgroundColor: Colors.card,
-                      borderRadius: Radius.lg,
-                      padding: Spacing.md,
-                      borderWidth: 1,
-                      borderColor: Colors.border,
-                      marginBottom: Spacing.sm,
-                    }}
-                  >
-                    <View style={{ flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", gap: Spacing.sm }}>
-                      <View style={{ flex: 1, minWidth: 0 }}>
-                        <Text style={{ ...Typography.section, fontSize: 16 }}>{item.name}</Text>
-                        <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4 }}>
-                          {item.note?.trim()
-                            ? item.note.trim()
-                            : item.groupName?.trim()
-                              ? `Split: ${item.groupName.trim()}`
-                              : "Legacy plan"}
-                        </Text>
-                        <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4 }}>
-                          {lastCompletedLabel ? `Last completed: ${lastCompletedLabel}` : "Last completed: —"}
-                        </Text>
-                      </View>
-
-                      <View style={{ flexDirection: "row", gap: 8 }}>
-                        <RowAction
-                          icon="open-outline"
-                          label="Open workout"
-                          onPress={() =>
-                            router.push({
-                              pathname: "/coach/workout",
-                              params: { workoutPlanId: item.id },
-                            })
-                          }
-                        />
-                        <RowAction
-                          icon="create-outline"
-                          label="Edit workout"
-                          onPress={() =>
-                            router.push({
-                              pathname: "/coach/editWorkout",
-                              params: { workoutPlanId: item.id },
-                            })
-                          }
-                        />
-                        <RowAction
-                          icon="trash-outline"
-                          label="Delete workout"
-                          tone="danger"
-                          disabled={deletingPlanId !== null}
-                          onPress={() => {
-                            Alert.alert(
-                              "Delete workout?",
-                              "This will remove the workout from the student’s active list. You can’t undo this in the app.",
-                              [
-                                { text: "Cancel", style: "cancel" },
-                                {
-                                  text: "Delete",
-                                  style: "destructive",
-                                  onPress: async () => {
-                                    try {
-                                      setDeletingPlanId(item.id);
-                                      if (!user || user.role !== "coach") {
-                                        throw new Error("You must be logged in as a coach.");
-                                      }
-                                      await workoutService.deactivateWorkoutPlan(item.id, user.id);
-                                      setPlans((prev) =>
-                                        prev.map((p) => (p.id === item.id ? { ...p, isActive: false } : p))
-                                      );
-                                    } catch (e: any) {
-                                      Alert.alert("Failed to delete", e.message ?? "Unknown error");
-                                    } finally {
-                                      setDeletingPlanId(null);
-                                    }
-                                  },
-                                },
-                              ]
-                            );
-                          }}
-                        />
-                      </View>
-                    </View>
-                  </View>
-                );
-              }}
-            />
-          )}
+          </Pressable>
 
           {/* Compliance insights */}
           <Text style={{ ...Typography.section, marginTop: Spacing.lg, marginBottom: Spacing.xs }}>

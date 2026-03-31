@@ -7,7 +7,6 @@ import {
   ScrollView,
   TextInput,
   Pressable,
-  Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -16,6 +15,7 @@ import { studentService } from "../../../services/studentService";
 import { trainingGroupService } from "../../../services/trainingGroupService";
 import type { StudentSummary } from "../../../types/StudentSummary";
 import { StudentCard } from "../../../components/StudentCard";
+import { PrimaryButton } from "../../../components/PrimaryButton";
 import { Colors } from "../../../theme/colors";
 import { Radius, Spacing } from "../../../theme/spacing";
 import { Typography } from "../../../theme/typography";

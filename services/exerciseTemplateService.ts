@@ -87,7 +87,8 @@ export const exerciseTemplateService = {
       const ref = collection(db, COLLECTION);
       const snap = await getDocs(query(ref, where("name", "==", name), limit(1)));
       if (!snap.empty) return;
-      await addDoc(ref, { name });
+      // Firestore rejects undefined fields; always sanitize writes.
+      await addDoc(ref, sanitizeForFirestore({ name }) as any);
     } catch (e) {
       console.warn("[exerciseTemplateService] upsertNameIfNeeded", e);
     }
