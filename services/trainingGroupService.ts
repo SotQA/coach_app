@@ -1,6 +1,7 @@
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -129,6 +130,19 @@ export const trainingGroupService = {
     const snap = await getDoc(ref);
     if (!snap.exists()) return null;
     return mapGroupDoc(snap as unknown as QueryDocumentSnapshot);
+  },
+
+  async deleteTrainingGroup(groupId: string, coachId: string): Promise<void> {
+    assertNonEmpty(groupId, "groupId");
+    assertNonEmpty(coachId, "coachId");
+    const ref = doc(db, TRAINING_GROUPS_COLLECTION, groupId);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return;
+    const data = snap.data() as any;
+    if (String(data.coachId ?? "") !== coachId) {
+      throw new Error("You don't have access to this training group.");
+    }
+    await deleteDoc(ref);
   },
 
   async getTrainingGroupsForStudent(coachId: string, studentId: string): Promise<TrainingGroup[]> {

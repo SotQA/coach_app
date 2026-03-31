@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useAuth } from "../../context/AuthContext";
 import { trainingGroupService } from "../../services/trainingGroupService";
@@ -9,6 +9,7 @@ import { ScreenLayout } from "../../components/ScreenLayout";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
+import { Swipeable } from "react-native-gesture-handler";
 
 export default function SelectTrainingGroup() {
   const router = useRouter();
@@ -105,43 +106,93 @@ export default function SelectTrainingGroup() {
             {groups.map((g, idx) => {
               const selected = g.id === selectedId;
               return (
-                <Pressable
+                <Swipeable
                   key={g.id}
-                  onPress={() => setSelectedId(g.id)}
-                  style={({ pressed }) => ({
-                    padding: Spacing.md,
-                    borderRadius: Radius.lg,
-                    backgroundColor: selected ? Colors.surface : Colors.card,
-                    borderWidth: 1,
-                    borderColor: selected ? Colors.primary : Colors.border,
-                    opacity: pressed ? 0.92 : 1,
-                  })}
+                  rightThreshold={48}
+                  renderRightActions={() => (
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={`Delete ${g.name}`}
+                      onPress={() => {
+                        Alert.alert(
+                          "Delete training group?",
+                          "This will remove the split from the student. Existing workouts already created under this split will remain, but the split itself will be deleted.",
+                          [
+                            { text: "Cancel", style: "cancel" },
+                            {
+                              text: "Delete",
+                              style: "destructive",
+                              onPress: async () => {
+                                try {
+                                  if (!user || user.role !== "coach") throw new Error("You must be logged in as a coach.");
+                                  await trainingGroupService.deleteTrainingGroup(g.id, user.id);
+                                  setGroups((prev) => prev.filter((x) => x.id !== g.id));
+                                  setSelectedId((prevSel) => {
+                                    if (prevSel !== g.id) return prevSel;
+                                    const remaining = groups.filter((x) => x.id !== g.id);
+                                    return remaining[0]?.id ?? "";
+                                  });
+                                } catch (e: any) {
+                                  Alert.alert("Failed to delete", e?.message ?? "Unknown error");
+                                }
+                              },
+                            },
+                          ]
+                        );
+                      }}
+                      style={({ pressed }) => ({
+                        marginLeft: Spacing.sm,
+                        marginBottom: Spacing.sm,
+                        paddingHorizontal: 16,
+                        borderRadius: Radius.lg,
+                        backgroundColor: "#7F1D1D",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        opacity: pressed ? 0.9 : 1,
+                      })}
+                    >
+                      <Text style={{ ...Typography.section, fontWeight: "900", color: "#FFFFFF" }}>Delete</Text>
+                    </Pressable>
+                  )}
                 >
-                  <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-                    <View style={{ flex: 1 }}>
-                      <Text style={{ ...Typography.section, fontWeight: "900" }}>{g.name}</Text>
-                      <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4 }}>
-                        {g.workoutsPerWeek} workouts/week
-                      </Text>
-                    </View>
-                    {selected ? (
-                      <View
-                        style={{
-                          paddingVertical: 6,
-                          paddingHorizontal: 10,
-                          borderRadius: Radius.pill,
-                          backgroundColor: Colors.primary,
-                        }}
-                      >
-                        <Text style={{ ...Typography.secondary, color: Colors.onPrimary, fontWeight: "900" }}>
-                          Selected
+                  <Pressable
+                    onPress={() => setSelectedId(g.id)}
+                    style={({ pressed }) => ({
+                      padding: Spacing.md,
+                      borderRadius: Radius.lg,
+                      backgroundColor: selected ? Colors.surface : Colors.card,
+                      borderWidth: 1,
+                      borderColor: selected ? Colors.primary : Colors.border,
+                      opacity: pressed ? 0.92 : 1,
+                      marginBottom: Spacing.sm,
+                    })}
+                  >
+                    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+                      <View style={{ flex: 1 }}>
+                        <Text style={{ ...Typography.section, fontWeight: "900" }}>{g.name}</Text>
+                        <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4 }}>
+                          {g.workoutsPerWeek} workouts/week
                         </Text>
                       </View>
-                    ) : idx === 0 ? (
-                      <Text style={{ ...Typography.secondary, color: Colors.textMuted }}>Recent</Text>
-                    ) : null}
-                  </View>
-                </Pressable>
+                      {selected ? (
+                        <View
+                          style={{
+                            paddingVertical: 6,
+                            paddingHorizontal: 10,
+                            borderRadius: Radius.pill,
+                            backgroundColor: Colors.primary,
+                          }}
+                        >
+                          <Text style={{ ...Typography.secondary, color: Colors.onPrimary, fontWeight: "900" }}>
+                            Selected
+                          </Text>
+                        </View>
+                      ) : idx === 0 ? (
+                        <Text style={{ ...Typography.secondary, color: Colors.textMuted }}>Recent</Text>
+                      ) : null}
+                    </View>
+                  </Pressable>
+                </Swipeable>
               );
             })}
           </View>
