@@ -55,6 +55,8 @@ export interface WorkoutLog {
   workoutName: string;
   exercises: WorkoutLogExercise[];
   completedAt: any;
+  /** Optional student notes for the session. */
+  sessionNotes?: string;
   /** Sum of per-exercise volume (sets × reps × weight) for this session. */
   totalVolume?: number;
   /** Coach feedback on a completed workout. */

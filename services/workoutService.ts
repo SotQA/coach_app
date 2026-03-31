@@ -185,6 +185,10 @@ const mapLogDoc = (snap: QueryDocumentSnapshot): WorkoutLog => {
     workoutName: data.workoutName != null ? String(data.workoutName) : "Workout",
     exercises,
     completedAt: data.completedAt ?? data.date,
+    sessionNotes:
+      data.sessionNotes != null && String(data.sessionNotes).trim() !== ""
+        ? String(data.sessionNotes)
+        : undefined,
     totalVolume:
       totalVol != null && totalVol !== "" && Number.isFinite(Number(totalVol))
         ? Number(totalVol)
@@ -503,6 +507,7 @@ export const workoutService = {
     completedAt?: string;
     totalVolume?: number;
     durationSeconds?: number;
+    sessionNotes?: string;
   }): Promise<WorkoutLog> {
     assertNonEmpty(payload.studentId, "studentId (Firebase Auth UID)");
     assertNonEmpty(payload.workoutPlanId, "workoutPlanId");
@@ -525,6 +530,10 @@ export const workoutService = {
       typeof payload.durationSeconds === "number" && Number.isFinite(payload.durationSeconds)
         ? Math.max(0, Math.floor(payload.durationSeconds))
         : undefined;
+    const sessionNotes =
+      payload.sessionNotes != null && String(payload.sessionNotes).trim() !== ""
+        ? String(payload.sessionNotes).trim()
+        : undefined;
 
     const dataToWrite = sanitizeForFirestore({
       studentId: payload.studentId,
@@ -533,6 +542,7 @@ export const workoutService = {
       exercises: normalizedExercises,
       completedAt,
       totalVolume,
+      sessionNotes,
       ...(durationSeconds !== undefined ? { durationSeconds } : {}),
     });
 
@@ -546,6 +556,7 @@ export const workoutService = {
       exercises: normalizedExercises,
       completedAt,
       totalVolume,
+      ...(sessionNotes !== undefined ? { sessionNotes } : {}),
       ...(durationSeconds !== undefined ? { durationSeconds } : {}),
     };
   },
