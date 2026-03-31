@@ -21,6 +21,7 @@ import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
 import { ScreenLayout } from "../../components/ScreenLayout";
 import { ExerciseCard, type ExerciseDraft } from "../../components/ExerciseCard";
+import { ExerciseLibraryModal } from "../../components/ExerciseLibraryModal";
 
 // Screen for coaches to build a workout plan for a specific student.
 export default function CreateWorkoutPlan() {
@@ -51,6 +52,7 @@ export default function CreateWorkoutPlan() {
   // Keep everything collapsed on initial open (avoid auto-focus/keyboard pop).
   const [expandedKey, setExpandedKey] = useState<string | null>(null);
   const [lastAddedKey, setLastAddedKey] = useState<string | null>(null);
+  const [libraryOpen, setLibraryOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [initializingUser, setInitializingUser] = useState(true);
   const [coachId, setCoachId] = useState<string | null>(null);
@@ -126,6 +128,20 @@ export default function CreateWorkoutPlan() {
     const next: ExerciseDraft = {
       _key: nextKey,
       ...base,
+      coachNote: "",
+    };
+    setExercises((prev) => [...prev, next]);
+    setLastAddedKey(nextKey);
+    setExpandedKey(nextKey);
+  };
+
+  const addExerciseFromLibrary = (payload: { name: string }) => {
+    const base = workoutService.createEmptyExercise();
+    const nextKey = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    const next: ExerciseDraft = {
+      _key: nextKey,
+      ...base,
+      name: payload.name,
       coachNote: "",
     };
     setExercises((prev) => [...prev, next]);
@@ -390,7 +406,7 @@ export default function CreateWorkoutPlan() {
                 <Text style={{ ...Typography.section, fontWeight: "900" }}>Exercises</Text>
                 <PrimaryButton
                   title="+ Add Exercise"
-                  onPress={addExercise}
+                  onPress={() => setLibraryOpen(true)}
                   style={{ width: "auto", paddingHorizontal: Spacing.md }}
                 />
               </View>
@@ -469,6 +485,15 @@ export default function CreateWorkoutPlan() {
       >
         {loading ? <ActivityIndicator /> : <PrimaryButton title="Save Workout Plan" onPress={handleSavePlan} />}
       </View>
+
+      {coachId ? (
+        <ExerciseLibraryModal
+          visible={libraryOpen}
+          coachId={coachId}
+          onClose={() => setLibraryOpen(false)}
+          onAddExercise={(p) => addExerciseFromLibrary({ name: p.name })}
+        />
+      ) : null}
     </ScreenLayout>
   );
 }
