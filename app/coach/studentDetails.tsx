@@ -228,7 +228,7 @@ export default function StudentDetails() {
   }: {
     label: string;
     value: string;
-    icon: any;
+    icon?: any;
     tint?: string;
   }) => (
     <View
@@ -240,13 +240,19 @@ export default function StudentDetails() {
         padding: Spacing.md,
         borderWidth: 1,
         borderColor: Colors.border,
+        alignItems: "center",
+        justifyContent: "center",
       }}
     >
-      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-        <Text style={{ ...Typography.secondary, color: Colors.textMuted }}>{label}</Text>
-        <Ionicons name={icon} size={18} color={tint ?? Colors.textMuted} />
-      </View>
-      <Text style={{ ...Typography.title, fontSize: 22, marginTop: 6 }}>{value}</Text>
+      {icon ? (
+        <Ionicons name={icon} size={18} color={tint ?? Colors.textMuted} style={{ marginBottom: 6 }} />
+      ) : null}
+      <Text style={{ ...Typography.secondary, color: Colors.textMuted, textAlign: "center", width: "100%" }}>
+        {label}
+      </Text>
+      <Text style={{ ...Typography.title, fontSize: 22, marginTop: 6, textAlign: "center", width: "100%" }}>
+        {value}
+      </Text>
     </View>
   );
 
@@ -281,6 +287,13 @@ export default function StudentDetails() {
     }).length;
     const ratio = Math.max(0, Math.min(1, completed / wpw));
     return { completed, target: wpw, ratio };
+  })();
+
+  const assignedProgramPercent = (() => {
+    if (typeof compliancePercent === "number" && Number.isFinite(compliancePercent)) {
+      return Math.max(0, Math.min(100, Math.round(compliancePercent)));
+    }
+    return Math.round(weeklyProgress.ratio * 100);
   })();
 
   const RowAction = ({
@@ -537,16 +550,32 @@ export default function StudentDetails() {
           {/* Quick stats */}
           <Text style={{ ...Typography.section, marginBottom: Spacing.xs }}>Quick stats</Text>
           <View style={{ flexDirection: "row", gap: Spacing.sm, marginBottom: Spacing.sm }}>
-            <StatCard label="Workouts completed" value={String(workoutsCompleted)} icon="barbell-outline" tint={Colors.primary} />
+            <StatCard
+              label="Workouts completed"
+              value={String(workoutsCompleted)}
+              icon="barbell-outline"
+              tint={Colors.primary}
+            />
             <StatCard
               label="Compliance"
               value={compliancePercent != null ? `${compliancePercent}%` : "—"}
               icon="checkmark-done-outline"
+              tint="#FF6B6B"
             />
           </View>
           <View style={{ flexDirection: "row", gap: Spacing.sm, marginBottom: Spacing.md }}>
-            <StatCard label="Current streak" value={currentStreakDays ? `${currentStreakDays}d` : "—"} icon="flame-outline" />
-            <StatCard label="Avg duration" value={avgDurationLabel ?? "—"} icon="time-outline" />
+            <StatCard
+              label="Current streak"
+              value={currentStreakDays ? `${currentStreakDays}d` : "—"}
+              icon="flame-outline"
+              tint="#FF8C42"
+            />
+            <StatCard
+              label="Avg duration"
+              value={avgDurationLabel ?? "—"}
+              icon="time-outline"
+              tint="#64D2FF"
+            />
           </View>
 
           {/* Active training group card */}
@@ -583,11 +612,12 @@ export default function StudentDetails() {
               });
             }}
             style={({ pressed }) => ({
-              backgroundColor: Colors.card,
+              // Slight blue-tinted card like the reference screenshot.
+              backgroundColor: "#121A26",
               borderRadius: Radius.lg,
               padding: Spacing.md,
               borderWidth: 1,
-              borderColor: Colors.border,
+              borderColor: "rgba(255,255,255,0.10)",
               marginBottom: Spacing.md,
               opacity: pressed ? 0.96 : 1,
             })}
@@ -606,9 +636,9 @@ export default function StudentDetails() {
                       width: 40,
                       height: 40,
                       borderRadius: 20,
-                      backgroundColor: Colors.surface,
+                      backgroundColor: "rgba(255,255,255,0.06)",
                       borderWidth: 1,
-                      borderColor: Colors.border,
+                      borderColor: "rgba(255,255,255,0.10)",
                       alignItems: "center",
                       justifyContent: "center",
                     }}
@@ -628,7 +658,7 @@ export default function StudentDetails() {
                   >
                     <View
                       style={{
-                        width: `${Math.round(weeklyProgress.ratio * 100)}%`,
+                        width: `${assignedProgramPercent}%`,
                         height: "100%",
                         backgroundColor: Colors.primary,
                       }}
@@ -639,7 +669,7 @@ export default function StudentDetails() {
                       Progress
                     </Text>
                     <Text style={{ ...Typography.secondary, color: Colors.textMuted }}>
-                      {weeklyProgress.target ? `${weeklyProgress.completed} of ${weeklyProgress.target} this week` : "—"}
+                      {typeof compliancePercent === "number" ? `${assignedProgramPercent}%` : weeklyProgress.target ? `${weeklyProgress.completed} of ${weeklyProgress.target} this week` : "—"}
                     </Text>
                   </View>
                 </View>

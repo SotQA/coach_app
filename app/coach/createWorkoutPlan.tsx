@@ -8,20 +8,20 @@ import {
   TextInput,
   View,
 } from "react-native";
+import DraggableFlatList, { type RenderItemParams } from "react-native-draggable-flatlist";
+import { ExerciseCard, type ExerciseDraft } from "../../components/ExerciseCard";
+import { ExerciseLibraryModal } from "../../components/ExerciseLibraryModal";
 import { PrimaryButton } from "../../components/PrimaryButton";
+import { ScreenLayout } from "../../components/ScreenLayout";
 import { useAuth } from "../../context/AuthContext";
+import { exerciseTemplateService } from "../../services/exerciseTemplateService";
 import { trainingGroupService } from "../../services/trainingGroupService";
 import { workoutService } from "../../services/workoutService";
-import { exerciseTemplateService } from "../../services/exerciseTemplateService";
-import type { Exercise } from "../../types/Workout";
-import type { TrainingGroup } from "../../types/TrainingGroup";
-import DraggableFlatList, { type RenderItemParams } from "react-native-draggable-flatlist";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
-import { ScreenLayout } from "../../components/ScreenLayout";
-import { ExerciseCard, type ExerciseDraft } from "../../components/ExerciseCard";
-import { ExerciseLibraryModal } from "../../components/ExerciseLibraryModal";
+import type { TrainingGroup } from "../../types/TrainingGroup";
+import type { Exercise } from "../../types/Workout";
 
 // Screen for coaches to build a workout plan for a specific student.
 export default function CreateWorkoutPlan() {
