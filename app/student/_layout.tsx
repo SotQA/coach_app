@@ -31,6 +31,7 @@ export default function StudentLayout() {
       <Stack.Screen name="today" options={{ title: "Today" }} />
       <Stack.Screen name="workout" options={{ title: "Workout" }} />
       <Stack.Screen name="workoutExecution" options={{ headerShown: false }} />
+      <Stack.Screen name="workoutPlanDetail" options={{ title: "Workout" }} />
       <Stack.Screen name="exerciseDetails" options={{ title: "Exercise Details" }} />
       <Stack.Screen name="progress" options={{ title: "Progress" }} />
     </Stack>
