@@ -10,7 +10,7 @@ import { Typography } from "../../../theme/typography";
 import { useAuth } from "../../../context/AuthContext";
 import { studentService } from "../../../services/studentService";
 import { ExerciseLibraryModal } from "../../../components/ExerciseLibraryModal";
-import { CoachProfileCard } from "../../../components/settings/CoachProfileCard";
+import { SettingsProfileCard } from "../../../components/settings/SettingsProfileCard";
 import { SettingsSection } from "../../../components/settings/SettingsSection";
 import { SettingsRow } from "../../../components/settings/SettingsRow";
 
@@ -121,13 +121,17 @@ export default function CoachProfile() {
             </Text>
           ) : null}
 
-          <CoachProfileCard
+          <SettingsProfileCard
             fullName={fullName}
             email={user.email ?? ""}
             roleLabel="Coach"
             initials={coachInitials}
-            studentCount={studentCount}
             statsLoading={statsLoading}
+            metaLine={
+              statsLoading || studentCount == null
+                ? null
+                : `${studentCount} ${studentCount === 1 ? "student" : "students"} on your roster`
+            }
             onEditProfile={() =>
               Alert.alert("Coming soon", "Profile editing isn’t available yet.", [{ text: "OK", style: "default" }])
             }

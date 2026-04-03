@@ -19,19 +19,21 @@ type Props = {
   email: string;
   roleLabel: string;
   initials: string;
-  studentCount: number | null;
-  statsLoading: boolean;
   onEditProfile: () => void;
+  /** When true, shows a small loader under the role line instead of meta text. */
+  statsLoading?: boolean;
+  /** Optional line under role (e.g. roster count or workout summary). */
+  metaLine?: string | null;
 };
 
-export function CoachProfileCard({
+export function SettingsProfileCard({
   fullName,
   email,
   roleLabel,
   initials,
-  studentCount,
-  statsLoading,
   onEditProfile,
+  statsLoading = false,
+  metaLine = null,
 }: Props) {
   return (
     <View
@@ -76,10 +78,8 @@ export function CoachProfileCard({
             <View style={{ marginTop: 8 }}>
               <ActivityIndicator size="small" color={Colors.primary} />
             </View>
-          ) : studentCount != null ? (
-            <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 6 }}>
-              {studentCount} {studentCount === 1 ? "student" : "students"} on your roster
-            </Text>
+          ) : metaLine ? (
+            <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 6 }}>{metaLine}</Text>
           ) : null}
         </View>
       </View>
