@@ -443,7 +443,7 @@ export default function CoachProgressTab() {
                     style={{
                       paddingVertical: 8,
                       paddingHorizontal: 12,
-                      borderRadius: Radius.md,
+                      borderRadius: Radius.sm,
                       backgroundColor: sel ? Colors.surface : Colors.card,
                       borderWidth: 1,
                       borderColor: sel ? Colors.primary : Colors.border,
@@ -468,7 +468,7 @@ export default function CoachProgressTab() {
               style={{
                 paddingVertical: 8,
                 paddingHorizontal: 12,
-                borderRadius: Radius.md,
+                borderRadius: Radius.sm,
                 backgroundColor: exerciseAll ? Colors.surface : Colors.card,
                 borderWidth: 1,
                 borderColor: exerciseAll ? Colors.primary : Colors.border,
@@ -488,7 +488,7 @@ export default function CoachProgressTab() {
                   style={{
                     paddingVertical: 8,
                     paddingHorizontal: 12,
-                    borderRadius: Radius.md,
+                    borderRadius: Radius.sm,
                     backgroundColor: sel ? Colors.surface : Colors.card,
                     borderWidth: 1,
                     borderColor: sel ? Colors.primary : Colors.border,
@@ -514,7 +514,7 @@ export default function CoachProgressTab() {
                   style={{
                     paddingVertical: 8,
                     paddingHorizontal: 12,
-                    borderRadius: Radius.md,
+                    borderRadius: Radius.sm,
                     backgroundColor: sel ? Colors.surface : Colors.card,
                     borderWidth: 1,
                     borderColor: sel ? Colors.primary : Colors.border,
@@ -700,7 +700,7 @@ export default function CoachProgressTab() {
                       style={{
                         paddingHorizontal: 10,
                         paddingVertical: 4,
-                        borderRadius: Radius.pill,
+                        borderRadius: Radius.sm,
                         backgroundColor:
                           s.status === "green"
                             ? "rgba(52,199,89,0.18)"
