@@ -4,20 +4,22 @@ import {
   Text,
   TextInput,
   ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { authService } from "../../services/authService";
+import { useAuth } from "../../context/AuthContext";
 import { studentService } from "../../services/studentService";
 import { PrimaryButton } from "../../components/PrimaryButton";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { Colors } from "../../theme/colors";
+import { Radius, Spacing } from "../../theme/spacing";
+import { Typography } from "../../theme/typography";
+import { ScreenLayout } from "../../components/ScreenLayout";
 
 // Screen used by the coach to create a new student record
 // that will appear in their dashboard.
 export default function CreateStudent() {
   const router = useRouter();
-  const [studentUid, setStudentUid] = useState("");
+  const { user } = useAuth();
   const [studentEmail, setStudentEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -26,24 +28,19 @@ export default function CreateStudent() {
     setError(null);
     setLoading(true);
     try {
-      const user = await authService.getCurrentUserWithRole();
       if (!user || user.role !== "coach") {
         setError("You must be logged in as a coach.");
         return;
       }
 
-      const uid = studentUid.trim();
       const email = studentEmail.trim();
 
-      if (email) {
-        await studentService.assignStudentToCoachByEmail(email, user.id);
-      } else {
-        if (!uid) {
-          setError("Enter a student email or UID.");
-          return;
-        }
-        await studentService.assignStudentToCoach(uid, user.id);
+      if (!email) {
+        setError("Enter a student email.");
+        return;
       }
+
+      await studentService.assignStudentToCoachByEmail(email, user.id);
 
       router.replace("/coach/dashboard");
     } catch (e: any) {
@@ -54,88 +51,89 @@ export default function CreateStudent() {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: "#0F172A" }}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1, padding: 16 }}
+    <ScreenLayout>
+      <KeyboardAwareScrollView
+        style={{ flex: 1, backgroundColor: Colors.bg }}
+        contentContainerStyle={{
+          flexGrow: 1,
+          padding: Spacing.md,
+          paddingBottom: 48,
+          backgroundColor: Colors.bg,
+        }}
+        // Prevent iOS bounce/overscroll revealing white during swipe-back.
+        bounces={false}
+        alwaysBounceVertical={false}
+        // Prevent Android glow/overscroll.
+        overScrollMode="never"
         keyboardShouldPersistTaps="handled"
+        enableOnAndroid
+        enableResetScrollToCoords={false}
+        extraScrollHeight={24}
       >
-        <View
-          style={{
-            backgroundColor: "#111827",
-            borderRadius: 24,
-            padding: 20,
-            marginTop: 16,
-          }}
-        >
+      <View
+        style={{
+          backgroundColor: Colors.card,
+          borderRadius: Radius.md,
+          padding: 20,
+          marginTop: Spacing.md,
+          borderWidth: 1,
+          borderColor: Colors.border,
+        }}
+      >
           <Text
             style={{
-              fontSize: 20,
-              fontWeight: "700",
-              marginBottom: 8,
-              color: "#F9FAFB",
+              ...Typography.title,
+              fontSize: 22,
+              marginBottom: Spacing.xs,
             }}
           >
             Create Student
           </Text>
-          <Text style={{ color: "#9CA3AF", marginBottom: 16 }}>
-            Link an existing student account to your roster using their Firebase Auth UID.
+          <Text style={{ ...Typography.secondary, marginBottom: Spacing.md }}>
+            Link an existing student account to your roster.
           </Text>
-          <Text style={{ color: "#E5E7EB", marginBottom: 4 }}>Student Email</Text>
+          <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Student Email</Text>
           <TextInput
             placeholder="student@example.com"
-            placeholderTextColor="#6B7280"
+            placeholderTextColor={Colors.textMuted}
             autoCapitalize="none"
             keyboardType="email-address"
             value={studentEmail}
             onChangeText={setStudentEmail}
             style={{
               borderWidth: 1,
-              borderColor: "#1F2937",
+              borderColor: Colors.border,
               padding: 12,
-              borderRadius: 12,
-              marginBottom: 12,
-              color: "white",
-              backgroundColor: "#020617",
+              borderRadius: Radius.sm,
+              marginBottom: Spacing.sm,
+              color: Colors.text,
+              backgroundColor: Colors.surface,
             }}
           />
-          <Text style={{ color: "#9CA3AF", marginBottom: 12 }}>
-            Or link by UID below.
-          </Text>
-          <Text style={{ color: "#E5E7EB", marginBottom: 4 }}>Student UID</Text>
-          <TextInput
-            placeholder="Firebase Auth UID"
-            placeholderTextColor="#6B7280"
-            autoCapitalize="none"
-            value={studentUid}
-            onChangeText={setStudentUid}
-            style={{
-              borderWidth: 1,
-              borderColor: "#1F2937",
-              padding: 12,
-              borderRadius: 12,
-              marginBottom: 12,
-              color: "white",
-              backgroundColor: "#020617",
-            }}
-          />
-          <Text style={{ color: "#9CA3AF", marginBottom: 16 }}>
-            The student must have already signed up. This sets `users/{studentUid}.coachId` to you.
+          <Text style={{ ...Typography.secondary, marginBottom: Spacing.md }}>
+            The student must have already signed up with this email.
           </Text>
 
           {loading ? (
             <ActivityIndicator style={{ marginVertical: 12 }} />
           ) : (
-            <PrimaryButton title="Link Student" onPress={handleCreate} />
+            <>
+              <PrimaryButton title="Link Student" onPress={handleCreate} />
+              <View style={{ marginTop: Spacing.sm }}>
+                <PrimaryButton
+                  title="Cancel"
+                  onPress={() => router.back()}
+                  style={{ backgroundColor: Colors.border }}
+                />
+              </View>
+            </>
           )}
           {error ? (
-            <Text style={{ color: "#FCA5A5", marginTop: 8 }}>{error}</Text>
+            <Text style={{ color: Colors.danger, marginTop: Spacing.xs }}>{error}</Text>
           ) : null}
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+      </View>
+      </KeyboardAwareScrollView>
+    </ScreenLayout>
   );
 }
 

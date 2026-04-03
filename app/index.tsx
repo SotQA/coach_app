@@ -1,6 +1,7 @@
 import { Redirect } from "expo-router";
-import { View, Text, ActivityIndicator } from "react-native";
+import { View, ActivityIndicator } from "react-native";
 import { useAuth } from "../context/AuthContext";
+import { Colors } from "../theme/colors";
 
 // Simple landing page that routes to login or signup.
 export default function Home() {
@@ -13,16 +14,16 @@ export default function Home() {
           flex: 1,
           justifyContent: "center",
           alignItems: "center",
-          backgroundColor: "#0F172A",
+          backgroundColor: Colors.bg,
         }}
       >
-        <ActivityIndicator />
+        <ActivityIndicator color={Colors.primary} />
       </View>
     );
   }
 
   if (user) {
-    const href = user.role === "coach" ? "/coach/dashboard" : "/student/today";
+    const href = user.role === "coach" ? "/coach/dashboard" : "/student/workouts";
     return <Redirect href={href} />;
   }
 

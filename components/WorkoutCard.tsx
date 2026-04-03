@@ -1,6 +1,9 @@
 import { FC } from "react";
 import { View, Text } from "react-native";
 import type { WorkoutPlan } from "../types/Workout";
+import { Colors } from "../theme/colors";
+import { Radius, Spacing } from "../theme/spacing";
+import { Typography } from "../theme/typography";
 
 interface WorkoutCardProps {
   plan: WorkoutPlan;
@@ -8,41 +11,47 @@ interface WorkoutCardProps {
 
 // Displays a simple summary of a workout plan and its exercises.
 export const WorkoutCard: FC<WorkoutCardProps> = ({ plan }) => {
+  const title = (plan.name ?? "").toString().trim() || "Workout Plan";
+  const groupLabel =
+    (plan.groupName ?? "").toString().trim() ||
+    (plan.groupId ? "Training Group" : "Legacy Plan");
   return (
     <View
       style={{
-        borderRadius: 20,
-        padding: 16,
-        marginVertical: 8,
-        backgroundColor: "#020617",
+        borderRadius: Radius.md,
+        padding: Spacing.md,
+        marginVertical: Spacing.xs,
+        backgroundColor: Colors.surface,
         borderWidth: 1,
-        borderColor: "#1F2937",
+        borderColor: Colors.border,
       }}
     >
       <Text
         style={{
-          fontWeight: "700",
-          marginBottom: 8,
-          color: "#E5E7EB",
-          fontSize: 16,
+          ...Typography.section,
+          marginBottom: Spacing.sm,
+          color: Colors.text,
         }}
       >
-        Workout Plan
+        {title}
+      </Text>
+      <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: Spacing.sm }}>
+        {groupLabel}
       </Text>
       {plan.exercises.map((exercise, index) => (
         <View
           key={`${exercise.name}-${index}`}
           style={{
-            marginBottom: 8,
-            paddingVertical: 4,
+            marginBottom: Spacing.xs,
+            paddingVertical: 6,
             borderBottomWidth: index === plan.exercises.length - 1 ? 0 : 1,
-            borderBottomColor: "#1F2937",
+            borderBottomColor: Colors.border,
           }}
         >
-          <Text style={{ fontWeight: "600", color: "#F9FAFB" }}>
+          <Text style={{ ...Typography.section, fontSize: 15 }}>
             {exercise.name}
           </Text>
-          <Text style={{ color: "#9CA3AF" }}>
+          <Text style={Typography.secondary}>
             {exercise.sets} sets x {exercise.reps} reps
             {exercise.weight ? ` @ ${exercise.weight}kg` : ""}
           </Text>

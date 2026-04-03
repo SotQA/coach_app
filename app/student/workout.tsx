@@ -3,17 +3,19 @@ import {
   View,
   Text,
   ActivityIndicator,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { authService } from "../../services/authService";
+import { useAuth } from "../../context/AuthContext";
 import { workoutService } from "../../services/workoutService";
 import type { AppUser } from "../../types/User";
 import type { Exercise } from "../../types/Workout";
 import { ExerciseInput } from "../../components/ExerciseInput";
 import { PrimaryButton } from "../../components/PrimaryButton";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { Colors } from "../../theme/colors";
+import { Spacing } from "../../theme/spacing";
+import { Typography } from "../../theme/typography";
+import { ScreenLayout } from "../../components/ScreenLayout";
 
 // Simple workout logging screen:
 // - Loads the current student
@@ -21,6 +23,7 @@ import { PrimaryButton } from "../../components/PrimaryButton";
 // - Uses ExerciseInput to keep UI consistent with coach's plan builder
 export default function WorkoutScreen() {
   const router = useRouter();
+  const { user: authUser } = useAuth();
   const [student, setStudent] = useState<AppUser | null>(null);
   const [workoutPlanId, setWorkoutPlanId] = useState<string | null>(null);
   const [exercise, setExercise] = useState<Exercise>(
@@ -36,14 +39,13 @@ export default function WorkoutScreen() {
       console.log("[student/workout] load start");
       try {
         setError(null);
-        const user = await authService.getCurrentUserWithRole();
-        console.log("[student/workout] currentUser.id", user?.id);
-        if (!user || user.role !== "student") {
+        console.log("[student/workout] currentUser.id", authUser?.id);
+        if (!authUser || authUser.role !== "student") {
           setError("You must be logged in as a student.");
           return;
         }
-        setStudent(user);
-        const plan = await workoutService.getWorkoutPlanForStudent(user.id);
+        setStudent(authUser);
+        const plan = await workoutService.getWorkoutPlanForStudent(authUser.id);
         console.log("[student/workout] workoutPlan", plan?.id ?? null);
         setWorkoutPlanId(plan?.id ?? null);
       } catch (e: any) {
@@ -55,7 +57,7 @@ export default function WorkoutScreen() {
     };
 
     loadUser();
-  }, []);
+  }, [authUser?.id, authUser?.role]);
 
   const handleLogWorkout = async () => {
     if (!student) return;
@@ -74,10 +76,14 @@ export default function WorkoutScreen() {
       await workoutService.logWorkoutEntry({
         studentId: student.id,
         workoutPlanId,
+        workoutName: "Workout",
         exercise: exercise.name,
         sets: exercise.sets,
         reps: exercise.reps,
         weight: exercise.weight,
+        rest: exercise.rest,
+        tempo: exercise.tempo,
+        rpe: exercise.rpe,
       });
       console.log("[student/workout] submit success");
       setMessage("Workout logged!");
@@ -97,7 +103,7 @@ export default function WorkoutScreen() {
           flex: 1,
           justifyContent: "center",
           alignItems: "center",
-          backgroundColor: "#0F172A",
+          backgroundColor: Colors.bg,
         }}
       >
         <ActivityIndicator />
@@ -112,7 +118,7 @@ export default function WorkoutScreen() {
           flex: 1,
           justifyContent: "center",
           padding: 16,
-          backgroundColor: "#0F172A",
+          backgroundColor: Colors.bg,
         }}
       >
         <Text style={{ color: "#FCA5A5", marginBottom: 8 }}>{error}</Text>
@@ -122,36 +128,26 @@ export default function WorkoutScreen() {
   }
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: "#0F172A" }}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
-    >
-      <ScrollView contentContainerStyle={{ padding: 16 }} keyboardShouldPersistTaps="handled">
-        <Text
-          style={{
-            fontSize: 20,
-            fontWeight: "700",
-            marginBottom: 8,
-            color: "#F9FAFB",
-          }}
-        >
+    <ScreenLayout>
+      <KeyboardAwareScrollView
+        style={{ flex: 1, backgroundColor: Colors.bg }}
+        contentContainerStyle={{ padding: Spacing.md, paddingBottom: 48 }}
+        keyboardShouldPersistTaps="handled"
+        enableOnAndroid
+        enableResetScrollToCoords={false}
+        extraScrollHeight={24}
+      >
+        <Text style={{ ...Typography.title, fontSize: 22, marginBottom: Spacing.sm }}>
           Log Workout
         </Text>
-        <ExerciseInput value={exercise} onChange={setExercise} />
+        <ExerciseInput value={exercise} onChange={setExercise} showAdvancedFields={false} />
         <View style={{ marginTop: 16 }}>
-          {submitting ? (
-            <ActivityIndicator />
-          ) : (
-            <PrimaryButton title="Save Set" onPress={handleLogWorkout} />
-          )}
+          {submitting ? <ActivityIndicator /> : <PrimaryButton title="Save Set" onPress={handleLogWorkout} />}
         </View>
-        {message ? (
-          <Text style={{ color: "#6EE7B7", marginTop: 8 }}>{message}</Text>
-        ) : null}
-        {error ? <Text style={{ color: "#FCA5A5", marginTop: 8 }}>{error}</Text> : null}
-      </ScrollView>
-    </KeyboardAvoidingView>
+        {message ? <Text style={{ color: Colors.success, marginTop: Spacing.xs }}>{message}</Text> : null}
+        {error ? <Text style={{ color: Colors.danger, marginTop: Spacing.xs }}>{error}</Text> : null}
+      </KeyboardAwareScrollView>
+    </ScreenLayout>
   );
 }
 

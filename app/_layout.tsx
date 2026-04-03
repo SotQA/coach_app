@@ -1,53 +1,66 @@
 import { Stack } from "expo-router";
-import { AuthProvider } from "../context/AuthContext";
+import { useEffect } from "react";
+import { ActivityIndicator, View } from "react-native";
+import { AuthProvider, useAuth } from "../context/AuthContext";
+import * as SystemUI from "expo-system-ui";
+import { DarkTheme, ThemeProvider } from "@react-navigation/native";
+import { Colors } from "../theme/colors";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
-export default function Layout() {
-  return (
-    <AuthProvider>
-      <Stack
-        screenOptions={{
-          headerTitleAlign: "center",
+function RootNavigator() {
+  const { loading } = useAuth();
+
+  useEffect(() => {
+    // Ensures iOS interactive back-swipe can't reveal a white root background.
+    // This is applied at runtime (works in Expo Go too).
+    SystemUI.setBackgroundColorAsync(Colors.bg).catch(() => {});
+  }, []);
+
+  if (loading) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: Colors.bg,
         }}
       >
-        <Stack.Screen name="index" options={{ title: "Gym Coach App" }} />
-        <Stack.Screen name="login" options={{ title: "Login" }} />
-        <Stack.Screen name="signup" options={{ title: "Sign Up" }} />
-        <Stack.Screen name="coach/dashboard" options={{ title: "Coach Dashboard" }} />
-        <Stack.Screen
-          name="coach/studentDetails"
-          options={{ title: "Student Details" }}
-        />
-        <Stack.Screen
-          name="coach/createStudent"
-          options={{ title: "Create Student" }}
-        />
-        <Stack.Screen
-          name="coach/createWorkoutPlan"
-          options={{ title: "Create Workout Plan" }}
-        />
-        <Stack.Screen name="coach/viewProgress" options={{ title: "Progress" }} />
-        <Stack.Screen
-          name="student/dashboard"
-          options={{ title: "Student Dashboard" }}
-        />
-        <Stack.Screen name="student/today" options={{ title: "Today" }} />
-        <Stack.Screen
-          name="student/workout"
-          options={{ title: "Workout" }}
-        />
-        <Stack.Screen
-          name="student/workoutExecution"
-          options={{ title: "Workout Execution" }}
-        />
-        <Stack.Screen
-          name="student/workoutHistory"
-          options={{ title: "Workout History" }}
-        />
-        <Stack.Screen
-          name="student/exerciseDetails"
-          options={{ title: "Exercise Details" }}
-        />
-      </Stack>
-    </AuthProvider>
+        <ActivityIndicator size="large" color={Colors.primary} />
+      </View>
+    );
+  }
+
+  return (
+    <Stack
+      screenOptions={{ headerShown: false }}
+    >
+      {/* Top-level groups */}
+      <Stack.Screen name="index" />
+      <Stack.Screen name="(auth)" />
+      <Stack.Screen name="coach" />
+      <Stack.Screen name="student" />
+    </Stack>
+  );
+}
+
+export default function Layout() {
+  const navTheme = {
+    ...DarkTheme,
+    colors: {
+      ...DarkTheme.colors,
+      background: Colors.bg,
+      card: Colors.bg,
+    },
+  };
+
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <AuthProvider>
+        <ThemeProvider value={navTheme}>
+          <RootNavigator />
+        </ThemeProvider>
+      </AuthProvider>
+    </GestureHandlerRootView>
   );
 }

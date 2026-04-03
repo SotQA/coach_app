@@ -1,13 +1,13 @@
 import { addDoc, collection } from "firebase/firestore";
 import { Button, View } from "react-native";
 import { db } from "../firebase/firebaseConfig";
-import { authService } from "../services/authService";
+import { useAuth } from "../context/AuthContext";
 
 export default function TestScreen() {
+  const { user } = useAuth();
 
   const addWorkout = async () => {
     try {
-      const user = await authService.getCurrentUserWithRole();
       if (!user) {
         alert("Please login first.");
         return;
@@ -16,7 +16,7 @@ export default function TestScreen() {
         studentId: user.id,
         exercise: "Bench Press",
         sets: 4,
-        reps: 10,
+        reps: "10",
         weight: 80,
         date: new Date()
       });

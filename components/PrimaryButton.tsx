@@ -1,5 +1,8 @@
-import { FC } from "react";
-import { Text, TouchableOpacity, ViewStyle, TextStyle } from "react-native";
+import { FC, useRef } from "react";
+import { Animated, Pressable, Text, TextStyle, ViewStyle } from "react-native";
+import { Colors } from "../theme/colors";
+import { Radius, Spacing } from "../theme/spacing";
+import { Typography } from "../theme/typography";
 
 interface PrimaryButtonProps {
   title: string;
@@ -9,7 +12,7 @@ interface PrimaryButtonProps {
   disabled?: boolean;
 }
 
-// Simple shared primary button with consistent rounded styling and color.
+// Primary = lime fill + dark label; callers can override `style.backgroundColor` for secondary rows.
 export const PrimaryButton: FC<PrimaryButtonProps> = ({
   title,
   onPress,
@@ -17,35 +20,67 @@ export const PrimaryButton: FC<PrimaryButtonProps> = ({
   textStyle,
   disabled,
 }) => {
+  const requestedWidth = (style as any)?.width as ViewStyle["width"] | undefined;
+  const containerWidth = requestedWidth ?? "100%";
+
+  const customBg = style?.backgroundColor;
+  const usesPrimaryFill =
+    !disabled && (customBg === undefined || customBg === Colors.primary);
+
   const baseStyle: ViewStyle = {
-    borderRadius: 999,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: disabled ? "#A0AEC0" : "#2563EB",
+    borderRadius: Radius.lg,
+    paddingVertical: 15,
+    paddingHorizontal: Spacing.md,
+    backgroundColor: disabled ? Colors.disabled : Colors.primary,
     alignItems: "center",
     justifyContent: "center",
   };
 
+  const defaultLabelColor = disabled
+    ? Colors.textMuted
+    : usesPrimaryFill
+      ? Colors.onPrimary
+      : Colors.text;
+
+  const scale = useRef(new Animated.Value(1)).current;
+  const animateTo = (toValue: number) => {
+    Animated.spring(scale, {
+      toValue,
+      useNativeDriver: true,
+      speed: 30,
+      bounciness: 0,
+    }).start();
+  };
+
   return (
-    <TouchableOpacity
+    <Pressable
       onPress={onPress}
-      style={[baseStyle, style]}
       disabled={disabled}
-      activeOpacity={0.8}
+      onPressIn={() => animateTo(0.97)}
+      onPressOut={() => animateTo(1)}
+      style={{ width: containerWidth }}
     >
-      <Text
+      <Animated.View
         style={[
-          {
-            color: "white",
-            fontWeight: "600",
-            fontSize: 16,
-          },
-          textStyle,
+          baseStyle,
+          { width: "100%" },
+          style,
+          { transform: [{ scale }] },
         ]}
       >
-        {title}
-      </Text>
-    </TouchableOpacity>
+        <Text
+          style={[
+            {
+              ...Typography.section,
+              color: defaultLabelColor,
+              textAlign: "center",
+            },
+            textStyle,
+          ]}
+        >
+          {title}
+        </Text>
+      </Animated.View>
+    </Pressable>
   );
 };
-
