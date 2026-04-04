@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
+import { useLocalSearchParams } from "expo-router";
 import { useAuth } from "../../../context/AuthContext";
 import { studentService } from "../../../services/studentService";
 import { workoutService } from "../../../services/workoutService";
@@ -13,6 +14,18 @@ import { ProgressAnalyticsView } from "../../../components/progress/ProgressAnal
 
 export default function CoachProgressTab() {
   const { user } = useAuth();
+  const params = useLocalSearchParams<{ studentId?: string; focusProgress?: string }>();
+  const paramStudentId = useMemo(() => String(params.studentId ?? "").trim(), [params.studentId]);
+
+  const coachProgressDefaults = useMemo(() => {
+    if (params.focusProgress !== "1") return null;
+    return {
+      timePreset: "4w" as const,
+      exerciseAll: true as const,
+      forStudentId: paramStudentId,
+    };
+  }, [params.focusProgress, paramStudentId]);
+
   const [students, setStudents] = useState<StudentSummary[]>([]);
   const [studentId, setStudentId] = useState<string>("");
   const [logs, setLogs] = useState<WorkoutLog[]>([]);
@@ -24,10 +37,13 @@ export default function CoachProgressTab() {
     if (!user || user.role !== "coach") return;
     const list = await studentService.getStudentsForCoach(user.id);
     setStudents(list);
-    if (list.length && !studentId) {
-      setStudentId(list[0].id);
-    }
-  }, [user, studentId]);
+    setStudentId((prev) => {
+      if (paramStudentId && list.some((s) => s.id === paramStudentId)) return paramStudentId;
+      if (prev && list.some((s) => s.id === prev)) return prev;
+      if (list.length) return list[0].id;
+      return "";
+    });
+  }, [user, paramStudentId]);
 
   const loadStudentData = useCallback(async () => {
     if (!user || user.role !== "coach" || !studentId) return;
@@ -102,6 +118,7 @@ export default function CoachProgressTab() {
       wpw={wpw}
       refreshing={refreshing}
       onRefresh={onRefresh}
+      coachProgressDefaults={coachProgressDefaults}
       coachContext={{
         students,
         selectedStudentId: studentId,

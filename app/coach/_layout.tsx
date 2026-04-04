@@ -45,7 +45,6 @@ export default function CoachLayout() {
       <Stack.Screen name="editWorkout" options={{ title: "Edit Workout" }} />
       <Stack.Screen name="workoutLogFeedback" options={{ title: "Workout feedback" }} />
       <Stack.Screen name="assignedWorkouts" options={{ title: "Assigned workouts" }} />
-      <Stack.Screen name="viewProgress" options={{ title: "Progress" }} />
     </Stack>
   );
 }
