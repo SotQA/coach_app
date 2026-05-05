@@ -11,6 +11,7 @@ import { useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../../context/AuthContext";
+import { useActiveWorkout } from "../../../context/ActiveWorkoutContext";
 import { workoutService } from "../../../services/workoutService";
 import { trainingGroupService } from "../../../services/trainingGroupService";
 import type { TrainingGroup } from "../../../types/TrainingGroup";
@@ -20,6 +21,8 @@ import { Radius, Spacing } from "../../../theme/spacing";
 import { Typography } from "../../../theme/typography";
 import { PrimaryButton } from "../../../components/PrimaryButton";
 import { ScreenLayout } from "../../../components/ScreenLayout";
+import { formatElapsedForTimer } from "../../../utils/workoutDuration";
+import { FLOATING_BAR_SCROLL_OFFSET } from "../../../components/FloatingWorkoutBar";
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -135,6 +138,7 @@ function ScaleCard({
 export default function StudentWorkouts() {
   const router = useRouter();
   const { user } = useAuth();
+  const activeWorkout = useActiveWorkout();
   const [plans, setPlans] = useState<WorkoutPlan[]>([]);
   const [logs, setLogs] = useState<WorkoutLog[]>([]);
   const [activeGroup, setActiveGroup] = useState<TrainingGroup | null>(null);
@@ -295,6 +299,14 @@ export default function StudentWorkouts() {
 
   const openExecution = useCallback(
     (plan: WorkoutPlan) => {
+      // If another session is already active, redirect to it instead of starting a new one.
+      if (activeWorkout.session) {
+        router.push({
+          pathname: "/student/workoutExecution",
+          params: { workoutPlanId: activeWorkout.session.workoutPlanId },
+        });
+        return;
+      }
       router.push({
         pathname: "/student/workoutExecution",
         params: {
@@ -304,7 +316,7 @@ export default function StudentWorkouts() {
         },
       });
     },
-    [router, activeGroup?.id]
+    [router, activeGroup?.id, activeWorkout.session]
   );
 
   const openDetail = useCallback(
@@ -350,7 +362,8 @@ export default function StudentWorkouts() {
         <ScrollView
           contentContainerStyle={{
             padding: Spacing.md,
-            paddingBottom: Spacing.xl * 2,
+            // Extra bottom padding when floating bar is visible so content isn't hidden under it.
+            paddingBottom: activeWorkout.session ? FLOATING_BAR_SCROLL_OFFSET + Spacing.xl : Spacing.xl * 2,
           }}
           showsVerticalScrollIndicator={false}
         >
@@ -375,6 +388,62 @@ export default function StudentWorkouts() {
               <Ionicons name="calendar-outline" size={24} color={Colors.primary} />
             </Pressable>
           </View>
+
+          {/* ── Active session resume banner ── */}
+          {activeWorkout.session ? (
+            <Pressable
+              onPress={() =>
+                router.push({
+                  pathname: "/student/workoutExecution",
+                  params: { workoutPlanId: activeWorkout.session!.workoutPlanId },
+                })
+              }
+              style={({ pressed }) => ({
+                backgroundColor: Colors.primary,
+                borderRadius: Radius.lg,
+                padding: Spacing.md,
+                marginBottom: Spacing.md,
+                flexDirection: "row",
+                alignItems: "center",
+                gap: Spacing.sm,
+                opacity: pressed ? 0.9 : 1,
+              })}
+            >
+              <View
+                style={{
+                  width: 10,
+                  height: 10,
+                  borderRadius: 5,
+                  backgroundColor: Colors.onPrimary,
+                  opacity: 0.7,
+                }}
+              />
+              <View style={{ flex: 1 }}>
+                <Text
+                  style={{
+                    ...Typography.section,
+                    color: Colors.onPrimary,
+                    fontWeight: "800",
+                    fontSize: 14,
+                  }}
+                  numberOfLines={1}
+                >
+                  Workout in progress · {activeWorkout.session.workoutName}
+                </Text>
+                <Text
+                  style={{
+                    ...Typography.secondary,
+                    color: Colors.onPrimary,
+                    opacity: 0.8,
+                    marginTop: 2,
+                  }}
+                >
+                  {formatElapsedForTimer(activeWorkout.elapsedSeconds)} · Tap to resume
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={Colors.onPrimary} />
+            </Pressable>
+          ) : null}
 
           {!showHub ? (
             <View

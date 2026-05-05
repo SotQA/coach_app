@@ -11,6 +11,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { useAuth } from "../../context/AuthContext";
+import { useActiveWorkout, type ActiveExerciseDraft } from "../../context/ActiveWorkoutContext";
 import { workoutService } from "../../services/workoutService";
 import type { LoggedSet, WorkoutLog, WorkoutPlan } from "../../types/Workout";
 import {
@@ -24,10 +25,9 @@ import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
 import { ScreenLayout } from "../../components/ScreenLayout";
-import {
-  formatElapsedForTimer,
-} from "../../utils/workoutDuration";
+import { formatElapsedForTimer } from "../../utils/workoutDuration";
 
+// ─── Local draft types (mirror ActiveSetDraft, using `done` for UI clarity) ──
 type SetDraft = { weight: string; reps: string; rpe: string; done: boolean };
 type ExerciseDraft = { sets: SetDraft[] };
 
@@ -39,7 +39,6 @@ function parseKgInput(text: string): number | null {
 }
 
 function normalizeDecimalInput(text: string): string {
-  // Keep it permissive while typing (allow "7.", ".", "0.5"), but strip invalid chars.
   let t = text.replace(",", ".").replace(/[^0-9.]/g, "");
   const firstDot = t.indexOf(".");
   if (firstDot >= 0) {
@@ -49,23 +48,59 @@ function normalizeDecimalInput(text: string): string {
   return t;
 }
 
-function getNextSetFocus(exIdx: number, setIdx: number, plan: WorkoutPlan): { ex: number; set: number } | null {
+function getNextSetFocus(
+  exIdx: number,
+  setIdx: number,
+  plan: WorkoutPlan
+): { ex: number; set: number } | null {
   const nSets = Math.max(1, Number(plan.exercises[exIdx]?.sets) || 1);
   if (setIdx + 1 < nSets) return { ex: exIdx, set: setIdx + 1 };
   if (exIdx + 1 < plan.exercises.length) return { ex: exIdx + 1, set: 0 };
   return null;
 }
 
+/** Build ActiveExerciseDraft[] from a loaded WorkoutPlan (fresh session). */
+function buildExerciseDrafts(plan: WorkoutPlan): ActiveExerciseDraft[] {
+  return plan.exercises.map((ex) => ({
+    name: ex.name,
+    sets: Array.from({ length: Math.max(1, Number(ex.sets) || 1) }, () => ({
+      weight:
+        ex.weight != null && Number.isFinite(Number(ex.weight)) ? String(ex.weight) : "",
+      reps: "",
+      rpe: ex.rpe != null && Number.isFinite(Number(ex.rpe)) ? String(ex.rpe) : "",
+      completed: false,
+    })),
+  }));
+}
+
+/** Convert persisted ActiveExerciseDraft[] → local ExerciseDraft[] for UI. */
+function toLocalDrafts(exercises: ActiveExerciseDraft[]): ExerciseDraft[] {
+  return exercises.map((ex) => ({
+    sets: ex.sets.map((s) => ({
+      weight: s.weight,
+      reps: s.reps,
+      rpe: s.rpe,
+      done: s.completed,
+    })),
+  }));
+}
+
 export default function WorkoutExecution() {
   const router = useRouter();
   const { user: authUser } = useAuth();
+  const activeWorkout = useActiveWorkout();
   const authUserId = authUser?.id;
   const authUserRole = authUser?.role;
-  const params = useLocalSearchParams<{ workoutPlanId?: string }>();
+  const params = useLocalSearchParams<{
+    workoutPlanId?: string;
+    groupId?: string;
+    workoutName?: string;
+  }>();
   const workoutPlanId = useMemo(
     () => String(params.workoutPlanId ?? "").trim(),
-    [params]
+    [params.workoutPlanId]
   );
+  const groupId = useMemo(() => String(params.groupId ?? "").trim(), [params.groupId]);
 
   const [plan, setPlan] = useState<WorkoutPlan | null>(null);
   const [priorLogs, setPriorLogs] = useState<WorkoutLog[]>([]);
@@ -75,33 +110,38 @@ export default function WorkoutExecution() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
-  /** Wall-clock start when workout is ready (after plan loads). */
-  const sessionStartMsRef = useRef<number | null>(null);
-  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+
   const planRef = useRef<WorkoutPlan | null>(null);
   const draftsRef = useRef<ExerciseDraft[]>([]);
   planRef.current = plan;
   draftsRef.current = drafts;
+
+  // Guard to prevent double-initialization when plan loads.
+  const sessionInitRef = useRef(false);
+
+  // Debounce timer for syncing notes to context (avoids AsyncStorage thrash on every keystroke).
+  const notesDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Refs for focusing next row inputs: [exIdx][setIdx] -> { weight, reps, rpe }
   const inputRefs = useRef<
     { weight: TextInput | null; reps: TextInput | null; rpe: TextInput | null }[][]
   >([]);
 
+  // ── Load plan & prior logs ────────────────────────────────────────────────
   useEffect(() => {
-    const load = async () => {
-      console.log("[student/workoutExecution] load start", { workoutPlanId });
-      setLoading(true);
-      try {
-        setError(null);
-        setMessage(null);
-        setPlan(null);
+    sessionInitRef.current = false;
 
+    const load = async () => {
+      setLoading(true);
+      setError(null);
+      setMessage(null);
+      setPlan(null);
+
+      try {
         if (!workoutPlanId) {
           setError("Missing workoutPlanId.");
           return;
         }
-
         if (!authUserId || authUserRole !== "student") {
           setError("You must be logged in as a student.");
           return;
@@ -112,7 +152,6 @@ export default function WorkoutExecution() {
           setError("Workout plan not found.");
           return;
         }
-
         if (loaded.studentId !== authUserId) {
           setError("You don't have access to this workout plan.");
           return;
@@ -120,24 +159,8 @@ export default function WorkoutExecution() {
 
         const history = await workoutService.getWorkoutHistory(authUserId);
         setPriorLogs(Array.isArray(history) ? history : []);
-
         setPlan(loaded);
-        setDrafts(
-          loaded.exercises.map((ex) => ({
-            sets: Array.from({ length: Math.max(1, Number(ex.sets) || 1) }, () => ({
-              weight:
-                ex.weight != null && Number.isFinite(Number(ex.weight))
-                  ? String(ex.weight)
-                  : "",
-              reps: "",
-              rpe: ex.rpe != null && Number.isFinite(Number(ex.rpe)) ? String(ex.rpe) : "",
-              done: false,
-            })),
-          }))
-        );
-        setSessionNotes("");
       } catch (e: any) {
-        console.error("[student/workoutExecution] load error", e);
         setError(e.message ?? "Failed to load workout plan.");
       } finally {
         setLoading(false);
@@ -147,43 +170,85 @@ export default function WorkoutExecution() {
     load();
   }, [workoutPlanId, authUserId, authUserRole]);
 
-  // Session timer: starts when plan is ready; 1s tick; cleared on unmount or plan change.
+  // ── Session init: restore existing session or start a fresh one ──────────
+  // Runs once per plan load. Uses the context session as source of truth.
   useEffect(() => {
-    const planId = plan?.id;
-    if (!planId) {
-      sessionStartMsRef.current = null;
-      setElapsedSeconds(0);
-      return;
+    if (!plan || sessionInitRef.current) return;
+    sessionInitRef.current = true;
+
+    const existing = activeWorkout.session;
+
+    if (existing && existing.workoutPlanId === workoutPlanId) {
+      // ✅ Restore: user returned to an in-progress session.
+      setDrafts(toLocalDrafts(existing.exercises));
+      setSessionNotes(existing.notes ?? "");
+    } else if (!existing) {
+      // 🆕 Fresh start: no active session at all.
+      const exercises = buildExerciseDrafts(plan);
+      activeWorkout.startSession({
+        studentId: authUserId!,
+        workoutPlanId: plan.id,
+        workoutName: plan.name,
+        groupId,
+        exercises,
+        notes: "",
+      });
+      setDrafts(toLocalDrafts(exercises));
+      setSessionNotes("");
+    } else {
+      // ⚠️ A different session is active — redirect to it instead.
+      router.replace({
+        pathname: "/student/workoutExecution",
+        params: { workoutPlanId: existing.workoutPlanId },
+      });
     }
-    const start = Date.now();
-    sessionStartMsRef.current = start;
-    setElapsedSeconds(0);
-    const id = setInterval(() => {
-      setElapsedSeconds(Math.floor((Date.now() - start) / 1000));
-    }, 1000);
-    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [plan?.id]);
+
+  // Cleanup notes debounce on unmount.
+  useEffect(() => {
+    return () => {
+      if (notesDebounceRef.current) clearTimeout(notesDebounceRef.current);
+    };
+  }, []);
 
   const bestWeightByExercise = useMemo(
     () => buildBestWeightMapFromLogs(priorLogs),
     [priorLogs]
   );
 
+  // ── Set update: keeps local UI state + context in sync ───────────────────
   const updateSet = (exIdx: number, setIdx: number, patch: Partial<SetDraft>) => {
+    // Sync to global context for persistence.
+    activeWorkout.updateSet(exIdx, setIdx, {
+      ...(patch.weight !== undefined ? { weight: patch.weight } : {}),
+      ...(patch.reps !== undefined ? { reps: patch.reps } : {}),
+      ...(patch.rpe !== undefined ? { rpe: patch.rpe } : {}),
+      ...(patch.done !== undefined ? { completed: patch.done } : {}),
+    });
+
+    // Update local UI state.
     setDrafts((prev) =>
       prev.map((row, i) =>
         i !== exIdx
           ? row
-          : {
-              sets: row.sets.map((s, j) => (j !== setIdx ? s : { ...s, ...patch })),
-            }
+          : { sets: row.sets.map((s, j) => (j !== setIdx ? s : { ...s, ...patch })) }
       )
     );
   };
 
+  // ── Notes update: debounce context sync to avoid AsyncStorage thrash ─────
+  const handleNotesChange = (text: string) => {
+    setSessionNotes(text);
+    if (notesDebounceRef.current) clearTimeout(notesDebounceRef.current);
+    notesDebounceRef.current = setTimeout(() => {
+      activeWorkout.updateNotes(text);
+    }, 400);
+  };
+
+  // ── Finish session: save to Firestore, clear context + storage ───────────
   const handleSubmit = async () => {
     if (!plan) return;
-
     setSaving(true);
     setError(null);
     setMessage(null);
@@ -221,12 +286,7 @@ export default function WorkoutExecution() {
               weightOut = w;
             }
           }
-
-          return {
-            setNumber: si + 1,
-            reps: r,
-            weight: weightOut,
-          };
+          return { setNumber: si + 1, reps: r, weight: weightOut };
         });
 
         const exKey = normalizeExerciseName(exercise.name);
@@ -237,9 +297,7 @@ export default function WorkoutExecution() {
             .filter((s) => s.reps > 0)
             .map((s) => (s.weight != null && Number.isFinite(s.weight) ? s.weight : 0))
         );
-        const isPr =
-          maxKg > 0 && (prevBest === undefined || maxKg > prevBest);
-
+        const isPr = maxKg > 0 && (prevBest === undefined || maxKg > prevBest);
         const volume = computeExerciseVolumeFromLoggedSets(loggedSets);
 
         return {
@@ -257,9 +315,9 @@ export default function WorkoutExecution() {
       const totalVolume = computeTotalVolume(completedExercises);
       const prNames = completedExercises.filter((e) => e.isPr).map((e) => e.name);
 
-      const started = sessionStartMsRef.current;
-      const durationSeconds =
-        started != null ? Math.max(0, Math.floor((Date.now() - started) / 1000)) : 0;
+      // Duration: derived from session startedAt for accuracy across app reopens.
+      const startedAt = activeWorkout.session?.startedAt ?? Date.now();
+      const durationSeconds = Math.max(0, Math.floor((Date.now() - startedAt) / 1000));
 
       await workoutService.logCompletedWorkout({
         studentId: authUser.id,
@@ -272,44 +330,34 @@ export default function WorkoutExecution() {
         sessionNotes: sessionNotes.trim() || undefined,
       });
 
+      // Clear the active session from context + AsyncStorage.
+      await activeWorkout.finishSession();
+
       if (prNames.length > 0) {
         Alert.alert("Great session!", `🔥 New PR on: ${prNames.join(", ")}`);
       }
       setMessage("Workout saved to history.");
       router.replace("/student/workoutHistory");
     } catch (e: any) {
-      console.error("[student/workoutExecution] submit error", e);
       setError(e.message ?? "Failed to save workout.");
     } finally {
       setSaving(false);
     }
   };
 
+  // ── Render ────────────────────────────────────────────────────────────────
+
   if (loading) {
     return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
-          backgroundColor: Colors.bg,
-        }}
-      >
-        <ActivityIndicator />
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: Colors.bg }}>
+        <ActivityIndicator color={Colors.primary} />
       </View>
     );
   }
 
   if (error && !plan) {
     return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          padding: Spacing.md,
-          backgroundColor: Colors.bg,
-        }}
-      >
+      <View style={{ flex: 1, justifyContent: "center", padding: Spacing.md, backgroundColor: Colors.bg }}>
         <Text style={{ color: Colors.danger, marginBottom: Spacing.sm }}>{error}</Text>
       </View>
     );
@@ -317,17 +365,8 @@ export default function WorkoutExecution() {
 
   if (!plan) {
     return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          padding: Spacing.md,
-          backgroundColor: Colors.bg,
-        }}
-      >
-        <Text style={{ color: Colors.danger, marginBottom: Spacing.sm }}>
-          Workout plan not loaded.
-        </Text>
+      <View style={{ flex: 1, justifyContent: "center", padding: Spacing.md, backgroundColor: Colors.bg }}>
+        <Text style={{ color: Colors.danger }}>Workout plan not loaded.</Text>
       </View>
     );
   }
@@ -363,6 +402,7 @@ export default function WorkoutExecution() {
               <Ionicons name="chevron-back" size={20} color={Colors.text} />
             </Pressable>
             <Text style={{ ...Typography.section, fontWeight: "900" }}>Log Session</Text>
+            {/* Timer badge — driven by context (survives app reopen) */}
             <View
               style={{
                 paddingVertical: 8,
@@ -373,8 +413,14 @@ export default function WorkoutExecution() {
                 borderColor: Colors.border,
               }}
             >
-              <Text style={{ ...Typography.secondary, color: Colors.primary, fontVariant: ["tabular-nums"] }}>
-                {formatElapsedForTimer(elapsedSeconds)}
+              <Text
+                style={{
+                  ...Typography.secondary,
+                  color: Colors.primary,
+                  fontVariant: ["tabular-nums"],
+                }}
+              >
+                {formatElapsedForTimer(activeWorkout.elapsedSeconds)}
               </Text>
             </View>
           </View>
@@ -400,10 +446,12 @@ export default function WorkoutExecution() {
             borderColor: Colors.border,
           }}
         >
-          <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: 6 }}>Session notes</Text>
+          <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: 6 }}>
+            Session notes
+          </Text>
           <TextInput
             value={sessionNotes}
-            onChangeText={setSessionNotes}
+            onChangeText={handleNotesChange}
             placeholder="Add session notes..."
             placeholderTextColor={Colors.textMuted}
             multiline
@@ -419,6 +467,7 @@ export default function WorkoutExecution() {
           />
         </View>
 
+        {/* Exercise rows */}
         {plan.exercises.map((exercise, exIdx) => {
           const draft = drafts[exIdx];
           const sets = draft?.sets ?? [];
@@ -463,6 +512,11 @@ export default function WorkoutExecution() {
                   <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 2 }}>
                     Target: {targetParts.join(" ")}
                   </Text>
+                  {exercise.coachNote ? (
+                    <Text style={{ ...Typography.secondary, color: Colors.primary, marginTop: 2 }}>
+                      Coach: {exercise.coachNote}
+                    </Text>
+                  ) : null}
                 </View>
               </View>
 
@@ -473,19 +527,10 @@ export default function WorkoutExecution() {
                   gap: 8,
                   paddingVertical: 6,
                   paddingHorizontal: 6,
-                  borderRadius: Radius.md,
-                  backgroundColor: "transparent",
                   marginBottom: Spacing.xs,
                 }}
               >
-                <Text
-                  style={{
-                    width: 32,
-                    ...Typography.secondary,
-                    color: Colors.textMuted,
-                    textAlign: "center",
-                  }}
-                >
+                <Text style={{ width: 32, ...Typography.secondary, color: Colors.textMuted, textAlign: "center" }}>
                   Set
                 </Text>
                 <Text style={{ flex: 1, ...Typography.secondary, color: Colors.textMuted, textAlign: "center" }}>
@@ -625,8 +670,7 @@ export default function WorkoutExecution() {
                           const next = getNextSetFocus(exIdx, setIdx, plan);
                           if (next) {
                             setTimeout(() => {
-                              const ref = inputRefs.current?.[next.ex]?.[next.set]?.weight;
-                              ref?.focus?.();
+                              inputRefs.current?.[next.ex]?.[next.set]?.weight?.focus?.();
                             }, 80);
                           }
                         }
@@ -644,7 +688,7 @@ export default function WorkoutExecution() {
                       })}
                     >
                       <Ionicons
-                        name={done ? "checkmark" : "checkmark"}
+                        name="checkmark"
                         size={18}
                         color={done ? Colors.onPrimary : "rgba(255,255,255,0.20)"}
                       />
@@ -656,7 +700,9 @@ export default function WorkoutExecution() {
           );
         })}
 
-        {error ? <Text style={{ color: Colors.danger, marginBottom: Spacing.sm }}>{error}</Text> : null}
+        {error ? (
+          <Text style={{ color: Colors.danger, marginBottom: Spacing.sm }}>{error}</Text>
+        ) : null}
         {message ? (
           <Text style={{ color: Colors.success, marginBottom: Spacing.sm }}>{message}</Text>
         ) : null}
@@ -675,7 +721,11 @@ export default function WorkoutExecution() {
           borderTopColor: Colors.border,
         }}
       >
-        {saving ? <ActivityIndicator /> : <PrimaryButton title="Finish Session" onPress={handleSubmit} />}
+        {saving ? (
+          <ActivityIndicator color={Colors.primary} />
+        ) : (
+          <PrimaryButton title="Finish Session" onPress={handleSubmit} />
+        )}
       </View>
     </ScreenLayout>
   );

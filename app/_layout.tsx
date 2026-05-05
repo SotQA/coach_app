@@ -2,6 +2,7 @@ import { Stack } from "expo-router";
 import { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { AuthProvider, useAuth } from "../context/AuthContext";
+import { ActiveWorkoutProvider } from "../context/ActiveWorkoutContext";
 import * as SystemUI from "expo-system-ui";
 import { DarkTheme, ThemeProvider } from "@react-navigation/native";
 import { Colors } from "../theme/colors";
@@ -57,9 +58,11 @@ export default function Layout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <AuthProvider>
-        <ThemeProvider value={navTheme}>
-          <RootNavigator />
-        </ThemeProvider>
+        <ActiveWorkoutProvider>
+          <ThemeProvider value={navTheme}>
+            <RootNavigator />
+          </ThemeProvider>
+        </ActiveWorkoutProvider>
       </AuthProvider>
     </GestureHandlerRootView>
   );
