@@ -10,6 +10,11 @@ import {
 } from "react";
 import { AppState, type AppStateStatus } from "react-native";
 import { useAuth } from "./AuthContext";
+import {
+  cancelAllScheduledNotifications,
+  cancelRestNotification,
+  scheduleRestNotification,
+} from "../services/notificationService";
 
 const STORAGE_KEY = "activeWorkoutSession";
 
@@ -35,6 +40,9 @@ export interface ActiveExerciseDraft {
  *
  * On pause: `pausedRemainingSeconds` is snapshotted and `isPaused = true`.
  * On resume: `startedAt` is backdated so the formula still holds.
+ *
+ * `notificationId` tracks the scheduled OS notification so it can be
+ * cancelled if the user skips, pauses, or finishes the session early.
  */
 export interface RestTimer {
   isActive: boolean;
@@ -44,6 +52,8 @@ export interface RestTimer {
   isPaused: boolean;
   /** Seconds remaining at the moment the timer was paused. */
   pausedRemainingSeconds?: number;
+  /** Identifier of the scheduled OS notification (for cancellation). */
+  notificationId?: string;
 }
 
 export interface ActiveWorkoutSession {
@@ -71,21 +81,17 @@ interface StartSessionParams {
 
 interface ActiveWorkoutContextValue {
   session: ActiveWorkoutSession | null;
-  /** Live workout elapsed seconds, derived from session.startedAt. Accurate after app reopen. */
+  /** Live workout elapsed seconds, derived from session.startedAt. */
   elapsedSeconds: number;
-  /** Live rest seconds remaining (float). Derived from restTimer.startedAt. 0 when inactive. */
+  /** Live rest seconds remaining (float). 0 when inactive. */
   restSecondsRemaining: number;
   startSession: (params: StartSessionParams) => Promise<void>;
   updateSet: (exIdx: number, setIdx: number, patch: Partial<ActiveSetDraft>) => void;
   updateNotes: (notes: string) => void;
   finishSession: () => Promise<void>;
-  /** Start a rest timer. Replaces any existing timer. */
   startRestTimer: (durationSeconds: number) => void;
-  /** End the rest timer immediately (user skipped or timer expired). */
   skipRestTimer: () => void;
-  /** Pause the rest timer, snapshotting remaining seconds. */
   pauseRestTimer: () => void;
-  /** Resume a paused rest timer. */
   resumeRestTimer: () => void;
 }
 
@@ -108,7 +114,6 @@ async function hydrate(): Promise<ActiveWorkoutSession | null> {
     const raw = await AsyncStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as Partial<ActiveWorkoutSession>;
-    // Validate minimum required fields.
     if (
       !parsed?.sessionId ||
       !parsed?.workoutPlanId ||
@@ -120,7 +125,6 @@ async function hydrate(): Promise<ActiveWorkoutSession | null> {
     }
     return parsed as ActiveWorkoutSession;
   } catch {
-    // Corrupted storage — safely reset.
     try {
       await AsyncStorage.removeItem(STORAGE_KEY);
     } catch {}
@@ -128,7 +132,6 @@ async function hydrate(): Promise<ActiveWorkoutSession | null> {
   }
 }
 
-/** Calculate rest seconds remaining from a RestTimer snapshot. Returns 0 if done. */
 function calcRestRemaining(rt: RestTimer): number {
   if (!rt.isActive) return 0;
   if (rt.isPaused) return Math.max(0, rt.pausedRemainingSeconds ?? 0);
@@ -145,26 +148,32 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [restSecondsRemaining, setRestSecondsRemaining] = useState(0);
 
-  // Always-fresh ref — avoids stale closures in AppState / interval callbacks.
   const sessionRef = useRef<ActiveWorkoutSession | null>(null);
   sessionRef.current = session;
 
   // ── Hydrate on mount ──────────────────────────────────────────────────────
   useEffect(() => {
     hydrate().then((loaded) => {
-      if (loaded) {
-        setSession(loaded);
-        setElapsedSeconds(Math.max(0, Math.floor((Date.now() - loaded.startedAt) / 1000)));
-        if (loaded.restTimer?.isActive) {
-          setRestSecondsRemaining(calcRestRemaining(loaded.restTimer));
+      if (!loaded) return;
+      setSession(loaded);
+      setElapsedSeconds(Math.max(0, Math.floor((Date.now() - loaded.startedAt) / 1000)));
+      if (loaded.restTimer?.isActive) {
+        const rem = calcRestRemaining(loaded.restTimer);
+        setRestSecondsRemaining(rem);
+        // If the rest timer expired while the app was closed, auto-clear it.
+        if (rem <= 0) {
+          const cleared = { ...loaded, restTimer: undefined };
+          setSession(cleared);
+          persist(cleared);
         }
       }
     });
   }, []);
 
-  // ── Clear session when user logs out ──────────────────────────────────────
+  // ── Clear session on logout ───────────────────────────────────────────────
   useEffect(() => {
     if (!user) {
+      cancelAllScheduledNotifications();
       setSession(null);
       setElapsedSeconds(0);
       setRestSecondsRemaining(0);
@@ -174,10 +183,7 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
 
   // ── Workout elapsed timer (1 s tick) ─────────────────────────────────────
   useEffect(() => {
-    if (!session) {
-      setElapsedSeconds(0);
-      return;
-    }
+    if (!session) { setElapsedSeconds(0); return; }
     const tick = () =>
       setElapsedSeconds(Math.max(0, Math.floor((Date.now() - session.startedAt) / 1000)));
     tick();
@@ -187,15 +193,10 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
   }, [session?.sessionId, session?.startedAt]);
 
   // ── Rest timer tick (250 ms — smooth countdown + auto-stop at 0) ─────────
-  // Uses sessionRef inside the tick to always read the latest values without
-  // re-creating the interval on every state change.
   useEffect(() => {
     const rt = session?.restTimer;
 
-    if (!rt?.isActive) {
-      setRestSecondsRemaining(0);
-      return;
-    }
+    if (!rt?.isActive) { setRestSecondsRemaining(0); return; }
     if (rt.isPaused) {
       setRestSecondsRemaining(Math.max(0, rt.pausedRemainingSeconds ?? 0));
       return;
@@ -205,11 +206,7 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
 
     const tick = () => {
       const current = sessionRef.current?.restTimer;
-      // Bail out if rest timer was deactivated/paused between ticks.
-      if (!current?.isActive || current.isPaused) {
-        clearInterval(intervalId);
-        return;
-      }
+      if (!current?.isActive || current.isPaused) { clearInterval(intervalId); return; }
 
       const remaining = Math.max(
         0,
@@ -219,7 +216,7 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
 
       if (remaining <= 0) {
         clearInterval(intervalId);
-        // Auto-stop: clear the restTimer from the session.
+        // Notification already fired — just clear the timer state.
         setSession((prev) => {
           if (!prev?.restTimer?.isActive) return prev;
           const updated: ActiveWorkoutSession = { ...prev, restTimer: undefined };
@@ -243,9 +240,7 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
   // ── Periodic save every 10 s ──────────────────────────────────────────────
   useEffect(() => {
     if (!session) return;
-    const id = setInterval(() => {
-      if (sessionRef.current) persist(sessionRef.current);
-    }, 10_000);
+    const id = setInterval(() => { if (sessionRef.current) persist(sessionRef.current); }, 10_000);
     return () => clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.sessionId]);
@@ -260,7 +255,14 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
         if (!s) return;
         setElapsedSeconds(Math.max(0, Math.floor((Date.now() - s.startedAt) / 1000)));
         if (s.restTimer?.isActive) {
-          setRestSecondsRemaining(calcRestRemaining(s.restTimer));
+          const rem = calcRestRemaining(s.restTimer);
+          setRestSecondsRemaining(rem);
+          // Timer finished while the app was in background — clear it.
+          if (rem <= 0) {
+            const cleared: ActiveWorkoutSession = { ...s, restTimer: undefined };
+            setSession(cleared);
+            persist(cleared);
+          }
         }
       }
     };
@@ -289,10 +291,7 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
         const exercises = prev.exercises.map((ex, i) =>
           i !== exIdx
             ? ex
-            : {
-                ...ex,
-                sets: ex.sets.map((s, j) => (j !== setIdx ? s : { ...s, ...patch })),
-              }
+            : { ...ex, sets: ex.sets.map((s, j) => (j !== setIdx ? s : { ...s, ...patch })) }
         );
         const updated = { ...prev, exercises };
         persist(updated);
@@ -312,29 +311,77 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const finishSession = useCallback(async () => {
+    // Cancel any pending rest notification before clearing the session.
+    const pendingId = sessionRef.current?.restTimer?.notificationId;
+    await cancelRestNotification(pendingId);
+
     setSession(null);
     setElapsedSeconds(0);
     setRestSecondsRemaining(0);
     await persist(null);
   }, []);
 
+  // ── Rest timer actions ────────────────────────────────────────────────────
+
   const startRestTimer = useCallback((durationSeconds: number) => {
     if (durationSeconds <= 0) return;
+    if (!sessionRef.current) return;
+
+    // Cancel any previously scheduled notification before starting a new one.
+    const previousId = sessionRef.current.restTimer?.notificationId;
+    if (previousId) cancelRestNotification(previousId);
+
+    // Build the timer state immediately (timer starts at this exact instant).
+    const startedAt = Date.now();
+    const restTimer: RestTimer = {
+      isActive: true,
+      durationSeconds,
+      startedAt,
+      isPaused: false,
+    };
+
+    // Use functional update so this is applied on top of any concurrent state
+    // changes (e.g. the updateSet call that just marked a set as completed),
+    // rather than overwriting them with a stale snapshot from sessionRef.
     setSession((prev) => {
       if (!prev) return prev;
-      const restTimer: RestTimer = {
-        isActive: true,
-        durationSeconds,
-        startedAt: Date.now(),
-        isPaused: false,
-      };
-      const updated = { ...prev, restTimer };
+      const updated: ActiveWorkoutSession = { ...prev, restTimer };
       persist(updated);
       return updated;
+    });
+
+    // workoutPlanId / workoutName never change within a session — safe to read
+    // from the ref here for the notification payload.
+    const { workoutPlanId, workoutName } = sessionRef.current;
+
+    // Schedule the OS notification asynchronously, then store its ID.
+    scheduleRestNotification({
+      delaySeconds: durationSeconds,
+      workoutPlanId,
+      workoutName,
+    }).then((notificationId) => {
+      if (!notificationId) return;
+      setSession((prev) => {
+        // Only store the ID if the same timer is still running.
+        if (!prev?.restTimer?.isActive || prev.restTimer.startedAt !== startedAt) {
+          // Timer was already skipped or replaced — cancel the just-scheduled notif.
+          cancelRestNotification(notificationId);
+          return prev;
+        }
+        const updated: ActiveWorkoutSession = {
+          ...prev,
+          restTimer: { ...prev.restTimer, notificationId },
+        };
+        persist(updated);
+        return updated;
+      });
     });
   }, []);
 
   const skipRestTimer = useCallback(() => {
+    const pendingId = sessionRef.current?.restTimer?.notificationId;
+    cancelRestNotification(pendingId);
+
     setRestSecondsRemaining(0);
     setSession((prev) => {
       if (!prev) return prev;
@@ -345,42 +392,80 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const pauseRestTimer = useCallback(() => {
-    setSession((prev) => {
-      const rt = prev?.restTimer;
-      if (!prev || !rt?.isActive || rt.isPaused) return prev;
-      const remaining = Math.max(
-        0,
-        rt.durationSeconds - (Date.now() - rt.startedAt) / 1000
-      );
-      const updated: ActiveWorkoutSession = {
-        ...prev,
-        restTimer: { ...rt, isPaused: true, pausedRemainingSeconds: remaining },
-      };
-      persist(updated);
-      setRestSecondsRemaining(remaining);
-      return updated;
-    });
-  }, []);
+    const rt = sessionRef.current?.restTimer;
+    if (!rt?.isActive || rt.isPaused) return;
 
-  const resumeRestTimer = useCallback(() => {
+    const remaining = Math.max(0, rt.durationSeconds - (Date.now() - rt.startedAt) / 1000);
+
+    // Cancel the OS notification — it will be rescheduled for `remaining` seconds on resume.
+    cancelRestNotification(rt.notificationId);
+
+    setRestSecondsRemaining(remaining);
     setSession((prev) => {
-      const rt = prev?.restTimer;
-      if (!prev || !rt?.isActive || !rt.isPaused) return prev;
-      const remaining = rt.pausedRemainingSeconds ?? 0;
-      // Backdate startedAt so "durationSeconds - (Date.now() - startedAt)" = remaining.
-      const newStartedAt = Date.now() - (rt.durationSeconds - remaining) * 1000;
+      const prevRt = prev?.restTimer;
+      if (!prev || !prevRt?.isActive || prevRt.isPaused) return prev;
       const updated: ActiveWorkoutSession = {
         ...prev,
         restTimer: {
-          ...rt,
-          isPaused: false,
-          startedAt: newStartedAt,
-          pausedRemainingSeconds: undefined,
+          ...prevRt,
+          isPaused: true,
+          pausedRemainingSeconds: remaining,
+          notificationId: undefined,
         },
       };
       persist(updated);
       return updated;
     });
+  }, []);
+
+  const resumeRestTimer = useCallback(() => {
+    const rt = sessionRef.current?.restTimer;
+    if (!rt?.isActive || !rt.isPaused) return;
+
+    const remaining = rt.pausedRemainingSeconds ?? 0;
+    // Backdate startedAt so "durationSeconds - (Date.now() - startedAt) = remaining" holds.
+    const newStartedAt = Date.now() - (rt.durationSeconds - remaining) * 1000;
+
+    setSession((prev) => {
+      const prevRt = prev?.restTimer;
+      if (!prev || !prevRt?.isActive || !prevRt.isPaused) return prev;
+      const updated: ActiveWorkoutSession = {
+        ...prev,
+        restTimer: {
+          ...prevRt,
+          isPaused: false,
+          startedAt: newStartedAt,
+          pausedRemainingSeconds: undefined,
+          notificationId: undefined,
+        },
+      };
+      persist(updated);
+      return updated;
+    });
+
+    // Reschedule the OS notification for the remaining duration.
+    if (remaining > 0) {
+      const s = sessionRef.current!;
+      scheduleRestNotification({
+        delaySeconds: remaining,
+        workoutPlanId: s.workoutPlanId,
+        workoutName: s.workoutName,
+      }).then((notificationId) => {
+        if (!notificationId) return;
+        setSession((prev) => {
+          if (!prev?.restTimer?.isActive || prev.restTimer.isPaused) {
+            cancelRestNotification(notificationId);
+            return prev;
+          }
+          const updated: ActiveWorkoutSession = {
+            ...prev,
+            restTimer: { ...prev.restTimer!, notificationId },
+          };
+          persist(updated);
+          return updated;
+        });
+      });
+    }
   }, []);
 
   return (

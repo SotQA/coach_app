@@ -43,7 +43,13 @@
           }
         }
       ],
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      [
+        "expo-notifications",
+        {
+          "color": "#D4FF44"
+        }
+      ]
     ],
     "extra": {
       "googleWebClientId": "915193499412-v3qiq1jcq8kfpqo29os02scvujdqpgu3.apps.googleusercontent.com",
