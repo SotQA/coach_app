@@ -14,8 +14,16 @@ export const FLOATING_BAR_HEIGHT = 58;
 /** Extra bottom padding tab-screen ScrollViews should add when a session is active. */
 export const FLOATING_BAR_SCROLL_OFFSET = FLOATING_BAR_HEIGHT + 16;
 
+/** mm:ss string, ceiling the seconds so "00:01" shows for the final tick. */
+function formatRestCountdown(seconds: number): string {
+  const s = Math.max(0, Math.ceil(seconds));
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return `${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
+}
+
 export function FloatingWorkoutBar() {
-  const { session, elapsedSeconds } = useActiveWorkout();
+  const { session, elapsedSeconds, restSecondsRemaining } = useActiveWorkout();
   const router = useRouter();
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
@@ -24,6 +32,9 @@ export function FloatingWorkoutBar() {
 
   // Hide when the user is already on the workout execution screen.
   if (pathname.includes("workoutExecution")) return null;
+
+  const restActive = session.restTimer?.isActive === true;
+  const restPaused = session.restTimer?.isPaused === true;
 
   const totalSets = session.exercises.reduce((acc, ex) => acc + ex.sets.length, 0);
   const doneSets = session.exercises.reduce(
@@ -34,6 +45,10 @@ export function FloatingWorkoutBar() {
   // Sit above the tab bar (49 px) + safe-area bottom + 8 px breathing room.
   const TAB_BAR_HEIGHT = 49;
   const bottomOffset = insets.bottom + TAB_BAR_HEIGHT + 8;
+
+  // When rest is almost done (≤5 s) pulse the bar color.
+  const isRestAlmostDone = restActive && !restPaused && restSecondsRemaining <= 5;
+  const barColor = isRestAlmostDone ? Colors.danger : Colors.primary;
 
   const handlePress = () => {
     router.push({
@@ -51,12 +66,12 @@ export function FloatingWorkoutBar() {
         right: 12,
         bottom: bottomOffset,
         height: FLOATING_BAR_HEIGHT,
-        backgroundColor: Colors.primary,
+        backgroundColor: barColor,
         borderRadius: Radius.lg,
         flexDirection: "row",
         alignItems: "center",
         paddingHorizontal: 16,
-        gap: 12,
+        gap: 10,
         opacity: pressed ? 0.9 : 1,
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 4 },
@@ -66,7 +81,7 @@ export function FloatingWorkoutBar() {
         zIndex: 9999,
       })}
     >
-      {/* Pulsing dot */}
+      {/* Status dot */}
       <View
         style={{
           width: 8,
@@ -77,39 +92,72 @@ export function FloatingWorkoutBar() {
         }}
       />
 
-      {/* Text */}
+      {/* Main content — swaps between rest-timer mode and normal workout mode */}
       <View style={{ flex: 1 }}>
-        <Text
-          style={{
-            ...Typography.section,
-            color: Colors.onPrimary,
-            fontWeight: "800",
-            fontSize: 14,
-          }}
-          numberOfLines={1}
-        >
-          {session.workoutName}
-        </Text>
-        <Text
-          style={{
-            ...Typography.secondary,
-            color: Colors.onPrimary,
-            opacity: 0.75,
-            fontSize: 12,
-            marginTop: 1,
-          }}
-        >
-          {doneSets}/{totalSets} sets · {formatElapsedForTimer(elapsedSeconds)}
-        </Text>
+        {restActive ? (
+          <>
+            <Text
+              style={{
+                ...Typography.section,
+                color: Colors.onPrimary,
+                fontWeight: "800",
+                fontSize: 13,
+              }}
+              numberOfLines={1}
+            >
+              {restPaused ? "Rest Paused" : "Resting"} · {session.workoutName}
+            </Text>
+            <Text
+              style={{
+                ...Typography.secondary,
+                color: Colors.onPrimary,
+                opacity: 0.8,
+                fontSize: 12,
+                marginTop: 1,
+              }}
+            >
+              {restPaused
+                ? `${formatRestCountdown(restSecondsRemaining)} remaining (paused)`
+                : `${formatRestCountdown(restSecondsRemaining)} remaining · tap to resume`}
+            </Text>
+          </>
+        ) : (
+          <>
+            <Text
+              style={{
+                ...Typography.section,
+                color: Colors.onPrimary,
+                fontWeight: "800",
+                fontSize: 13,
+              }}
+              numberOfLines={1}
+            >
+              {session.workoutName}
+            </Text>
+            <Text
+              style={{
+                ...Typography.secondary,
+                color: Colors.onPrimary,
+                opacity: 0.75,
+                fontSize: 12,
+                marginTop: 1,
+              }}
+            >
+              {doneSets}/{totalSets} sets · {formatElapsedForTimer(elapsedSeconds)}
+            </Text>
+          </>
+        )}
       </View>
 
-      {/* Timer badge */}
+      {/* Right badge — shows rest countdown or workout elapsed time */}
       <View
         style={{
-          backgroundColor: "rgba(0,0,0,0.15)",
+          backgroundColor: "rgba(0,0,0,0.18)",
           paddingHorizontal: 10,
           paddingVertical: 5,
           borderRadius: Radius.pill,
+          minWidth: 52,
+          alignItems: "center",
         }}
       >
         <Text
@@ -121,7 +169,9 @@ export function FloatingWorkoutBar() {
             fontSize: 13,
           }}
         >
-          {formatElapsedForTimer(elapsedSeconds)}
+          {restActive
+            ? formatRestCountdown(restSecondsRemaining)
+            : formatElapsedForTimer(elapsedSeconds)}
         </Text>
       </View>
 

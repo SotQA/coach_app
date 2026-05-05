@@ -25,7 +25,8 @@ import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
 import { ScreenLayout } from "../../components/ScreenLayout";
-import { formatElapsedForTimer } from "../../utils/workoutDuration";
+import { RestTimerBar } from "../../components/RestTimerBar";
+import { formatElapsedForTimer, parseRestSeconds } from "../../utils/workoutDuration";
 
 // ─── Local draft types (mirror ActiveSetDraft, using `done` for UI clarity) ──
 type SetDraft = { weight: string; reps: string; rpe: string; done: boolean };
@@ -227,6 +228,15 @@ export default function WorkoutExecution() {
       ...(patch.done !== undefined ? { completed: patch.done } : {}),
     });
 
+    // Auto-start rest timer when a set is marked as completed.
+    if (patch.done === true && planRef.current) {
+      const exercise = planRef.current.exercises[exIdx];
+      const restSecs = parseRestSeconds(exercise?.rest);
+      if (restSecs && restSecs > 0) {
+        activeWorkout.startRestTimer(restSecs);
+      }
+    }
+
     // Update local UI state.
     setDrafts((prev) =>
       prev.map((row, i) =>
@@ -375,7 +385,11 @@ export default function WorkoutExecution() {
     <ScreenLayout>
       <KeyboardAwareScrollView
         style={{ flex: 1, backgroundColor: Colors.bg }}
-        contentContainerStyle={{ padding: Spacing.md, paddingBottom: 120 }}
+        contentContainerStyle={{
+            padding: Spacing.md,
+            // Extra space when rest timer card is visible in the sticky footer.
+            paddingBottom: activeWorkout.session?.restTimer?.isActive ? 220 : 120,
+          }}
         keyboardShouldPersistTaps="handled"
         enableOnAndroid
         enableResetScrollToCoords={false}
@@ -708,19 +722,22 @@ export default function WorkoutExecution() {
         ) : null}
       </KeyboardAwareScrollView>
 
-      {/* Sticky footer */}
+      {/* Sticky footer — rest timer card (when active) + finish button */}
       <View
         style={{
           position: "absolute",
           left: 0,
           right: 0,
           bottom: 0,
-          padding: Spacing.md,
+          paddingHorizontal: Spacing.md,
+          paddingBottom: Spacing.md,
+          paddingTop: Spacing.sm,
           backgroundColor: Colors.bg,
           borderTopWidth: 1,
           borderTopColor: Colors.border,
         }}
       >
+        <RestTimerBar />
         {saving ? (
           <ActivityIndicator color={Colors.primary} />
         ) : (
