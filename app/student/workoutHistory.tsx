@@ -458,7 +458,7 @@ export default function WorkoutHistory() {
             }}
           >
             <View style={{ width: calendarMaxW, alignSelf: "center" }}>
-            <View style={{ flexDirection: "row", marginBottom: 10 }}>
+            <View style={{ flexDirection: "row", marginBottom: 10, gap: rowGap }}>
               {["M", "T", "W", "T", "F", "S", "S"].map((L, i) => (
                 <View key={`${L}-${i}`} style={{ width: cellW, alignItems: "center" }}>
                   <Text style={{ ...Typography.secondary, fontSize: 12, fontWeight: "800", color: Colors.textMuted }}>{L}</Text>
