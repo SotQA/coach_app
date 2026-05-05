@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { View, Text, ScrollView, Pressable, RefreshControl, useWindowDimensions } from "react-native";
 import type { StudentSummary } from "../../types/StudentSummary";
 import type { WorkoutLog } from "../../types/Workout";
@@ -40,6 +40,8 @@ export type ProgressAnalyticsViewProps = {
   refreshing: boolean;
   onRefresh: () => void;
   coachContext?: ProgressAnalyticsCoachContext;
+  /** When set (e.g. from student profile “View Progress”), applies filters; `forStudentId` bumps identity when the target student changes. */
+  coachProgressDefaults?: { timePreset: TimeRangePreset; exerciseAll: true; forStudentId?: string } | null;
 };
 
 const studentLabel = (s: StudentSummary) =>
@@ -52,6 +54,7 @@ export function ProgressAnalyticsView({
   refreshing,
   onRefresh,
   coachContext,
+  coachProgressDefaults = null,
 }: ProgressAnalyticsViewProps) {
   const { width: windowWidth } = useWindowDimensions();
   const chartWidth = Math.max(200, windowWidth - Spacing.md * 4);
@@ -59,6 +62,15 @@ export function ProgressAnalyticsView({
   const [exerciseAll, setExerciseAll] = useState(true);
   const [exerciseName, setExerciseName] = useState("");
   const [timePreset, setTimePreset] = useState<TimeRangePreset>("8w");
+
+  useEffect(() => {
+    if (!coachProgressDefaults) return;
+    setTimePreset(coachProgressDefaults.timePreset);
+    if (coachProgressDefaults.exerciseAll) {
+      setExerciseAll(true);
+      setExerciseName("");
+    }
+  }, [coachProgressDefaults]);
 
   const nowMs = Date.now();
   const exerciseNorm = exerciseAll ? null : normalizeExerciseName(exerciseName);

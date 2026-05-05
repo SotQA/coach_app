@@ -540,8 +540,8 @@ export default function StudentDetails() {
               variant="secondary"
               onPress={() =>
                 router.push({
-                  pathname: "/coach/viewProgress",
-                  params: { studentId },
+                  pathname: "/coach/progress",
+                  params: { studentId, focusProgress: "1" },
                 })
               }
             />
