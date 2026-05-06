@@ -12,6 +12,7 @@ import {
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../../context/AuthContext";
+import { useI18n } from "../../../context/I18nContext";
 import { studentService } from "../../../services/studentService";
 import { workoutService } from "../../../services/workoutService";
 import type { StudentSummary } from "../../../types/StudentSummary";
@@ -20,6 +21,7 @@ import { Colors } from "../../../theme/colors";
 import { Radius, Spacing } from "../../../theme/spacing";
 import { Typography } from "../../../theme/typography";
 import { ScreenLayout } from "../../../components/ScreenLayout";
+import { formatDate } from "../../../utils/formatLocale";
 
 function coachDisplayName(user: { firstName: string; lastName: string } | null): string {
   if (!user) return "Coach";
@@ -38,6 +40,7 @@ function initials(user: { firstName: string; lastName: string } | null): string 
 export default function CoachDashboard() {
   const router = useRouter();
   const { user } = useAuth();
+  const { t, locale } = useI18n();
   const [students, setStudents] = useState<StudentSummary[]>([]);
   const [workoutsCompletedToday, setWorkoutsCompletedToday] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -45,13 +48,9 @@ export default function CoachDashboard() {
   const [error, setError] = useState<string | null>(null);
 
   const todayLine = useMemo(() => {
-    const d = new Date();
-    return `Here's what's happening today, ${d.toLocaleDateString(undefined, {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    })}.`;
-  }, []);
+    const dateStr = formatDate(Date.now(), locale, { month: "short", day: "numeric", year: "numeric" });
+    return t("todayHappening", { date: dateStr });
+  }, [locale, t]);
 
   useEffect(() => {
     if (!user || user.role !== "coach") {
@@ -93,7 +92,7 @@ export default function CoachDashboard() {
         setWorkoutsCompletedToday(count);
       } catch (e: any) {
         console.error("[coach/dashboard] load error", e);
-        setError(e.message ?? "Failed to load dashboard.");
+        setError(e.message ?? t("failedToLoad"));
       } finally {
         setLoading(false);
       }
@@ -137,7 +136,7 @@ export default function CoachDashboard() {
       setWorkoutsCompletedToday(count);
     } catch (e: any) {
       console.error("[coach/dashboard] refresh error", e);
-      setError(e.message ?? "Failed to refresh dashboard.");
+        setError(e.message ?? t("failedToLoad"));
     } finally {
       setRefreshing(false);
     }
@@ -172,7 +171,7 @@ export default function CoachDashboard() {
           }}
         >
           <Text style={{ color: Colors.danger, marginBottom: Spacing.xs }}>{error}</Text>
-          <PrimaryButton title="Go to Login" onPress={() => router.replace("/login")} />
+          <PrimaryButton title={t("goToLogin")} onPress={() => router.replace("/login")} />
         </View>
       </ScreenLayout>
     );
@@ -234,7 +233,7 @@ export default function CoachDashboard() {
               <View style={{ flex: 1 }}>
                 <Text style={{ ...Typography.title, fontSize: 22 }}>{name}</Text>
                 <Text style={{ ...Typography.secondary, color: Colors.primary, marginTop: 2, fontWeight: "600" }}>
-                  Active Now
+                  {t("activeNow")}
                 </Text>
               </View>
             </View>
@@ -267,7 +266,7 @@ export default function CoachDashboard() {
             </Pressable>
           </View>
 
-          <Text style={{ ...Typography.title, fontSize: 26, marginBottom: 4 }}>Overview</Text>
+          <Text style={{ ...Typography.title, fontSize: 26, marginBottom: 4 }}>{t("overview")}</Text>
           <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: Spacing.md }}>
             {todayLine}
           </Text>
@@ -306,8 +305,8 @@ export default function CoachDashboard() {
               <Text style={{ fontSize: 32, fontWeight: "800", color: Colors.text, lineHeight: 36 }}>
                 {students.length}
               </Text>
-              <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 2 }}>
-                Total Students
+                <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 2 }}>
+                {t("totalStudents")}
               </Text>
             </View>
 
@@ -338,10 +337,10 @@ export default function CoachDashboard() {
                 {workoutsCompletedToday}
               </Text>
               <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 2 }}>
-                Workouts Completed
+                {t("workoutsCompletedToday")}
               </Text>
               <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 2 }}>
-                Today
+                {t("todayLabel")}
               </Text>
             </View>
           </View>
@@ -356,7 +355,7 @@ export default function CoachDashboard() {
           >
             <Pressable
               onPress={() =>
-                Alert.alert("Coming soon", "Start Log will be available in a future update.")
+                Alert.alert(t("comingSoon"), t("startLogComing"))
               }
               style={({ pressed }) => ({
                 flex: 1,
@@ -381,7 +380,7 @@ export default function CoachDashboard() {
             >
               <Ionicons name="play" size={18} color={Colors.onPrimary} />
               <Text style={{ ...Typography.section, fontWeight: "800", color: Colors.onPrimary }}>
-                Start Log
+                {t("startLog")}
               </Text>
             </Pressable>
             <Pressable
@@ -403,7 +402,7 @@ export default function CoachDashboard() {
             >
               <Ionicons name="person-add-outline" size={22} color={Colors.primary} />
               <Text style={{ ...Typography.section, fontWeight: "700", color: Colors.text }}>
-                Add Student
+                {t("addStudent")}
               </Text>
             </Pressable>
           </View>

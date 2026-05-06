@@ -8,11 +8,18 @@ import { SettingsProfileCard } from "../../../components/settings/SettingsProfil
 import { SettingsSection } from "../../../components/settings/SettingsSection";
 import { SettingsRow } from "../../../components/settings/SettingsRow";
 import { useAuth } from "../../../context/AuthContext";
+import {
+  useI18n,
+  SUPPORTED_LOCALES,
+  LOCALE_LABELS,
+  type SupportedLocale,
+} from "../../../context/I18nContext";
 import { workoutService } from "../../../services/workoutService";
 import type { WorkoutLog } from "../../../types/Workout";
 import { Colors } from "../../../theme/colors";
 import { Spacing } from "../../../theme/spacing";
 import { Typography } from "../../../theme/typography";
+import { formatDateFull } from "../../../utils/formatLocale";
 
 function initialsFromUser(user: { firstName?: string | null; lastName?: string | null } | null): string {
   if (!user) return "S";
@@ -39,6 +46,7 @@ const toMs = (value: unknown): number => {
 export default function StudentProfile() {
   const router = useRouter();
   const { user, logout } = useAuth();
+  const { t, locale, setLocale } = useI18n();
   const insets = useSafeAreaInsets();
   const [statsLoading, setStatsLoading] = useState(true);
   const [logs, setLogs] = useState<WorkoutLog[]>([]);
@@ -63,7 +71,7 @@ export default function StudentProfile() {
         setLogs(Array.isArray(history) ? history : []);
       } catch (e: unknown) {
         if (cancelled) return;
-        const msg = e instanceof Error ? e.message : "Failed to load stats.";
+        const msg = e instanceof Error ? e.message : t("failedToLoad");
         setStatsError(msg);
         setLogs([]);
       } finally {
@@ -71,26 +79,38 @@ export default function StudentProfile() {
       }
     };
     load();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [user?.id]);
 
-  if (!user) {
-    return null;
-  }
+  const metaLine = useMemo(() => {
+    if (statsLoading || statsError) return null;
+    const count = logs.length;
+    const lastMs = count
+      ? toMs((logs[0] as { completedAt?: string; date?: string })?.completedAt ?? (logs[0] as { date?: string })?.date)
+      : 0;
+    const lastDate = lastMs > 0 ? formatDateFull(lastMs, locale) : "—";
+    return t(count === 1 ? "workoutsLogged_one" : "workoutsLogged_other", { count, date: lastDate });
+  }, [statsLoading, statsError, logs, locale, t]);
 
-  const workoutsCompleted = logs.length;
-  const lastMs = logs.length ? toMs((logs[0] as { completedAt?: string; date?: string })?.completedAt ?? (logs[0] as { date?: string })?.date) : 0;
-  const lastWorkoutDate =
-    lastMs > 0 ? new Date(lastMs).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }) : "—";
+  const sexLabel = user?.sex
+    ? String(user.sex).charAt(0).toUpperCase() + String(user.sex).slice(1)
+    : "—";
 
-  const metaLine =
-    statsLoading || statsError
-      ? null
-      : `${workoutsCompleted} ${workoutsCompleted === 1 ? "workout" : "workouts"} logged · Last: ${lastWorkoutDate}`;
+  const openLanguagePicker = () => {
+    Alert.alert(
+      t("selectLanguage"),
+      undefined,
+      [
+        ...SUPPORTED_LOCALES.map((loc) => ({
+          text: LOCALE_LABELS[loc] + (loc === locale ? " ✓" : ""),
+          onPress: () => setLocale(loc as SupportedLocale),
+        })),
+        { text: t("cancel"), style: "cancel" as const },
+      ]
+    );
+  };
 
-  const sexLabel = user.sex ? String(user.sex).charAt(0).toUpperCase() + String(user.sex).slice(1) : "—";
+  if (!user) return null;
 
   return (
     <ScreenLayout>
@@ -115,13 +135,13 @@ export default function StudentProfile() {
               borderBottomColor: Colors.border,
             }}
           >
-            <Text style={{ ...Typography.title, fontSize: 22 }}>Settings</Text>
+            <Text style={{ ...Typography.title, fontSize: 22 }}>{t("settings")}</Text>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Notification preferences"
+              accessibilityLabel={t("notifications")}
               onPress={() =>
-                Alert.alert("Notifications", "Notification preferences will be available in a future update.", [
-                  { text: "OK", style: "default" },
+                Alert.alert(t("notifications"), t("notificationPrefsComing"), [
+                  { text: t("ok"), style: "default" },
                 ])
               }
               style={({ pressed }) => ({
@@ -141,103 +161,119 @@ export default function StudentProfile() {
           </View>
 
           {statsError ? (
-            <Text style={{ ...Typography.secondary, color: Colors.danger, marginBottom: Spacing.sm }}>{statsError}</Text>
+            <Text style={{ ...Typography.secondary, color: Colors.danger, marginBottom: Spacing.sm }}>
+              {statsError}
+            </Text>
           ) : null}
 
           <SettingsProfileCard
             fullName={fullName}
             email={user.email ?? ""}
-            roleLabel="Student"
+            roleLabel={t("roleStudent")}
             initials={initials}
             statsLoading={statsLoading}
             metaLine={metaLine}
             onEditProfile={() =>
-              Alert.alert("Coming soon", "Profile editing isn’t available yet.", [{ text: "OK", style: "default" }])
+              Alert.alert(t("comingSoon"), t("profileEditComingSoon"), [
+                { text: t("ok"), style: "default" },
+              ])
             }
           />
 
-          <SettingsSection title="App preferences">
+          <SettingsSection title={t("appPreferences")}>
+            <SettingsRow
+              icon="language-outline"
+              title={t("language")}
+              subtitle={LOCALE_LABELS[locale]}
+              onPress={openLanguagePicker}
+            />
             <SettingsRow
               icon="scale-outline"
-              title="Measurement units"
-              subtitle="kg / lbs"
+              title={t("measurementUnits")}
+              subtitle={t("measurementUnitsSubtitle")}
               onPress={() =>
-                Alert.alert("Measurement units", "Unit preferences will be available in a future update.", [
-                  { text: "OK", style: "default" },
+                Alert.alert(t("measurementUnits"), t("measurementUnitsComing"), [
+                  { text: t("ok"), style: "default" },
                 ])
               }
             />
             <SettingsRow
               icon="moon-outline"
-              title="Theme"
-              subtitle="Dark mode"
+              title={t("theme")}
+              subtitle={t("themeDark")}
               onPress={() =>
-                Alert.alert("Theme", "Additional themes will be available in a future update.", [
-                  { text: "OK", style: "default" },
+                Alert.alert(t("theme"), t("themeComing"), [
+                  { text: t("ok"), style: "default" },
                 ])
               }
             />
             <SettingsRow
               icon="notifications-outline"
-              title="Notifications"
-              subtitle="Workout reminders, plan updates"
+              title={t("notifications")}
+              subtitle={t("notificationsSubtitleStudent")}
               showDivider={false}
               onPress={() =>
-                Alert.alert("Notifications", "Notification preferences will be available in a future update.", [
-                  { text: "OK", style: "default" },
+                Alert.alert(t("notifications"), t("notificationPrefsComing"), [
+                  { text: t("ok"), style: "default" },
                 ])
               }
             />
           </SettingsSection>
 
-          <SettingsSection title="Your profile">
+          <SettingsSection title={t("yourProfile")}>
             <SettingsRow
               icon="calendar-outline"
-              title="Date of birth"
-              subtitle={user.dateOfBirth?.trim() ? user.dateOfBirth : "Not set"}
+              title={t("dateOfBirth")}
+              subtitle={user.dateOfBirth?.trim() ? user.dateOfBirth : t("notSet")}
               onPress={() =>
                 Alert.alert(
-                  "Date of birth",
-                  user.dateOfBirth?.trim() ? user.dateOfBirth : "Not set in your profile yet.",
-                  [{ text: "OK", style: "default" }]
+                  t("dateOfBirth"),
+                  user.dateOfBirth?.trim() ? user.dateOfBirth : t("notSet"),
+                  [{ text: t("ok"), style: "default" }]
                 )
               }
             />
             <SettingsRow
               icon="person-outline"
-              title="Sex"
-              subtitle={sexLabel}
+              title={t("sex")}
+              subtitle={sexLabel === "—" ? t("notSet") : sexLabel}
               showDivider={false}
-              onPress={() => Alert.alert("Sex", sexLabel === "—" ? "Not set in your profile yet." : sexLabel, [{ text: "OK", style: "default" }])}
+              onPress={() =>
+                Alert.alert(
+                  t("sex"),
+                  sexLabel === "—" ? t("notSet") : sexLabel,
+                  [{ text: t("ok"), style: "default" }]
+                )
+              }
             />
           </SettingsSection>
 
-          <SettingsSection title="Training">
+          <SettingsSection title={t("training")}>
             <SettingsRow
               icon="barbell-outline"
-              title="My workouts"
-              subtitle="Plans assigned by your coach"
+              title={t("myWorkouts")}
+              subtitle={t("myWorkoutsSubtitle")}
               onPress={() => router.push("/student/workouts")}
             />
             <SettingsRow
               icon="stats-chart-outline"
-              title="Progress"
-              subtitle="PRs and strength trends"
+              title={t("nav_progress")}
+              subtitle={t("progressSubtitle")}
               onPress={() => router.push("/student/progress")}
             />
             <SettingsRow
               icon="time-outline"
-              title="Workout history"
-              subtitle="Past sessions and logs"
+              title={t("workoutHistory")}
+              subtitle={t("workoutHistorySubtitle")}
               showDivider={false}
               onPress={() => router.push("/student/workoutHistory")}
             />
           </SettingsSection>
 
-          <SettingsSection title="Account" style={{ marginTop: Spacing.sm }}>
+          <SettingsSection title={t("account")} style={{ marginTop: Spacing.sm }}>
             <SettingsRow
               icon="log-out-outline"
-              title="Log out"
+              title={t("logOut")}
               onPress={() => logout()}
               destructive
               showChevron={false}

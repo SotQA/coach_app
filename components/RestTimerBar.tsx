@@ -1,6 +1,7 @@
 import { Pressable, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useActiveWorkout } from "../context/ActiveWorkoutContext";
+import { useI18n } from "../context/I18nContext";
 import { Colors } from "../theme/colors";
 import { Radius, Spacing } from "../theme/spacing";
 import { Typography } from "../theme/typography";
@@ -27,6 +28,7 @@ export function RestTimerBar() {
     resumeRestTimer,
     skipRestTimer,
   } = useActiveWorkout();
+  const { t } = useI18n();
 
   const rt = session?.restTimer;
   if (!rt?.isActive) return null;
@@ -71,7 +73,7 @@ export function RestTimerBar() {
               marginBottom: 2,
             }}
           >
-            {isPaused ? "Rest Paused" : "Rest Time"}
+            {isPaused ? t("restPaused") : t("restTime")}
           </Text>
           <Text
             style={{
@@ -102,7 +104,7 @@ export function RestTimerBar() {
               justifyContent: "center",
               opacity: pressed ? 0.75 : 1,
             })}
-            accessibilityLabel={isPaused ? "Resume rest timer" : "Pause rest timer"}
+            accessibilityLabel={isPaused ? t("resumeTimer") : t("pauseTimer")}
           >
             <Ionicons
               name={isPaused ? "play" : "pause"}
@@ -123,7 +125,7 @@ export function RestTimerBar() {
               justifyContent: "center",
               opacity: pressed ? 0.85 : 1,
             })}
-            accessibilityLabel="Skip rest"
+            accessibilityLabel={t("skip")}
           >
             <Text
               style={{
@@ -133,7 +135,7 @@ export function RestTimerBar() {
                 fontSize: 13,
               }}
             >
-              Skip
+              {t("skip")}
             </Text>
           </Pressable>
         </View>
@@ -150,7 +152,6 @@ export function RestTimerBar() {
       >
         <View
           style={{
-            // Percentage string width works in React Native.
             width: `${Math.round(progress * 100)}%`,
             height: "100%",
             backgroundColor: isAlmostDone ? Colors.danger : Colors.primary,
@@ -169,7 +170,7 @@ export function RestTimerBar() {
           textAlign: "right",
         }}
       >
-        {rt.durationSeconds}s planned
+        {t("sPlanned", { n: rt.durationSeconds })}
       </Text>
     </View>
   );

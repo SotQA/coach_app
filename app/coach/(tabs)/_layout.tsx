@@ -3,10 +3,12 @@ import { Tabs, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Colors } from "../../../theme/colors";
+import { useI18n } from "../../../context/I18nContext";
 
 export default function CoachTabsLayout() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { t } = useI18n();
 
   const fabShadow =
     Platform.OS === "ios"
@@ -38,7 +40,7 @@ export default function CoachTabsLayout() {
       <Tabs.Screen
         name="dashboard"
         options={{
-          title: "Dashboard",
+          title: t("nav_dashboard"),
           tabBarIcon: ({ color, size, focused }) => (
             <Ionicons
               name={focused ? "home" : "home-outline"}
@@ -51,7 +53,7 @@ export default function CoachTabsLayout() {
       <Tabs.Screen
         name="students"
         options={{
-          title: "Students",
+          title: t("nav_students"),
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="people-outline" color={color} size={size} />
           ),
@@ -66,7 +68,7 @@ export default function CoachTabsLayout() {
           },
         }}
         options={{
-          title: "Add",
+          title: t("nav_add"),
           tabBarLabel: () => null,
           tabBarIcon: () => (
             <View
@@ -89,7 +91,7 @@ export default function CoachTabsLayout() {
       <Tabs.Screen
         name="progress"
         options={{
-          title: "Progress",
+          title: t("nav_progress"),
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="stats-chart-outline" color={color} size={size} />
           ),
@@ -98,7 +100,7 @@ export default function CoachTabsLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: "Settings",
+          title: t("nav_settings"),
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="settings-outline" color={color} size={size} />
           ),

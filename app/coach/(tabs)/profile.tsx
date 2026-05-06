@@ -8,6 +8,12 @@ import { Colors } from "../../../theme/colors";
 import { Spacing } from "../../../theme/spacing";
 import { Typography } from "../../../theme/typography";
 import { useAuth } from "../../../context/AuthContext";
+import {
+  useI18n,
+  SUPPORTED_LOCALES,
+  LOCALE_LABELS,
+  type SupportedLocale,
+} from "../../../context/I18nContext";
 import { studentService } from "../../../services/studentService";
 import { ExerciseLibraryModal } from "../../../components/ExerciseLibraryModal";
 import { SettingsProfileCard } from "../../../components/settings/SettingsProfileCard";
@@ -25,6 +31,7 @@ function initialsFromUser(user: { firstName?: string | null; lastName?: string |
 export default function CoachProfile() {
   const router = useRouter();
   const { user, logout } = useAuth();
+  const { t, locale, setLocale } = useI18n();
   const insets = useSafeAreaInsets();
   const [statsLoading, setStatsLoading] = useState(true);
   const [studentCount, setStudentCount] = useState<number | null>(null);
@@ -50,7 +57,7 @@ export default function CoachProfile() {
         setStudentCount(Array.isArray(students) ? students.length : 0);
       } catch (e: unknown) {
         if (cancelled) return;
-        const msg = e instanceof Error ? e.message : "Failed to load stats.";
+        const msg = e instanceof Error ? e.message : t("failedToLoad");
         setStatsError(msg);
         setStudentCount(null);
       } finally {
@@ -58,14 +65,30 @@ export default function CoachProfile() {
       }
     };
     load();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [user?.id]);
 
-  if (!user) {
-    return null;
-  }
+  const metaLine = useMemo(() => {
+    if (statsLoading || studentCount == null) return null;
+    const count = studentCount;
+    return t(count === 1 ? "studentsOnRoster_one" : "studentsOnRoster_other", { count });
+  }, [statsLoading, studentCount, t]);
+
+  const openLanguagePicker = () => {
+    Alert.alert(
+      t("selectLanguage"),
+      undefined,
+      [
+        ...SUPPORTED_LOCALES.map((loc) => ({
+          text: LOCALE_LABELS[loc] + (loc === locale ? " ✓" : ""),
+          onPress: () => setLocale(loc as SupportedLocale),
+        })),
+        { text: t("cancel"), style: "cancel" as const },
+      ]
+    );
+  };
+
+  if (!user) return null;
 
   return (
     <ScreenLayout>
@@ -90,13 +113,13 @@ export default function CoachProfile() {
               borderBottomColor: Colors.border,
             }}
           >
-            <Text style={{ ...Typography.title, fontSize: 22 }}>Settings</Text>
+            <Text style={{ ...Typography.title, fontSize: 22 }}>{t("settings")}</Text>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Notification preferences"
+              accessibilityLabel={t("notifications")}
               onPress={() =>
-                Alert.alert("Notifications", "Notification preferences will be available in a future update.", [
-                  { text: "OK", style: "default" },
+                Alert.alert(t("notifications"), t("notificationPrefsComing"), [
+                  { text: t("ok"), style: "default" },
                 ])
               }
               style={({ pressed }) => ({
@@ -124,85 +147,89 @@ export default function CoachProfile() {
           <SettingsProfileCard
             fullName={fullName}
             email={user.email ?? ""}
-            roleLabel="Coach"
+            roleLabel={t("roleCoach")}
             initials={coachInitials}
             statsLoading={statsLoading}
-            metaLine={
-              statsLoading || studentCount == null
-                ? null
-                : `${studentCount} ${studentCount === 1 ? "student" : "students"} on your roster`
-            }
+            metaLine={metaLine}
             onEditProfile={() =>
-              Alert.alert("Coming soon", "Profile editing isn’t available yet.", [{ text: "OK", style: "default" }])
+              Alert.alert(t("comingSoon"), t("profileEditComingSoon"), [
+                { text: t("ok"), style: "default" },
+              ])
             }
           />
 
-          <SettingsSection title="App preferences">
+          <SettingsSection title={t("appPreferences")}>
+            <SettingsRow
+              icon="language-outline"
+              title={t("language")}
+              subtitle={LOCALE_LABELS[locale]}
+              onPress={openLanguagePicker}
+            />
             <SettingsRow
               icon="scale-outline"
-              title="Measurement units"
-              subtitle="kg / lbs"
+              title={t("measurementUnits")}
+              subtitle={t("measurementUnitsSubtitle")}
               onPress={() =>
-                Alert.alert("Measurement units", "Unit preferences will be available in a future update.", [
-                  { text: "OK", style: "default" },
+                Alert.alert(t("measurementUnits"), t("measurementUnitsComing"), [
+                  { text: t("ok"), style: "default" },
                 ])
               }
             />
             <SettingsRow
               icon="moon-outline"
-              title="Theme"
-              subtitle="Dark mode"
+              title={t("theme")}
+              subtitle={t("themeDark")}
               onPress={() =>
-                Alert.alert("Theme", "Additional themes will be available in a future update.", [
-                  { text: "OK", style: "default" },
+                Alert.alert(t("theme"), t("themeComing"), [
+                  { text: t("ok"), style: "default" },
                 ])
               }
             />
             <SettingsRow
               icon="notifications-outline"
-              title="Notifications"
-              subtitle="Workout reminders, student completion alerts"
+              title={t("notifications")}
+              subtitle={t("notificationsSubtitleCoach")}
               showDivider={false}
               onPress={() =>
-                Alert.alert("Notifications", "Notification preferences will be available in a future update.", [
-                  { text: "OK", style: "default" },
+                Alert.alert(t("notifications"), t("notificationPrefsComing"), [
+                  { text: t("ok"), style: "default" },
                 ])
               }
             />
           </SettingsSection>
 
-          <SettingsSection title="Coaching tools">
+          <SettingsSection title={t("coachingTools")}>
             <SettingsRow
               icon="barbell-outline"
-              title="Exercise library"
-              subtitle="Browse and manage custom exercises"
+              title={t("exerciseLibrary")}
+              subtitle={t("exerciseLibrarySubtitle")}
               onPress={() => setLibraryOpen(true)}
             />
             <SettingsRow
               icon="people-circle-outline"
-              title="Training groups"
-              subtitle="Assign splits & schedules — open a student to manage groups"
+              title={t("trainingGroups")}
+              subtitle={t("trainingGroupsSubtitle")}
               onPress={() => router.push("/coach/students")}
             />
             <SettingsRow
               icon="people-outline"
-              title="Student management"
-              subtitle="Roster, workout plans, and profiles"
+              title={t("studentManagement")}
+              subtitle={t("studentManagementSubtitle")}
               onPress={() => router.push("/coach/students")}
             />
             <SettingsRow
               icon="stats-chart-outline"
-              title="Progress analytics"
-              subtitle="Trends, volume, and coaching signals"
+              title={t("progressAnalytics")}
+              subtitle={t("progressAnalyticsSubtitle")}
               showDivider={false}
               onPress={() => router.push("/coach/progress")}
             />
           </SettingsSection>
 
-          <SettingsSection title="Account" style={{ marginTop: Spacing.sm }}>
+          <SettingsSection title={t("account")} style={{ marginTop: Spacing.sm }}>
             <SettingsRow
               icon="log-out-outline"
-              title="Log out"
+              title={t("logOut")}
               onPress={() => logout()}
               destructive
               showChevron={false}
@@ -215,9 +242,7 @@ export default function CoachProfile() {
           visible={libraryOpen}
           coachId={user.id}
           onClose={() => setLibraryOpen(false)}
-          onAddExercise={() => {
-            /* Selection is handled inside the modal (usage + close). */
-          }}
+          onAddExercise={() => {}}
         />
       </View>
     </ScreenLayout>

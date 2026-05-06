@@ -12,6 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { useAuth } from "../../context/AuthContext";
 import { useActiveWorkout, type ActiveExerciseDraft } from "../../context/ActiveWorkoutContext";
+import { useI18n } from "../../context/I18nContext";
 import { workoutService } from "../../services/workoutService";
 import type { LoggedSet, WorkoutLog, WorkoutPlan } from "../../types/Workout";
 import {
@@ -90,6 +91,7 @@ export default function WorkoutExecution() {
   const router = useRouter();
   const { user: authUser } = useAuth();
   const activeWorkout = useActiveWorkout();
+  const { t } = useI18n();
   const authUserId = authUser?.id;
   const authUserRole = authUser?.role;
   const params = useLocalSearchParams<{
@@ -344,9 +346,9 @@ export default function WorkoutExecution() {
       await activeWorkout.finishSession();
 
       if (prNames.length > 0) {
-        Alert.alert("Great session!", `🔥 New PR on: ${prNames.join(", ")}`);
+        Alert.alert(t("greatSession"), `🔥 New PR on: ${prNames.join(", ")}`);
       }
-      setMessage("Workout saved to history.");
+      setMessage(t("workoutSaved"));
       router.replace("/student/workoutHistory");
     } catch (e: any) {
       setError(e.message ?? "Failed to save workout.");
@@ -415,7 +417,7 @@ export default function WorkoutExecution() {
             >
               <Ionicons name="chevron-back" size={20} color={Colors.text} />
             </Pressable>
-            <Text style={{ ...Typography.section, fontWeight: "900" }}>Log Session</Text>
+            <Text style={{ ...Typography.section, fontWeight: "900" }}>{t("logSession")}</Text>
             {/* Timer badge — driven by context (survives app reopen) */}
             <View
               style={{
@@ -461,12 +463,12 @@ export default function WorkoutExecution() {
           }}
         >
           <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: 6 }}>
-            Session notes
+            {t("sessionNotes")}
           </Text>
           <TextInput
             value={sessionNotes}
             onChangeText={handleNotesChange}
-            placeholder="Add session notes..."
+            placeholder={t("addSessionNotes")}
             placeholderTextColor={Colors.textMuted}
             multiline
             style={{
@@ -485,12 +487,11 @@ export default function WorkoutExecution() {
         {plan.exercises.map((exercise, exIdx) => {
           const draft = drafts[exIdx];
           const sets = draft?.sets ?? [];
-          const targetParts: string[] = [];
-          targetParts.push(`${exercise.sets} sets x ${exercise.reps} reps`);
-          if (exercise.weight != null && Number.isFinite(Number(exercise.weight))) {
-            targetParts.push(`@ ${exercise.weight}kg`);
-          }
-          if (exercise.rpe != null) targetParts.push(`RPE ${exercise.rpe}`);
+          const weightSuffix =
+            exercise.weight != null && Number.isFinite(Number(exercise.weight))
+              ? ` @ ${exercise.weight}kg`
+              : "";
+          const rpeSuffix = exercise.rpe != null ? ` RPE ${exercise.rpe}` : "";
 
           return (
             <View
@@ -524,11 +525,11 @@ export default function WorkoutExecution() {
                 <View style={{ flex: 1 }}>
                   <Text style={{ ...Typography.section, fontWeight: "900" }}>{exercise.name}</Text>
                   <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 2 }}>
-                    Target: {targetParts.join(" ")}
+                    {t("target", { sets: exercise.sets, reps: exercise.reps })}{weightSuffix}{rpeSuffix}
                   </Text>
                   {exercise.coachNote ? (
                     <Text style={{ ...Typography.secondary, color: Colors.primary, marginTop: 2 }}>
-                      Coach: {exercise.coachNote}
+                      {t("coachNoteLabel", { note: exercise.coachNote })}
                     </Text>
                   ) : null}
                 </View>
@@ -545,16 +546,16 @@ export default function WorkoutExecution() {
                 }}
               >
                 <Text style={{ width: 32, ...Typography.secondary, color: Colors.textMuted, textAlign: "center" }}>
-                  Set
+                  {t("setColumn")}
                 </Text>
                 <Text style={{ flex: 1, ...Typography.secondary, color: Colors.textMuted, textAlign: "center" }}>
-                  Kg
+                  {t("kgColumn")}
                 </Text>
                 <Text style={{ flex: 1, ...Typography.secondary, color: Colors.textMuted, textAlign: "center" }}>
-                  Reps
+                  {t("repsColumn")}
                 </Text>
                 <Text style={{ flex: 1, ...Typography.secondary, color: Colors.textMuted, textAlign: "center" }}>
-                  RPE
+                  {t("rpeColumn")}
                 </Text>
                 <Text style={{ width: 34, ...Typography.secondary, color: Colors.textMuted, textAlign: "center" }}>
                   ✓
@@ -741,7 +742,7 @@ export default function WorkoutExecution() {
         {saving ? (
           <ActivityIndicator color={Colors.primary} />
         ) : (
-          <PrimaryButton title="Finish Session" onPress={handleSubmit} />
+          <PrimaryButton title={t("finishSession")} onPress={handleSubmit} />
         )}
       </View>
     </ScreenLayout>

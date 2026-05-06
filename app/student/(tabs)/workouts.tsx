@@ -12,6 +12,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../../context/AuthContext";
 import { useActiveWorkout } from "../../../context/ActiveWorkoutContext";
+import { useI18n } from "../../../context/I18nContext";
 import { workoutService } from "../../../services/workoutService";
 import { trainingGroupService } from "../../../services/trainingGroupService";
 import type { TrainingGroup } from "../../../types/TrainingGroup";
@@ -23,6 +24,8 @@ import { PrimaryButton } from "../../../components/PrimaryButton";
 import { ScreenLayout } from "../../../components/ScreenLayout";
 import { formatElapsedForTimer } from "../../../utils/workoutDuration";
 import { FLOATING_BAR_SCROLL_OFFSET } from "../../../components/FloatingWorkoutBar";
+import { formatDateShort } from "../../../utils/formatLocale";
+import type { SupportedLocale } from "../../../context/I18nContext";
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -70,15 +73,19 @@ function isInCurrentMonth(ms: number): boolean {
   return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
 }
 
-function formatRelativeDone(ms: number): string {
-  if (!ms) return "Never";
+function formatRelativeDone(
+  ms: number,
+  t: (key: string, opts?: Record<string, unknown>) => string,
+  locale: SupportedLocale
+): string {
+  if (!ms) return t("never");
   const diff = Date.now() - ms;
   const days = Math.floor(diff / 86400000);
-  if (days < 0) return "Recently";
-  if (days === 0) return "Today";
-  if (days === 1) return "Yesterday";
-  if (days < 7) return `${days} days ago`;
-  return new Date(ms).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  if (days < 0) return t("recently");
+  if (days === 0) return t("today");
+  if (days === 1) return t("yesterday");
+  if (days < 7) return t("daysAgo", { n: days });
+  return formatDateShort(ms, locale);
 }
 
 function focusFromPlan(plan: WorkoutPlan): string {
@@ -138,6 +145,7 @@ function ScaleCard({
 export default function StudentWorkouts() {
   const router = useRouter();
   const { user } = useAuth();
+  const { t, locale } = useI18n();
   const activeWorkout = useActiveWorkout();
   const [plans, setPlans] = useState<WorkoutPlan[]>([]);
   const [logs, setLogs] = useState<WorkoutLog[]>([]);
@@ -165,7 +173,7 @@ export default function StudentWorkouts() {
       let cancelled = false;
 
       if (!user || user.role !== "student") {
-        setError("You must be logged in as a student.");
+        setError(t("failedToLoad"));
         setLoading(false);
         return undefined;
       }
@@ -184,7 +192,7 @@ export default function StudentWorkouts() {
           hasLoadedOnceRef.current = true;
         } catch (e: unknown) {
           if (!cancelled && showFullScreenLoad) {
-            setError(e instanceof Error ? e.message : "Failed to load workouts.");
+            setError(e instanceof Error ? e.message : t("failedToLoad"));
           }
         } finally {
           if (!cancelled && showFullScreenLoad) setLoading(false);
@@ -348,7 +356,7 @@ export default function StudentWorkouts() {
           }}
         >
           <Text style={{ color: Colors.danger, marginBottom: Spacing.sm }}>{error}</Text>
-          <PrimaryButton title="Go to Login" onPress={() => router.replace("/login")} />
+          <PrimaryButton title={t("goToLogin")} onPress={() => router.replace("/login")} />
         </View>
       </ScreenLayout>
     );
@@ -375,7 +383,7 @@ export default function StudentWorkouts() {
               marginBottom: Spacing.md,
             }}
           >
-            <Text style={{ ...Typography.title, fontSize: 22 }}>Workouts</Text>
+            <Text style={{ ...Typography.title, fontSize: 22 }}>{t("workouts")}</Text>
             <Pressable
               onPress={() => router.push("/student/workoutHistory")}
               hitSlop={12}
@@ -428,7 +436,7 @@ export default function StudentWorkouts() {
                   }}
                   numberOfLines={1}
                 >
-                  Workout in progress · {activeWorkout.session.workoutName}
+                  {t("workoutInProgress", { name: activeWorkout.session.workoutName })}
                 </Text>
                 <Text
                   style={{
@@ -438,7 +446,7 @@ export default function StudentWorkouts() {
                     marginTop: 2,
                   }}
                 >
-                  {formatElapsedForTimer(activeWorkout.elapsedSeconds)} · Tap to resume
+                  {formatElapsedForTimer(activeWorkout.elapsedSeconds)} · {t("tapToResume")}
                 </Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color={Colors.onPrimary} />
@@ -458,10 +466,10 @@ export default function StudentWorkouts() {
             >
               <Ionicons name="barbell-outline" size={40} color={Colors.textMuted} style={{ marginBottom: Spacing.sm }} />
               <Text style={{ ...Typography.section, textAlign: "center", marginBottom: Spacing.xs }}>
-                No workouts assigned yet
+                {t("noWorkoutsAssigned")}
               </Text>
               <Text style={{ ...Typography.secondary, color: Colors.textMuted, textAlign: "center" }}>
-                Your coach will assign your training split soon
+                {t("coachWillAssign")}
               </Text>
             </View>
           ) : (
@@ -477,15 +485,15 @@ export default function StudentWorkouts() {
                 }}
               >
                 <Text style={{ ...Typography.secondary, color: Colors.primary, marginBottom: 4, fontWeight: "700" }}>
-                  Active split
+                  {t("activeSplit")}
                 </Text>
                 <Text style={{ ...Typography.title, fontSize: 20, marginBottom: Spacing.xs }}>
-                  {groupMeta.name || "Your program"}
+                  {groupMeta.name || t("yourProgram")}
                 </Text>
                 <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: Spacing.xs }}>
-                  {groupMeta.weekNum != null ? `Week ${groupMeta.weekNum}` : "Program"}
+                  {groupMeta.weekNum != null ? t("weekN", { n: groupMeta.weekNum }) : t("program")}
                   {" • "}
-                  {groupMeta.wpw} workouts/week
+                  {t("workoutsPerWeek", { n: groupMeta.wpw })}
                 </Text>
                 {groupMeta.description ? (
                   <Text style={{ ...Typography.secondary, color: Colors.textSecondary }}>{groupMeta.description}</Text>
@@ -506,7 +514,7 @@ export default function StudentWorkouts() {
                   <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" }}>
                     <View style={{ flex: 1, marginRight: Spacing.sm }}>
                       <Text style={{ ...Typography.secondary, color: Colors.primary, fontWeight: "800", marginBottom: 6 }}>
-                        Next up
+                        {t("nextUp")}
                       </Text>
                       <Text style={{ ...Typography.title, fontSize: 22, marginBottom: Spacing.xs }}>
                         {recommendedPlan.name}
@@ -516,19 +524,19 @@ export default function StudentWorkouts() {
                       </Text>
                       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: Spacing.md }}>
                         <Text style={Typography.secondary}>
-                          Last: {formatRelativeDone(lastMsByPlanId[recommendedPlan.id] ?? 0)}
+                          {t("lastWhen", { when: formatRelativeDone(lastMsByPlanId[recommendedPlan.id] ?? 0, t, locale) })}
                         </Text>
                         {recommendedPlan.estimatedDurationMinutes != null &&
                         recommendedPlan.estimatedDurationMinutes > 0 ? (
                           <Text style={Typography.secondary}>
-                            ~{recommendedPlan.estimatedDurationMinutes} min
+                            {t("minEst", { n: recommendedPlan.estimatedDurationMinutes })}
                           </Text>
                         ) : null}
                       </View>
                     </View>
                   </View>
                   <View style={{ marginTop: Spacing.md }} pointerEvents="box-none">
-                    <PrimaryButton title="Start Workout" onPress={() => openExecution(recommendedPlan)} />
+                    <PrimaryButton title={t("startWorkout")} onPress={() => openExecution(recommendedPlan)} />
                   </View>
                 </ScaleCard>
               ) : null}
@@ -541,7 +549,7 @@ export default function StudentWorkouts() {
                   fontWeight: "700",
                 }}
               >
-                Workout library
+                {t("workoutLibrary")}
               </Text>
               <View style={{ gap: Spacing.md, marginBottom: Spacing.lg }}>
                 {sortedPlans.map((plan) => {
@@ -564,7 +572,7 @@ export default function StudentWorkouts() {
                         <View style={{ flex: 1, marginRight: Spacing.sm }}>
                           <Text style={{ ...Typography.section, fontSize: 18, fontWeight: "800" }}>{plan.name}</Text>
                           <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4 }}>
-                            {exCount} exercise{exCount === 1 ? "" : "s"} · Last: {formatRelativeDone(lastMs)}
+                            {t(exCount === 1 ? "exerciseCount_one" : "exerciseCount_other", { count: exCount })} · {t("lastWhen", { when: formatRelativeDone(lastMs, t, locale) })}
                           </Text>
                           <View style={{ flexDirection: "row", flexWrap: "wrap", gap: Spacing.sm, marginTop: Spacing.sm }}>
                             {isNew ? (
@@ -576,7 +584,7 @@ export default function StudentWorkouts() {
                                   borderRadius: Radius.sm,
                                 }}
                               >
-                                <Text style={{ color: Colors.primary, fontSize: 12, fontWeight: "700" }}>New</Text>
+                                <Text style={{ color: Colors.primary, fontSize: 12, fontWeight: "700" }}>{t("new")}</Text>
                               </View>
                             ) : null}
                             {doneThisWeek && !isNew ? (
@@ -589,7 +597,7 @@ export default function StudentWorkouts() {
                                 }}
                               >
                                 <Text style={{ color: Colors.success, fontSize: 12, fontWeight: "700" }}>
-                                  Done this week
+                                  {t("doneThisWeek")}
                                 </Text>
                               </View>
                             ) : null}
@@ -598,7 +606,7 @@ export default function StudentWorkouts() {
                       </View>
                       <View style={{ flexDirection: "row", gap: Spacing.sm, marginTop: Spacing.md }}>
                         <View style={{ flex: 1 }}>
-                          <PrimaryButton title="Start" onPress={() => openExecution(plan)} />
+                          <PrimaryButton title={t("start")} onPress={() => openExecution(plan)} />
                         </View>
                         <Pressable
                           onPress={() => openDetail(plan.id)}
@@ -614,7 +622,7 @@ export default function StudentWorkouts() {
                             opacity: pressed ? 0.85 : 1,
                           })}
                         >
-                          <Text style={{ ...Typography.section, color: Colors.primary, fontWeight: "700" }}>Details</Text>
+                          <Text style={{ ...Typography.section, color: Colors.primary, fontWeight: "700" }}>{t("details")}</Text>
                         </Pressable>
                       </View>
                     </ScaleCard>
@@ -631,16 +639,16 @@ export default function StudentWorkouts() {
                   borderColor: Colors.border,
                 }}
               >
-                <Text style={{ ...Typography.section, marginBottom: Spacing.sm, fontWeight: "800" }}>Progress snapshot</Text>
+                <Text style={{ ...Typography.section, marginBottom: Spacing.sm, fontWeight: "800" }}>{t("progressSnapshot")}</Text>
                 <View style={{ gap: Spacing.sm }}>
                   <Text style={Typography.secondary}>
-                    This week: {Math.min(sessionsThisWeek, wpwTarget)} / {wpwTarget} completed
+                    {t("thisWeekCompleted", { done: Math.min(sessionsThisWeek, wpwTarget), target: wpwTarget })}
                   </Text>
                   <Text style={Typography.secondary}>
-                    Streak: {streak} day{streak === 1 ? "" : "s"}
+                    {t(streak === 1 ? "streak_one" : "streak_other", { count: streak })}
                   </Text>
-                  <Text style={Typography.secondary}>Sessions this month: {sessionsThisMonth}</Text>
-                  <Text style={Typography.secondary}>PRs this week: {prsThisWeek}</Text>
+                  <Text style={Typography.secondary}>{t("sessionsThisMonth", { n: sessionsThisMonth })}</Text>
+                  <Text style={Typography.secondary}>{t("prsThisWeek", { n: prsThisWeek })}</Text>
                 </View>
               </ScaleCard>
             </>

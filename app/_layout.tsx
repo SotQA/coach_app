@@ -4,6 +4,7 @@ import { ActivityIndicator, View } from "react-native";
 import * as Notifications from "expo-notifications";
 import { AuthProvider, useAuth } from "../context/AuthContext";
 import { ActiveWorkoutProvider, useActiveWorkout } from "../context/ActiveWorkoutContext";
+import { I18nProvider } from "../context/I18nContext";
 import * as SystemUI from "expo-system-ui";
 import { DarkTheme, ThemeProvider } from "@react-navigation/native";
 import { Colors } from "../theme/colors";
@@ -100,13 +101,15 @@ export default function Layout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <AuthProvider>
-        <ActiveWorkoutProvider>
-          <ThemeProvider value={navTheme}>
-            <RootNavigator />
-          </ThemeProvider>
-        </ActiveWorkoutProvider>
-      </AuthProvider>
+      <I18nProvider>
+        <AuthProvider>
+          <ActiveWorkoutProvider>
+            <ThemeProvider value={navTheme}>
+              <RootNavigator />
+            </ThemeProvider>
+          </ActiveWorkoutProvider>
+        </AuthProvider>
+      </I18nProvider>
     </GestureHandlerRootView>
   );
 }

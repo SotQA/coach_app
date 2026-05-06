@@ -1,8 +1,11 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "../../../theme/colors";
+import { useI18n } from "../../../context/I18nContext";
 
 export default function StudentTabsLayout() {
+  const { t } = useI18n();
+
   return (
     <Tabs
       screenOptions={{
@@ -18,7 +21,7 @@ export default function StudentTabsLayout() {
       <Tabs.Screen
         name="workouts"
         options={{
-          title: "Workouts",
+          title: t("nav_workouts"),
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="barbell-outline" color={color} size={size} />
           ),
@@ -27,7 +30,7 @@ export default function StudentTabsLayout() {
       <Tabs.Screen
         name="workoutHistory"
         options={{
-          title: "History",
+          title: t("nav_history"),
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="time-outline" color={color} size={size} />
           ),
@@ -36,7 +39,7 @@ export default function StudentTabsLayout() {
       <Tabs.Screen
         name="progress"
         options={{
-          title: "Progress",
+          title: t("nav_progress"),
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="stats-chart-outline" color={color} size={size} />
           ),
@@ -45,11 +48,12 @@ export default function StudentTabsLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: "Profile",
-          tabBarIcon: ({ color, size }) => <Ionicons name="person-outline" color={color} size={size} />,
+          title: t("nav_profile"),
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="person-outline" color={color} size={size} />
+          ),
         }}
       />
     </Tabs>
   );
 }
-

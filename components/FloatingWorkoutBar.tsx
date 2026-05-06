@@ -3,6 +3,7 @@ import { useRouter, usePathname } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useActiveWorkout } from "../context/ActiveWorkoutContext";
+import { useI18n } from "../context/I18nContext";
 import { formatElapsedForTimer } from "../utils/workoutDuration";
 import { Colors } from "../theme/colors";
 import { Radius } from "../theme/spacing";
@@ -11,7 +12,7 @@ import { Typography } from "../theme/typography";
 /** Height of the floating bar itself (not including bottom offset). */
 export const FLOATING_BAR_HEIGHT = 58;
 
-/** Extra bottom padding tab-screen ScrollViews should add when a session is active. */
+/** Extra bottom padding tab screens should add when a session is active. */
 export const FLOATING_BAR_SCROLL_OFFSET = FLOATING_BAR_HEIGHT + 16;
 
 /** mm:ss string, ceiling the seconds so "00:01" shows for the final tick. */
@@ -24,6 +25,7 @@ function formatRestCountdown(seconds: number): string {
 
 export function FloatingWorkoutBar() {
   const { session, elapsedSeconds, restSecondsRemaining } = useActiveWorkout();
+  const { t } = useI18n();
   const router = useRouter();
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
@@ -46,7 +48,6 @@ export function FloatingWorkoutBar() {
   const TAB_BAR_HEIGHT = 49;
   const bottomOffset = insets.bottom + TAB_BAR_HEIGHT + 8;
 
-  // When rest is almost done (≤5 s) pulse the bar color.
   const isRestAlmostDone = restActive && !restPaused && restSecondsRemaining <= 5;
   const barColor = isRestAlmostDone ? Colors.danger : Colors.primary;
 
@@ -56,6 +57,8 @@ export function FloatingWorkoutBar() {
       params: { workoutPlanId: session.workoutPlanId },
     });
   };
+
+  const restTime = formatRestCountdown(restSecondsRemaining);
 
   return (
     <Pressable
@@ -105,7 +108,7 @@ export function FloatingWorkoutBar() {
               }}
               numberOfLines={1}
             >
-              {restPaused ? "Rest Paused" : "Resting"} · {session.workoutName}
+              {t(restPaused ? "restPausedDot" : "restingDot", { name: session.workoutName })}
             </Text>
             <Text
               style={{
@@ -116,9 +119,7 @@ export function FloatingWorkoutBar() {
                 marginTop: 1,
               }}
             >
-              {restPaused
-                ? `${formatRestCountdown(restSecondsRemaining)} remaining (paused)`
-                : `${formatRestCountdown(restSecondsRemaining)} remaining · tap to resume`}
+              {t(restPaused ? "remainingPaused" : "remainingTapResume", { time: restTime })}
             </Text>
           </>
         ) : (
@@ -143,7 +144,7 @@ export function FloatingWorkoutBar() {
                 marginTop: 1,
               }}
             >
-              {doneSets}/{totalSets} sets · {formatElapsedForTimer(elapsedSeconds)}
+              {t("setsDone", { done: doneSets, total: totalSets })} · {formatElapsedForTimer(elapsedSeconds)}
             </Text>
           </>
         )}
@@ -170,7 +171,7 @@ export function FloatingWorkoutBar() {
           }}
         >
           {restActive
-            ? formatRestCountdown(restSecondsRemaining)
+            ? restTime
             : formatElapsedForTimer(elapsedSeconds)}
         </Text>
       </View>
