@@ -23,13 +23,12 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import type { Sex, UserRole } from "../../types/User";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { useAuth } from "../../context/AuthContext";
+import { useI18n } from "../../context/I18nContext";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
 
 const TOTAL_STEPS = 3;
-
-const STEP_TITLES = ["Account", "About you", "Your role"] as const;
 
 function parseYMD(value: string): Date | null {
   const parts = value.split("-");
@@ -58,6 +57,7 @@ export default function Signup() {
   const insets = useSafeAreaInsets();
   const { width: windowWidth } = useWindowDimensions();
   const { user, loading: authLoading, signup } = useAuth();
+  const { t } = useI18n();
   const scrollRef = useRef<KeyboardAwareScrollView | null>(null);
   const trackWidth = Math.max(0, windowWidth - Spacing.lg * 2);
   const barW = useSharedValue((trackWidth * 1) / TOTAL_STEPS);
@@ -76,6 +76,8 @@ export default function Signup() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  const STEP_TITLES = [t("stepAccount"), t("stepAboutYou"), t("stepYourRole")] as const;
+
   useEffect(() => {
     const w = Math.max(0, windowWidth - Spacing.lg * 2);
     barW.value = withTiming((w * (step + 1)) / TOTAL_STEPS, { duration: 320 });
@@ -90,34 +92,28 @@ export default function Signup() {
   }, [step]);
 
   const validateStep0 = useCallback((): string | null => {
-    if (!validateEmail(email)) return "Please enter a valid email address.";
-    if (password.length < 8) return "Password must be at least 8 characters.";
-    if (password !== confirmPassword) return "Passwords do not match.";
+    if (!validateEmail(email)) return t("errorInvalidEmail");
+    if (password.length < 8) return t("errorPasswordMin");
+    if (password !== confirmPassword) return t("errorPasswordMatch");
     return null;
-  }, [email, password, confirmPassword]);
+  }, [email, password, confirmPassword, t]);
 
   const validateStep1 = useCallback((): string | null => {
-    if (!firstName.trim()) return "First name is required.";
-    if (!lastName.trim()) return "Last name is required.";
-    if (!dateOfBirth.trim()) return "Date of birth is required.";
+    if (!firstName.trim()) return t("errorFirstNameRequired");
+    if (!lastName.trim()) return t("errorLastNameRequired");
+    if (!dateOfBirth.trim()) return t("errorDobRequired");
     return null;
-  }, [firstName, lastName, dateOfBirth]);
+  }, [firstName, lastName, dateOfBirth, t]);
 
   const goNext = () => {
     setError(null);
     if (step === 0) {
       const err = validateStep0();
-      if (err) {
-        setError(err);
-        return;
-      }
+      if (err) { setError(err); return; }
     }
     if (step === 1) {
       const err = validateStep1();
-      if (err) {
-        setError(err);
-        return;
-      }
+      if (err) { setError(err); return; }
     }
     if (step < TOTAL_STEPS - 1) setStep((s) => s + 1);
   };
@@ -131,13 +127,13 @@ export default function Signup() {
   const handleCreateAccount = async () => {
     setError(null);
     if (role == null) {
-      setError("Please select Coach or Student.");
+      setError(t("errorSelectRole"));
       return;
     }
     const e0 = validateStep0();
     const e1 = validateStep1();
     if (e0 || e1) {
-      setError(e0 ?? e1 ?? "Please complete all steps.");
+      setError(e0 ?? e1 ?? t("errorCompleteSteps"));
       return;
     }
 
@@ -153,7 +149,7 @@ export default function Signup() {
         sex
       );
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Failed to sign up.";
+      const msg = err instanceof Error ? err.message : t("failedToSignup");
       setError(msg);
     } finally {
       setSubmitting(false);
@@ -209,10 +205,7 @@ export default function Signup() {
     return (
       <Pressable
         disabled={submitting}
-        onPress={() => {
-          setRole(value);
-          setError(null);
-        }}
+        onPress={() => { setRole(value); setError(null); }}
         style={({ pressed }) => ({
           flexDirection: "row",
           alignItems: "center",
@@ -225,12 +218,7 @@ export default function Signup() {
           marginBottom: Spacing.sm,
           opacity: pressed ? 0.92 : 1,
           ...(Platform.OS === "ios"
-            ? {
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: selected ? 0.2 : 0.12,
-                shadowRadius: 10,
-              }
+            ? { shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: selected ? 0.2 : 0.12, shadowRadius: 10 }
             : { elevation: selected ? 4 : 2 }),
         })}
       >
@@ -272,9 +260,7 @@ export default function Signup() {
   return (
     <View style={{ flex: 1, backgroundColor: Colors.bg, paddingTop: insets.top }}>
       <KeyboardAwareScrollView
-        ref={(r) => {
-          scrollRef.current = r;
-        }}
+        ref={(r) => { scrollRef.current = r; }}
         style={{ flex: 1 }}
         contentContainerStyle={{
           flexGrow: 1,
@@ -291,7 +277,7 @@ export default function Signup() {
         <View style={{ flexDirection: "row", alignItems: "center", marginBottom: Spacing.md }}>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={step === 0 ? "Back to login" : "Previous step"}
+            accessibilityLabel={step === 0 ? t("back") : t("back")}
             onPress={goBack}
             style={({ pressed }) => ({
               width: 44,
@@ -310,7 +296,7 @@ export default function Signup() {
           </Pressable>
           <View style={{ flex: 1 }}>
             <Text style={{ ...Typography.secondary, color: Colors.textMuted, fontWeight: "700", fontSize: 12 }}>
-              Step {step + 1} of {TOTAL_STEPS}
+              {t("stepOf", { n: step + 1, total: TOTAL_STEPS })}
             </Text>
             <Text style={{ ...Typography.title, fontSize: 20, marginTop: 2 }}>{STEP_TITLES[step]}</Text>
           </View>
@@ -325,16 +311,7 @@ export default function Signup() {
             marginBottom: Spacing.lg,
           }}
         >
-          <Animated.View
-            style={[
-              {
-                height: 4,
-                borderRadius: 2,
-                backgroundColor: Colors.primary,
-              },
-              barStyle,
-            ]}
-          />
+          <Animated.View style={[{ height: 4, borderRadius: 2, backgroundColor: Colors.primary }, barStyle]} />
         </View>
 
         <Animated.View
@@ -351,23 +328,18 @@ export default function Signup() {
               borderWidth: 1,
               borderColor: Colors.border,
               ...(Platform.OS === "ios"
-                ? {
-                    shadowColor: "#000",
-                    shadowOffset: { width: 0, height: 8 },
-                    shadowOpacity: 0.25,
-                    shadowRadius: 16,
-                  }
+                ? { shadowColor: "#000", shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.25, shadowRadius: 16 }
                 : { elevation: 6 }),
             }}
           >
             {step === 0 ? (
               <>
                 <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: Spacing.lg, lineHeight: 22 }}>
-                  Create your credentials. You can finish your profile in the next steps.
+                  {t("createCredentials")}
                 </Text>
-                <Text style={{ ...Typography.secondary, marginBottom: 6, fontWeight: "600" }}>Email</Text>
+                <Text style={{ ...Typography.secondary, marginBottom: 6, fontWeight: "600" }}>{t("email")}</Text>
                 <TextInput
-                  placeholder="you@example.com"
+                  placeholder={t("emailPlaceholder")}
                   placeholderTextColor={Colors.textMuted}
                   autoCapitalize="none"
                   keyboardType="email-address"
@@ -376,9 +348,9 @@ export default function Signup() {
                   onChangeText={setEmail}
                   style={{ ...inputStyle, marginBottom: Spacing.sm }}
                 />
-                <Text style={{ ...Typography.secondary, marginBottom: 6, fontWeight: "600" }}>Password</Text>
+                <Text style={{ ...Typography.secondary, marginBottom: 6, fontWeight: "600" }}>{t("password")}</Text>
                 <TextInput
-                  placeholder="At least 8 characters"
+                  placeholder={t("passwordMin")}
                   placeholderTextColor={Colors.textMuted}
                   value={password}
                   onChangeText={setPassword}
@@ -386,9 +358,9 @@ export default function Signup() {
                   autoComplete="password-new"
                   style={{ ...inputStyle, marginBottom: Spacing.sm }}
                 />
-                <Text style={{ ...Typography.secondary, marginBottom: 6, fontWeight: "600" }}>Confirm password</Text>
+                <Text style={{ ...Typography.secondary, marginBottom: 6, fontWeight: "600" }}>{t("confirmPassword")}</Text>
                 <TextInput
-                  placeholder="Re-enter password"
+                  placeholder={t("reEnterPassword")}
                   placeholderTextColor={Colors.textMuted}
                   value={confirmPassword}
                   onChangeText={setConfirmPassword}
@@ -396,34 +368,34 @@ export default function Signup() {
                   autoComplete="password-new"
                   style={{ ...inputStyle, marginBottom: Spacing.md }}
                 />
-                <PrimaryButton title="Continue" onPress={goNext} />
+                <PrimaryButton title={t("continue")} onPress={goNext} />
               </>
             ) : null}
 
             {step === 1 ? (
               <>
                 <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: Spacing.lg, lineHeight: 22 }}>
-                  Tell us a bit about you. This helps personalize your experience.
+                  {t("tellAboutYou")}
                 </Text>
-                <Text style={{ ...Typography.secondary, marginBottom: 6, fontWeight: "600" }}>First name</Text>
+                <Text style={{ ...Typography.secondary, marginBottom: 6, fontWeight: "600" }}>{t("firstName")}</Text>
                 <TextInput
-                  placeholder="First name"
+                  placeholder={t("firstName")}
                   placeholderTextColor={Colors.textMuted}
                   value={firstName}
                   onChangeText={setFirstName}
                   autoCapitalize="words"
                   style={{ ...inputStyle, marginBottom: Spacing.sm }}
                 />
-                <Text style={{ ...Typography.secondary, marginBottom: 6, fontWeight: "600" }}>Last name</Text>
+                <Text style={{ ...Typography.secondary, marginBottom: 6, fontWeight: "600" }}>{t("lastName")}</Text>
                 <TextInput
-                  placeholder="Last name"
+                  placeholder={t("lastName")}
                   placeholderTextColor={Colors.textMuted}
                   value={lastName}
                   onChangeText={setLastName}
                   autoCapitalize="words"
                   style={{ ...inputStyle, marginBottom: Spacing.sm }}
                 />
-                <Text style={{ ...Typography.secondary, marginBottom: 6, fontWeight: "600" }}>Date of birth</Text>
+                <Text style={{ ...Typography.secondary, marginBottom: 6, fontWeight: "600" }}>{t("dateOfBirth")}</Text>
                 <Pressable
                   onPress={() => setDobPickerOpen(true)}
                   style={({ pressed }) => ({
@@ -437,7 +409,7 @@ export default function Signup() {
                   })}
                 >
                   <Text style={[Typography.body, { color: dateOfBirth ? Colors.text : Colors.textMuted }]}>
-                    {dateOfBirth ? dateOfBirth : "Select date"}
+                    {dateOfBirth ? dateOfBirth : t("selectDate")}
                   </Text>
                 </Pressable>
 
@@ -464,10 +436,9 @@ export default function Signup() {
 
                 {dobPickerOpen && Platform.OS === "ios" ? (
                   <View style={{ flexDirection: "row", gap: Spacing.sm, marginBottom: Spacing.md, alignItems: "stretch" }}>
-                    {/* PrimaryButton uses width: 100% on its root — wrap so row split works (see StudentCard). */}
                     <View style={{ flex: 1, minWidth: 0 }}>
                       <PrimaryButton
-                        title="Apply"
+                        title={t("apply")}
                         onPress={() => {
                           if (!dobDraft) return;
                           setDateOfBirth(formatYMD(dobDraft));
@@ -477,10 +448,7 @@ export default function Signup() {
                       />
                     </View>
                     <Pressable
-                      onPress={() => {
-                        setDobDraft(null);
-                        setDobPickerOpen(false);
-                      }}
+                      onPress={() => { setDobDraft(null); setDobPickerOpen(false); }}
                       style={{
                         flexShrink: 0,
                         justifyContent: "center",
@@ -492,46 +460,46 @@ export default function Signup() {
                         borderColor: Colors.border,
                       }}
                     >
-                      <Text style={{ ...Typography.section, color: Colors.textMuted, fontWeight: "700" }}>Cancel</Text>
+                      <Text style={{ ...Typography.section, color: Colors.textMuted, fontWeight: "700" }}>{t("cancel")}</Text>
                     </Pressable>
                   </View>
                 ) : null}
 
-                <Text style={{ ...Typography.secondary, marginBottom: Spacing.xs, fontWeight: "600" }}>Sex</Text>
+                <Text style={{ ...Typography.secondary, marginBottom: Spacing.xs, fontWeight: "600" }}>{t("sex")}</Text>
                 <View style={{ flexDirection: "row", gap: Spacing.xs, marginBottom: Spacing.md }}>
-                  <SexChip value="male" label="Male" />
-                  <SexChip value="female" label="Female" />
+                  <SexChip value="male" label={t("male")} />
+                  <SexChip value="female" label={t("female")} />
                 </View>
-                <PrimaryButton title="Continue" onPress={goNext} />
+                <PrimaryButton title={t("continue")} onPress={goNext} />
               </>
             ) : null}
 
             {step === 2 ? (
               <>
                 <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: Spacing.lg, lineHeight: 22 }}>
-                  How will you use the app? Pick the experience that matches you.
+                  {t("howWillYouUse")}
                 </Text>
                 <RoleCard
                   value="coach"
-                  title="Coach"
-                  subtitle="Manage students, build plans, track progress"
+                  title={t("roleCoach")}
+                  subtitle={t("roleCoachDesc")}
                   icon="school-outline"
                 />
                 <RoleCard
                   value="student"
-                  title="Student"
-                  subtitle="Follow workouts, log sessions, track PRs"
+                  title={t("roleStudent")}
+                  subtitle={t("roleStudentDesc")}
                   icon="barbell-outline"
                 />
                 {submitting ? (
                   <View style={{ alignItems: "center", paddingVertical: Spacing.lg }}>
                     <ActivityIndicator size="large" color={Colors.primary} />
                     <Text style={[Typography.secondary, { color: Colors.textMuted, marginTop: Spacing.md }]}>
-                      Creating your account…
+                      {t("creatingAccount")}
                     </Text>
                   </View>
                 ) : (
-                  <PrimaryButton title="Create Account" onPress={handleCreateAccount} />
+                  <PrimaryButton title={t("createAccountBtn")} onPress={handleCreateAccount} />
                 )}
               </>
             ) : null}
@@ -546,7 +514,8 @@ export default function Signup() {
 
         <Pressable onPress={() => router.replace("/login")} style={{ marginTop: Spacing.lg, paddingVertical: Spacing.sm }}>
           <Text style={[Typography.secondary, { color: Colors.textMuted, textAlign: "center", fontWeight: "600" }]}>
-            Already have an account? <Text style={{ color: Colors.primary }}>Log in</Text>
+            {t("alreadyHaveAccount")}{" "}
+            <Text style={{ color: Colors.primary }}>{t("logInLink")}</Text>
           </Text>
         </Pressable>
       </KeyboardAwareScrollView>

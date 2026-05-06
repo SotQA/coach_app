@@ -8,6 +8,7 @@ import { makeRedirectUri } from "expo-auth-session";
 import Constants, { ExecutionEnvironment } from "expo-constants";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { useAuth } from "../../context/AuthContext";
+import { useI18n } from "../../context/I18nContext";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
@@ -18,6 +19,7 @@ WebBrowser.maybeCompleteAuthSession();
 export default function Login() {
   const router = useRouter();
   const { user, loading: authLoading, login, loginWithGoogleIdToken } = useAuth();
+  const { t } = useI18n();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -29,8 +31,6 @@ export default function Login() {
   const googleIosClientId = String(extra.googleIosClientId ?? "").trim();
   const googleAndroidClientId = String(extra.googleAndroidClientId ?? "").trim();
 
-  // Google "Web application" clients only allow http(s) redirect URIs — not exp://.
-  // On native, use iOS/Android OAuth clients; Expo Go cannot satisfy Google's rules (see googleButtonEnabled).
   const isExpoGo = Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
 
   const webGoogleRedirectUri =
@@ -76,7 +76,7 @@ export default function Login() {
     try {
       await login(email.trim(), password);
     } catch (e: any) {
-      setError(e.message ?? "Failed to login.");
+      setError(e.message ?? t("failedToLogin"));
     } finally {
       setSubmitting(false);
     }
@@ -126,20 +126,12 @@ export default function Login() {
 
   if (authLoading) {
     return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
-          backgroundColor: Colors.bg,
-        }}
-      >
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: Colors.bg }}>
         <ActivityIndicator />
       </View>
     );
   }
 
-  // Protected by (auth)/_layout.tsx; render nothing during redirect.
   if (user) return null;
 
   return (
@@ -165,14 +157,14 @@ export default function Login() {
           borderColor: Colors.border,
         }}
       >
-        <Text style={{ ...Typography.title, marginBottom: Spacing.xs }}>Welcome back</Text>
+        <Text style={{ ...Typography.title, marginBottom: Spacing.xs }}>{t("welcomeBack")}</Text>
         <Text style={{ ...Typography.secondary, marginBottom: Spacing.lg }}>
-          Log in to manage your coaching or stay on top of your workouts.
+          {t("loginSubtitle")}
         </Text>
 
-        <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Email</Text>
+        <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("email")}</Text>
         <TextInput
-          placeholder="you@example.com"
+          placeholder={t("emailPlaceholder")}
           placeholderTextColor={Colors.textMuted}
           autoCapitalize="none"
           keyboardType="email-address"
@@ -189,9 +181,9 @@ export default function Login() {
           }}
         />
 
-        <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Password</Text>
+        <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("password")}</Text>
         <TextInput
-          placeholder="••••••••"
+          placeholder={t("passwordPlaceholder")}
           placeholderTextColor={Colors.textMuted}
           value={password}
           onChangeText={setPassword}
@@ -211,7 +203,7 @@ export default function Login() {
           <ActivityIndicator style={{ marginVertical: 12 }} />
         ) : (
           <>
-            <PrimaryButton title="Login" onPress={handleLogin} />
+            <PrimaryButton title={t("login")} onPress={handleLogin} />
             <Pressable
               disabled={googleSubmitting || !googleButtonEnabled}
               onPress={handleGoogleLogin}
@@ -236,7 +228,7 @@ export default function Login() {
                 <>
                   <Ionicons name="logo-google" size={18} color={Colors.text} />
                   <Text style={{ ...Typography.section, color: Colors.text }}>
-                    Continue with Google
+                    {t("continueWithGoogle")}
                   </Text>
                 </>
               )}
@@ -252,7 +244,7 @@ export default function Login() {
               </Text>
             ) : null}
             <PrimaryButton
-              title="Create account"
+              title={t("createAccount")}
               onPress={() => router.push("/signup")}
               style={{ marginTop: Spacing.sm, backgroundColor: Colors.border }}
             />
@@ -266,4 +258,3 @@ export default function Login() {
     </KeyboardAwareScrollView>
   );
 }
-
