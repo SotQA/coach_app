@@ -187,14 +187,17 @@ export default function StudentDetails() {
 
   const compliancePercent = (() => {
     const wpw = latestGroup?.workoutsPerWeek ?? 0;
-    if (!wpw || wpw <= 0) return null;
+    if (!wpw || !Number.isFinite(wpw) || wpw <= 0) {
+      // Compliance is undefined when no weekly target is set.
+      return null;
+    }
     const now = Date.now();
     const weekAgo = now - 7 * 24 * 60 * 60 * 1000;
     const count7 = logs.filter((l) => {
       const ms = toMs((l as any).completedAt ?? (l as any).date);
       return ms >= weekAgo && ms <= now;
     }).length;
-    return Math.max(0, Math.min(100, Math.round((count7 / wpw) * 100)));
+    return Math.max(0, Math.min(999, Math.round((count7 / wpw) * 100)));
   })();
 
   const currentStreakDays = (() => {
