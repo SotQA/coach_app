@@ -29,27 +29,11 @@ import { ScreenLayout } from "../../components/ScreenLayout";
 import { RestTimerBar } from "../../components/RestTimerBar";
 import { formatElapsedForTimer, parseRestSeconds } from "../../utils/workoutDuration";
 import { logger } from "../../utils/logger";
+import { parseKgInput, normalizeDecimalInput } from "../../utils/inputParsing";
 
 // ─── Local draft types (mirror ActiveSetDraft, using `done` for UI clarity) ──
 type SetDraft = { weight: string; reps: string; rpe: string; done: boolean };
 type ExerciseDraft = { sets: SetDraft[] };
-
-function parseKgInput(text: string): number | null {
-  const t = text.trim().replace(",", ".");
-  if (t === "") return null;
-  const n = Number(t);
-  return Number.isFinite(n) && n >= 0 ? n : null;
-}
-
-function normalizeDecimalInput(text: string): string {
-  let t = text.replace(",", ".").replace(/[^0-9.]/g, "");
-  const firstDot = t.indexOf(".");
-  if (firstDot >= 0) {
-    t = t.slice(0, firstDot + 1) + t.slice(firstDot + 1).replace(/\./g, "");
-  }
-  if (t.startsWith(".")) t = `0${t}`;
-  return t;
-}
 
 function getNextSetFocus(
   exIdx: number,
