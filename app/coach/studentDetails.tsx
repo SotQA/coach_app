@@ -80,16 +80,32 @@ export default function StudentDetails() {
 
         setStudent(studentDoc);
 
-        // Load the rest in parallel for performance.
-        const [g, workoutPlans, history] = await Promise.all([
-          trainingGroupService.getLatestTrainingGroupForStudent(userId, studentId).catch(() => null),
+        // Load the rest in parallel; a single sub-fetch failure must not blank the whole screen.
+        const [gResult, plansResult, historyResult] = await Promise.allSettled([
+          trainingGroupService.getLatestTrainingGroupForStudent(userId, studentId),
           workoutService.getWorkoutPlansForStudentAsCoach(userId, studentId),
           workoutService.getWorkoutHistory(studentId),
         ]);
         if (!active) return;
-        setLatestGroup(g);
+
+        if (gResult.status === "fulfilled") {
+          setLatestGroup(gResult.value);
+        } else {
+          logger.warn("[studentDetails] partial load failure", { which: "trainingGroup", reason: gResult.reason });
+          setLatestGroup(null);
+        }
+
+        const workoutPlans = plansResult.status === "fulfilled" ? plansResult.value : [];
+        if (plansResult.status === "rejected") {
+          logger.warn("[studentDetails] partial load failure", { which: "workoutPlans", reason: plansResult.reason });
+        }
         logger.log("[coach/studentDetails] fetched plans", workoutPlans.length);
         setPlans(workoutPlans);
+
+        const history = historyResult.status === "fulfilled" ? historyResult.value : [];
+        if (historyResult.status === "rejected") {
+          logger.warn("[studentDetails] partial load failure", { which: "history", reason: historyResult.reason });
+        }
         logger.log("[coach/studentDetails] fetched logs", history.length);
         setLogs(history);
       } catch (e: any) {
