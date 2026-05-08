@@ -45,24 +45,27 @@ export default function StudentDetails() {
   }, [plans]);
 
   useEffect(() => {
-    const load = async () => {
+    let active = true;
+
+    (async () => {
       logger.log("[coach/studentDetails] load start", { studentId });
       setLoading(true);
       try {
         setError(null);
 
         if (!studentId) {
-          setError("Missing studentId.");
+          if (active) setError("Missing studentId.");
           return;
         }
 
         logger.log("[coach/studentDetails] currentUser", user);
         if (!userId || userRole !== "coach") {
-          setError("You must be logged in as a coach.");
+          if (active) setError("You must be logged in as a coach.");
           return;
         }
 
         const studentDoc = await studentService.getStudentById(studentId);
+        if (!active) return;
         logger.log("[coach/studentDetails] fetched student", studentDoc?.id);
         if (!studentDoc) {
           setError("Student not found.");
@@ -77,26 +80,44 @@ export default function StudentDetails() {
 
         setStudent(studentDoc);
 
-        // Load the rest in parallel for performance.
-        const [g, workoutPlans, history] = await Promise.all([
-          trainingGroupService.getLatestTrainingGroupForStudent(userId, studentId).catch(() => null),
+        // Load the rest in parallel; a single sub-fetch failure must not blank the whole screen.
+        const [gResult, plansResult, historyResult] = await Promise.allSettled([
+          trainingGroupService.getLatestTrainingGroupForStudent(userId, studentId),
           workoutService.getWorkoutPlansForStudentAsCoach(userId, studentId),
           workoutService.getWorkoutHistory(studentId),
         ]);
-        setLatestGroup(g);
+        if (!active) return;
+
+        if (gResult.status === "fulfilled") {
+          setLatestGroup(gResult.value);
+        } else {
+          logger.warn("[studentDetails] partial load failure", { which: "trainingGroup", reason: gResult.reason });
+          setLatestGroup(null);
+        }
+
+        const workoutPlans = plansResult.status === "fulfilled" ? plansResult.value : [];
+        if (plansResult.status === "rejected") {
+          logger.warn("[studentDetails] partial load failure", { which: "workoutPlans", reason: plansResult.reason });
+        }
         logger.log("[coach/studentDetails] fetched plans", workoutPlans.length);
         setPlans(workoutPlans);
+
+        const history = historyResult.status === "fulfilled" ? historyResult.value : [];
+        if (historyResult.status === "rejected") {
+          logger.warn("[studentDetails] partial load failure", { which: "history", reason: historyResult.reason });
+        }
         logger.log("[coach/studentDetails] fetched logs", history.length);
         setLogs(history);
       } catch (e: any) {
-        console.error("[coach/studentDetails] load error", e);
+        if (!active) return;
+        logger.error("[coach/studentDetails] load error", e);
         setError(e.message ?? "Failed to load student details.");
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
-    };
+    })();
 
-    load();
+    return () => { active = false; };
   }, [studentId, userId, userRole]);
 
   if (loading) {
@@ -156,7 +177,8 @@ export default function StudentDetails() {
       try {
         const d = value.toDate();
         return d instanceof Date ? d.getTime() : 0;
-      } catch {
+      } catch (e) {
+        logger.warn("[studentDetails] toMs failed", e, value);
         return 0;
       }
     }
@@ -182,14 +204,17 @@ export default function StudentDetails() {
 
   const compliancePercent = (() => {
     const wpw = latestGroup?.workoutsPerWeek ?? 0;
-    if (!wpw || wpw <= 0) return null;
+    if (!wpw || !Number.isFinite(wpw) || wpw <= 0) {
+      // Compliance is undefined when no weekly target is set.
+      return null;
+    }
     const now = Date.now();
     const weekAgo = now - 7 * 24 * 60 * 60 * 1000;
     const count7 = logs.filter((l) => {
       const ms = toMs((l as any).completedAt ?? (l as any).date);
       return ms >= weekAgo && ms <= now;
     }).length;
-    return Math.max(0, Math.min(100, Math.round((count7 / wpw) * 100)));
+    return Math.max(0, Math.min(999, Math.round((count7 / wpw) * 100)));
   })();
 
   const currentStreakDays = (() => {
@@ -209,11 +234,11 @@ export default function StudentDetails() {
     const today = new Date();
     const keyFor = (d: Date) => dayKey(d.getTime());
     const hasToday = days.has(keyFor(today));
-    const start = new Date(today);
-    if (!hasToday) start.setDate(start.getDate() - 1);
-    if (!days.has(keyFor(start))) return 0;
-    let streak = 0;
-    const cursor = new Date(start);
+    // streak counts today + each previous consecutive day with a logged workout
+    let streak = hasToday ? 1 : 0;
+    const cursor = new Date(today);
+    cursor.setDate(cursor.getDate() - 1); // start from yesterday
+    if (!hasToday && !days.has(keyFor(cursor))) return 0;
     while (days.has(keyFor(cursor))) {
       streak += 1;
       cursor.setDate(cursor.getDate() - 1);

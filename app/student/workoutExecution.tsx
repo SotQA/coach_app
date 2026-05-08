@@ -28,6 +28,7 @@ import { Typography } from "../../theme/typography";
 import { ScreenLayout } from "../../components/ScreenLayout";
 import { RestTimerBar } from "../../components/RestTimerBar";
 import { formatElapsedForTimer, parseRestSeconds } from "../../utils/workoutDuration";
+import { logger } from "../../utils/logger";
 
 // ─── Local draft types (mirror ActiveSetDraft, using `done` for UI clarity) ──
 type SetDraft = { weight: string; reps: string; rpe: string; done: boolean };
@@ -133,8 +134,9 @@ export default function WorkoutExecution() {
   // ── Load plan & prior logs ────────────────────────────────────────────────
   useEffect(() => {
     sessionInitRef.current = false;
+    let active = true;
 
-    const load = async () => {
+    (async () => {
       setLoading(true);
       setError(null);
       setMessage(null);
@@ -142,15 +144,16 @@ export default function WorkoutExecution() {
 
       try {
         if (!workoutPlanId) {
-          setError("Missing workoutPlanId.");
+          if (active) setError("Missing workoutPlanId.");
           return;
         }
         if (!authUserId || authUserRole !== "student") {
-          setError("You must be logged in as a student.");
+          if (active) setError("You must be logged in as a student.");
           return;
         }
 
         const loaded = await workoutService.getWorkoutPlanById(workoutPlanId);
+        if (!active) return;
         if (!loaded) {
           setError("Workout plan not found.");
           return;
@@ -161,16 +164,19 @@ export default function WorkoutExecution() {
         }
 
         const history = await workoutService.getWorkoutHistory(authUserId);
+        if (!active) return;
         setPriorLogs(Array.isArray(history) ? history : []);
         setPlan(loaded);
       } catch (e: any) {
+        if (!active) return;
+        logger.error("[workoutExecution] load failed", e);
         setError(e.message ?? "Failed to load workout plan.");
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
-    };
+    })();
 
-    load();
+    return () => { active = false; };
   }, [workoutPlanId, authUserId, authUserRole]);
 
   // ── Session init: restore existing session or start a fresh one ──────────
@@ -222,6 +228,17 @@ export default function WorkoutExecution() {
 
   // ── Set update: keeps local UI state + context in sync ───────────────────
   const updateSet = (exIdx: number, setIdx: number, patch: Partial<SetDraft>) => {
+    const exercise = planRef.current?.exercises?.[exIdx];
+    if (!exercise) {
+      logger.warn("[workoutExecution] missing exercise at idx", exIdx);
+      return;
+    }
+    const draftsForEx = draftsRef.current[exIdx];
+    if (!draftsForEx || draftsForEx.sets?.[setIdx] === undefined) {
+      logger.warn("[workoutExecution] missing set at idx", { exIdx, setIdx });
+      return;
+    }
+
     // Sync to global context for persistence.
     activeWorkout.updateSet(exIdx, setIdx, {
       ...(patch.weight !== undefined ? { weight: patch.weight } : {}),
@@ -231,8 +248,7 @@ export default function WorkoutExecution() {
     });
 
     // Auto-start rest timer when a set is marked as completed.
-    if (patch.done === true && planRef.current) {
-      const exercise = planRef.current.exercises[exIdx];
+    if (patch.done === true) {
       const restSecs = parseRestSeconds(exercise?.rest);
       if (restSecs && restSecs > 0) {
         activeWorkout.startRestTimer(restSecs);
@@ -685,7 +701,8 @@ export default function WorkoutExecution() {
                           const next = getNextSetFocus(exIdx, setIdx, plan);
                           if (next) {
                             setTimeout(() => {
-                              inputRefs.current?.[next.ex]?.[next.set]?.weight?.focus?.();
+                              const ref = inputRefs.current?.[next.ex]?.[next.set];
+                              if (ref?.weight) ref.weight.focus();
                             }, 80);
                           }
                         }

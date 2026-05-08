@@ -19,6 +19,7 @@ import { formatDurationForHistory } from "../../utils/workoutDuration";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { EmptyState } from "../../components/EmptyState";
 import { Colors } from "../../theme/colors";
+import { logger } from "../../utils/logger";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
 import { ScreenLayout } from "../../components/ScreenLayout";
@@ -50,8 +51,13 @@ function toMs(value: unknown): number {
   }
   if (value instanceof Date) return value.getTime();
   if (typeof (value as { toDate?: () => Date })?.toDate === "function") {
-    const d = (value as { toDate: () => Date }).toDate();
-    return d instanceof Date ? d.getTime() : 0;
+    try {
+      const d = (value as { toDate: () => Date }).toDate();
+      return d instanceof Date ? d.getTime() : 0;
+    } catch (e) {
+      logger.warn("[workoutHistory] toMs failed", e, value);
+      return 0;
+    }
   }
   return 0;
 }
@@ -166,29 +172,28 @@ export default function WorkoutHistory() {
   }, [user]);
 
   useEffect(() => {
-    let cancelled = false;
+    let active = true;
     (async () => {
       setLoading(true);
       try {
         setError(null);
         if (!user || user.role !== "student") {
-          setError("You must be logged in as a student.");
+          if (active) setError("You must be logged in as a student.");
           return;
         }
-        await load();
+        const history = await workoutService.getWorkoutHistory(user.id);
+        if (!active) return;
+        setLogs(Array.isArray(history) ? history : []);
       } catch (e: unknown) {
-        if (!cancelled) {
-          const msg = e instanceof Error ? e.message : "Failed to load workout history.";
-          setError(msg);
-        }
+        if (!active) return;
+        const msg = e instanceof Error ? e.message : "Failed to load workout history.";
+        setError(msg);
       } finally {
-        if (!cancelled) setLoading(false);
+        if (active) setLoading(false);
       }
     })();
-    return () => {
-      cancelled = true;
-    };
-  }, [user?.id, user?.role, load]);
+    return () => { active = false; };
+  }, [user?.id, user?.role]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);

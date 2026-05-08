@@ -15,8 +15,12 @@ import {
   cancelRestNotification,
   scheduleRestNotification,
 } from "../services/notificationService";
+import { logger } from "../utils/logger";
 
-const STORAGE_KEY = "activeWorkoutSession";
+const STORAGE_KEY = "activeWorkoutSession.v2";
+
+// One-time best-effort cleanup of the legacy v1 key.
+AsyncStorage.removeItem("activeWorkoutSession").catch(() => {});
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -105,7 +109,7 @@ async function persist(session: ActiveWorkoutSession | null): Promise<void> {
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(session));
     }
   } catch (e) {
-    console.warn("[ActiveWorkout] persist failed:", e);
+    logger.warn("[ActiveWorkout] persist failed:", e);
   }
 }
 
@@ -113,18 +117,29 @@ async function hydrate(): Promise<ActiveWorkoutSession | null> {
   try {
     const raw = await AsyncStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as Partial<ActiveWorkoutSession>;
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(raw);
+    } catch (e) {
+      logger.warn("[ActiveWorkout] corrupt session blob, clearing", e);
+      await AsyncStorage.removeItem(STORAGE_KEY);
+      return null;
+    }
     if (
-      !parsed?.sessionId ||
-      !parsed?.workoutPlanId ||
-      !parsed?.studentId ||
-      typeof parsed?.startedAt !== "number"
+      typeof parsed !== "object" ||
+      parsed === null ||
+      typeof (parsed as any).workoutPlanId !== "string" ||
+      !(parsed as any).sessionId ||
+      !(parsed as any).studentId ||
+      typeof (parsed as any).startedAt !== "number"
     ) {
+      logger.warn("[ActiveWorkout] invalid session schema, clearing");
       await AsyncStorage.removeItem(STORAGE_KEY);
       return null;
     }
     return parsed as ActiveWorkoutSession;
-  } catch {
+  } catch (e) {
+    logger.warn("[ActiveWorkout] corrupt session blob, clearing", e);
     try {
       await AsyncStorage.removeItem(STORAGE_KEY);
     } catch {}
@@ -150,6 +165,10 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
 
   const sessionRef = useRef<ActiveWorkoutSession | null>(null);
   sessionRef.current = session;
+
+  // Tracks the most-recently scheduled OS notification ID synchronously so
+  // we can cancel it before scheduling a new one, avoiding double-fire.
+  const pendingRestNotificationIdRef = useRef<string | null>(null);
 
   // ── Hydrate on mount ──────────────────────────────────────────────────────
   useEffect(() => {
@@ -312,7 +331,8 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
 
   const finishSession = useCallback(async () => {
     // Cancel any pending rest notification before clearing the session.
-    const pendingId = sessionRef.current?.restTimer?.notificationId;
+    const pendingId = pendingRestNotificationIdRef.current ?? sessionRef.current?.restTimer?.notificationId;
+    pendingRestNotificationIdRef.current = null;
     await cancelRestNotification(pendingId);
 
     setSession(null);
@@ -327,9 +347,11 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
     if (durationSeconds <= 0) return;
     if (!sessionRef.current) return;
 
-    // Cancel any previously scheduled notification before starting a new one.
-    const previousId = sessionRef.current.restTimer?.notificationId;
-    if (previousId) cancelRestNotification(previousId);
+    // Cancel any previously pending notification via the ref (synchronous, no race).
+    if (pendingRestNotificationIdRef.current) {
+      cancelRestNotification(pendingRestNotificationIdRef.current);
+      pendingRestNotificationIdRef.current = null;
+    }
 
     // Build the timer state immediately (timer starts at this exact instant).
     const startedAt = Date.now();
@@ -361,11 +383,13 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
       workoutName,
     }).then((notificationId) => {
       if (!notificationId) return;
+      pendingRestNotificationIdRef.current = notificationId;
       setSession((prev) => {
         // Only store the ID if the same timer is still running.
         if (!prev?.restTimer?.isActive || prev.restTimer.startedAt !== startedAt) {
           // Timer was already skipped or replaced — cancel the just-scheduled notif.
           cancelRestNotification(notificationId);
+          pendingRestNotificationIdRef.current = null;
           return prev;
         }
         const updated: ActiveWorkoutSession = {
@@ -379,8 +403,9 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const skipRestTimer = useCallback(() => {
-    const pendingId = sessionRef.current?.restTimer?.notificationId;
+    const pendingId = pendingRestNotificationIdRef.current ?? sessionRef.current?.restTimer?.notificationId;
     cancelRestNotification(pendingId);
+    pendingRestNotificationIdRef.current = null;
 
     setRestSecondsRemaining(0);
     setSession((prev) => {
@@ -398,7 +423,8 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
     const remaining = Math.max(0, rt.durationSeconds - (Date.now() - rt.startedAt) / 1000);
 
     // Cancel the OS notification — it will be rescheduled for `remaining` seconds on resume.
-    cancelRestNotification(rt.notificationId);
+    cancelRestNotification(pendingRestNotificationIdRef.current ?? rt.notificationId);
+    pendingRestNotificationIdRef.current = null;
 
     setRestSecondsRemaining(remaining);
     setSession((prev) => {
@@ -452,9 +478,11 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
         workoutName: s.workoutName,
       }).then((notificationId) => {
         if (!notificationId) return;
+        pendingRestNotificationIdRef.current = notificationId;
         setSession((prev) => {
           if (!prev?.restTimer?.isActive || prev.restTimer.isPaused) {
             cancelRestNotification(notificationId);
+            pendingRestNotificationIdRef.current = null;
             return prev;
           }
           const updated: ActiveWorkoutSession = {

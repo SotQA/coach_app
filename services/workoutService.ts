@@ -54,6 +54,8 @@ function sanitizeForFirestore<T>(value: T): T {
   return value;
 }
 
+import { logger } from "../utils/logger";
+
 const assertNonEmpty = (value: string, label: string) => {
   if (!value || !value.trim()) throw new Error(`Missing ${label}.`);
   if (value.includes("@")) {
@@ -69,8 +71,13 @@ const toMs = (value: any): number => {
   }
   if (value instanceof Date) return value.getTime();
   if (typeof value?.toDate === "function") {
-    const d = value.toDate();
-    return d instanceof Date ? d.getTime() : 0;
+    try {
+      const d = value.toDate();
+      return d instanceof Date ? d.getTime() : 0;
+    } catch (e) {
+      logger.warn("[workoutService] toMs failed", e, value);
+      return 0;
+    }
   }
   return 0;
 };

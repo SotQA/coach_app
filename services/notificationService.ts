@@ -1,5 +1,6 @@
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
+import { logger } from "../utils/logger";
 
 // ─── Channel (Android 8+) ────────────────────────────────────────────────────
 
@@ -85,6 +86,11 @@ export interface ScheduleRestOptions {
 export async function scheduleRestNotification(
   opts: ScheduleRestOptions
 ): Promise<string | null> {
+  const { status } = await Notifications.getPermissionsAsync();
+  if (status !== "granted") {
+    logger.warn("[notifications] skipping schedule — permission not granted", { status });
+    return null;
+  }
   const delay = Math.max(1, Math.round(opts.delaySeconds));
   try {
     const id = await Notifications.scheduleNotificationAsync({

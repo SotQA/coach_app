@@ -26,6 +26,7 @@ import { formatElapsedForTimer } from "../../../utils/workoutDuration";
 import { FLOATING_BAR_SCROLL_OFFSET } from "../../../components/FloatingWorkoutBar";
 import { formatDateShort } from "../../../utils/formatLocale";
 import type { SupportedLocale } from "../../../context/I18nContext";
+import { logger } from "../../../utils/logger";
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -37,8 +38,13 @@ function toMs(value: unknown): number {
   }
   if (value instanceof Date) return value.getTime();
   if (typeof (value as { toDate?: () => Date })?.toDate === "function") {
-    const d = (value as { toDate: () => Date }).toDate();
-    return d instanceof Date ? d.getTime() : 0;
+    try {
+      const d = (value as { toDate: () => Date }).toDate();
+      return d instanceof Date ? d.getTime() : 0;
+    } catch (e) {
+      logger.warn("[workouts] toMs failed", e, value);
+      return 0;
+    }
   }
   return 0;
 }

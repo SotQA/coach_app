@@ -17,6 +17,7 @@ import {
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "../firebase/firebaseConfig";
 import type { AppUser, UserRole, Sex } from "../types/User";
+import { logger } from "../utils/logger";
 
 type AuthContextValue = {
   user: AppUser | null;
@@ -44,15 +45,30 @@ const normalizeSex = (value: any): Sex => {
   return "other";
 };
 
-const mapToAppUser = (user: User, data: any): AppUser => ({
-  id: user.uid,
-  email: data?.email ?? user.email ?? "",
-  role: data?.role as AppUser["role"],
-  firstName: data?.firstName ?? "",
-  lastName: data?.lastName ?? "",
-  dateOfBirth: data?.dateOfBirth ?? "",
-  sex: normalizeSex(data?.sex),
-});
+const VALID_ROLES = ["coach", "student"] as const;
+
+function asValidRole(v: unknown): AppUser["role"] | null {
+  return typeof v === "string" && (VALID_ROLES as readonly string[]).includes(v)
+    ? (v as AppUser["role"])
+    : null;
+}
+
+const mapToAppUser = (user: User, data: any): AppUser | null => {
+  const role = asValidRole(data?.role);
+  if (!role) {
+    logger.error("[auth] invalid role on user doc", { uid: user.uid, role: data?.role });
+    return null;
+  }
+  return {
+    id: user.uid,
+    email: data?.email ?? user.email ?? "",
+    role,
+    firstName: data?.firstName ?? "",
+    lastName: data?.lastName ?? "",
+    dateOfBirth: data?.dateOfBirth ?? "",
+    sex: normalizeSex(data?.sex),
+  };
+};
 
 const splitDisplayName = (displayName: string | null | undefined) => {
   const raw = (displayName ?? "").trim();
@@ -86,7 +102,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         const data = snap.data() as any;
-        setUser(mapToAppUser(firebaseUser, data));
+        const appUser = mapToAppUser(firebaseUser, data);
+        if (!appUser) {
+          await signOut(auth);
+          setUser(null);
+          return;
+        }
+        setUser(appUser);
       } catch (e) {
         console.error("[AuthProvider] Failed to resolve user role", e);
         setUser(null);
@@ -110,7 +132,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error("User profile not found.");
     }
     const data = snap.data() as any;
-    return mapToAppUser(firebaseUser, data);
+    const appUser = mapToAppUser(firebaseUser, data);
+    if (!appUser) {
+      await signOut(auth);
+      throw new Error("User account has an invalid role. Please contact support.");
+    }
+    return appUser;
   };
 
   const loginWithGoogleIdToken = async ({ idToken }: { idToken: string }): Promise<AppUser> => {
@@ -151,7 +178,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     const data = latest.data() as any;
-    return mapToAppUser(firebaseUser, data);
+    const appUser = mapToAppUser(firebaseUser, data);
+    if (!appUser) {
+      await signOut(auth);
+      throw new Error("User account has an invalid role. Please contact support.");
+    }
+    return appUser;
   };
 
   const signup = async (
@@ -178,7 +210,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       createdAt,
     });
 
-    return mapToAppUser(firebaseUser, {
+    const appUser = mapToAppUser(firebaseUser, {
       email: normalizedEmail,
       role,
       firstName,
@@ -187,6 +219,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       sex,
       createdAt,
     });
+    if (!appUser) throw new Error("Signup produced an invalid role. Please contact support.");
+    return appUser;
   };
 
   const logout = async () => {

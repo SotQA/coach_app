@@ -15,6 +15,7 @@ import { Colors } from "../theme/colors";
 import { Radius, Spacing } from "../theme/spacing";
 import { Typography } from "../theme/typography";
 import { exerciseTemplateService, type ExerciseTemplate } from "../services/exerciseTemplateService";
+import { logger } from "../utils/logger";
 
 const CATEGORIES = [
   "Chest",
@@ -43,8 +44,13 @@ const toMs = (v: any): number => {
   }
   if (v instanceof Date) return v.getTime();
   if (typeof v?.toDate === "function") {
-    const d = v.toDate();
-    return d instanceof Date ? d.getTime() : 0;
+    try {
+      const d = v.toDate();
+      return d instanceof Date ? d.getTime() : 0;
+    } catch (e) {
+      logger.warn("[ExerciseLibraryModal] toMs failed", e, v);
+      return 0;
+    }
   }
   return 0;
 };
