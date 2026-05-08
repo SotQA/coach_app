@@ -12,7 +12,10 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.sergey.gymcoachapp",
-      "backgroundColor": "#000000"
+      "backgroundColor": "#000000",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -54,11 +57,16 @@
     "extra": {
       "googleWebClientId": "915193499412-v3qiq1jcq8kfpqo29os02scvujdqpgu3.apps.googleusercontent.com",
       "googleAndroidClientId": "",
-      "googleIosClientId": "915193499412-ghogd0kh7abhlhmo75vu7j9nptp5qb04.apps.googleusercontent.com"
+      "googleIosClientId": "915193499412-ghogd0kh7abhlhmo75vu7j9nptp5qb04.apps.googleusercontent.com",
+      "router": {},
+      "eas": {
+        "projectId": "1b422a1c-9bd3-4db2-bcac-e661256c018e"
+      }
     },
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "owner": "sot_qa"
   }
 }
