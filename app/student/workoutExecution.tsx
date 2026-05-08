@@ -228,6 +228,17 @@ export default function WorkoutExecution() {
 
   // ── Set update: keeps local UI state + context in sync ───────────────────
   const updateSet = (exIdx: number, setIdx: number, patch: Partial<SetDraft>) => {
+    const exercise = planRef.current?.exercises?.[exIdx];
+    if (!exercise) {
+      logger.warn("[workoutExecution] missing exercise at idx", exIdx);
+      return;
+    }
+    const draftsForEx = draftsRef.current[exIdx];
+    if (!draftsForEx || draftsForEx.sets?.[setIdx] === undefined) {
+      logger.warn("[workoutExecution] missing set at idx", { exIdx, setIdx });
+      return;
+    }
+
     // Sync to global context for persistence.
     activeWorkout.updateSet(exIdx, setIdx, {
       ...(patch.weight !== undefined ? { weight: patch.weight } : {}),
@@ -237,8 +248,7 @@ export default function WorkoutExecution() {
     });
 
     // Auto-start rest timer when a set is marked as completed.
-    if (patch.done === true && planRef.current) {
-      const exercise = planRef.current.exercises[exIdx];
+    if (patch.done === true) {
       const restSecs = parseRestSeconds(exercise?.rest);
       if (restSecs && restSecs > 0) {
         activeWorkout.startRestTimer(restSecs);
@@ -691,7 +701,8 @@ export default function WorkoutExecution() {
                           const next = getNextSetFocus(exIdx, setIdx, plan);
                           if (next) {
                             setTimeout(() => {
-                              inputRefs.current?.[next.ex]?.[next.set]?.weight?.focus?.();
+                              const ref = inputRefs.current?.[next.ex]?.[next.set];
+                              if (ref?.weight) ref.weight.focus();
                             }, 80);
                           }
                         }
