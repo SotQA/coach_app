@@ -28,38 +28,9 @@ import { formatDateShort } from "../../../utils/formatLocale";
 import type { SupportedLocale } from "../../../context/I18nContext";
 import { logger } from "../../../utils/logger";
 import { toMs } from "../../../utils/dateConvert";
+import { dayKeyFromMs, startOfWeekMonday, isInCurrentWeek, isInCurrentMonth } from "../../../utils/dateRanges";
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
-
-function dayKeyFromMs(ms: number): string {
-  const d = new Date(ms);
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
-
-function startOfWeekMonday(d: Date): Date {
-  const x = new Date(d);
-  x.setHours(0, 0, 0, 0);
-  const day = x.getDay();
-  const diff = day === 0 ? -6 : 1 - day;
-  x.setDate(x.getDate() + diff);
-  return x;
-}
-
-function isInCurrentWeek(ms: number): boolean {
-  if (!ms) return false;
-  const start = startOfWeekMonday(new Date()).getTime();
-  return ms >= start && ms < start + WEEK_MS;
-}
-
-function isInCurrentMonth(ms: number): boolean {
-  if (!ms) return false;
-  const now = new Date();
-  const d = new Date(ms);
-  return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
-}
 
 function formatRelativeDone(
   ms: number,

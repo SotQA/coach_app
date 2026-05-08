@@ -17,6 +17,7 @@ import { ScreenLayout } from "../../components/ScreenLayout";
 import type { TrainingGroup } from "../../types/TrainingGroup";
 import { logger } from "@/utils/logger";
 import { toMs } from "@/utils/dateConvert";
+import { dayKeyFromMs } from "@/utils/dateRanges";
 
 export default function StudentDetails() {
   const router = useRouter();
@@ -201,20 +202,13 @@ export default function StudentDetails() {
 
   const currentStreakDays = (() => {
     if (logs.length === 0) return 0;
-    const dayKey = (ms: number) => {
-      const d = new Date(ms);
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, "0");
-      const dd = String(d.getDate()).padStart(2, "0");
-      return `${y}-${m}-${dd}`;
-    };
     const days = new Set<string>();
     for (const l of logs) {
       const ms = toMs((l as any).completedAt ?? (l as any).date);
-      if (ms > 0) days.add(dayKey(ms));
+      if (ms > 0) days.add(dayKeyFromMs(ms));
     }
     const today = new Date();
-    const keyFor = (d: Date) => dayKey(d.getTime());
+    const keyFor = (d: Date) => dayKeyFromMs(d.getTime());
     const hasToday = days.has(keyFor(today));
     // streak counts today + each previous consecutive day with a logged workout
     let streak = hasToday ? 1 : 0;

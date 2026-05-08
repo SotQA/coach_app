@@ -21,6 +21,7 @@ import { EmptyState } from "../../components/EmptyState";
 import { Colors } from "../../theme/colors";
 import { logger } from "../../utils/logger";
 import { toMs } from "../../utils/dateConvert";
+import { dayKeyFromMs, dayKeyFromDate, startOfMonth, addMonths, isSameMonth, mondayIndexFromDate } from "../../utils/dateRanges";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
 import { ScreenLayout } from "../../components/ScreenLayout";
@@ -43,18 +44,6 @@ const CHIP_ORDER: { key: WorkoutCategory; label: string }[] = [
   { key: "mobility", label: "Mobility" },
   { key: "other", label: "Other" },
 ];
-
-function dayKeyFromMs(ms: number): string {
-  const d = new Date(ms);
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
-
-function dayKeyFromDate(d: Date): string {
-  return dayKeyFromMs(d.getTime());
-}
 
 function categorizeWorkoutName(name: string): Exclude<WorkoutCategory, "all"> {
   const n = name.toLowerCase();
@@ -90,22 +79,6 @@ function formatVolumeCompact(kg: number): string {
   return `${Math.round(kg)} kg`;
 }
 
-function startOfMonth(d: Date): Date {
-  return new Date(d.getFullYear(), d.getMonth(), 1);
-}
-
-function addMonths(d: Date, delta: number): Date {
-  return new Date(d.getFullYear(), d.getMonth() + delta, 1);
-}
-
-function isSameMonth(a: Date, b: Date): boolean {
-  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth();
-}
-
-/** Monday = 0 … Sunday = 6 */
-function mondayIndexFromDate(d: Date): number {
-  return (d.getDay() + 6) % 7;
-}
 
 export default function WorkoutHistory() {
   const router = useRouter();
