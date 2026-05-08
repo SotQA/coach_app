@@ -14,7 +14,14 @@
       "bundleIdentifier": "com.sergey.gymcoachapp",
       "backgroundColor": "#000000",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLSchemes": [
+              "com.googleusercontent.apps.915193499412-ghogd0kh7abhlhmo75vu7j9nptp5qb04"
+            ]
+          }
+        ]
       }
     },
     "android": {
@@ -55,7 +62,7 @@
       ]
     ],
     "extra": {
-      "googleWebClientId": "915193499412-v3qiq1jcq8kfpqo29os02scvujdqpgu3.apps.googleusercontent.com",
+      "googleWebClientId": "915193499412-nee8iipn919on2ir7eoj8e5a06mvov5p.apps.googleusercontent.com",
       "googleAndroidClientId": "",
       "googleIosClientId": "915193499412-ghogd0kh7abhlhmo75vu7j9nptp5qb04.apps.googleusercontent.com",
       "router": {},
