@@ -190,7 +190,7 @@ export function ExerciseCard({
         <View style={{ padding: Spacing.md, paddingTop: 0 }}>
           <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Exercise Name</Text>
           <TextInput
-            ref={(r) => (nameRef.current = r)}
+            ref={(r) => { nameRef.current = r; }}
             autoFocus={autoFocusName === true}
             placeholder="Bench Press"
             placeholderTextColor={Colors.textMuted}

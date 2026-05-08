@@ -185,7 +185,6 @@ export default function CoachStudents() {
               autoCapitalize="none"
               style={{
                 flex: 1,
-                color: Colors.text,
                 ...Typography.section,
                 fontWeight: "600",
                 paddingVertical: 0,
