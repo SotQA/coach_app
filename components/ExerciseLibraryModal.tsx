@@ -131,7 +131,7 @@ export function ExerciseLibraryModal({ visible, coachId, onClose, onAddExercise 
               style={({ pressed }) => ({
                 width: 40,
                 height: 40,
-                borderRadius: 20,
+                borderRadius: Radius.lg,
                 alignItems: "center",
                 justifyContent: "center",
                 backgroundColor: Colors.card,
@@ -449,4 +449,5 @@ export function ExerciseLibraryModal({ visible, coachId, onClose, onAddExercise 
     </Modal>
   );
 }
+
 

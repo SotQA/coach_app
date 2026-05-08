@@ -12,7 +12,7 @@ import { PrimaryButton } from "../../components/PrimaryButton";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
-import { Typography } from "../../theme/typography";
+import { Typography, FontSizes } from "../../theme/typography";
 import { ScreenLayout } from "../../components/ScreenLayout";
 
 // Screen used by the coach to create a new student record
@@ -57,7 +57,7 @@ export default function CreateStudent() {
         contentContainerStyle={{
           flexGrow: 1,
           padding: Spacing.md,
-          paddingBottom: 48,
+          paddingBottom: Spacing.screenBottom,
           backgroundColor: Colors.bg,
         }}
         // Prevent iOS bounce/overscroll revealing white during swipe-back.
@@ -83,7 +83,7 @@ export default function CreateStudent() {
           <Text
             style={{
               ...Typography.title,
-              fontSize: 22,
+              fontSize: FontSizes.h3,
               marginBottom: Spacing.xs,
             }}
           >
@@ -136,4 +136,6 @@ export default function CreateStudent() {
     </ScreenLayout>
   );
 }
+
+
 

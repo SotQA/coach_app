@@ -11,7 +11,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useI18n } from "../../context/I18nContext";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
-import { Typography } from "../../theme/typography";
+import { Typography, FontSizes } from "../../theme/typography";
 import { Ionicons } from "@expo/vector-icons";
 import { logger } from "@/utils/logger";
 
@@ -142,7 +142,7 @@ export default function Login() {
         flexGrow: 1,
         justifyContent: "center",
         padding: Spacing.lg,
-        paddingBottom: 48,
+        paddingBottom: Spacing.screenBottom,
       }}
       keyboardShouldPersistTaps="handled"
       enableOnAndroid
@@ -235,12 +235,12 @@ export default function Login() {
               )}
             </Pressable>
             {isExpoGo ? (
-              <Text style={{ ...Typography.secondary, marginTop: Spacing.xs, fontSize: 12 }}>
+              <Text style={{ ...Typography.secondary, marginTop: Spacing.xs, fontSize: FontSizes.caption }}>
                 Google sign-in requires a dev build (Expo Go cannot register the redirect URI Google accepts).
               </Text>
             ) : null}
             {!isExpoGo && Platform.OS === "android" && !googleAndroidClientId ? (
-              <Text style={{ ...Typography.secondary, marginTop: Spacing.xs, fontSize: 12 }}>
+              <Text style={{ ...Typography.secondary, marginTop: Spacing.xs, fontSize: FontSizes.caption }}>
                 Add an Android OAuth client ID in app.json to use Google on Android.
               </Text>
             ) : null}
@@ -259,3 +259,5 @@ export default function Login() {
     </KeyboardAwareScrollView>
   );
 }
+
+

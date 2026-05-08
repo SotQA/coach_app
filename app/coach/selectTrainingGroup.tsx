@@ -8,7 +8,7 @@ import { PrimaryButton } from "../../components/PrimaryButton";
 import { ScreenLayout } from "../../components/ScreenLayout";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
-import { Typography } from "../../theme/typography";
+import { Typography, FontSizes } from "../../theme/typography";
 import { Swipeable } from "react-native-gesture-handler";
 
 export default function SelectTrainingGroup() {
@@ -63,7 +63,7 @@ export default function SelectTrainingGroup() {
         style={{ flex: 1, backgroundColor: Colors.bg }}
         contentContainerStyle={{ padding: Spacing.md, paddingBottom: Spacing.lg, paddingTop: Spacing.lg }}
       >
-        <Text style={{ ...Typography.title, fontSize: 26, marginBottom: 6 }}>Select Training Group</Text>
+        <Text style={{ ...Typography.title, fontSize: FontSizes.h2, marginBottom: 6 }}>Select Training Group</Text>
         <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: Spacing.md }}>
           For: {studentName}
         </Text>
@@ -231,4 +231,6 @@ export default function SelectTrainingGroup() {
     </ScreenLayout>
   );
 }
+
+
 

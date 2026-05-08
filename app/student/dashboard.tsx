@@ -9,7 +9,7 @@ import { WorkoutCard } from "../../components/WorkoutCard";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
-import { Typography } from "../../theme/typography";
+import { Typography, FontSizes } from "../../theme/typography";
 import { ScreenLayout } from "../../components/ScreenLayout";
 import { logger } from "@/utils/logger";
 
@@ -89,7 +89,7 @@ export default function StudentDashboard() {
         <Text
           style={{
             ...Typography.title,
-            fontSize: 22,
+            fontSize: FontSizes.h3,
             marginBottom: Spacing.sm,
           }}
         >
@@ -144,4 +144,6 @@ export default function StudentDashboard() {
     </ScreenLayout>
   );
 }
+
+
 

@@ -4,7 +4,7 @@ import type { StudentSummary } from "../../types/StudentSummary";
 import type { WorkoutLog } from "../../types/Workout";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
-import { Typography } from "../../theme/typography";
+import { Typography, FontSizes } from "../../theme/typography";
 import { ScreenLayout } from "../ScreenLayout";
 import { normalizeExerciseName } from "../../utils/workoutMetrics";
 import {
@@ -184,7 +184,7 @@ export function ProgressAnalyticsView({
             backgroundColor: Colors.bg,
           }}
         >
-          <Text style={{ ...Typography.title, fontSize: 22, marginBottom: Spacing.sm }}>{screenTitle}</Text>
+          <Text style={{ ...Typography.title, fontSize: FontSizes.h3, marginBottom: Spacing.sm }}>{screenTitle}</Text>
           {variant === "student" ? (
             <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: Spacing.sm }}>
               Your volume, strength trends, and exercise insights.
@@ -213,7 +213,7 @@ export function ProgressAnalyticsView({
                           borderColor: sel ? Colors.primary : Colors.border,
                         }}
                       >
-                        <Text style={{ ...Typography.section, fontSize: 13, fontWeight: sel ? "800" : "600" }}>
+                        <Text style={{ ...Typography.section, fontSize: FontSizes.note, fontWeight: sel ? "800" : "600" }}>
                           {studentLabel(s)}
                         </Text>
                       </Pressable>
@@ -242,7 +242,7 @@ export function ProgressAnalyticsView({
                 borderColor: exerciseAll ? Colors.primary : Colors.border,
               }}
             >
-              <Text style={{ fontWeight: exerciseAll ? "800" : "600", color: Colors.text, fontSize: 13 }}>All exercises</Text>
+              <Text style={{ fontWeight: exerciseAll ? "800" : "600", color: Colors.text, fontSize: FontSizes.note }}>All exercises</Text>
             </Pressable>
             {exerciseNames.map((name) => {
               const sel = !exerciseAll && exerciseName === name;
@@ -263,7 +263,7 @@ export function ProgressAnalyticsView({
                     maxWidth: 200,
                   }}
                 >
-                  <Text numberOfLines={1} style={{ fontWeight: sel ? "800" : "600", color: Colors.text, fontSize: 13 }}>
+                  <Text numberOfLines={1} style={{ fontWeight: sel ? "800" : "600", color: Colors.text, fontSize: FontSizes.note }}>
                     {name}
                   </Text>
                 </Pressable>
@@ -288,7 +288,7 @@ export function ProgressAnalyticsView({
                     borderColor: sel ? Colors.primary : Colors.border,
                   }}
                 >
-                  <Text style={{ fontWeight: sel ? "800" : "600", color: Colors.text, fontSize: 13 }}>{p.label}</Text>
+                  <Text style={{ fontWeight: sel ? "800" : "600", color: Colors.text, fontSize: FontSizes.note }}>{p.label}</Text>
                 </Pressable>
               );
             })}
@@ -379,7 +379,7 @@ export function ProgressAnalyticsView({
                 }}
               >
                 <Text style={{ ...Typography.section, marginBottom: Spacing.sm }}>1RM progression</Text>
-                <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: Spacing.sm, fontSize: 12 }}>
+                <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: Spacing.sm, fontSize: FontSizes.caption }}>
                   Weekly best estimated 1RM{exerciseNorm ? "" : " (best lift each week)"}. PR points highlighted.
                 </Text>
                 {weekly1RM.length === 0 ? (
@@ -400,7 +400,7 @@ export function ProgressAnalyticsView({
                 }}
               >
                 <Text style={{ ...Typography.section, marginBottom: Spacing.sm }}>Volume vs intensity</Text>
-                <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: Spacing.sm, fontSize: 12 }}>
+                <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: Spacing.sm, fontSize: FontSizes.caption }}>
                   Cyan = weekly volume · Lime dashed = avg load (kg)
                 </Text>
                 <DualLineChart data={volLoad} width={chartWidth} />
@@ -487,7 +487,7 @@ export function ProgressAnalyticsView({
                       >
                         <Text
                           style={{
-                            fontSize: 11,
+                            fontSize: FontSizes.tiny,
                             fontWeight: "800",
                             color:
                               s.status === "green" ? Colors.success : s.status === "red" ? Colors.danger : "#FFD60A",
@@ -508,3 +508,5 @@ export function ProgressAnalyticsView({
     </ScreenLayout>
   );
 }
+
+

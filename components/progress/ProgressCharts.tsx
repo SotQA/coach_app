@@ -4,7 +4,7 @@ import Svg, { Polyline, Circle, Line } from "react-native-svg";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
-import { Typography } from "../../theme/typography";
+import { Typography, FontSizes } from "../../theme/typography";
 import type { TimeRangePreset, WeeklyPoint, WeeklyVolLoad } from "../../utils/coachProgressAnalytics";
 
 export const TIME_PRESETS: { key: TimeRangePreset; label: string }[] = [
@@ -169,7 +169,7 @@ export function KpiCard({
       }}
     >
       <Text style={{ ...Typography.secondary, color: Colors.textMuted }}>{label}</Text>
-      <Text style={{ ...Typography.title, fontSize: 22, marginTop: 6 }}>
+      <Text style={{ ...Typography.title, fontSize: FontSizes.h3, marginTop: 6 }}>
         {value}
         {unit ? <Text style={{ ...Typography.secondary, fontSize: 14 }}> {unit}</Text> : null}
       </Text>
@@ -198,3 +198,5 @@ export function KpiCard({
     </View>
   );
 }
+
+

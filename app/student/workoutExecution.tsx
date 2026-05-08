@@ -24,7 +24,7 @@ import {
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
-import { Typography } from "../../theme/typography";
+import { Typography, FontSizes } from "../../theme/typography";
 import { ScreenLayout } from "../../components/ScreenLayout";
 import { RestTimerBar } from "../../components/RestTimerBar";
 import { formatElapsedForTimer, parseRestSeconds } from "../../utils/workoutDuration";
@@ -406,7 +406,7 @@ export default function WorkoutExecution() {
               style={({ pressed }) => ({
                 width: 40,
                 height: 40,
-                borderRadius: 20,
+                borderRadius: Radius.lg,
                 alignItems: "center",
                 justifyContent: "center",
                 backgroundColor: Colors.card,
@@ -441,7 +441,7 @@ export default function WorkoutExecution() {
             </View>
           </View>
 
-          <Text style={{ ...Typography.title, fontSize: 22, marginTop: Spacing.sm }}>{plan.name}</Text>
+          <Text style={{ ...Typography.title, fontSize: FontSizes.h3, marginTop: Spacing.sm }}>{plan.name}</Text>
           <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4 }}>
             {(authUser?.firstName || authUser?.lastName
               ? `${authUser?.firstName ?? ""} ${authUser?.lastName ?? ""}`.trim()
@@ -749,3 +749,5 @@ export default function WorkoutExecution() {
     </ScreenLayout>
   );
 }
+
+

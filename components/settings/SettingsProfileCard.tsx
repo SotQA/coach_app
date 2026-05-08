@@ -1,7 +1,7 @@
 import { ActivityIndicator, Platform, Text, View } from "react-native";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
-import { Typography } from "../../theme/typography";
+import { Typography, FontSizes } from "../../theme/typography";
 import { PrimaryButton } from "../PrimaryButton";
 
 const cardShadow = Platform.select({
@@ -62,10 +62,10 @@ export function SettingsProfileCard({
             justifyContent: "center",
           }}
         >
-          <Text style={{ fontSize: 26, fontWeight: "900", color: Colors.primary }}>{initials}</Text>
+          <Text style={{ fontSize: FontSizes.h2, fontWeight: "900", color: Colors.primary }}>{initials}</Text>
         </View>
         <View style={{ flex: 1, minWidth: 0 }}>
-          <Text style={{ ...Typography.title, fontSize: 22 }} numberOfLines={2}>
+          <Text style={{ ...Typography.title, fontSize: FontSizes.h3 }} numberOfLines={2}>
             {fullName}
           </Text>
           <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4 }} numberOfLines={1}>
@@ -87,3 +87,5 @@ export function SettingsProfileCard({
     </View>
   );
 }
+
+

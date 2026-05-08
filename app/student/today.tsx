@@ -8,7 +8,7 @@ import { workoutService } from "../../services/workoutService";
 import type { WorkoutPlan } from "../../types/Workout";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
-import { Typography } from "../../theme/typography";
+import { Typography, FontSizes } from "../../theme/typography";
 import { ScreenLayout } from "../../components/ScreenLayout";
 import { logger } from "@/utils/logger";
 
@@ -91,7 +91,7 @@ export default function TodayWorkout() {
           <Text
             style={{
               ...Typography.title,
-              fontSize: 22,
+              fontSize: FontSizes.h3,
             }}
           >
             Your Workouts
@@ -144,4 +144,6 @@ export default function TodayWorkout() {
     </ScreenLayout>
   );
 }
+
+
 

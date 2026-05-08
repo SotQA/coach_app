@@ -7,7 +7,7 @@ import { useI18n } from "../context/I18nContext";
 import { formatElapsedForTimer } from "../utils/workoutDuration";
 import { Colors } from "../theme/colors";
 import { Radius } from "../theme/spacing";
-import { Typography } from "../theme/typography";
+import { Typography, FontSizes } from "../theme/typography";
 
 /** Height of the floating bar itself (not including bottom offset). */
 export const FLOATING_BAR_HEIGHT = 58;
@@ -104,7 +104,7 @@ export function FloatingWorkoutBar() {
                 ...Typography.section,
                 color: Colors.onPrimary,
                 fontWeight: "800",
-                fontSize: 13,
+                fontSize: FontSizes.note,
               }}
               numberOfLines={1}
             >
@@ -115,7 +115,7 @@ export function FloatingWorkoutBar() {
                 ...Typography.secondary,
                 color: Colors.onPrimary,
                 opacity: 0.8,
-                fontSize: 12,
+                fontSize: FontSizes.caption,
                 marginTop: 1,
               }}
             >
@@ -129,7 +129,7 @@ export function FloatingWorkoutBar() {
                 ...Typography.section,
                 color: Colors.onPrimary,
                 fontWeight: "800",
-                fontSize: 13,
+                fontSize: FontSizes.note,
               }}
               numberOfLines={1}
             >
@@ -140,7 +140,7 @@ export function FloatingWorkoutBar() {
                 ...Typography.secondary,
                 color: Colors.onPrimary,
                 opacity: 0.75,
-                fontSize: 12,
+                fontSize: FontSizes.caption,
                 marginTop: 1,
               }}
             >
@@ -167,7 +167,7 @@ export function FloatingWorkoutBar() {
             color: Colors.onPrimary,
             fontWeight: "700",
             fontVariant: ["tabular-nums"],
-            fontSize: 13,
+            fontSize: FontSizes.note,
           }}
         >
           {restActive
@@ -180,3 +180,5 @@ export function FloatingWorkoutBar() {
     </Pressable>
   );
 }
+
+

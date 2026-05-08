@@ -12,7 +12,7 @@ import { formatDurationForHistory } from "../../utils/workoutDuration";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
-import { Typography } from "../../theme/typography";
+import { Typography, FontSizes } from "../../theme/typography";
 import { ScreenLayout } from "../../components/ScreenLayout";
 import type { TrainingGroup } from "../../types/TrainingGroup";
 import { logger } from "@/utils/logger";
@@ -251,7 +251,7 @@ export default function StudentDetails() {
       <Text style={{ ...Typography.secondary, color: Colors.textMuted, textAlign: "center", width: "100%" }}>
         {label}
       </Text>
-      <Text style={{ ...Typography.title, fontSize: 22, marginTop: 6, textAlign: "center", width: "100%" }}>
+      <Text style={{ ...Typography.title, fontSize: FontSizes.h3, marginTop: 6, textAlign: "center", width: "100%" }}>
         {value}
       </Text>
     </View>
@@ -382,7 +382,7 @@ export default function StudentDetails() {
         numberOfLines={3}
         style={{
           ...Typography.section,
-          fontSize: 13,
+          fontSize: FontSizes.note,
           lineHeight: 16,
           fontWeight: variant === "primary" ? "800" : "700",
           color: variant === "primary" ? Colors.onPrimary : Colors.text,
@@ -415,7 +415,7 @@ export default function StudentDetails() {
               style={({ pressed }) => ({
                 width: 40,
                 height: 40,
-                borderRadius: 20,
+                borderRadius: Radius.lg,
                 alignItems: "center",
                 justifyContent: "center",
                 backgroundColor: Colors.card,
@@ -455,7 +455,7 @@ export default function StudentDetails() {
                   justifyContent: "center",
                 }}
               >
-                <Text style={{ ...Typography.section, fontSize: 22, fontWeight: "900" }}>{initials}</Text>
+                <Text style={{ ...Typography.section, fontSize: FontSizes.h3, fontWeight: "900" }}>{initials}</Text>
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={{ ...Typography.title, fontSize: 24 }}>{displayName}</Text>
@@ -627,7 +627,7 @@ export default function StudentDetails() {
               <>
                 <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: Spacing.md }}>
                   <View style={{ flex: 1, minWidth: 0 }}>
-                    <Text style={{ ...Typography.title, fontSize: 18 }}>{latestGroup.name}</Text>
+                    <Text style={{ ...Typography.title, fontSize: FontSizes.subheading }}>{latestGroup.name}</Text>
                     <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4 }}>
                       {latestGroup.workoutsPerWeek ? `${latestGroup.workoutsPerWeek} days/week` : "Days/week —"}
                     </Text>
@@ -636,7 +636,7 @@ export default function StudentDetails() {
                     style={{
                       width: 40,
                       height: 40,
-                      borderRadius: 20,
+                      borderRadius: Radius.lg,
                       backgroundColor: Colors.surfaceSubtle,
                       borderWidth: 1,
                       borderColor: Colors.surfaceHighlight,
@@ -688,7 +688,7 @@ export default function StudentDetails() {
               </>
             ) : (
               <>
-                <Text style={{ ...Typography.title, fontSize: 18 }}>No active training split</Text>
+                <Text style={{ ...Typography.title, fontSize: FontSizes.subheading }}>No active training split</Text>
                 <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 6 }}>
                   Create a split to start assigning workouts.
                 </Text>
@@ -736,4 +736,6 @@ export default function StudentDetails() {
     </ScreenLayout>
   );
 }
+
+
 
