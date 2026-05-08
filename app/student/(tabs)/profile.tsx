@@ -21,14 +21,10 @@ import { Spacing } from "../../../theme/spacing";
 import { Typography } from "../../../theme/typography";
 import { formatDateFull } from "../../../utils/formatLocale";
 import { toMs } from "../../../utils/dateConvert";
+import { getUserInitials } from "../../../utils/userDisplay";
 
-function initialsFromUser(user: { firstName?: string | null; lastName?: string | null } | null): string {
-  if (!user) return "S";
-  const a = user.firstName?.trim()?.[0] ?? "";
-  const b = user.lastName?.trim()?.[0] ?? "";
-  const s = `${a}${b}`.toUpperCase();
-  return s || "S";
-}
+const initialsFromUser = (user: { firstName?: string | null; lastName?: string | null } | null) =>
+  getUserInitials(user, "S");
 
 export default function StudentProfile() {
   const router = useRouter();

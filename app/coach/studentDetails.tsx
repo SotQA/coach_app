@@ -18,6 +18,7 @@ import type { TrainingGroup } from "../../types/TrainingGroup";
 import { logger } from "@/utils/logger";
 import { toMs } from "@/utils/dateConvert";
 import { dayKeyFromMs } from "@/utils/dateRanges";
+import { getUserInitials, getDisplayName } from "@/utils/userDisplay";
 
 export default function StudentDetails() {
   const router = useRouter();
@@ -162,10 +163,8 @@ export default function StudentDetails() {
     );
   }
 
-  const studentFullName = [student.firstName, student.lastName].filter(Boolean).join(" ").trim();
-  const displayName = studentFullName || "Student";
-  const initials =
-    `${student.firstName?.trim()?.[0] ?? ""}${student.lastName?.trim()?.[0] ?? ""}`.toUpperCase() || "S";
+  const displayName = getDisplayName(student, "Student");
+  const initials = getUserInitials(student, "S");
 
 
   const lastWorkoutMs = logs[0] ? toMs((logs[0] as any).completedAt ?? (logs[0] as any).date) : 0;

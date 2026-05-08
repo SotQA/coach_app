@@ -19,14 +19,10 @@ import { ExerciseLibraryModal } from "../../../components/ExerciseLibraryModal";
 import { SettingsProfileCard } from "../../../components/settings/SettingsProfileCard";
 import { SettingsSection } from "../../../components/settings/SettingsSection";
 import { SettingsRow } from "../../../components/settings/SettingsRow";
+import { getUserInitials } from "../../../utils/userDisplay";
 
-function initialsFromUser(user: { firstName?: string | null; lastName?: string | null } | null): string {
-  if (!user) return "C";
-  const a = user.firstName?.trim()?.[0] ?? "";
-  const b = user.lastName?.trim()?.[0] ?? "";
-  const s = `${a}${b}`.toUpperCase();
-  return s || "C";
-}
+const initialsFromUser = (user: { firstName?: string | null; lastName?: string | null } | null) =>
+  getUserInitials(user, "C");
 
 export default function CoachProfile() {
   const router = useRouter();

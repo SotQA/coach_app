@@ -22,20 +22,13 @@ import { Radius, Spacing } from "../../../theme/spacing";
 import { Typography } from "../../../theme/typography";
 import { ScreenLayout } from "../../../components/ScreenLayout";
 import { formatDate } from "../../../utils/formatLocale";
+import { getUserInitials, getDisplayName } from "../../../utils/userDisplay";
 
-function coachDisplayName(user: { firstName: string; lastName: string } | null): string {
-  if (!user) return "Coach";
-  const n = `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim();
-  return n || "Coach";
-}
+const coachDisplayName = (user: { firstName?: string | null; lastName?: string | null } | null) =>
+  getDisplayName(user, "Coach");
 
-function initials(user: { firstName: string; lastName: string } | null): string {
-  if (!user) return "C";
-  const a = user.firstName?.trim()?.[0] ?? "";
-  const b = user.lastName?.trim()?.[0] ?? "";
-  const s = `${a}${b}`.toUpperCase();
-  return s || "C";
-}
+const initials = (user: { firstName?: string | null; lastName?: string | null } | null) =>
+  getUserInitials(user, "C");
 
 export default function CoachDashboard() {
   const router = useRouter();
