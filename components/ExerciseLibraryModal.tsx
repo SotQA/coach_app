@@ -15,7 +15,6 @@ import { Colors } from "../theme/colors";
 import { Radius, Spacing } from "../theme/spacing";
 import { Typography } from "../theme/typography";
 import { exerciseTemplateService, type ExerciseTemplate } from "../services/exerciseTemplateService";
-import { logger } from "../utils/logger";
 import { toMs } from "../utils/dateConvert";
 
 const CATEGORIES = [

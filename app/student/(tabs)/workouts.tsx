@@ -26,7 +26,6 @@ import { formatElapsedForTimer } from "../../../utils/workoutDuration";
 import { FLOATING_BAR_SCROLL_OFFSET } from "../../../components/FloatingWorkoutBar";
 import { formatDateShort } from "../../../utils/formatLocale";
 import type { SupportedLocale } from "../../../context/I18nContext";
-import { logger } from "../../../utils/logger";
 import { toMs } from "../../../utils/dateConvert";
 import { dayKeyFromMs, startOfWeekMonday, isInCurrentWeek, isInCurrentMonth } from "../../../utils/dateRanges";
 

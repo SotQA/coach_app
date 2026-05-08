@@ -19,7 +19,6 @@ import { formatDurationForHistory } from "../../utils/workoutDuration";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { EmptyState } from "../../components/EmptyState";
 import { Colors } from "../../theme/colors";
-import { logger } from "../../utils/logger";
 import { toMs } from "../../utils/dateConvert";
 import { dayKeyFromMs, dayKeyFromDate, startOfMonth, addMonths, isSameMonth, mondayIndexFromDate } from "../../utils/dateRanges";
 import { Radius, Spacing } from "../../theme/spacing";
