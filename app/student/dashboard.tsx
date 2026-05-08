@@ -11,6 +11,7 @@ import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
 import { ScreenLayout } from "../../components/ScreenLayout";
+import { logger } from "@/utils/logger";
 
 // Student dashboard:
 // - Loads the current student user
@@ -26,18 +27,18 @@ export default function StudentDashboard() {
 
   useEffect(() => {
     const load = async () => {
-      console.log("[student/dashboard] load start");
+      logger.log("[student/dashboard] load start");
       setLoading(true);
       try {
         setError(null);
-        console.log("[student/dashboard] currentUser.id", user?.id);
+        logger.log("[student/dashboard] currentUser.id", user?.id);
         if (!user || user.role !== "student") {
           setError("You must be logged in as a student.");
           return;
         }
         setStudent(user);
         const workoutPlan = await workoutService.getWorkoutPlanForStudent(user.id);
-        console.log("[student/dashboard] workoutPlan", workoutPlan?.id ?? null);
+        logger.log("[student/dashboard] workoutPlan", workoutPlan?.id ?? null);
         setPlan(workoutPlan);
       } catch (e: any) {
         console.error("[student/dashboard] load error", e);

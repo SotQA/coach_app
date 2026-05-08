@@ -20,6 +20,7 @@ import { Colors } from "../../../theme/colors";
 import { Radius, Spacing } from "../../../theme/spacing";
 import { Typography } from "../../../theme/typography";
 import { ScreenLayout } from "../../../components/ScreenLayout";
+import { logger } from "@/utils/logger";
 
 export default function CoachStudents() {
   const router = useRouter();
@@ -54,13 +55,13 @@ export default function CoachStudents() {
     }
 
     const loadData = async () => {
-      console.log("[coach/students] load start");
+      logger.log("[coach/students] load start");
       setLoading(true);
       try {
         setError(null);
-        console.log("[coach/students] currentUser.id", user.id);
+        logger.log("[coach/students] currentUser.id", user.id);
         const data = await studentService.getStudentsForCoach(user.id);
-        console.log("[coach/students] students", data.length);
+        logger.log("[coach/students] students", data.length);
         setStudents(data);
 
         // Fetch latest training group for each student (fast UI: list renders immediately).

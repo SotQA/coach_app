@@ -13,6 +13,7 @@ import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
 import { Ionicons } from "@expo/vector-icons";
+import { logger } from "@/utils/logger";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -37,7 +38,7 @@ export default function Login() {
     Platform.OS === "web" ? makeRedirectUri({ path: "oauthredirect" }) : "";
 
   if (__DEV__ && Platform.OS === "web" && webGoogleRedirectUri) {
-    console.log(
+    logger.log(
       "[login] Web only — add this URI to Google Cloud → Web client → Authorized redirect URIs:",
       webGoogleRedirectUri
     );

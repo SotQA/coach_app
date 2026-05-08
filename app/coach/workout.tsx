@@ -10,6 +10,7 @@ import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
 import { ScreenLayout } from "../../components/ScreenLayout";
+import { logger } from "@/utils/logger";
 
 export default function CoachWorkout() {
   const router = useRouter();
@@ -24,7 +25,7 @@ export default function CoachWorkout() {
 
   useEffect(() => {
     const load = async () => {
-      console.log("[coach/workout] load start", { workoutPlanId });
+      logger.log("[coach/workout] load start", { workoutPlanId });
       setLoading(true);
       try {
         setError(null);

@@ -10,6 +10,7 @@ import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
 import { ScreenLayout } from "../../components/ScreenLayout";
+import { logger } from "@/utils/logger";
 
 const toMs = (value: any): number => {
   if (!value) return 0;
@@ -37,11 +38,11 @@ export default function ExerciseDetails() {
 
   useEffect(() => {
     const load = async () => {
-      console.log("[student/exerciseDetails] load start", { exerciseName });
+      logger.log("[student/exerciseDetails] load start", { exerciseName });
       setLoading(true);
       try {
         setError(null);
-        console.log("[student/exerciseDetails] currentUser", user);
+        logger.log("[student/exerciseDetails] currentUser", user);
         if (!user || user.role !== "student") {
           setError("You must be logged in as a student.");
           return;
