@@ -217,11 +217,11 @@ export default function StudentDetails() {
     const today = new Date();
     const keyFor = (d: Date) => dayKey(d.getTime());
     const hasToday = days.has(keyFor(today));
-    const start = new Date(today);
-    if (!hasToday) start.setDate(start.getDate() - 1);
-    if (!days.has(keyFor(start))) return 0;
-    let streak = 0;
-    const cursor = new Date(start);
+    // streak counts today + each previous consecutive day with a logged workout
+    let streak = hasToday ? 1 : 0;
+    const cursor = new Date(today);
+    cursor.setDate(cursor.getDate() - 1); // start from yesterday
+    if (!hasToday && !days.has(keyFor(cursor))) return 0;
     while (days.has(keyFor(cursor))) {
       streak += 1;
       cursor.setDate(cursor.getDate() - 1);
