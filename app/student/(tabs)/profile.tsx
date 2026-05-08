@@ -20,6 +20,7 @@ import { Colors } from "../../../theme/colors";
 import { Spacing } from "../../../theme/spacing";
 import { Typography } from "../../../theme/typography";
 import { formatDateFull } from "../../../utils/formatLocale";
+import { toMs } from "../../../utils/dateConvert";
 
 function initialsFromUser(user: { firstName?: string | null; lastName?: string | null } | null): string {
   if (!user) return "S";
@@ -28,20 +29,6 @@ function initialsFromUser(user: { firstName?: string | null; lastName?: string |
   const s = `${a}${b}`.toUpperCase();
   return s || "S";
 }
-
-const toMs = (value: unknown): number => {
-  if (!value) return 0;
-  if (typeof value === "string") {
-    const ms = Date.parse(value);
-    return Number.isFinite(ms) ? ms : 0;
-  }
-  if (value instanceof Date) return value.getTime();
-  if (typeof (value as { toDate?: () => Date })?.toDate === "function") {
-    const d = (value as { toDate: () => Date }).toDate();
-    return d instanceof Date ? d.getTime() : 0;
-  }
-  return 0;
-};
 
 export default function StudentProfile() {
   const router = useRouter();

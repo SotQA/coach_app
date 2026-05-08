@@ -20,6 +20,7 @@ import { PrimaryButton } from "../../components/PrimaryButton";
 import { EmptyState } from "../../components/EmptyState";
 import { Colors } from "../../theme/colors";
 import { logger } from "../../utils/logger";
+import { toMs } from "../../utils/dateConvert";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
 import { ScreenLayout } from "../../components/ScreenLayout";
@@ -42,25 +43,6 @@ const CHIP_ORDER: { key: WorkoutCategory; label: string }[] = [
   { key: "mobility", label: "Mobility" },
   { key: "other", label: "Other" },
 ];
-
-function toMs(value: unknown): number {
-  if (!value) return 0;
-  if (typeof value === "string") {
-    const ms = Date.parse(value);
-    return Number.isFinite(ms) ? ms : 0;
-  }
-  if (value instanceof Date) return value.getTime();
-  if (typeof (value as { toDate?: () => Date })?.toDate === "function") {
-    try {
-      const d = (value as { toDate: () => Date }).toDate();
-      return d instanceof Date ? d.getTime() : 0;
-    } catch (e) {
-      logger.warn("[workoutHistory] toMs failed", e, value);
-      return 0;
-    }
-  }
-  return 0;
-}
 
 function dayKeyFromMs(ms: number): string {
   const d = new Date(ms);

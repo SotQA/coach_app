@@ -11,20 +11,7 @@ import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
 import { ScreenLayout } from "../../components/ScreenLayout";
 import { logger } from "@/utils/logger";
-
-const toMs = (value: any): number => {
-  if (!value) return 0;
-  if (typeof value === "string") {
-    const ms = Date.parse(value);
-    return Number.isFinite(ms) ? ms : 0;
-  }
-  if (value instanceof Date) return value.getTime();
-  if (typeof value?.toDate === "function") {
-    const d = value.toDate();
-    return d instanceof Date ? d.getTime() : 0;
-  }
-  return 0;
-};
+import { toMs } from "@/utils/dateConvert";
 
 export default function ExerciseDetails() {
   const router = useRouter();

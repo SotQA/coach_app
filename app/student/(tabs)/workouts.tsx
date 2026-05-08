@@ -27,27 +27,9 @@ import { FLOATING_BAR_SCROLL_OFFSET } from "../../../components/FloatingWorkoutB
 import { formatDateShort } from "../../../utils/formatLocale";
 import type { SupportedLocale } from "../../../context/I18nContext";
 import { logger } from "../../../utils/logger";
+import { toMs } from "../../../utils/dateConvert";
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
-
-function toMs(value: unknown): number {
-  if (!value) return 0;
-  if (typeof value === "string") {
-    const ms = Date.parse(value);
-    return Number.isFinite(ms) ? ms : 0;
-  }
-  if (value instanceof Date) return value.getTime();
-  if (typeof (value as { toDate?: () => Date })?.toDate === "function") {
-    try {
-      const d = (value as { toDate: () => Date }).toDate();
-      return d instanceof Date ? d.getTime() : 0;
-    } catch (e) {
-      logger.warn("[workouts] toMs failed", e, value);
-      return 0;
-    }
-  }
-  return 0;
-}
 
 function dayKeyFromMs(ms: number): string {
   const d = new Date(ms);

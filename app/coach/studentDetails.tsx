@@ -16,6 +16,7 @@ import { Typography } from "../../theme/typography";
 import { ScreenLayout } from "../../components/ScreenLayout";
 import type { TrainingGroup } from "../../types/TrainingGroup";
 import { logger } from "@/utils/logger";
+import { toMs } from "@/utils/dateConvert";
 
 export default function StudentDetails() {
   const router = useRouter();
@@ -165,25 +166,6 @@ export default function StudentDetails() {
   const initials =
     `${student.firstName?.trim()?.[0] ?? ""}${student.lastName?.trim()?.[0] ?? ""}`.toUpperCase() || "S";
 
-  const toMs = (value: any): number => {
-    if (!value) return 0;
-    if (typeof value === "number" && Number.isFinite(value)) return value;
-    if (typeof value === "string") {
-      const t = Date.parse(value);
-      return Number.isFinite(t) ? t : 0;
-    }
-    if (value instanceof Date) return value.getTime();
-    if (typeof value?.toDate === "function") {
-      try {
-        const d = value.toDate();
-        return d instanceof Date ? d.getTime() : 0;
-      } catch (e) {
-        logger.warn("[studentDetails] toMs failed", e, value);
-        return 0;
-      }
-    }
-    return 0;
-  };
 
   const lastWorkoutMs = logs[0] ? toMs((logs[0] as any).completedAt ?? (logs[0] as any).date) : 0;
   const lastWorkoutLabel =

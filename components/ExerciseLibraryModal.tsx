@@ -16,6 +16,7 @@ import { Radius, Spacing } from "../theme/spacing";
 import { Typography } from "../theme/typography";
 import { exerciseTemplateService, type ExerciseTemplate } from "../services/exerciseTemplateService";
 import { logger } from "../utils/logger";
+import { toMs } from "../utils/dateConvert";
 
 const CATEGORIES = [
   "Chest",
@@ -34,25 +35,6 @@ type Props = {
   coachId: string;
   onClose: () => void;
   onAddExercise: (payload: { name: string; category?: string; equipment?: string }) => void;
-};
-
-const toMs = (v: any): number => {
-  if (!v) return 0;
-  if (typeof v === "string") {
-    const ms = Date.parse(v);
-    return Number.isFinite(ms) ? ms : 0;
-  }
-  if (v instanceof Date) return v.getTime();
-  if (typeof v?.toDate === "function") {
-    try {
-      const d = v.toDate();
-      return d instanceof Date ? d.getTime() : 0;
-    } catch (e) {
-      logger.warn("[ExerciseLibraryModal] toMs failed", e, v);
-      return 0;
-    }
-  }
-  return 0;
 };
 
 export function ExerciseLibraryModal({ visible, coachId, onClose, onAddExercise }: Props) {

@@ -55,6 +55,7 @@ function sanitizeForFirestore<T>(value: T): T {
 }
 
 import { logger } from "../utils/logger";
+import { toMs } from "../utils/dateConvert";
 
 const assertNonEmpty = (value: string, label: string) => {
   if (!value || !value.trim()) throw new Error(`Missing ${label}.`);
@@ -63,24 +64,6 @@ const assertNonEmpty = (value: string, label: string) => {
   }
 };
 
-const toMs = (value: any): number => {
-  if (!value) return 0;
-  if (typeof value === "string") {
-    const ms = Date.parse(value);
-    return Number.isFinite(ms) ? ms : 0;
-  }
-  if (value instanceof Date) return value.getTime();
-  if (typeof value?.toDate === "function") {
-    try {
-      const d = value.toDate();
-      return d instanceof Date ? d.getTime() : 0;
-    } catch (e) {
-      logger.warn("[workoutService] toMs failed", e, value);
-      return 0;
-    }
-  }
-  return 0;
-};
 
 const normalizeExercise = (ex: any): Exercise => {
   const reps = ex?.reps != null ? String(ex.reps) : "";

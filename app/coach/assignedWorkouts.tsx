@@ -9,6 +9,7 @@ import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
 import { ScreenLayout } from "../../components/ScreenLayout";
+import { toMs } from "../../utils/dateConvert";
 
 export default function AssignedWorkouts() {
   const router = useRouter();
@@ -30,25 +31,6 @@ export default function AssignedWorkouts() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deletingPlanId, setDeletingPlanId] = useState<string | null>(null);
-
-  const toMs = (value: any): number => {
-    if (!value) return 0;
-    if (typeof value === "number" && Number.isFinite(value)) return value;
-    if (typeof value === "string") {
-      const t = Date.parse(value);
-      return Number.isFinite(t) ? t : 0;
-    }
-    if (value instanceof Date) return value.getTime();
-    if (typeof value?.toDate === "function") {
-      try {
-        const d = value.toDate();
-        return d instanceof Date ? d.getTime() : 0;
-      } catch {
-        return 0;
-      }
-    }
-    return 0;
-  };
 
   useEffect(() => {
     const load = async () => {
