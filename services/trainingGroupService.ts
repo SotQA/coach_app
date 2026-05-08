@@ -15,6 +15,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import type { TrainingGroup, TrainingGroupType } from "../types/TrainingGroup";
+import type { TrainingGroupFirestoreDoc } from "../types/firestore";
 
 const TRAINING_GROUPS_COLLECTION = "trainingGroups";
 
@@ -44,7 +45,7 @@ const assertNonEmpty = (value: string, label: string) => {
 };
 
 const mapGroupDoc = (snap: QueryDocumentSnapshot): TrainingGroup => {
-  const data = snap.data() as any;
+  const data = snap.data() as TrainingGroupFirestoreDoc | undefined ?? {};
   return {
     id: snap.id,
     studentId: String(data.studentId ?? ""),
@@ -138,8 +139,8 @@ export const trainingGroupService = {
     const ref = doc(db, TRAINING_GROUPS_COLLECTION, groupId);
     const snap = await getDoc(ref);
     if (!snap.exists()) return;
-    const data = snap.data() as any;
-    if (String(data.coachId ?? "") !== coachId) {
+    const data = snap.data() as TrainingGroupFirestoreDoc | undefined;
+    if (String(data?.coachId ?? "") !== coachId) {
       throw new Error("You don't have access to this training group.");
     }
     await deleteDoc(ref);

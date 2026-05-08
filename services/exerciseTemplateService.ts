@@ -10,6 +10,7 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
+import type { ExerciseTemplateFirestoreDoc } from "../types/firestore";
 
 const COLLECTION = "exerciseTemplates";
 
@@ -45,7 +46,7 @@ export type ExerciseTemplate = {
   lastUsedAt?: any;
 };
 
-function mapDoc(id: string, data: any): ExerciseTemplate {
+function mapDoc(id: string, data: ExerciseTemplateFirestoreDoc | undefined): ExerciseTemplate {
   return {
     id,
     name: data?.name != null ? String(data.name).trim() : "",
@@ -194,7 +195,7 @@ export const exerciseTemplateService = {
       return;
     }
     const d = snap.docs[0];
-    const current = d.data() as any;
+    const current = d.data() as ExerciseTemplateFirestoreDoc | undefined;
     const nextCount =
       current?.usageCount != null && Number.isFinite(Number(current.usageCount))
         ? Number(current.usageCount) + 1
@@ -210,3 +211,4 @@ export const exerciseTemplateService = {
     );
   },
 };
+
