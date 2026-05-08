@@ -161,7 +161,8 @@ export default function StudentDetails() {
       try {
         const d = value.toDate();
         return d instanceof Date ? d.getTime() : 0;
-      } catch {
+      } catch (e) {
+        logger.warn("[studentDetails] toMs failed", e, value);
         return 0;
       }
     }

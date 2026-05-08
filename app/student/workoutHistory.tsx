@@ -19,6 +19,7 @@ import { formatDurationForHistory } from "../../utils/workoutDuration";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { EmptyState } from "../../components/EmptyState";
 import { Colors } from "../../theme/colors";
+import { logger } from "../../utils/logger";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
 import { ScreenLayout } from "../../components/ScreenLayout";
@@ -50,8 +51,13 @@ function toMs(value: unknown): number {
   }
   if (value instanceof Date) return value.getTime();
   if (typeof (value as { toDate?: () => Date })?.toDate === "function") {
-    const d = (value as { toDate: () => Date }).toDate();
-    return d instanceof Date ? d.getTime() : 0;
+    try {
+      const d = (value as { toDate: () => Date }).toDate();
+      return d instanceof Date ? d.getTime() : 0;
+    } catch (e) {
+      logger.warn("[workoutHistory] toMs failed", e, value);
+      return 0;
+    }
   }
   return 0;
 }
