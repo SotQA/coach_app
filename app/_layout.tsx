@@ -14,6 +14,7 @@ import {
   requestNotificationPermissions,
   setupNotificationChannel,
 } from "../services/notificationService";
+import ErrorBoundary from "../components/ErrorBoundary";
 
 // Configure how notifications appear when the app is in the foreground.
 // Must be called before any notification is received.
@@ -105,7 +106,9 @@ export default function Layout() {
         <AuthProvider>
           <ActiveWorkoutProvider>
             <ThemeProvider value={navTheme}>
-              <RootNavigator />
+              <ErrorBoundary>
+                <RootNavigator />
+              </ErrorBoundary>
             </ThemeProvider>
           </ActiveWorkoutProvider>
         </AuthProvider>

@@ -15,6 +15,7 @@ import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
 import { ScreenLayout } from "../../components/ScreenLayout";
 import type { TrainingGroup } from "../../types/TrainingGroup";
+import { logger } from "@/utils/logger";
 
 export default function StudentDetails() {
   const router = useRouter();
@@ -45,7 +46,7 @@ export default function StudentDetails() {
 
   useEffect(() => {
     const load = async () => {
-      console.log("[coach/studentDetails] load start", { studentId });
+      logger.log("[coach/studentDetails] load start", { studentId });
       setLoading(true);
       try {
         setError(null);
@@ -55,14 +56,14 @@ export default function StudentDetails() {
           return;
         }
 
-        console.log("[coach/studentDetails] currentUser", user);
+        logger.log("[coach/studentDetails] currentUser", user);
         if (!userId || userRole !== "coach") {
           setError("You must be logged in as a coach.");
           return;
         }
 
         const studentDoc = await studentService.getStudentById(studentId);
-        console.log("[coach/studentDetails] fetched student", studentDoc?.id);
+        logger.log("[coach/studentDetails] fetched student", studentDoc?.id);
         if (!studentDoc) {
           setError("Student not found.");
           return;
@@ -83,9 +84,9 @@ export default function StudentDetails() {
           workoutService.getWorkoutHistory(studentId),
         ]);
         setLatestGroup(g);
-        console.log("[coach/studentDetails] fetched plans", workoutPlans.length);
+        logger.log("[coach/studentDetails] fetched plans", workoutPlans.length);
         setPlans(workoutPlans);
-        console.log("[coach/studentDetails] fetched logs", history.length);
+        logger.log("[coach/studentDetails] fetched logs", history.length);
         setLogs(history);
       } catch (e: any) {
         console.error("[coach/studentDetails] load error", e);

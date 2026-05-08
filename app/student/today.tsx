@@ -10,6 +10,7 @@ import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
 import { ScreenLayout } from "../../components/ScreenLayout";
+import { logger } from "@/utils/logger";
 
 export default function TodayWorkout() {
   const router = useRouter();
@@ -20,18 +21,18 @@ export default function TodayWorkout() {
 
   useEffect(() => {
     const load = async () => {
-      console.log("[student/workouts] load start");
+      logger.log("[student/workouts] load start");
       setLoading(true);
       try {
         setError(null);
-        console.log("[student/workouts] currentUser.id", user?.id);
+        logger.log("[student/workouts] currentUser.id", user?.id);
         if (!user || user.role !== "student") {
           setError("You must be logged in as a student.");
           return;
         }
 
         const activePlans = await workoutService.getActiveWorkoutPlansForStudent(user.id);
-        console.log("[student/workouts] plans", activePlans.length);
+        logger.log("[student/workouts] plans", activePlans.length);
         setPlans(activePlans);
       } catch (e: any) {
         console.error("[student/workouts] load error", e);

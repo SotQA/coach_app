@@ -16,6 +16,7 @@ import { Colors } from "../../theme/colors";
 import { Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
 import { ScreenLayout } from "../../components/ScreenLayout";
+import { logger } from "@/utils/logger";
 
 // Simple workout logging screen:
 // - Loads the current student
@@ -36,17 +37,17 @@ export default function WorkoutScreen() {
 
   useEffect(() => {
     const loadUser = async () => {
-      console.log("[student/workout] load start");
+      logger.log("[student/workout] load start");
       try {
         setError(null);
-        console.log("[student/workout] currentUser.id", authUser?.id);
+        logger.log("[student/workout] currentUser.id", authUser?.id);
         if (!authUser || authUser.role !== "student") {
           setError("You must be logged in as a student.");
           return;
         }
         setStudent(authUser);
         const plan = await workoutService.getWorkoutPlanForStudent(authUser.id);
-        console.log("[student/workout] workoutPlan", plan?.id ?? null);
+        logger.log("[student/workout] workoutPlan", plan?.id ?? null);
         setWorkoutPlanId(plan?.id ?? null);
       } catch (e: any) {
         console.error("[student/workout] load error", e);
@@ -65,7 +66,7 @@ export default function WorkoutScreen() {
       setError("No workout plan assigned yet.");
       return;
     }
-    console.log("[student/workout] submit start", {
+    logger.log("[student/workout] submit start", {
       currentUserId: student.id,
       workoutPlanId,
     });
@@ -85,7 +86,7 @@ export default function WorkoutScreen() {
         tempo: exercise.tempo,
         rpe: exercise.rpe,
       });
-      console.log("[student/workout] submit success");
+      logger.log("[student/workout] submit success");
       setMessage("Workout logged!");
       setExercise(workoutService.createEmptyExercise());
     } catch (e: any) {

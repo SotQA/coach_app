@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
 import { Platform } from "react-native";
 
 // Your web app's Firebase configuration
@@ -15,6 +16,22 @@ const firebaseConfig = {
 
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig);
+
+// App Check (only on web; native uses a separate path via expo-app-check or
+// react-native-firebase if added later).
+if (Platform.OS === "web" && typeof window !== "undefined") {
+  try {
+    initializeAppCheck(app, {
+      provider: new ReCaptchaV3Provider(
+        process.env.EXPO_PUBLIC_RECAPTCHA_SITE_KEY ?? ""
+      ),
+      isTokenAutoRefreshEnabled: true,
+    });
+  } catch (e) {
+    // Non-fatal: App Check failure must not prevent app boot.
+    console.warn("[firebase] App Check init failed", e);
+  }
+}
 
 /**
  * Persist auth session on iOS/Android (AsyncStorage). Web uses default browser persistence.

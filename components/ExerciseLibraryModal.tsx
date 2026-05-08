@@ -175,7 +175,7 @@ export function ExerciseLibraryModal({ visible, coachId, onClose, onAddExercise 
           >
             <Ionicons name="search" size={18} color={Colors.textMuted} />
             <TextInput
-              ref={(r) => (searchRef.current = r)}
+              ref={(r) => { searchRef.current = r; }}
               value={query}
               onChangeText={setQuery}
               placeholder="Search exercise..."
@@ -185,7 +185,6 @@ export function ExerciseLibraryModal({ visible, coachId, onClose, onAddExercise 
               returnKeyType="search"
               style={{
                 flex: 1,
-                color: Colors.text,
                 ...Typography.section,
                 fontWeight: "700",
                 paddingVertical: 0,
