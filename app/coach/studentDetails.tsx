@@ -323,7 +323,7 @@ export default function StudentDetails() {
         justifyContent: "center",
         backgroundColor: Colors.surface,
         borderWidth: 1,
-        borderColor: tone === "danger" ? "rgba(220,38,38,0.35)" : Colors.border,
+        borderColor: tone === "danger" ? Colors.dangerTint : Colors.border,
         opacity: disabled ? 0.5 : pressed ? 0.92 : 1,
       })}
     >
@@ -618,7 +618,7 @@ export default function StudentDetails() {
               borderRadius: Radius.lg,
               padding: Spacing.md,
               borderWidth: 1,
-              borderColor: "rgba(255,255,255,0.10)",
+              borderColor: Colors.surfaceHighlight,
               marginBottom: Spacing.md,
               opacity: pressed ? 0.96 : 1,
             })}
@@ -637,9 +637,9 @@ export default function StudentDetails() {
                       width: 40,
                       height: 40,
                       borderRadius: 20,
-                      backgroundColor: "rgba(255,255,255,0.06)",
+                      backgroundColor: Colors.surfaceSubtle,
                       borderWidth: 1,
-                      borderColor: "rgba(255,255,255,0.10)",
+                      borderColor: Colors.surfaceHighlight,
                       alignItems: "center",
                       justifyContent: "center",
                     }}
@@ -653,7 +653,7 @@ export default function StudentDetails() {
                     style={{
                       height: 8,
                       borderRadius: 999,
-                      backgroundColor: "rgba(255,255,255,0.10)",
+                      backgroundColor: Colors.surfaceHighlight,
                       overflow: "hidden",
                     }}
                   >

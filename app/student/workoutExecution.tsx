@@ -502,7 +502,7 @@ export default function WorkoutExecution() {
                 padding: 14,
                 marginBottom: Spacing.sm,
                 borderWidth: 1,
-                borderColor: "rgba(255,255,255,0.06)",
+                borderColor: Colors.surfaceSubtle,
               }}
             >
               <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.sm, marginBottom: Spacing.sm }}>
@@ -513,7 +513,7 @@ export default function WorkoutExecution() {
                     borderRadius: 7,
                     backgroundColor: "rgba(255,255,255,0.05)",
                     borderWidth: 1,
-                    borderColor: "rgba(255,255,255,0.10)",
+                    borderColor: Colors.surfaceHighlight,
                     alignItems: "center",
                     justifyContent: "center",
                   }}
@@ -610,12 +610,12 @@ export default function WorkoutExecution() {
                       style={{
                         flex: 1,
                         borderWidth: 1,
-                        borderColor: "rgba(255,255,255,0.10)",
+                        borderColor: Colors.surfaceHighlight,
                         paddingVertical: 8,
                         paddingHorizontal: 12,
                         borderRadius: Radius.sm,
                         color: Colors.text,
-                        backgroundColor: "rgba(255,255,255,0.06)",
+                        backgroundColor: Colors.surfaceSubtle,
                         textAlign: "center",
                       }}
                     />
@@ -638,12 +638,12 @@ export default function WorkoutExecution() {
                       style={{
                         flex: 1,
                         borderWidth: 1,
-                        borderColor: "rgba(255,255,255,0.10)",
+                        borderColor: Colors.surfaceHighlight,
                         paddingVertical: 8,
                         paddingHorizontal: 12,
                         borderRadius: Radius.sm,
                         color: Colors.text,
-                        backgroundColor: "rgba(255,255,255,0.06)",
+                        backgroundColor: Colors.surfaceSubtle,
                         textAlign: "center",
                       }}
                     />
@@ -666,12 +666,12 @@ export default function WorkoutExecution() {
                       style={{
                         flex: 1,
                         borderWidth: 1,
-                        borderColor: "rgba(255,255,255,0.10)",
+                        borderColor: Colors.surfaceHighlight,
                         paddingVertical: 8,
                         paddingHorizontal: 12,
                         borderRadius: Radius.sm,
                         color: Colors.text,
-                        backgroundColor: "rgba(255,255,255,0.06)",
+                        backgroundColor: Colors.surfaceSubtle,
                         textAlign: "center",
                       }}
                     />
@@ -696,8 +696,8 @@ export default function WorkoutExecution() {
                         height: 34,
                         borderRadius: 10,
                         borderWidth: 1,
-                        borderColor: done ? "rgba(212,255,68,0.55)" : "rgba(255,255,255,0.10)",
-                        backgroundColor: done ? Colors.primary : "rgba(255,255,255,0.06)",
+                        borderColor: done ? "rgba(212,255,68,0.55)" : Colors.surfaceHighlight,
+                        backgroundColor: done ? Colors.primary : Colors.surfaceSubtle,
                         alignItems: "center",
                         justifyContent: "center",
                         opacity: pressed ? 0.9 : 1,

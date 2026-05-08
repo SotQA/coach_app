@@ -103,7 +103,7 @@ export default function AssignedWorkouts() {
         justifyContent: "center",
         backgroundColor: Colors.surface,
         borderWidth: 1,
-        borderColor: tone === "danger" ? "rgba(220,38,38,0.35)" : Colors.border,
+        borderColor: tone === "danger" ? Colors.dangerTint : Colors.border,
         opacity: disabled ? 0.5 : pressed ? 0.92 : 1,
       })}
     >
