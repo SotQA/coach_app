@@ -59,7 +59,7 @@ export default function Login() {
               ? googleWebClientId || undefined
               : undefined,
         },
-    Platform.OS === "web" ? {} : { scheme: "gymcoachapp", path: "oauthredirect" }
+    Platform.OS === "web" ? { path: "oauthredirect" } : {}
   );
 
   const googleNativeConfigured =
