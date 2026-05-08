@@ -45,24 +45,27 @@ export default function StudentDetails() {
   }, [plans]);
 
   useEffect(() => {
-    const load = async () => {
+    let active = true;
+
+    (async () => {
       logger.log("[coach/studentDetails] load start", { studentId });
       setLoading(true);
       try {
         setError(null);
 
         if (!studentId) {
-          setError("Missing studentId.");
+          if (active) setError("Missing studentId.");
           return;
         }
 
         logger.log("[coach/studentDetails] currentUser", user);
         if (!userId || userRole !== "coach") {
-          setError("You must be logged in as a coach.");
+          if (active) setError("You must be logged in as a coach.");
           return;
         }
 
         const studentDoc = await studentService.getStudentById(studentId);
+        if (!active) return;
         logger.log("[coach/studentDetails] fetched student", studentDoc?.id);
         if (!studentDoc) {
           setError("Student not found.");
@@ -83,20 +86,22 @@ export default function StudentDetails() {
           workoutService.getWorkoutPlansForStudentAsCoach(userId, studentId),
           workoutService.getWorkoutHistory(studentId),
         ]);
+        if (!active) return;
         setLatestGroup(g);
         logger.log("[coach/studentDetails] fetched plans", workoutPlans.length);
         setPlans(workoutPlans);
         logger.log("[coach/studentDetails] fetched logs", history.length);
         setLogs(history);
       } catch (e: any) {
-        console.error("[coach/studentDetails] load error", e);
+        if (!active) return;
+        logger.error("[coach/studentDetails] load error", e);
         setError(e.message ?? "Failed to load student details.");
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
-    };
+    })();
 
-    load();
+    return () => { active = false; };
   }, [studentId, userId, userRole]);
 
   if (loading) {

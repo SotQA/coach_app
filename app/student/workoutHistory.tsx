@@ -166,29 +166,28 @@ export default function WorkoutHistory() {
   }, [user]);
 
   useEffect(() => {
-    let cancelled = false;
+    let active = true;
     (async () => {
       setLoading(true);
       try {
         setError(null);
         if (!user || user.role !== "student") {
-          setError("You must be logged in as a student.");
+          if (active) setError("You must be logged in as a student.");
           return;
         }
-        await load();
+        const history = await workoutService.getWorkoutHistory(user.id);
+        if (!active) return;
+        setLogs(Array.isArray(history) ? history : []);
       } catch (e: unknown) {
-        if (!cancelled) {
-          const msg = e instanceof Error ? e.message : "Failed to load workout history.";
-          setError(msg);
-        }
+        if (!active) return;
+        const msg = e instanceof Error ? e.message : "Failed to load workout history.";
+        setError(msg);
       } finally {
-        if (!cancelled) setLoading(false);
+        if (active) setLoading(false);
       }
     })();
-    return () => {
-      cancelled = true;
-    };
-  }, [user?.id, user?.role, load]);
+    return () => { active = false; };
+  }, [user?.id, user?.role]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
