@@ -15,8 +15,12 @@ import {
   cancelRestNotification,
   scheduleRestNotification,
 } from "../services/notificationService";
+import { logger } from "../utils/logger";
 
-const STORAGE_KEY = "activeWorkoutSession";
+const STORAGE_KEY = "activeWorkoutSession.v2";
+
+// One-time best-effort cleanup of the legacy v1 key.
+AsyncStorage.removeItem("activeWorkoutSession").catch(() => {});
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -105,7 +109,7 @@ async function persist(session: ActiveWorkoutSession | null): Promise<void> {
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(session));
     }
   } catch (e) {
-    console.warn("[ActiveWorkout] persist failed:", e);
+    logger.warn("[ActiveWorkout] persist failed:", e);
   }
 }
 
@@ -113,18 +117,29 @@ async function hydrate(): Promise<ActiveWorkoutSession | null> {
   try {
     const raw = await AsyncStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as Partial<ActiveWorkoutSession>;
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(raw);
+    } catch (e) {
+      logger.warn("[ActiveWorkout] corrupt session blob, clearing", e);
+      await AsyncStorage.removeItem(STORAGE_KEY);
+      return null;
+    }
     if (
-      !parsed?.sessionId ||
-      !parsed?.workoutPlanId ||
-      !parsed?.studentId ||
-      typeof parsed?.startedAt !== "number"
+      typeof parsed !== "object" ||
+      parsed === null ||
+      typeof (parsed as any).workoutPlanId !== "string" ||
+      !(parsed as any).sessionId ||
+      !(parsed as any).studentId ||
+      typeof (parsed as any).startedAt !== "number"
     ) {
+      logger.warn("[ActiveWorkout] invalid session schema, clearing");
       await AsyncStorage.removeItem(STORAGE_KEY);
       return null;
     }
     return parsed as ActiveWorkoutSession;
-  } catch {
+  } catch (e) {
+    logger.warn("[ActiveWorkout] corrupt session blob, clearing", e);
     try {
       await AsyncStorage.removeItem(STORAGE_KEY);
     } catch {}
