@@ -1,8 +1,11 @@
-import { FC, useRef } from "react";
-import { Animated, Pressable, Text, TextStyle, ViewStyle } from "react-native";
+import { FC, type ReactNode } from "react";
+import { ActivityIndicator, Pressable, Text, TextStyle, ViewStyle } from "react-native";
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { Colors } from "../theme/colors";
 import { Radius, Spacing } from "../theme/spacing";
 import { Typography } from "../theme/typography";
+
+const PRESS_SCALE = 0.97;
 
 interface PrimaryButtonProps {
   title: string;
@@ -10,76 +13,110 @@ interface PrimaryButtonProps {
   style?: ViewStyle;
   textStyle?: TextStyle;
   disabled?: boolean;
+  /** @default "primary" — lime fill. `"secondary"` = transparent + primary border + primary label. */
+  variant?: "primary" | "secondary";
+  /** Shown to the left of the title (e.g. icon). */
+  leftSlot?: ReactNode;
+  /** When true, shows a spinner and ignores presses. */
+  loading?: boolean;
 }
 
-// Primary = lime fill + dark label; callers can override `style.backgroundColor` for secondary rows.
 export const PrimaryButton: FC<PrimaryButtonProps> = ({
   title,
   onPress,
   style,
   textStyle,
   disabled,
+  variant = "primary",
+  leftSlot,
+  loading = false,
 }) => {
-  const requestedWidth = (style as any)?.width as ViewStyle["width"] | undefined;
+  const requestedWidth = (style as { width?: ViewStyle["width"] })?.width;
   const containerWidth = requestedWidth ?? "100%";
+
+  const isSecondary = variant === "secondary";
+  const inactive = disabled || loading;
 
   const customBg = style?.backgroundColor;
   const usesPrimaryFill =
-    !disabled && (customBg === undefined || customBg === Colors.primary);
+    !inactive &&
+    !isSecondary &&
+    (customBg === undefined || customBg === Colors.primary);
+
+  const defaultLabelColor = inactive
+    ? Colors.textMuted
+    : isSecondary
+      ? Colors.primary
+      : usesPrimaryFill
+        ? Colors.onPrimary
+        : Colors.text;
 
   const baseStyle: ViewStyle = {
     borderRadius: Radius.lg,
     paddingVertical: 15,
     paddingHorizontal: Spacing.md,
-    backgroundColor: disabled ? Colors.disabled : Colors.primary,
     alignItems: "center",
     justifyContent: "center",
+    minHeight: 50,
   };
 
-  const defaultLabelColor = disabled
-    ? Colors.textMuted
-    : usesPrimaryFill
-      ? Colors.onPrimary
-      : Colors.text;
+  if (isSecondary) {
+    baseStyle.backgroundColor = "transparent";
+    baseStyle.borderWidth = 1.5;
+    baseStyle.borderColor = inactive ? Colors.disabled : Colors.primary;
+  } else {
+    baseStyle.backgroundColor = inactive ? Colors.disabled : Colors.primary;
+  }
 
-  const scale = useRef(new Animated.Value(1)).current;
-  const animateTo = (toValue: number) => {
-    Animated.spring(scale, {
-      toValue,
-      useNativeDriver: true,
-      speed: 30,
-      bounciness: 0,
-    }).start();
+  const scale = useSharedValue(1);
+  const animStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const runPressIn = () => {
+    if (inactive) return;
+    scale.value = withSpring(PRESS_SCALE);
+  };
+  const runPressOut = () => {
+    scale.value = withSpring(1);
   };
 
   return (
     <Pressable
       onPress={onPress}
-      disabled={disabled}
-      onPressIn={() => animateTo(0.97)}
-      onPressOut={() => animateTo(1)}
+      disabled={inactive}
+      onPressIn={runPressIn}
+      onPressOut={runPressOut}
       style={{ width: containerWidth }}
     >
       <Animated.View
         style={[
           baseStyle,
           { width: "100%" },
+          leftSlot && !loading ? { flexDirection: "row", gap: 10 } : null,
           style,
-          { transform: [{ scale }] },
+          animStyle,
         ]}
       >
-        <Text
-          style={[
-            {
-              ...Typography.section,
-              color: defaultLabelColor,
-              textAlign: "center",
-            },
-            textStyle,
-          ]}
-        >
-          {title}
-        </Text>
+        {loading ? (
+          <ActivityIndicator color={isSecondary ? Colors.primary : Colors.onPrimary} />
+        ) : (
+          <>
+            {leftSlot}
+            <Text
+              style={[
+                {
+                  ...Typography.section,
+                  color: defaultLabelColor,
+                  textAlign: "center",
+                },
+                textStyle,
+              ]}
+            >
+              {title}
+            </Text>
+          </>
+        )}
       </Animated.View>
     </Pressable>
   );

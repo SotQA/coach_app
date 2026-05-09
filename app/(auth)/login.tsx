@@ -1,12 +1,21 @@
-import { useState } from "react";
-import { View, Text, TextInput, ActivityIndicator, Pressable, Platform } from "react-native";
+import { useState, type ComponentProps, type ReactNode } from "react";
+import {
+  View,
+  Text,
+  ActivityIndicator,
+  Platform,
+  KeyboardAvoidingView,
+  ScrollView,
+  Pressable,
+} from "react-native";
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { useRouter } from "expo-router";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
 import { makeRedirectUri } from "expo-auth-session";
 import Constants, { ExecutionEnvironment } from "expo-constants";
 import { PrimaryButton } from "../../components/PrimaryButton";
+import { InputField } from "../../components/InputField";
 import { useAuth } from "../../context/AuthContext";
 import { useI18n } from "../../context/I18nContext";
 import { Colors } from "../../theme/colors";
@@ -16,6 +25,50 @@ import { Ionicons } from "@expo/vector-icons";
 import { logger } from "@/utils/logger";
 
 WebBrowser.maybeCompleteAuthSession();
+
+const H_PAD = 24;
+const PRESS_SCALE = 0.97;
+
+/** Local Reanimated spring scale for `Pressable`s on this screen (Google row). */
+function TouchScale({
+  children,
+  disabled,
+  onPress,
+  onPressIn,
+  onPressOut,
+  accessibilityRole,
+  accessibilityLabel,
+}: Pick<
+  ComponentProps<typeof Pressable>,
+  "disabled" | "onPress" | "onPressIn" | "onPressOut" | "accessibilityRole" | "accessibilityLabel"
+> & {
+  children: ReactNode;
+}) {
+  const scale = useSharedValue(1);
+  const animStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  return (
+    <Pressable
+      disabled={disabled}
+      onPress={onPress}
+      accessibilityRole={accessibilityRole}
+      accessibilityLabel={accessibilityLabel}
+      onPressIn={(e) => {
+        if (!disabled) scale.value = withSpring(PRESS_SCALE);
+        onPressIn?.(e);
+      }}
+      onPressOut={(e) => {
+        scale.value = withSpring(1);
+        onPressOut?.(e);
+      }}
+      style={{ width: "100%" }}
+    >
+      <Animated.View style={[{ width: "100%" }, animStyle]}>{children}</Animated.View>
+    </Pressable>
+  );
+}
 
 export default function Login() {
   const router = useRouter();
@@ -27,7 +80,7 @@ export default function Login() {
   const [submitting, setSubmitting] = useState(false);
   const [googleSubmitting, setGoogleSubmitting] = useState(false);
 
-  const extra = (Constants.expoConfig as any)?.extra ?? {};
+  const extra = (Constants.expoConfig as { extra?: Record<string, unknown> })?.extra ?? {};
   const googleWebClientId = String(extra.googleWebClientId ?? "").trim();
   const googleIosClientId = String(extra.googleIosClientId ?? "").trim();
   const googleAndroidClientId = String(extra.googleAndroidClientId ?? "").trim();
@@ -136,128 +189,129 @@ export default function Login() {
   if (user) return null;
 
   return (
-    <KeyboardAwareScrollView
+    <KeyboardAvoidingView
       style={{ flex: 1, backgroundColor: Colors.bg }}
-      contentContainerStyle={{
-        flexGrow: 1,
-        justifyContent: "center",
-        padding: Spacing.lg,
-        paddingBottom: Spacing.screenBottom,
-      }}
-      keyboardShouldPersistTaps="handled"
-      enableOnAndroid
-      enableResetScrollToCoords={false}
-      extraScrollHeight={24}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <View
-        style={{
-          backgroundColor: Colors.card,
-          borderRadius: Radius.md,
-          padding: Spacing.lg,
-          borderWidth: 1,
-          borderColor: Colors.border,
-        }}
+      <ScrollView
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
       >
-        <Text style={{ ...Typography.title, marginBottom: Spacing.xs }}>{t("welcomeBack")}</Text>
-        <Text style={{ ...Typography.secondary, marginBottom: Spacing.lg }}>
-          {t("loginSubtitle")}
-        </Text>
+        <View style={{ flex: 1 }} />
 
-        <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("email")}</Text>
-        <TextInput
-          placeholder={t("emailPlaceholder")}
-          placeholderTextColor={Colors.textMuted}
-          autoCapitalize="none"
-          keyboardType="email-address"
-          value={email}
-          onChangeText={setEmail}
-          style={{
-            borderWidth: 1,
-            borderColor: Colors.border,
-            borderRadius: Radius.sm,
-            marginBottom: Spacing.sm,
-            padding: 12,
-            color: Colors.text,
-            backgroundColor: Colors.surface,
-          }}
-        />
+        <View style={{ paddingHorizontal: H_PAD, paddingBottom: Spacing.screenBottom }}>
+          <Text style={{ ...Typography.display, color: Colors.primary, letterSpacing: -1.5 }}>Mentorix</Text>
+          <Text style={{ ...Typography.micro, color: Colors.textMuted, marginTop: Spacing.xs }}>
+            Coach. Train. Progress.
+          </Text>
 
-        <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("password")}</Text>
-        <TextInput
-          placeholder={t("passwordPlaceholder")}
-          placeholderTextColor={Colors.textMuted}
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          style={{
-            borderWidth: 1,
-            borderColor: Colors.border,
-            borderRadius: Radius.sm,
-            marginBottom: Spacing.md,
-            padding: 12,
-            color: Colors.text,
-            backgroundColor: Colors.surface,
-          }}
-        />
+          <Text style={{ ...Typography.display, marginTop: Spacing.lg }}>{t("welcomeBack")}</Text>
+          <Text style={{ ...Typography.body, color: Colors.textMuted, marginTop: Spacing.xs }}>
+            {t("loginSubtitle")}
+          </Text>
 
-        {submitting ? (
-          <ActivityIndicator style={{ marginVertical: 12 }} />
-        ) : (
-          <>
-            <PrimaryButton title={t("login")} onPress={handleLogin} />
-            <Pressable
-              disabled={googleSubmitting || !googleButtonEnabled}
+          <View style={{ marginTop: Spacing.lg }}>
+            <View style={{ marginBottom: Spacing.sm }}>
+              <InputField
+                label={t("email")}
+                value={email}
+                onChangeText={setEmail}
+                placeholder={t("emailPlaceholder")}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                autoComplete="email"
+              />
+            </View>
+            <InputField
+              label={t("password")}
+              value={password}
+              onChangeText={setPassword}
+              placeholder={t("passwordPlaceholder")}
+              secureTextEntry
+              autoComplete="password"
+            />
+          </View>
+
+          <View style={{ marginTop: Spacing.lg, gap: Spacing.md }}>
+            <PrimaryButton title={t("login")} onPress={handleLogin} loading={submitting} />
+
+            <TouchScale
+              disabled={googleSubmitting || submitting || !googleButtonEnabled}
               onPress={handleGoogleLogin}
-              style={({ pressed }) => ({
-                marginTop: Spacing.sm,
-                paddingVertical: 14,
-                paddingHorizontal: Spacing.md,
-                borderRadius: Radius.md,
-                backgroundColor: Colors.surface,
-                borderWidth: 1,
-                borderColor: Colors.border,
-                opacity: pressed ? 0.9 : 1,
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 10,
-              })}
+              accessibilityRole="button"
+              accessibilityLabel={t("continueWithGoogle")}
             >
-              {googleSubmitting ? (
-                <ActivityIndicator />
-              ) : (
-                <>
-                  <Ionicons name="logo-google" size={18} color={Colors.text} />
-                  <Text style={{ ...Typography.section, color: Colors.text }}>
-                    {t("continueWithGoogle")}
-                  </Text>
-                </>
-              )}
-            </Pressable>
-            {isExpoGo ? (
-              <Text style={{ ...Typography.secondary, marginTop: Spacing.xs, fontSize: FontSizes.caption }}>
-                Google sign-in requires a dev build (Expo Go cannot register the redirect URI Google accepts).
-              </Text>
-            ) : null}
-            {!isExpoGo && Platform.OS === "android" && !googleAndroidClientId ? (
-              <Text style={{ ...Typography.secondary, marginTop: Spacing.xs, fontSize: FontSizes.caption }}>
-                Add an Android OAuth client ID in app.json to use Google on Android.
-              </Text>
-            ) : null}
+              <View
+                style={{
+                  borderRadius: Radius.lg,
+                  paddingVertical: 15,
+                  paddingHorizontal: Spacing.md,
+                  borderWidth: 1.5,
+                  borderColor:
+                    googleButtonEnabled && !googleSubmitting && !submitting
+                      ? Colors.primary
+                      : Colors.disabled,
+                  backgroundColor: "transparent",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 10,
+                  minHeight: 50,
+                }}
+              >
+                {googleSubmitting ? (
+                  <ActivityIndicator color={Colors.primary} />
+                ) : (
+                  <>
+                    <Ionicons
+                      name="logo-google"
+                      size={18}
+                      color={
+                        googleButtonEnabled && !submitting ? Colors.primary : Colors.textMuted
+                      }
+                    />
+                    <Text
+                      style={{
+                        ...Typography.section,
+                        color:
+                          googleButtonEnabled && !submitting ? Colors.primary : Colors.textMuted,
+                        textAlign: "center",
+                      }}
+                    >
+                      {t("continueWithGoogle")}
+                    </Text>
+                  </>
+                )}
+              </View>
+            </TouchScale>
+
             <PrimaryButton
               title={t("createAccount")}
+              variant="secondary"
+              disabled={submitting || googleSubmitting}
               onPress={() => router.push("/signup")}
-              style={{ marginTop: Spacing.sm, backgroundColor: Colors.border }}
             />
-          </>
-        )}
+          </View>
 
-        {error ? (
-          <Text style={{ color: Colors.danger, marginTop: Spacing.xs }}>{error}</Text>
-        ) : null}
-      </View>
-    </KeyboardAwareScrollView>
+          {isExpoGo ? (
+            <Text style={{ ...Typography.secondary, marginTop: Spacing.md, fontSize: FontSizes.caption }}>
+              Google sign-in requires a dev build (Expo Go cannot register the redirect URI Google accepts).
+            </Text>
+          ) : null}
+          {!isExpoGo && Platform.OS === "android" && !googleAndroidClientId ? (
+            <Text style={{ ...Typography.secondary, marginTop: Spacing.xs, fontSize: FontSizes.caption }}>
+              Add an Android OAuth client ID in app.json to use Google on Android.
+            </Text>
+          ) : null}
+
+          {error ? (
+            <Text style={{ color: Colors.danger, marginTop: Spacing.md }}>{error}</Text>
+          ) : null}
+        </View>
+
+        <View style={{ flex: 1 }} />
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
-
-
