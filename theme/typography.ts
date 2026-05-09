@@ -12,6 +12,9 @@ export const FontSizes = {
   caption: 12,  // metadata, timestamps (18+ occurrences)
   note: 13,     // secondary captions (15+ occurrences)
   tiny: 11,     // badge / pill labels (5+ occurrences)
+  display: 44,
+  h1: 32,
+  micro: 11,
 } as const;
 
 export const Typography = {
@@ -34,6 +37,25 @@ export const Typography = {
     fontSize: 14,
     fontWeight: "400" as const,
     color: Colors.textSecondary,
+  },
+  display: {
+    fontSize: 44,
+    fontWeight: "800" as const,
+    letterSpacing: -1.0,
+    color: Colors.text,
+  },
+  hero: {
+    fontSize: 32,
+    fontWeight: "800" as const,
+    letterSpacing: -0.5,
+    color: Colors.text,
+  },
+  micro: {
+    fontSize: 11,
+    fontWeight: "700" as const,
+    letterSpacing: 1.4,
+    color: Colors.textMuted,
+    textTransform: "uppercase" as const,
   },
 } as const;
 

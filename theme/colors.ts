@@ -25,4 +25,10 @@ export const Colors = {
   surfaceSubtle:   "rgba(255,255,255,0.06)",  // subtle inset backgrounds, grid lines
   surfaceHighlight:"rgba(255,255,255,0.10)",  // slightly brighter surface tint, active rows
   dangerTint:      "rgba(220,38,38,0.35)",    // danger-tone card border
+
+  surfaceElevated: "#15151A",
+  inputBg:         "#1F1F23",
+  hairline:        "rgba(255,255,255,0.06)",
+  hairlineStrong:  "rgba(255,255,255,0.12)",
+  primaryGlow:     "rgba(212,255,68,0.35)",
 } as const;
