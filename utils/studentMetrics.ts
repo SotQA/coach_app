@@ -55,8 +55,9 @@ export function compliancePercent(
   return Math.max(0, Math.min(999, Math.round((count7 / wpw) * 100)));
 }
 
-/** Same short date label as the pre-refactor screen (`MMM d` in local locale). Null when no logs / no date. */
-export function lastWorkoutLabel(logs: WorkoutLog[]): string | null {
+/** Same short date label as the pre-refactor screen (`MMM d` in local locale). */
+export function lastWorkoutLabel(logs: WorkoutLog[], now: Date = new Date()): string | null {
+  void now;
   const lastWorkoutMs = logs[0] ? logCompletedMs(logs[0]) : 0;
   if (lastWorkoutMs <= 0) return null;
   return new Date(lastWorkoutMs).toLocaleDateString(undefined, { month: "short", day: "numeric" });
