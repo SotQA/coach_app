@@ -14,6 +14,7 @@ import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography, FontSizes } from "../../theme/typography";
 import { ScreenLayout } from "../../components/ScreenLayout";
+import { StudentStatCard } from "../../components/student/StudentStatCard";
 import type { TrainingGroup } from "../../types/TrainingGroup";
 import { logger } from "@/utils/logger";
 import { getUserInitials, getDisplayName } from "@/utils/userDisplay";
@@ -154,42 +155,6 @@ export default function StudentDetails() {
 
   const displayName = getDisplayName(student, "Student");
   const initials = getUserInitials(student, "S");
-
-  const StatCard = ({
-    label,
-    value,
-    icon,
-    tint,
-  }: {
-    label: string;
-    value: string;
-    icon?: any;
-    tint?: string;
-  }) => (
-    <View
-      style={{
-        flex: 1,
-        minWidth: 0,
-        backgroundColor: Colors.card,
-        borderRadius: Radius.lg,
-        padding: Spacing.md,
-        borderWidth: 1,
-        borderColor: Colors.border,
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      {icon ? (
-        <Ionicons name={icon} size={18} color={tint ?? Colors.textMuted} style={{ marginBottom: 6 }} />
-      ) : null}
-      <Text style={{ ...Typography.secondary, color: Colors.textMuted, textAlign: "center", width: "100%" }}>
-        {label}
-      </Text>
-      <Text style={{ ...Typography.title, fontSize: FontSizes.h3, marginTop: 6, textAlign: "center", width: "100%" }}>
-        {value}
-      </Text>
-    </View>
-  );
 
   const RowAction = ({
     icon,
@@ -445,13 +410,13 @@ export default function StudentDetails() {
           {/* Quick stats */}
           <Text style={{ ...Typography.section, marginBottom: Spacing.xs }}>Quick stats</Text>
           <View style={{ flexDirection: "row", gap: Spacing.sm, marginBottom: Spacing.sm }}>
-            <StatCard
+            <StudentStatCard
               label="Workouts completed"
               value={String(logs.length)}
               icon="barbell-outline"
               tint={Colors.primary}
             />
-            <StatCard
+            <StudentStatCard
               label="Compliance"
               value={compliancePct != null ? `${compliancePct}%` : "—"}
               icon="checkmark-done-outline"
@@ -459,13 +424,13 @@ export default function StudentDetails() {
             />
           </View>
           <View style={{ flexDirection: "row", gap: Spacing.sm, marginBottom: Spacing.md }}>
-            <StatCard
+            <StudentStatCard
               label="Current streak"
               value={streakDays ? `${streakDays}d` : "—"}
               icon="flame-outline"
               tint="#FF8C42"
             />
-            <StatCard
+            <StudentStatCard
               label="Avg duration"
               value={avgDurationLabel ?? "—"}
               icon="time-outline"
