@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { View, Text, ActivityIndicator, Alert, ScrollView, Pressable } from "react-native";
+import { useCallback, useMemo } from "react";
+import { View, Text, ActivityIndicator, ScrollView, Pressable } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../context/AuthContext";
@@ -19,6 +19,7 @@ import { logger } from "@/utils/logger";
 import { toMs } from "@/utils/dateConvert";
 import { dayKeyFromMs } from "@/utils/dateRanges";
 import { getUserInitials, getDisplayName } from "@/utils/userDisplay";
+import { useAsyncData } from "../../hooks/useAsyncData";
 
 export default function StudentDetails() {
   const router = useRouter();
@@ -29,99 +30,60 @@ export default function StudentDetails() {
 
   const studentId = useMemo(() => String(params.studentId ?? "").trim(), [params]);
 
-  const [student, setStudent] = useState<StudentSummary | null>(null);
-  const [plans, setPlans] = useState<WorkoutPlan[]>([]);
-  const [logs, setLogs] = useState<WorkoutLog[]>([]);
-  const [latestGroup, setLatestGroup] = useState<TrainingGroup | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [deletingPlanId, setDeletingPlanId] = useState<string | null>(null);
+  type StudentDetailsData = {
+    student: StudentSummary;
+    latestGroup: TrainingGroup | null;
+    plans: WorkoutPlan[];
+    logs: WorkoutLog[];
+  };
 
-  const sortedPlans = useMemo(() => {
-    const getOrder = (p: WorkoutPlan) =>
-      typeof p.order === "number" && Number.isFinite(p.order) ? p.order : Number.MAX_SAFE_INTEGER;
+  const fetcher = useCallback(async (): Promise<StudentDetailsData> => {
+    logger.log("[coach/studentDetails] load start", { studentId });
+    if (!studentId) throw new Error("Missing studentId.");
+    if (!userId || userRole !== "coach") throw new Error("You must be logged in as a coach.");
+    const studentDoc = await studentService.getStudentById(studentId);
+    logger.log("[coach/studentDetails] fetched student", studentDoc?.id);
+    if (!studentDoc) throw new Error("Student not found.");
+    if (studentDoc.coachId !== userId) throw new Error("You don't have access to this student.");
 
-    return plans
-      .filter((p) => p.isActive !== false)
-      .slice()
-      .sort((a, b) => getOrder(a) - getOrder(b));
-  }, [plans]);
+    const [gResult, plansResult, historyResult] = await Promise.allSettled([
+      trainingGroupService.getLatestTrainingGroupForStudent(userId, studentId),
+      workoutService.getWorkoutPlansForStudentAsCoach(userId, studentId),
+      workoutService.getWorkoutHistory(studentId),
+    ]);
 
-  useEffect(() => {
-    let active = true;
+    if (gResult.status === "rejected") {
+      logger.warn("[studentDetails] partial load failure", { which: "trainingGroup", reason: gResult.reason });
+    }
+    const workoutPlans = plansResult.status === "fulfilled" ? plansResult.value : [];
+    if (plansResult.status === "rejected") {
+      logger.warn("[studentDetails] partial load failure", { which: "workoutPlans", reason: plansResult.reason });
+    }
+    logger.log("[coach/studentDetails] fetched plans", workoutPlans.length);
+    const history = historyResult.status === "fulfilled" ? historyResult.value : [];
+    if (historyResult.status === "rejected") {
+      logger.warn("[studentDetails] partial load failure", { which: "history", reason: historyResult.reason });
+    }
+    logger.log("[coach/studentDetails] fetched logs", history.length);
 
-    (async () => {
-      logger.log("[coach/studentDetails] load start", { studentId });
-      setLoading(true);
-      try {
-        setError(null);
-
-        if (!studentId) {
-          if (active) setError("Missing studentId.");
-          return;
-        }
-
-        logger.log("[coach/studentDetails] currentUser", user);
-        if (!userId || userRole !== "coach") {
-          if (active) setError("You must be logged in as a coach.");
-          return;
-        }
-
-        const studentDoc = await studentService.getStudentById(studentId);
-        if (!active) return;
-        logger.log("[coach/studentDetails] fetched student", studentDoc?.id);
-        if (!studentDoc) {
-          setError("Student not found.");
-          return;
-        }
-
-        // Basic ownership check (UI-level). Security should be enforced via Firestore rules too.
-        if (studentDoc.coachId !== userId) {
-          setError("You don't have access to this student.");
-          return;
-        }
-
-        setStudent(studentDoc);
-
-        // Load the rest in parallel; a single sub-fetch failure must not blank the whole screen.
-        const [gResult, plansResult, historyResult] = await Promise.allSettled([
-          trainingGroupService.getLatestTrainingGroupForStudent(userId, studentId),
-          workoutService.getWorkoutPlansForStudentAsCoach(userId, studentId),
-          workoutService.getWorkoutHistory(studentId),
-        ]);
-        if (!active) return;
-
-        if (gResult.status === "fulfilled") {
-          setLatestGroup(gResult.value);
-        } else {
-          logger.warn("[studentDetails] partial load failure", { which: "trainingGroup", reason: gResult.reason });
-          setLatestGroup(null);
-        }
-
-        const workoutPlans = plansResult.status === "fulfilled" ? plansResult.value : [];
-        if (plansResult.status === "rejected") {
-          logger.warn("[studentDetails] partial load failure", { which: "workoutPlans", reason: plansResult.reason });
-        }
-        logger.log("[coach/studentDetails] fetched plans", workoutPlans.length);
-        setPlans(workoutPlans);
-
-        const history = historyResult.status === "fulfilled" ? historyResult.value : [];
-        if (historyResult.status === "rejected") {
-          logger.warn("[studentDetails] partial load failure", { which: "history", reason: historyResult.reason });
-        }
-        logger.log("[coach/studentDetails] fetched logs", history.length);
-        setLogs(history);
-      } catch (e: any) {
-        if (!active) return;
-        logger.error("[coach/studentDetails] load error", e);
-        setError(e.message ?? "Failed to load student details.");
-      } finally {
-        if (active) setLoading(false);
-      }
-    })();
-
-    return () => { active = false; };
+    return {
+      student: studentDoc,
+      latestGroup: gResult.status === "fulfilled" ? gResult.value : null,
+      plans: workoutPlans,
+      logs: history,
+    };
   }, [studentId, userId, userRole]);
+
+  const { data: detailsData, loading, error: loadError } = useAsyncData<StudentDetailsData>(
+    fetcher,
+    [fetcher]
+  );
+
+  const student = detailsData?.student ?? null;
+  const plans = useMemo(() => detailsData?.plans ?? [], [detailsData]);
+  const logs = useMemo(() => detailsData?.logs ?? [], [detailsData]);
+  const latestGroup = detailsData?.latestGroup ?? null;
+
 
   if (loading) {
     return (
@@ -138,7 +100,7 @@ export default function StudentDetails() {
     );
   }
 
-  if (error) {
+  if (loadError) {
     return (
       <View
         style={{
@@ -148,7 +110,7 @@ export default function StudentDetails() {
           backgroundColor: Colors.bg,
         }}
       >
-        <Text style={{ color: Colors.danger, marginBottom: Spacing.sm }}>{error}</Text>
+        <Text style={{ color: Colors.danger, marginBottom: Spacing.sm }}>{loadError.message}</Text>
         <PrimaryButton title="Back to Dashboard" onPress={() => router.replace("/coach/dashboard")} />
       </View>
     );

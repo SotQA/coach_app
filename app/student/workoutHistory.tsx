@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useAsyncData } from "../../hooks/useAsyncData";
 import {
   ActivityIndicator,
   Pressable,
@@ -84,14 +85,24 @@ export default function WorkoutHistory() {
   const insets = useSafeAreaInsets();
   const { width: windowW } = useWindowDimensions();
   const { user } = useAuth();
-  const [logs, setLogs] = useState<WorkoutLog[]>([]);
-  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [visibleMonth, setVisibleMonth] = useState(() => startOfMonth(new Date()));
   const [selectedDayKey, setSelectedDayKey] = useState<string | null>(null);
   const [filterCategory, setFilterCategory] = useState<WorkoutCategory>("all");
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
+
+  const fetcher = useCallback(async (): Promise<WorkoutLog[]> => {
+    if (!user || user.role !== "student") throw new Error("You must be logged in as a student.");
+    const history = await workoutService.getWorkoutHistory(user.id);
+    return Array.isArray(history) ? history : [];
+  }, [user]);
+
+  const { data: fetchedLogs, loading, error: loadError, reload } = useAsyncData<WorkoutLog[]>(
+    fetcher,
+    [fetcher]
+  );
+
+  const logs = useMemo(() => fetchedLogs ?? [], [fetchedLogs]);
 
   const normalizedLogs = useMemo((): LogWithMeta[] => {
     return logs.map((log) => {
@@ -119,44 +130,14 @@ export default function WorkoutHistory() {
     });
   }, [logs]);
 
-  const load = useCallback(async () => {
-    if (!user || user.role !== "student") return;
-    const history = await workoutService.getWorkoutHistory(user.id);
-    setLogs(Array.isArray(history) ? history : []);
-  }, [user]);
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    reload();
+  }, [reload]);
 
   useEffect(() => {
-    let active = true;
-    (async () => {
-      setLoading(true);
-      try {
-        setError(null);
-        if (!user || user.role !== "student") {
-          if (active) setError("You must be logged in as a student.");
-          return;
-        }
-        const history = await workoutService.getWorkoutHistory(user.id);
-        if (!active) return;
-        setLogs(Array.isArray(history) ? history : []);
-      } catch (e: unknown) {
-        if (!active) return;
-        const msg = e instanceof Error ? e.message : "Failed to load workout history.";
-        setError(msg);
-      } finally {
-        if (active) setLoading(false);
-      }
-    })();
-    return () => { active = false; };
-  }, [user?.id, user?.role]);
-
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    try {
-      await load();
-    } finally {
-      setRefreshing(false);
-    }
-  }, [load]);
+    if (!loading && refreshing) setRefreshing(false);
+  }, [loading, refreshing]);
 
   const monthLabel = useMemo(
     () =>
@@ -299,10 +280,10 @@ export default function WorkoutHistory() {
     );
   }
 
-  if (error) {
+  if (loadError) {
     return (
       <View style={{ flex: 1, justifyContent: "center", padding: Spacing.md, backgroundColor: Colors.bg }}>
-        <Text style={{ color: Colors.danger, marginBottom: Spacing.sm }}>{error}</Text>
+        <Text style={{ color: Colors.danger, marginBottom: Spacing.sm }}>{loadError.message}</Text>
         <PrimaryButton title="Go to Login" onPress={() => router.replace("/login")} />
       </View>
     );

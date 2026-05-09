@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -11,7 +11,8 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { useAuth } from "../../context/AuthContext";
-import { useActiveWorkout, type ActiveExerciseDraft } from "../../context/ActiveWorkoutContext";
+import { useActiveWorkoutSession, type ActiveExerciseDraft } from "../../context/ActiveWorkoutSessionContext";
+import { useElapsedSeconds } from "../../context/ElapsedTimeContext";
 import { useI18n } from "../../context/I18nContext";
 import { workoutService } from "../../services/workoutService";
 import type { LoggedSet, WorkoutLog, WorkoutPlan } from "../../types/Workout";
@@ -30,6 +31,7 @@ import { RestTimerBar } from "../../components/RestTimerBar";
 import { formatElapsedForTimer, parseRestSeconds } from "../../utils/workoutDuration";
 import { logger } from "../../utils/logger";
 import { parseKgInput, normalizeDecimalInput } from "../../utils/inputParsing";
+import { useAsyncData } from "../../hooks/useAsyncData";
 
 // ─── Local draft types (mirror ActiveSetDraft, using `done` for UI clarity) ──
 type SetDraft = { weight: string; reps: string; rpe: string; done: boolean };
@@ -75,7 +77,8 @@ function toLocalDrafts(exercises: ActiveExerciseDraft[]): ExerciseDraft[] {
 export default function WorkoutExecution() {
   const router = useRouter();
   const { user: authUser } = useAuth();
-  const activeWorkout = useActiveWorkout();
+  const activeWorkout = useActiveWorkoutSession();
+  const elapsedSeconds = useElapsedSeconds();
   const { t } = useI18n();
   const authUserId = authUser?.id;
   const authUserRole = authUser?.role;
@@ -90,13 +93,32 @@ export default function WorkoutExecution() {
   );
   const groupId = useMemo(() => String(params.groupId ?? "").trim(), [params.groupId]);
 
-  const [plan, setPlan] = useState<WorkoutPlan | null>(null);
-  const [priorLogs, setPriorLogs] = useState<WorkoutLog[]>([]);
+  type ExecutionData = { plan: WorkoutPlan; priorLogs: WorkoutLog[] };
+
+  const fetcher = useCallback(async (): Promise<ExecutionData> => {
+    if (!workoutPlanId) throw new Error("Missing workoutPlanId.");
+    if (!authUserId || authUserRole !== "student")
+      throw new Error("You must be logged in as a student.");
+    const loaded = await workoutService.getWorkoutPlanById(workoutPlanId);
+    if (!loaded) throw new Error("Workout plan not found.");
+    if (loaded.studentId !== authUserId)
+      throw new Error("You don't have access to this workout plan.");
+    const history = await workoutService.getWorkoutHistory(authUserId);
+    return { plan: loaded, priorLogs: Array.isArray(history) ? history : [] };
+  }, [workoutPlanId, authUserId, authUserRole]);
+
+  const { data: execData, loading, error: loadError } = useAsyncData<ExecutionData>(
+    fetcher,
+    [fetcher]
+  );
+
+  const plan = execData?.plan ?? null;
+  const priorLogs = useMemo(() => execData?.priorLogs ?? [], [execData]);
+
   const [drafts, setDrafts] = useState<ExerciseDraft[]>([]);
   const [sessionNotes, setSessionNotes] = useState("");
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
   const planRef = useRef<WorkoutPlan | null>(null);
@@ -115,52 +137,9 @@ export default function WorkoutExecution() {
     { weight: TextInput | null; reps: TextInput | null; rpe: TextInput | null }[][]
   >([]);
 
-  // ── Load plan & prior logs ────────────────────────────────────────────────
+  // ── Reset session-init guard when fetch deps change ──────────────────────
   useEffect(() => {
     sessionInitRef.current = false;
-    let active = true;
-
-    (async () => {
-      setLoading(true);
-      setError(null);
-      setMessage(null);
-      setPlan(null);
-
-      try {
-        if (!workoutPlanId) {
-          if (active) setError("Missing workoutPlanId.");
-          return;
-        }
-        if (!authUserId || authUserRole !== "student") {
-          if (active) setError("You must be logged in as a student.");
-          return;
-        }
-
-        const loaded = await workoutService.getWorkoutPlanById(workoutPlanId);
-        if (!active) return;
-        if (!loaded) {
-          setError("Workout plan not found.");
-          return;
-        }
-        if (loaded.studentId !== authUserId) {
-          setError("You don't have access to this workout plan.");
-          return;
-        }
-
-        const history = await workoutService.getWorkoutHistory(authUserId);
-        if (!active) return;
-        setPriorLogs(Array.isArray(history) ? history : []);
-        setPlan(loaded);
-      } catch (e: any) {
-        if (!active) return;
-        logger.error("[workoutExecution] load failed", e);
-        setError(e.message ?? "Failed to load workout plan.");
-      } finally {
-        if (active) setLoading(false);
-      }
-    })();
-
-    return () => { active = false; };
   }, [workoutPlanId, authUserId, authUserRole]);
 
   // ── Session init: restore existing session or start a fresh one ──────────
@@ -262,11 +241,11 @@ export default function WorkoutExecution() {
   const handleSubmit = async () => {
     if (!plan) return;
     setSaving(true);
-    setError(null);
+    setSaveError(null);
     setMessage(null);
     try {
       if (!authUser || authUser.role !== "student") {
-        setError("You must be logged in as a student.");
+        setSaveError("You must be logged in as a student.");
         return;
       }
 
@@ -351,7 +330,7 @@ export default function WorkoutExecution() {
       setMessage(t("workoutSaved"));
       router.replace("/student/workoutHistory");
     } catch (e: any) {
-      setError(e.message ?? "Failed to save workout.");
+      setSaveError(e.message ?? "Failed to save workout.");
     } finally {
       setSaving(false);
     }
@@ -367,10 +346,10 @@ export default function WorkoutExecution() {
     );
   }
 
-  if (error && !plan) {
+  if (loadError && !plan) {
     return (
       <View style={{ flex: 1, justifyContent: "center", padding: Spacing.md, backgroundColor: Colors.bg }}>
-        <Text style={{ color: Colors.danger, marginBottom: Spacing.sm }}>{error}</Text>
+        <Text style={{ color: Colors.danger, marginBottom: Spacing.sm }}>{loadError.message}</Text>
       </View>
     );
   }
@@ -436,7 +415,7 @@ export default function WorkoutExecution() {
                   fontVariant: ["tabular-nums"],
                 }}
               >
-                {formatElapsedForTimer(activeWorkout.elapsedSeconds)}
+                {formatElapsedForTimer(elapsedSeconds)}
               </Text>
             </View>
           </View>
@@ -716,8 +695,8 @@ export default function WorkoutExecution() {
           );
         })}
 
-        {error ? (
-          <Text style={{ color: Colors.danger, marginBottom: Spacing.sm }}>{error}</Text>
+        {saveError ? (
+          <Text style={{ color: Colors.danger, marginBottom: Spacing.sm }}>{saveError}</Text>
         ) : null}
         {message ? (
           <Text style={{ color: Colors.success, marginBottom: Spacing.sm }}>{message}</Text>

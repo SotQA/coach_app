@@ -1,0 +1,105 @@
+## phase-2: split ActiveWorkout context, add useAsyncData, debounce persistence
+
+Behavior-preserving refactor. UI looks and feels identical. No schema changes.
+
+---
+
+## Commits
+
+- `2.10: add useAsyncData hook, migrate three screens`
+- `2.11: split ActiveWorkoutContext into session + elapsed-time providers`
+- `1.11: debounce AsyncStorage persistence with force-flush on critical events`
+- `fix: memoize derived arrays to avoid useMemo dep churn`
+
+---
+
+## Changes
+
+### Task 2.10 — `hooks/useAsyncData<T>`
+New hook encapsulating the `let active = true; (async()=>{...})(); return () => { active = false; }` pattern.
+- Cancels stale fetches on unmount and dep change via token counter.
+- `data` is retained on reload so screens don't flash blank.
+- `error` cleared at every fetch start.
+- Exposes `reload()` to trigger manual refetches.
+
+Migrated to hook:
+- `app/student/workoutExecution.tsx` — fetcher returns `{ plan, priorLogs }`
+- `app/coach/studentDetails.tsx` — fetcher returns `{ student, latestGroup, plans, logs }`
+- `app/student/workoutHistory.tsx` — fetcher returns `WorkoutLog[]`; pull-to-refresh uses `reload()`
+
+### Task 2.11 — Context split
+**Problem:** `useActiveWorkout()` exposed `elapsedSeconds` (ticking 1 Hz) in the same context as stable session state. Every session consumer re-rendered every second.
+
+**Solution:**
+- `context/ActiveWorkoutContext.tsx` renamed → `context/ActiveWorkoutSessionContext.tsx`
+  - Provider: `ActiveWorkoutSessionProvider`
+  - Hook: `useActiveWorkoutSession()` — stable surface (session, mutators, rest-timer state)
+  - `elapsedSeconds` removed from this context
+- New `context/ElapsedTimeContext.tsx`
+  - Provider: `ElapsedTimeProvider` (must live inside `ActiveWorkoutSessionProvider`)
+  - Hook: `useElapsedSeconds()` — returns `number`, re-renders at 1 Hz
+  - Hook: `useElapsedFormatted()` — thin wrapper for mm:ss string
+- Provider tree in `app/_layout.tsx`:
+  ```
+  <ActiveWorkoutSessionProvider>
+    <ElapsedTimeProvider>
+      ...
+    </ElapsedTimeProvider>
+  </ActiveWorkoutSessionProvider>
+  ```
+- All consumers migrated: `_layout.tsx`, `workoutExecution.tsx`, `workouts.tsx`, `FloatingWorkoutBar.tsx`, `RestTimerBar.tsx`
+
+### Task 1.11 — Debounced AsyncStorage persistence
+**Problem:** `persist()` was called on every `updateSet` keystroke (~10 writes/sec).
+
+**Solution:** 500 ms debounce via `persistDebounced()`. Force-flush on critical events:
+- `finishSession()` — flushes pending write, then writes `null` immediately
+- `AppState` → background/inactive — calls `flushPersist()`
+- Provider unmount — calls `flushPersist()` in effect cleanup
+- Logout — cancels timer, writes `null` immediately (fire-and-forget)
+- Periodic 10s save — cancels debounce, writes `sessionRef.current` directly
+
+**Hard guarantee preserved:** losing the last 500 ms of a keystroke is acceptable; losing the session on force-quit / background is not.
+
+---
+
+## Verification
+
+### 1. `npx tsc --noEmit`
+```
+(no output — clean)
+```
+
+### 2. `npx expo lint` — new warnings introduced
+None. All warnings shown are pre-existing (checked against `main` baseline):
+- `app/_layout.tsx` — pre-existing `lastResponse`/`router` missing deps
+- `app/coach/studentDetails.tsx` — `RowAction` unused (pre-existing)
+- All other warnings were present before this branch
+
+### 3. `useActiveWorkout` grep
+```
+(no output — zero references remaining)
+```
+
+### 4. `ActiveWorkoutContext` grep (code references, not comments)
+```
+components\RestTimerBar.tsx:20:  * Reads directly from ActiveWorkoutContext so it can...
+```
+Only a JSDoc comment — not a code import.
+
+### 5. `let active = true` in the three migrated screens
+```
+(no output — all three migrated to useAsyncData)
+```
+
+### Manual smoke (iOS simulator checklist)
+- [ ] Cold launch with no session → boots, no errors, login works
+- [ ] Sign in as student → start workout → elapsed timer ticks each second
+- [ ] Type a weight at 5 chars/sec → no input lag
+- [ ] Background app 30 s → foreground → elapsed time caught up to wall-clock
+- [ ] Force-quit while typing → relaunch → session hydrates (may lose last char, not whole session)
+- [ ] Finish workout → sign out + sign back in → history shows completed log
+
+### Bugs noted (not fixed here)
+- `RowAction` component in `studentDetails.tsx` is defined but never rendered — likely dead code from a UI refactor, safe to remove in a later pass.
+- `deletingPlanId` state in `studentDetails.tsx` was also dead code — removed in this branch as part of cleanup.
