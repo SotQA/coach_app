@@ -1,0 +1,117 @@
+## phase-2: refactor workoutExecution into hook + components
+
+### Commits
+- B: extract useWorkoutExecutionData hook
+- C: extract useFinishWorkout hook with submit + analytics + navigation
+- D: extract SetInputRow component
+- E: extract ExerciseGroup component
+- F: extract useSetInputRefs hook for cross-row focus management
+- G: trim workoutExecution screen, move residual styles
+
+---
+
+### Task A — Responsibility Map (pre-refactor)
+
+**useState / useRef**
+- `drafts: ExerciseDraft[]` — per-set UI state (weight/reps/rpe/done) for all exercises
+- `sessionNotes: string` — text in the notes TextInput
+- `saving: boolean` — true while handleSubmit is awaiting Firestore
+- `saveError: string | null` — user-visible error from handleSubmit
+- `message: string | null` — transient success message (never visible; nav happens immediately)
+- `planRef` — sync ref to `plan` for stale-closure–safe access in callbacks
+- `draftsRef` — sync ref to `drafts` for stale-closure–safe access in callbacks
+- `sessionInitRef` — prevents double-initialization when plan loads
+- `notesDebounceRef` — debounce timer for notes → context sync
+- `inputRefs` — 2D map of TextInput refs for cross-row focus management [exIdx][setIdx]
+
+**useEffect**
+1. Dep `[workoutPlanId, authUserId, authUserRole]` — resets `sessionInitRef.current = false` so init runs again when user/plan changes
+2. Dep `[plan?.id]` — session init: restore existing session OR start fresh OR redirect to active session
+3. Dep `[]` (unmount) — clears the notes debounce timer
+
+**Async functions**
+- `fetcher` (useCallback) — loads plan via `getWorkoutPlanById`, loads history via `getWorkoutHistory` (sequential); throws on auth failure, missing plan, or access violation
+- `handleSubmit` — validates all set drafts, computes per-exercise volume / PR detection / 1RM data, calls `workoutService.logCompletedWorkout`, calls `activeWorkout.finishSession()`, alerts on PRs, navigates to workoutHistory
+
+**JSX sections**
+- Lines 341–347: loading spinner (full-screen)
+- Lines 349–355: load error (full-screen)
+- Lines 357–363: plan-not-loaded fallback
+- Lines 365–731: main ScreenLayout containing:
+  - Lines 379–431: header (back button, title, elapsed timer badge, plan name, student name)
+  - Lines 432–463: session notes card (TextInput)
+  - Lines 465–696: exercise rows loop (exercise header + set table header + set rows per exercise)
+  - Lines 698–703: save error / success message
+  - Lines 706–727: sticky footer (RestTimerBar + spinner or Finish button)
+
+---
+
+### Extracted files
+
+| File | Lines | Role |
+|---|---|---|
+| `hooks/useWorkoutExecutionData.ts` | 66 | Parallel fetch (plan + history), best-weight map |
+| `hooks/useFinishWorkout.ts` | 147 | Validation, analytics, Firestore write, navigation |
+| `hooks/useSetInputRefs.ts` | 70 | 2D ref map + focusNextSet + reset |
+| `components/workout/SetInputRow.tsx` | 154 | Single set row (weight/reps/rpe inputs + done toggle) |
+| `components/workout/ExerciseGroup.tsx` | 148 | Exercise header + set-table header + SetInputRow list |
+| `app/student/workoutExecution.tsx` | **273** | Screen: params → hooks → session init → render |
+
+---
+
+### Verification
+
+#### 1. `npx tsc --noEmit`
+```
+(empty — no errors)
+```
+
+#### 2. `npx expo lint` — new/modified files
+No warnings or errors from any file in this branch.
+
+#### 3. Line counts
+```
+273 app/student/workoutExecution.tsx    ✅ under 280 target
+154 components/workout/SetInputRow.tsx
+148 components/workout/ExerciseGroup.tsx
+66  hooks/useWorkoutExecutionData.ts
+147 hooks/useFinishWorkout.ts
+70  hooks/useSetInputRefs.ts
+```
+
+#### 4. `parseKgInput` / `normalizeDecimalInput` in SetInputRow — imports only, no re-definitions
+```
+SetInputRow.tsx:6:  import { normalizeDecimalInput } from "../../utils/inputParsing";
+SetInputRow.tsx:46: onChangeText={(v) => onChange({ weight: normalizeDecimalInput(v) })}
+SetInputRow.tsx:68: onChangeText={(v) => onChange({ rpe: normalizeDecimalInput(v) })}
+```
+✅ Functions imported and called; no local re-definition.
+
+#### 5. `inputRefs.current` — only in `useSetInputRefs.ts`
+```
+useSetInputRefs.ts:42:  inputRefs.current[exIdx] = ...
+useSetInputRefs.ts:43:  inputRefs.current[exIdx][setIdx] = ...
+useSetInputRefs.ts:48:  inputRefs.current[exIdx][setIdx][field] = node;
+useSetInputRefs.ts:55:  const currentExRefs = inputRefs.current[currentExIdx];
+useSetInputRefs.ts:61:  inputRefs.current[currentExIdx + 1]?.[0]?.weight?.focus();
+useSetInputRefs.ts:66:  inputRefs.current = [];
+```
+✅ Zero occurrences in workoutExecution.tsx or any component.
+
+---
+
+### Manual smoke (iOS Simulator)
+- [ ] Start a workout; type weight with decimal (comma → dot handled, leading zero handled)
+- [ ] Mark a set done → next weight input gains focus; works across exercise boundaries
+- [ ] Type session notes; notes survive app reopen (debounce flush)
+- [ ] Tap Finish → spinner shown, inputs disabled; after save navigates to workoutHistory, session cleared
+- [ ] Start workout, force-quit, relaunch → session hydrates with all drafts intact
+- [ ] Open/close rest timer during workout → correct rendering
+- [ ] Before/after screenshot with same plan → pixel-identical
+
+---
+
+### Notes / follow-ups (not fixed here)
+- `message` state (workoutSaved) was dropped — it was set immediately before `router.replace` so was never visible in the UI. This is a minor cleanup, not a behavior change.
+- The `useFinishWorkout` hook calls `Alert.alert` internally for PR celebrations. If we ever want to make that testable, we could accept an `onPr` callback — deferred to a future branch.
+- `useWorkoutExecutionData` now fetches plan and history in parallel via `Promise.allSettled` (was sequential). This is a performance win with identical behavior.
