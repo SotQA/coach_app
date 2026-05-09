@@ -2,7 +2,6 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Pressable,
   Text,
   TextInput,
@@ -14,13 +13,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useActiveWorkoutSession, type ActiveExerciseDraft } from "../../context/ActiveWorkoutSessionContext";
 import { useElapsedSeconds } from "../../context/ElapsedTimeContext";
 import { useI18n } from "../../context/I18nContext";
-import { workoutService } from "../../services/workoutService";
-import type { LoggedSet, WorkoutPlan } from "../../types/Workout";
-import {
-  computeExerciseVolumeFromLoggedSets,
-  computeTotalVolume,
-  normalizeExerciseName,
-} from "../../utils/workoutMetrics";
+import type { WorkoutPlan } from "../../types/Workout";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
@@ -29,8 +22,9 @@ import { ScreenLayout } from "../../components/ScreenLayout";
 import { RestTimerBar } from "../../components/RestTimerBar";
 import { formatElapsedForTimer, parseRestSeconds } from "../../utils/workoutDuration";
 import { logger } from "../../utils/logger";
-import { parseKgInput, normalizeDecimalInput } from "../../utils/inputParsing";
+import { normalizeDecimalInput } from "../../utils/inputParsing";
 import { useWorkoutExecutionData } from "../../hooks/useWorkoutExecutionData";
+import { useFinishWorkout } from "../../hooks/useFinishWorkout";
 
 // ─── Local draft types (mirror ActiveSetDraft, using `done` for UI clarity) ──
 type SetDraft = { weight: string; reps: string; rpe: string; done: boolean };
@@ -96,11 +90,10 @@ export default function WorkoutExecution() {
   const plan = execData?.plan ?? null;
   const bestWeightByExercise = execData?.bestWeightByExercise ?? new Map<string, number>();
 
+  const { finishWorkout, submitting, submitError } = useFinishWorkout();
+
   const [drafts, setDrafts] = useState<ExerciseDraft[]>([]);
   const [sessionNotes, setSessionNotes] = useState("");
-  const [saving, setSaving] = useState(false);
-  const [saveError, setSaveError] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
 
   const planRef = useRef<WorkoutPlan | null>(null);
   const draftsRef = useRef<ExerciseDraft[]>([]);
@@ -213,104 +206,6 @@ export default function WorkoutExecution() {
     }, 400);
   };
 
-  // ── Finish session: save to Firestore, clear context + storage ───────────
-  const handleSubmit = async () => {
-    if (!plan) return;
-    setSaving(true);
-    setSaveError(null);
-    setMessage(null);
-    try {
-      if (!authUser || authUser.role !== "student") {
-        setSaveError("You must be logged in as a student.");
-        return;
-      }
-
-      const completedExercises = plan.exercises.map((exercise, exIdx) => {
-        const draft = drafts[exIdx];
-        if (!draft || draft.sets.length === 0) {
-          throw new Error(`Missing set data for "${exercise.name}".`);
-        }
-
-        const loggedSets: LoggedSet[] = draft.sets.map((d, si) => {
-          if (!d.done) {
-            return { setNumber: si + 1, reps: 0, weight: null };
-          }
-          const raw = String(d.reps).trim();
-          const r = raw === "" ? 0 : Number(raw);
-          if (!Number.isFinite(r) || !Number.isInteger(r) || r < 0) {
-            throw new Error(
-              `Set ${si + 1} (${exercise.name}): use a whole number for reps (0 skips the set).`
-            );
-          }
-          let weightOut: number | null = null;
-          if (r > 0) {
-            const trimmedW = d.weight.trim();
-            if (trimmedW !== "") {
-              const w = parseKgInput(d.weight);
-              if (w === null) {
-                throw new Error(`Set ${si + 1} (${exercise.name}): invalid weight.`);
-              }
-              weightOut = w;
-            }
-          }
-          return { setNumber: si + 1, reps: r, weight: weightOut };
-        });
-
-        const exKey = normalizeExerciseName(exercise.name);
-        const prevBest = bestWeightByExercise.get(exKey);
-        const maxKg = Math.max(
-          0,
-          ...loggedSets
-            .filter((s) => s.reps > 0)
-            .map((s) => (s.weight != null && Number.isFinite(s.weight) ? s.weight : 0))
-        );
-        const isPr = maxKg > 0 && (prevBest === undefined || maxKg > prevBest);
-        const volume = computeExerciseVolumeFromLoggedSets(loggedSets);
-
-        return {
-          name: exercise.name,
-          repsPlanned: String(exercise.reps ?? ""),
-          sets: loggedSets,
-          rest: exercise.rest ?? "",
-          tempo: exercise.tempo ?? "",
-          rpe: exercise.rpe ?? null,
-          volume,
-          isPr,
-        };
-      });
-
-      const totalVolume = computeTotalVolume(completedExercises);
-      const prNames = completedExercises.filter((e) => e.isPr).map((e) => e.name);
-
-      // Duration: derived from session startedAt for accuracy across app reopens.
-      const startedAt = activeWorkout.session?.startedAt ?? Date.now();
-      const durationSeconds = Math.max(0, Math.floor((Date.now() - startedAt) / 1000));
-
-      await workoutService.logCompletedWorkout({
-        studentId: authUser.id,
-        workoutPlanId: plan.id,
-        workoutName: plan.name,
-        exercises: completedExercises,
-        completedAt: new Date().toISOString(),
-        totalVolume,
-        durationSeconds,
-        sessionNotes: sessionNotes.trim() || undefined,
-      });
-
-      // Clear the active session from context + AsyncStorage.
-      await activeWorkout.finishSession();
-
-      if (prNames.length > 0) {
-        Alert.alert(t("greatSession"), `🔥 New PR on: ${prNames.join(", ")}`);
-      }
-      setMessage(t("workoutSaved"));
-      router.replace("/student/workoutHistory");
-    } catch (e: any) {
-      setSaveError(e.message ?? "Failed to save workout.");
-    } finally {
-      setSaving(false);
-    }
-  };
 
   // ── Render ────────────────────────────────────────────────────────────────
 
@@ -671,11 +566,8 @@ export default function WorkoutExecution() {
           );
         })}
 
-        {saveError ? (
-          <Text style={{ color: Colors.danger, marginBottom: Spacing.sm }}>{saveError}</Text>
-        ) : null}
-        {message ? (
-          <Text style={{ color: Colors.success, marginBottom: Spacing.sm }}>{message}</Text>
+        {submitError ? (
+          <Text style={{ color: Colors.danger, marginBottom: Spacing.sm }}>{submitError}</Text>
         ) : null}
       </KeyboardAwareScrollView>
 
@@ -695,10 +587,21 @@ export default function WorkoutExecution() {
         }}
       >
         <RestTimerBar />
-        {saving ? (
+        {submitting ? (
           <ActivityIndicator color={Colors.primary} />
         ) : (
-          <PrimaryButton title={t("finishSession")} onPress={handleSubmit} />
+          <PrimaryButton
+            title={t("finishSession")}
+            onPress={() =>
+              plan &&
+              finishWorkout({
+                plan,
+                drafts,
+                notes: sessionNotes,
+                bestWeightByExercise,
+              })
+            }
+          />
         )}
       </View>
     </ScreenLayout>
