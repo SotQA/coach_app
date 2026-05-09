@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useCallback, useRef } from "react";
 import { TextInput } from "react-native";
 
 type InputSet = { weight: TextInput | null; reps: TextInput | null; rpe: TextInput | null };
@@ -32,40 +32,39 @@ export interface SetInputRefs {
 export function useSetInputRefs(): SetInputRefs {
   const inputRefs = useRef<InputSet[][]>([]);
 
-  const registerRef = (
-    exIdx: number,
-    setIdx: number,
-    field: "weight" | "reps" | "rpe",
-    node: TextInput | null
-  ) => {
-    inputRefs.current[exIdx] = inputRefs.current[exIdx] ?? [];
-    inputRefs.current[exIdx][setIdx] = inputRefs.current[exIdx][setIdx] ?? {
-      weight: null,
-      reps: null,
-      rpe: null,
-    };
-    inputRefs.current[exIdx][setIdx][field] = node;
-  };
+  const registerRef = useCallback(
+    (
+      exIdx: number,
+      setIdx: number,
+      field: "weight" | "reps" | "rpe",
+      node: TextInput | null
+    ) => {
+      inputRefs.current[exIdx] = inputRefs.current[exIdx] ?? [];
+      inputRefs.current[exIdx][setIdx] = inputRefs.current[exIdx][setIdx] ?? {
+        weight: null,
+        reps: null,
+        rpe: null,
+      };
+      inputRefs.current[exIdx][setIdx][field] = node;
+    },
+    []
+  );
 
-  const focusNextSet = (currentExIdx: number, currentSetIdx: number) => {
+  const focusNextSet = useCallback((currentExIdx: number, currentSetIdx: number) => {
     setTimeout(() => {
       const currentExRefs = inputRefs.current[currentExIdx];
       const nSetsInEx = currentExRefs?.length ?? 0;
-
       if (currentSetIdx + 1 < nSetsInEx) {
-        // Next set in the same exercise.
         currentExRefs[currentSetIdx + 1]?.weight?.focus();
         return;
       }
-
-      // First set of the next exercise.
       inputRefs.current[currentExIdx + 1]?.[0]?.weight?.focus();
     }, 80);
-  };
+  }, []);
 
-  const reset = () => {
+  const reset = useCallback(() => {
     inputRefs.current = [];
-  };
+  }, []);
 
   return { registerRef, focusNextSet, reset };
 }
