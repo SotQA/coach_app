@@ -99,15 +99,11 @@ interface ActiveWorkoutSessionContextValue {
 
 // ─── Storage helpers ─────────────────────────────────────────────────────────
 
-async function persist(session: ActiveWorkoutSession | null): Promise<void> {
-  try {
-    if (session === null) {
-      await AsyncStorage.removeItem(STORAGE_KEY);
-    } else {
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(session));
-    }
-  } catch (e) {
-    logger.warn("[ActiveWorkout] persist failed:", e);
+async function writeToStorage(session: ActiveWorkoutSession | null): Promise<void> {
+  if (session === null) {
+    await AsyncStorage.removeItem(STORAGE_KEY);
+  } else {
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(session));
   }
 }
 
@@ -169,10 +165,45 @@ export function ActiveWorkoutSessionProvider({ children }: { children: ReactNode
   // we can cancel it before scheduling a new one, avoiding double-fire.
   const pendingRestNotificationIdRef = useRef<string | null>(null);
 
+  // ── Debounced persistence (500 ms) ────────────────────────────────────────
+  const persistTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastQueuedSessionRef = useRef<ActiveWorkoutSession | null>(null);
+
+  const persistDebounced = useCallback((next: ActiveWorkoutSession | null) => {
+    lastQueuedSessionRef.current = next;
+    if (persistTimerRef.current) clearTimeout(persistTimerRef.current);
+    persistTimerRef.current = setTimeout(() => {
+      const toWrite = lastQueuedSessionRef.current;
+      persistTimerRef.current = null;
+      writeToStorage(toWrite).catch((e) =>
+        logger.warn("[ActiveWorkout] setItem failed", e)
+      );
+    }, 500);
+  }, []);
+
+  /**
+   * Cancel the pending debounce and write immediately.
+   * If no write is pending the disk is already current — returns without writing.
+   * Use `writeToStorage` directly when you need to force an unconditional write.
+   */
+  const flushPersist = useCallback(async () => {
+    if (!persistTimerRef.current) return;
+    clearTimeout(persistTimerRef.current);
+    persistTimerRef.current = null;
+    const toWrite = lastQueuedSessionRef.current;
+    try {
+      await writeToStorage(toWrite);
+    } catch (e) {
+      logger.warn("[ActiveWorkout] flush failed", e);
+    }
+  }, []);
+
   // ── Hydrate on mount ──────────────────────────────────────────────────────
   useEffect(() => {
     hydrate().then((loaded) => {
       if (!loaded) return;
+      // Seed the queued ref so the first AppState/periodic flush sees the right value.
+      lastQueuedSessionRef.current = loaded;
       setSession(loaded);
       if (loaded.restTimer?.isActive) {
         const rem = calcRestRemaining(loaded.restTimer);
@@ -181,11 +212,11 @@ export function ActiveWorkoutSessionProvider({ children }: { children: ReactNode
         if (rem <= 0) {
           const cleared = { ...loaded, restTimer: undefined };
           setSession(cleared);
-          persist(cleared);
+          persistDebounced(cleared);
         }
       }
     });
-  }, []);
+  }, [persistDebounced]);
 
   // ── Clear session on logout ───────────────────────────────────────────────
   useEffect(() => {
@@ -193,7 +224,15 @@ export function ActiveWorkoutSessionProvider({ children }: { children: ReactNode
       cancelAllScheduledNotifications();
       setSession(null);
       setRestSecondsRemaining(0);
-      persist(null);
+      // Cancel any pending debounce and write null immediately (fire-and-forget).
+      if (persistTimerRef.current) {
+        clearTimeout(persistTimerRef.current);
+        persistTimerRef.current = null;
+      }
+      lastQueuedSessionRef.current = null;
+      writeToStorage(null).catch((e) =>
+        logger.warn("[ActiveWorkout] logout clear failed", e)
+      );
     }
   }, [user]);
 
@@ -225,7 +264,7 @@ export function ActiveWorkoutSessionProvider({ children }: { children: ReactNode
         setSession((prev) => {
           if (!prev?.restTimer?.isActive) return prev;
           const updated: ActiveWorkoutSession = { ...prev, restTimer: undefined };
-          persist(updated);
+          persistDebounced(updated);
           return updated;
         });
       }
@@ -242,19 +281,32 @@ export function ActiveWorkoutSessionProvider({ children }: { children: ReactNode
     session?.restTimer?.durationSeconds,
   ]);
 
-  // ── Periodic save every 10 s ──────────────────────────────────────────────
+  // ── Periodic save every 10 s (belt-and-suspenders for crashes) ───────────
   useEffect(() => {
     if (!session) return;
-    const id = setInterval(() => { if (sessionRef.current) persist(sessionRef.current); }, 10_000);
+    const id = setInterval(() => {
+      const current = sessionRef.current;
+      if (!current) return;
+      // Cancel any pending debounce and write the current state directly.
+      if (persistTimerRef.current) {
+        clearTimeout(persistTimerRef.current);
+        persistTimerRef.current = null;
+      }
+      lastQueuedSessionRef.current = current;
+      writeToStorage(current).catch((e) =>
+        logger.warn("[ActiveWorkout] periodic save failed", e)
+      );
+    }, 10_000);
     return () => clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.sessionId]);
 
-  // ── AppState: save on background, resync rest timer on foreground ─────────
+  // ── AppState: flush on background, resync rest timer on foreground ────────
   useEffect(() => {
     const handler = (state: AppStateStatus) => {
       if (state === "background" || state === "inactive") {
-        if (sessionRef.current) persist(sessionRef.current);
+        // Flush any pending debounced write before the app is suspended.
+        flushPersist();
       } else if (state === "active") {
         const s = sessionRef.current;
         if (!s) return;
@@ -265,14 +317,18 @@ export function ActiveWorkoutSessionProvider({ children }: { children: ReactNode
           if (rem <= 0) {
             const cleared: ActiveWorkoutSession = { ...s, restTimer: undefined };
             setSession(cleared);
-            persist(cleared);
+            persistDebounced(cleared);
           }
         }
       }
     };
     const sub = AppState.addEventListener("change", handler);
-    return () => sub.remove();
-  }, []);
+    return () => {
+      // Flush on provider unmount as well.
+      flushPersist();
+      sub.remove();
+    };
+  }, [flushPersist, persistDebounced]);
 
   // ── Actions ───────────────────────────────────────────────────────────────
 
@@ -284,8 +340,10 @@ export function ActiveWorkoutSessionProvider({ children }: { children: ReactNode
       ...params,
     };
     setSession(newSession);
-    await persist(newSession);
-  }, []);
+    // Write immediately — starting a session is a critical event.
+    persistDebounced(newSession);
+    await flushPersist();
+  }, [flushPersist, persistDebounced]);
 
   const updateSet = useCallback(
     (exIdx: number, setIdx: number, patch: Partial<ActiveSetDraft>) => {
@@ -297,21 +355,21 @@ export function ActiveWorkoutSessionProvider({ children }: { children: ReactNode
             : { ...ex, sets: ex.sets.map((s, j) => (j !== setIdx ? s : { ...s, ...patch })) }
         );
         const updated = { ...prev, exercises };
-        persist(updated);
+        persistDebounced(updated);
         return updated;
       });
     },
-    []
+    [persistDebounced]
   );
 
   const updateNotes = useCallback((notes: string) => {
     setSession((prev) => {
       if (!prev) return prev;
       const updated = { ...prev, notes };
-      persist(updated);
+      persistDebounced(updated);
       return updated;
     });
-  }, []);
+  }, [persistDebounced]);
 
   const finishSession = useCallback(async () => {
     // Cancel any pending rest notification before clearing the session.
@@ -319,10 +377,22 @@ export function ActiveWorkoutSessionProvider({ children }: { children: ReactNode
     pendingRestNotificationIdRef.current = null;
     await cancelRestNotification(pendingId);
 
+    // Flush any pending debounced write while the session is still set.
+    await flushPersist();
+
     setSession(null);
     setRestSecondsRemaining(0);
-    await persist(null);
-  }, []);
+
+    // Clear storage immediately — finishing a session must not lose state.
+    if (persistTimerRef.current) {
+      clearTimeout(persistTimerRef.current);
+      persistTimerRef.current = null;
+    }
+    lastQueuedSessionRef.current = null;
+    await writeToStorage(null).catch((e) =>
+      logger.warn("[ActiveWorkout] finish session clear failed", e)
+    );
+  }, [flushPersist]);
 
   // ── Rest timer actions ────────────────────────────────────────────────────
 
@@ -351,7 +421,7 @@ export function ActiveWorkoutSessionProvider({ children }: { children: ReactNode
     setSession((prev) => {
       if (!prev) return prev;
       const updated: ActiveWorkoutSession = { ...prev, restTimer };
-      persist(updated);
+      persistDebounced(updated);
       return updated;
     });
 
@@ -379,11 +449,11 @@ export function ActiveWorkoutSessionProvider({ children }: { children: ReactNode
           ...prev,
           restTimer: { ...prev.restTimer, notificationId },
         };
-        persist(updated);
+        persistDebounced(updated);
         return updated;
       });
     });
-  }, []);
+  }, [persistDebounced]);
 
   const skipRestTimer = useCallback(() => {
     const pendingId = pendingRestNotificationIdRef.current ?? sessionRef.current?.restTimer?.notificationId;
@@ -394,10 +464,10 @@ export function ActiveWorkoutSessionProvider({ children }: { children: ReactNode
     setSession((prev) => {
       if (!prev) return prev;
       const updated: ActiveWorkoutSession = { ...prev, restTimer: undefined };
-      persist(updated);
+      persistDebounced(updated);
       return updated;
     });
-  }, []);
+  }, [persistDebounced]);
 
   const pauseRestTimer = useCallback(() => {
     const rt = sessionRef.current?.restTimer;
@@ -422,10 +492,10 @@ export function ActiveWorkoutSessionProvider({ children }: { children: ReactNode
           notificationId: undefined,
         },
       };
-      persist(updated);
+      persistDebounced(updated);
       return updated;
     });
-  }, []);
+  }, [persistDebounced]);
 
   const resumeRestTimer = useCallback(() => {
     const rt = sessionRef.current?.restTimer;
@@ -448,7 +518,7 @@ export function ActiveWorkoutSessionProvider({ children }: { children: ReactNode
           notificationId: undefined,
         },
       };
-      persist(updated);
+      persistDebounced(updated);
       return updated;
     });
 
@@ -472,12 +542,12 @@ export function ActiveWorkoutSessionProvider({ children }: { children: ReactNode
             ...prev,
             restTimer: { ...prev.restTimer!, notificationId },
           };
-          persist(updated);
+          persistDebounced(updated);
           return updated;
         });
       });
     }
-  }, []);
+  }, [persistDebounced]);
 
   return (
     <ActiveWorkoutSessionContext.Provider
