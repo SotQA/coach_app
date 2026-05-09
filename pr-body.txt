@@ -1,0 +1,26 @@
+## Summary
+
+- **2.1** Extract `utils/dateConvert.ts` — single `toMs`/`toDate` replacing 9 inline copies; most-defensive (try/catch) version kept
+- **2.2** Extract `utils/dateRanges.ts` — `dayKeyFromMs`, `startOfWeekMonday`, `startOfMonth`, `addMonths`, `isInCurrentWeek`, `isInCurrentMonth`, etc. from 3 screens
+- **2.3** Extract `utils/inputParsing.ts` — `parseKgInput`, `normalizeDecimalInput`, `parseFloatInput` from `workoutExecution` + `ExerciseCard`
+- **2.4** Extract `utils/userDisplay.ts` — `getUserInitials` / `getDisplayName` from 5 files
+- **2.5** Promote recurring rgba literals to `Colors.surfaceSubtle`, `Colors.surfaceHighlight`, `Colors.dangerTint` (only 2+ occurrence values tokenized)
+- **2.6** Promote recurring magic numbers to `Spacing.screenBottom`, `Radius.xl`, `FontSizes.*` across 33 files
+- **2.7** Add `types/firestore.ts` boundary types; replace all `snap.data() as any` in 5 services
+
+## Verification
+
+| Check | Result |
+|---|---|
+| `npx tsc --noEmit` | Clean (empty output) |
+| `npx expo lint` | 0 errors, 31 warnings (all pre-existing) |
+| `toMs` definitions outside `utils/dateConvert.ts` | Zero |
+| Recurring rgba literals in app/components | Zero |
+| `snap.data() as any` in services | Zero |
+
+## Notes
+
+- `ExerciseInput.tsx` has a similar float parser inline but in a different dispatch pattern — left per scope rules, not a direct duplicate
+- `isInCurrentMonth` fixed to compare local Y/M only (was doing UTC arithmetic in one of the copies)
+- One-occurrence rgba values from the task spec (`primaryTint`, `primaryBorder`, etc.) intentionally not added — appear only once in the codebase
+- `borderRadius: 20` hardcoded occurrences also replaced with pre-existing `Radius.lg`
