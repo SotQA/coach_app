@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Mentorix app icon (E3 — heavy M medallion).
+  Use this as the source for the iOS App Store icon (1024×1024 PNG).
+  Renders at any size, but the PNG used in app.json must be exactly 1024×1024
+  with no transparency.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <rect x="0" y="0" width="1024" height="1024" fill="#080808"/>
+  <circle cx="512" cy="512" r="371" stroke="#D4FF44" stroke-width="19" fill="none"/>
+  <path d="M 352 704 L 352 320 L 512 512 L 672 320 L 672 704" stroke="#D4FF44" stroke-width="96" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>
