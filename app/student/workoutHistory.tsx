@@ -102,7 +102,7 @@ export default function WorkoutHistory() {
     [fetcher]
   );
 
-  const logs = fetchedLogs ?? [];
+  const logs = useMemo(() => fetchedLogs ?? [], [fetchedLogs]);
 
   const normalizedLogs = useMemo((): LogWithMeta[] => {
     return logs.map((log) => {

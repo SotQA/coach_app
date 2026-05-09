@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { View, Text, ActivityIndicator, Alert, ScrollView, Pressable } from "react-native";
+import { useCallback, useMemo } from "react";
+import { View, Text, ActivityIndicator, ScrollView, Pressable } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../context/AuthContext";
@@ -29,8 +29,6 @@ export default function StudentDetails() {
   const params = useLocalSearchParams<{ studentId?: string }>();
 
   const studentId = useMemo(() => String(params.studentId ?? "").trim(), [params]);
-
-  const [deletingPlanId, setDeletingPlanId] = useState<string | null>(null);
 
   type StudentDetailsData = {
     student: StudentSummary;
@@ -82,19 +80,9 @@ export default function StudentDetails() {
   );
 
   const student = detailsData?.student ?? null;
-  const plans = detailsData?.plans ?? [];
-  const logs = detailsData?.logs ?? [];
+  const plans = useMemo(() => detailsData?.plans ?? [], [detailsData]);
+  const logs = useMemo(() => detailsData?.logs ?? [], [detailsData]);
   const latestGroup = detailsData?.latestGroup ?? null;
-
-  const sortedPlans = useMemo(() => {
-    const getOrder = (p: WorkoutPlan) =>
-      typeof p.order === "number" && Number.isFinite(p.order) ? p.order : Number.MAX_SAFE_INTEGER;
-
-    return plans
-      .filter((p) => p.isActive !== false)
-      .slice()
-      .sort((a, b) => getOrder(a) - getOrder(b));
-  }, [plans]);
 
 
   if (loading) {

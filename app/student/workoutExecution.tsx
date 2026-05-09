@@ -113,7 +113,7 @@ export default function WorkoutExecution() {
   );
 
   const plan = execData?.plan ?? null;
-  const priorLogs = execData?.priorLogs ?? [];
+  const priorLogs = useMemo(() => execData?.priorLogs ?? [], [execData]);
 
   const [drafts, setDrafts] = useState<ExerciseDraft[]>([]);
   const [sessionNotes, setSessionNotes] = useState("");
