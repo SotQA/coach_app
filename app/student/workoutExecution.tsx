@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -15,9 +15,8 @@ import { useActiveWorkoutSession, type ActiveExerciseDraft } from "../../context
 import { useElapsedSeconds } from "../../context/ElapsedTimeContext";
 import { useI18n } from "../../context/I18nContext";
 import { workoutService } from "../../services/workoutService";
-import type { LoggedSet, WorkoutLog, WorkoutPlan } from "../../types/Workout";
+import type { LoggedSet, WorkoutPlan } from "../../types/Workout";
 import {
-  buildBestWeightMapFromLogs,
   computeExerciseVolumeFromLoggedSets,
   computeTotalVolume,
   normalizeExerciseName,
@@ -31,7 +30,7 @@ import { RestTimerBar } from "../../components/RestTimerBar";
 import { formatElapsedForTimer, parseRestSeconds } from "../../utils/workoutDuration";
 import { logger } from "../../utils/logger";
 import { parseKgInput, normalizeDecimalInput } from "../../utils/inputParsing";
-import { useAsyncData } from "../../hooks/useAsyncData";
+import { useWorkoutExecutionData } from "../../hooks/useWorkoutExecutionData";
 
 // ─── Local draft types (mirror ActiveSetDraft, using `done` for UI clarity) ──
 type SetDraft = { weight: string; reps: string; rpe: string; done: boolean };
@@ -81,7 +80,6 @@ export default function WorkoutExecution() {
   const elapsedSeconds = useElapsedSeconds();
   const { t } = useI18n();
   const authUserId = authUser?.id;
-  const authUserRole = authUser?.role;
   const params = useLocalSearchParams<{
     workoutPlanId?: string;
     groupId?: string;
@@ -93,27 +91,10 @@ export default function WorkoutExecution() {
   );
   const groupId = useMemo(() => String(params.groupId ?? "").trim(), [params.groupId]);
 
-  type ExecutionData = { plan: WorkoutPlan; priorLogs: WorkoutLog[] };
-
-  const fetcher = useCallback(async (): Promise<ExecutionData> => {
-    if (!workoutPlanId) throw new Error("Missing workoutPlanId.");
-    if (!authUserId || authUserRole !== "student")
-      throw new Error("You must be logged in as a student.");
-    const loaded = await workoutService.getWorkoutPlanById(workoutPlanId);
-    if (!loaded) throw new Error("Workout plan not found.");
-    if (loaded.studentId !== authUserId)
-      throw new Error("You don't have access to this workout plan.");
-    const history = await workoutService.getWorkoutHistory(authUserId);
-    return { plan: loaded, priorLogs: Array.isArray(history) ? history : [] };
-  }, [workoutPlanId, authUserId, authUserRole]);
-
-  const { data: execData, loading, error: loadError } = useAsyncData<ExecutionData>(
-    fetcher,
-    [fetcher]
-  );
+  const { data: execData, loading, error: loadError } = useWorkoutExecutionData(workoutPlanId);
 
   const plan = execData?.plan ?? null;
-  const priorLogs = useMemo(() => execData?.priorLogs ?? [], [execData]);
+  const bestWeightByExercise = execData?.bestWeightByExercise ?? new Map<string, number>();
 
   const [drafts, setDrafts] = useState<ExerciseDraft[]>([]);
   const [sessionNotes, setSessionNotes] = useState("");
@@ -140,7 +121,7 @@ export default function WorkoutExecution() {
   // ── Reset session-init guard when fetch deps change ──────────────────────
   useEffect(() => {
     sessionInitRef.current = false;
-  }, [workoutPlanId, authUserId, authUserRole]);
+  }, [workoutPlanId, authUserId]);
 
   // ── Session init: restore existing session or start a fresh one ──────────
   // Runs once per plan load. Uses the context session as source of truth.
@@ -183,11 +164,6 @@ export default function WorkoutExecution() {
       if (notesDebounceRef.current) clearTimeout(notesDebounceRef.current);
     };
   }, []);
-
-  const bestWeightByExercise = useMemo(
-    () => buildBestWeightMapFromLogs(priorLogs),
-    [priorLogs]
-  );
 
   // ── Set update: keeps local UI state + context in sync ───────────────────
   const updateSet = (exIdx: number, setIdx: number, patch: Partial<SetDraft>) => {
