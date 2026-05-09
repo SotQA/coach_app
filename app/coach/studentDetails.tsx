@@ -16,10 +16,17 @@ import { Typography, FontSizes } from "../../theme/typography";
 import { ScreenLayout } from "../../components/ScreenLayout";
 import type { TrainingGroup } from "../../types/TrainingGroup";
 import { logger } from "@/utils/logger";
-import { toMs } from "@/utils/dateConvert";
-import { dayKeyFromMs } from "@/utils/dateRanges";
 import { getUserInitials, getDisplayName } from "@/utils/userDisplay";
 import { useAsyncData } from "../../hooks/useAsyncData";
+import {
+  assignedProgramBarPercent,
+  averageRecentDurationSeconds,
+  buildPlanById,
+  compliancePercent,
+  currentStreakDays,
+  lastWorkoutLabel,
+  weeklyProgress,
+} from "@/utils/studentMetrics";
 
 export default function StudentDetails() {
   const router = useRouter();
@@ -84,6 +91,26 @@ export default function StudentDetails() {
   const logs = useMemo(() => detailsData?.logs ?? [], [detailsData]);
   const latestGroup = detailsData?.latestGroup ?? null;
 
+  const planById = useMemo(() => buildPlanById(plans), [plans]);
+  const streakDays = useMemo(() => currentStreakDays(logs), [logs]);
+  const compliancePct = useMemo(
+    () => compliancePercent(logs, latestGroup?.workoutsPerWeek),
+    [logs, latestGroup?.workoutsPerWeek]
+  );
+  const lastWorkoutLbl = useMemo(() => lastWorkoutLabel(logs), [logs]);
+  const weeklyProg = useMemo(
+    () => weeklyProgress(logs, latestGroup, planById),
+    [logs, latestGroup, planById]
+  );
+  const assignedPct = useMemo(
+    () => assignedProgramBarPercent(compliancePct, weeklyProg),
+    [compliancePct, weeklyProg]
+  );
+  const avgDurationSeconds = useMemo(() => averageRecentDurationSeconds(logs), [logs]);
+  const avgDurationLabel = useMemo(
+    () => (avgDurationSeconds != null ? formatDurationForHistory(avgDurationSeconds) : null),
+    [avgDurationSeconds]
+  );
 
   if (loading) {
     return (
@@ -128,61 +155,6 @@ export default function StudentDetails() {
   const displayName = getDisplayName(student, "Student");
   const initials = getUserInitials(student, "S");
 
-
-  const lastWorkoutMs = logs[0] ? toMs((logs[0] as any).completedAt ?? (logs[0] as any).date) : 0;
-  const lastWorkoutLabel =
-    lastWorkoutMs > 0
-      ? new Date(lastWorkoutMs).toLocaleDateString(undefined, { month: "short", day: "numeric" })
-      : null;
-
-  const workoutsCompleted = logs.length;
-  const avgDurationSeconds = (() => {
-    const items = logs
-      .map((l) => (typeof l.durationSeconds === "number" && Number.isFinite(l.durationSeconds) ? l.durationSeconds : null))
-      .filter((n): n is number => n !== null && n > 0)
-      .slice(0, 10);
-    if (items.length === 0) return null;
-    return Math.floor(items.reduce((a, b) => a + b, 0) / items.length);
-  })();
-  const avgDurationLabel = avgDurationSeconds != null ? formatDurationForHistory(avgDurationSeconds) : null;
-
-  const compliancePercent = (() => {
-    const wpw = latestGroup?.workoutsPerWeek ?? 0;
-    if (!wpw || !Number.isFinite(wpw) || wpw <= 0) {
-      // Compliance is undefined when no weekly target is set.
-      return null;
-    }
-    const now = Date.now();
-    const weekAgo = now - 7 * 24 * 60 * 60 * 1000;
-    const count7 = logs.filter((l) => {
-      const ms = toMs((l as any).completedAt ?? (l as any).date);
-      return ms >= weekAgo && ms <= now;
-    }).length;
-    return Math.max(0, Math.min(999, Math.round((count7 / wpw) * 100)));
-  })();
-
-  const currentStreakDays = (() => {
-    if (logs.length === 0) return 0;
-    const days = new Set<string>();
-    for (const l of logs) {
-      const ms = toMs((l as any).completedAt ?? (l as any).date);
-      if (ms > 0) days.add(dayKeyFromMs(ms));
-    }
-    const today = new Date();
-    const keyFor = (d: Date) => dayKeyFromMs(d.getTime());
-    const hasToday = days.has(keyFor(today));
-    // streak counts today + each previous consecutive day with a logged workout
-    let streak = hasToday ? 1 : 0;
-    const cursor = new Date(today);
-    cursor.setDate(cursor.getDate() - 1); // start from yesterday
-    if (!hasToday && !days.has(keyFor(cursor))) return 0;
-    while (days.has(keyFor(cursor))) {
-      streak += 1;
-      cursor.setDate(cursor.getDate() - 1);
-    }
-    return streak;
-  })();
-
   const StatCard = ({
     label,
     value,
@@ -218,46 +190,6 @@ export default function StudentDetails() {
       </Text>
     </View>
   );
-
-  const startOfWeekMs = (nowMs: number): number => {
-    const d = new Date(nowMs);
-    const day = d.getDay(); // 0 Sun ... 6 Sat
-    const diffToMonday = (day + 6) % 7; // Mon => 0
-    d.setDate(d.getDate() - diffToMonday);
-    d.setHours(0, 0, 0, 0);
-    return d.getTime();
-  };
-
-  const planById = (() => {
-    const m = new Map<string, WorkoutPlan>();
-    for (const p of plans) m.set(p.id, p);
-    return m;
-  })();
-
-  const weeklyProgress = (() => {
-    const wpw = latestGroup?.workoutsPerWeek ?? 0;
-    if (!latestGroup?.id || !wpw || wpw <= 0) {
-      return { completed: 0, target: wpw, ratio: 0 };
-    }
-    const now = Date.now();
-    const start = startOfWeekMs(now);
-    const end = now;
-    const completed = logs.filter((l) => {
-      const ms = toMs((l as any).completedAt ?? (l as any).date);
-      if (ms < start || ms > end) return false;
-      const plan = planById.get(l.workoutPlanId);
-      return plan?.groupId === latestGroup.id;
-    }).length;
-    const ratio = Math.max(0, Math.min(1, completed / wpw));
-    return { completed, target: wpw, ratio };
-  })();
-
-  const assignedProgramPercent = (() => {
-    if (typeof compliancePercent === "number" && Number.isFinite(compliancePercent)) {
-      return Math.max(0, Math.min(100, Math.round(compliancePercent)));
-    }
-    return Math.round(weeklyProgress.ratio * 100);
-  })();
 
   const RowAction = ({
     icon,
@@ -464,7 +396,7 @@ export default function StudentDetails() {
                     }}
                   >
                     <Text style={{ ...Typography.secondary, color: Colors.textMuted }}>
-                      {lastWorkoutLabel ? `Last workout: ${lastWorkoutLabel}` : "Last workout: —"}
+                      {lastWorkoutLbl ? `Last workout: ${lastWorkoutLbl}` : "Last workout: —"}
                     </Text>
                   </View>
                 </View>
@@ -515,13 +447,13 @@ export default function StudentDetails() {
           <View style={{ flexDirection: "row", gap: Spacing.sm, marginBottom: Spacing.sm }}>
             <StatCard
               label="Workouts completed"
-              value={String(workoutsCompleted)}
+              value={String(logs.length)}
               icon="barbell-outline"
               tint={Colors.primary}
             />
             <StatCard
               label="Compliance"
-              value={compliancePercent != null ? `${compliancePercent}%` : "—"}
+              value={compliancePct != null ? `${compliancePct}%` : "—"}
               icon="checkmark-done-outline"
               tint="#FF6B6B"
             />
@@ -529,7 +461,7 @@ export default function StudentDetails() {
           <View style={{ flexDirection: "row", gap: Spacing.sm, marginBottom: Spacing.md }}>
             <StatCard
               label="Current streak"
-              value={currentStreakDays ? `${currentStreakDays}d` : "—"}
+              value={streakDays ? `${streakDays}d` : "—"}
               icon="flame-outline"
               tint="#FF8C42"
             />
@@ -621,7 +553,7 @@ export default function StudentDetails() {
                   >
                     <View
                       style={{
-                        width: `${assignedProgramPercent}%`,
+                        width: `${assignedPct}%`,
                         height: "100%",
                         backgroundColor: Colors.primary,
                       }}
@@ -632,7 +564,7 @@ export default function StudentDetails() {
                       Progress
                     </Text>
                     <Text style={{ ...Typography.secondary, color: Colors.textMuted }}>
-                      {typeof compliancePercent === "number" ? `${assignedProgramPercent}%` : weeklyProgress.target ? `${weeklyProgress.completed} of ${weeklyProgress.target} this week` : "—"}
+                      {typeof compliancePct === "number" ? `${assignedPct}%` : weeklyProg.target ? `${weeklyProg.completed} of ${weeklyProg.target} this week` : "—"}
                     </Text>
                   </View>
                 </View>
@@ -683,13 +615,13 @@ export default function StudentDetails() {
             }}
           >
             <Text style={{ ...Typography.secondary, color: Colors.textMuted }}>
-              {compliancePercent != null
-                ? `This week: ${compliancePercent}% of target (${latestGroup?.workoutsPerWeek ?? "—"} workouts/week).`
+              {compliancePct != null
+                ? `This week: ${compliancePct}% of target (${latestGroup?.workoutsPerWeek ?? "—"} workouts/week).`
                 : "Set a workouts/week target to track compliance."}
             </Text>
             <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 6 }}>
-              {currentStreakDays
-                ? `Current streak: ${currentStreakDays} day${currentStreakDays === 1 ? "" : "s"}.`
+              {streakDays
+                ? `Current streak: ${streakDays} day${streakDays === 1 ? "" : "s"}.`
                 : "No active streak yet."}
             </Text>
           </View>
