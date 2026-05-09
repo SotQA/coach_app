@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react";
-import { View, Text, ActivityIndicator, ScrollView, Pressable } from "react-native";
+import { View, Text, ActivityIndicator, ScrollView, Pressable, StyleSheet } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../context/AuthContext";
@@ -12,14 +12,32 @@ import { formatDurationForHistory } from "../../utils/workoutDuration";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
-import { Typography, FontSizes } from "../../theme/typography";
+import { Typography } from "../../theme/typography";
 import { ScreenLayout } from "../../components/ScreenLayout";
+import { StudentStatCard } from "../../components/student/StudentStatCard";
+import { StudentActionButton } from "../../components/student/StudentActionButton";
+import { StudentProfileHero } from "../../components/student/StudentProfileHero";
+import { StudentProgramProgressCard } from "../../components/student/StudentProgramProgressCard";
 import type { TrainingGroup } from "../../types/TrainingGroup";
 import { logger } from "@/utils/logger";
-import { toMs } from "@/utils/dateConvert";
-import { dayKeyFromMs } from "@/utils/dateRanges";
 import { getUserInitials, getDisplayName } from "@/utils/userDisplay";
 import { useAsyncData } from "../../hooks/useAsyncData";
+import {
+  assignedProgramBarPercent,
+  averageRecentDurationSeconds,
+  buildPlanById,
+  compliancePercent,
+  currentStreakDays,
+  lastWorkoutLabel,
+  weeklyProgress,
+} from "@/utils/studentMetrics";
+
+type StudentDetailsData = {
+  student: StudentSummary;
+  latestGroup: TrainingGroup | null;
+  plans: WorkoutPlan[];
+  logs: WorkoutLog[];
+};
 
 export default function StudentDetails() {
   const router = useRouter();
@@ -27,15 +45,7 @@ export default function StudentDetails() {
   const userId = user?.id;
   const userRole = user?.role;
   const params = useLocalSearchParams<{ studentId?: string }>();
-
   const studentId = useMemo(() => String(params.studentId ?? "").trim(), [params]);
-
-  type StudentDetailsData = {
-    student: StudentSummary;
-    latestGroup: TrainingGroup | null;
-    plans: WorkoutPlan[];
-    logs: WorkoutLog[];
-  };
 
   const fetcher = useCallback(async (): Promise<StudentDetailsData> => {
     logger.log("[coach/studentDetails] load start", { studentId });
@@ -51,7 +61,6 @@ export default function StudentDetails() {
       workoutService.getWorkoutPlansForStudentAsCoach(userId, studentId),
       workoutService.getWorkoutHistory(studentId),
     ]);
-
     if (gResult.status === "rejected") {
       logger.warn("[studentDetails] partial load failure", { which: "trainingGroup", reason: gResult.reason });
     }
@@ -65,7 +74,6 @@ export default function StudentDetails() {
       logger.warn("[studentDetails] partial load failure", { which: "history", reason: historyResult.reason });
     }
     logger.log("[coach/studentDetails] fetched logs", history.length);
-
     return {
       student: studentDoc,
       latestGroup: gResult.status === "fulfilled" ? gResult.value : null,
@@ -74,27 +82,28 @@ export default function StudentDetails() {
     };
   }, [studentId, userId, userRole]);
 
-  const { data: detailsData, loading, error: loadError } = useAsyncData<StudentDetailsData>(
-    fetcher,
-    [fetcher]
-  );
+  const { data: detailsData, loading, error: loadError } = useAsyncData<StudentDetailsData>(fetcher, [fetcher]);
 
   const student = detailsData?.student ?? null;
   const plans = useMemo(() => detailsData?.plans ?? [], [detailsData]);
   const logs = useMemo(() => detailsData?.logs ?? [], [detailsData]);
   const latestGroup = detailsData?.latestGroup ?? null;
 
+  const planById = useMemo(() => buildPlanById(plans), [plans]);
+  const streakDays = useMemo(() => currentStreakDays(logs), [logs]);
+  const compliancePct = useMemo(
+    () => compliancePercent(logs, latestGroup?.workoutsPerWeek),
+    [logs, latestGroup?.workoutsPerWeek]
+  );
+  const lastWorkoutLbl = useMemo(() => lastWorkoutLabel(logs), [logs]);
+  const weeklyProg = useMemo(() => weeklyProgress(logs, latestGroup, planById), [logs, latestGroup, planById]);
+  const assignedPct = useMemo(() => assignedProgramBarPercent(compliancePct, weeklyProg), [compliancePct, weeklyProg]);
+  const avgDurationSeconds = useMemo(() => averageRecentDurationSeconds(logs), [logs]);
+  const avgDurationLabel = useMemo(() => (avgDurationSeconds != null ? formatDurationForHistory(avgDurationSeconds) : null), [avgDurationSeconds]);
 
   if (loading) {
     return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
-          backgroundColor: Colors.bg,
-        }}
-      >
+      <View style={styles.loading}>
         <ActivityIndicator />
       </View>
     );
@@ -102,15 +111,8 @@ export default function StudentDetails() {
 
   if (loadError) {
     return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          padding: 16,
-          backgroundColor: Colors.bg,
-        }}
-      >
-        <Text style={{ color: Colors.danger, marginBottom: Spacing.sm }}>{loadError.message}</Text>
+      <View style={styles.errorWrapPad16}>
+        <Text style={styles.errorText}>{loadError.message}</Text>
         <PrimaryButton title="Back to Dashboard" onPress={() => router.replace("/coach/dashboard")} />
       </View>
     );
@@ -118,8 +120,8 @@ export default function StudentDetails() {
 
   if (!student) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", padding: Spacing.md, backgroundColor: Colors.bg }}>
-        <Text style={{ color: Colors.danger, marginBottom: Spacing.sm }}>Student not loaded.</Text>
+      <View style={styles.errorWrap}>
+        <Text style={styles.errorText}>Student not loaded.</Text>
         <PrimaryButton title="Back to Dashboard" onPress={() => router.replace("/coach/dashboard")} />
       </View>
     );
@@ -128,422 +130,79 @@ export default function StudentDetails() {
   const displayName = getDisplayName(student, "Student");
   const initials = getUserInitials(student, "S");
 
-
-  const lastWorkoutMs = logs[0] ? toMs((logs[0] as any).completedAt ?? (logs[0] as any).date) : 0;
-  const lastWorkoutLabel =
-    lastWorkoutMs > 0
-      ? new Date(lastWorkoutMs).toLocaleDateString(undefined, { month: "short", day: "numeric" })
-      : null;
-
-  const workoutsCompleted = logs.length;
-  const avgDurationSeconds = (() => {
-    const items = logs
-      .map((l) => (typeof l.durationSeconds === "number" && Number.isFinite(l.durationSeconds) ? l.durationSeconds : null))
-      .filter((n): n is number => n !== null && n > 0)
-      .slice(0, 10);
-    if (items.length === 0) return null;
-    return Math.floor(items.reduce((a, b) => a + b, 0) / items.length);
-  })();
-  const avgDurationLabel = avgDurationSeconds != null ? formatDurationForHistory(avgDurationSeconds) : null;
-
-  const compliancePercent = (() => {
-    const wpw = latestGroup?.workoutsPerWeek ?? 0;
-    if (!wpw || !Number.isFinite(wpw) || wpw <= 0) {
-      // Compliance is undefined when no weekly target is set.
-      return null;
-    }
-    const now = Date.now();
-    const weekAgo = now - 7 * 24 * 60 * 60 * 1000;
-    const count7 = logs.filter((l) => {
-      const ms = toMs((l as any).completedAt ?? (l as any).date);
-      return ms >= weekAgo && ms <= now;
-    }).length;
-    return Math.max(0, Math.min(999, Math.round((count7 / wpw) * 100)));
-  })();
-
-  const currentStreakDays = (() => {
-    if (logs.length === 0) return 0;
-    const days = new Set<string>();
-    for (const l of logs) {
-      const ms = toMs((l as any).completedAt ?? (l as any).date);
-      if (ms > 0) days.add(dayKeyFromMs(ms));
-    }
-    const today = new Date();
-    const keyFor = (d: Date) => dayKeyFromMs(d.getTime());
-    const hasToday = days.has(keyFor(today));
-    // streak counts today + each previous consecutive day with a logged workout
-    let streak = hasToday ? 1 : 0;
-    const cursor = new Date(today);
-    cursor.setDate(cursor.getDate() - 1); // start from yesterday
-    if (!hasToday && !days.has(keyFor(cursor))) return 0;
-    while (days.has(keyFor(cursor))) {
-      streak += 1;
-      cursor.setDate(cursor.getDate() - 1);
-    }
-    return streak;
-  })();
-
-  const StatCard = ({
-    label,
-    value,
-    icon,
-    tint,
-  }: {
-    label: string;
-    value: string;
-    icon?: any;
-    tint?: string;
-  }) => (
-    <View
-      style={{
-        flex: 1,
-        minWidth: 0,
-        backgroundColor: Colors.card,
-        borderRadius: Radius.lg,
-        padding: Spacing.md,
-        borderWidth: 1,
-        borderColor: Colors.border,
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      {icon ? (
-        <Ionicons name={icon} size={18} color={tint ?? Colors.textMuted} style={{ marginBottom: 6 }} />
-      ) : null}
-      <Text style={{ ...Typography.secondary, color: Colors.textMuted, textAlign: "center", width: "100%" }}>
-        {label}
-      </Text>
-      <Text style={{ ...Typography.title, fontSize: FontSizes.h3, marginTop: 6, textAlign: "center", width: "100%" }}>
-        {value}
-      </Text>
-    </View>
-  );
-
-  const startOfWeekMs = (nowMs: number): number => {
-    const d = new Date(nowMs);
-    const day = d.getDay(); // 0 Sun ... 6 Sat
-    const diffToMonday = (day + 6) % 7; // Mon => 0
-    d.setDate(d.getDate() - diffToMonday);
-    d.setHours(0, 0, 0, 0);
-    return d.getTime();
-  };
-
-  const planById = (() => {
-    const m = new Map<string, WorkoutPlan>();
-    for (const p of plans) m.set(p.id, p);
-    return m;
-  })();
-
-  const weeklyProgress = (() => {
-    const wpw = latestGroup?.workoutsPerWeek ?? 0;
-    if (!latestGroup?.id || !wpw || wpw <= 0) {
-      return { completed: 0, target: wpw, ratio: 0 };
-    }
-    const now = Date.now();
-    const start = startOfWeekMs(now);
-    const end = now;
-    const completed = logs.filter((l) => {
-      const ms = toMs((l as any).completedAt ?? (l as any).date);
-      if (ms < start || ms > end) return false;
-      const plan = planById.get(l.workoutPlanId);
-      return plan?.groupId === latestGroup.id;
-    }).length;
-    const ratio = Math.max(0, Math.min(1, completed / wpw));
-    return { completed, target: wpw, ratio };
-  })();
-
-  const assignedProgramPercent = (() => {
-    if (typeof compliancePercent === "number" && Number.isFinite(compliancePercent)) {
-      return Math.max(0, Math.min(100, Math.round(compliancePercent)));
-    }
-    return Math.round(weeklyProgress.ratio * 100);
-  })();
-
-  const RowAction = ({
-    icon,
-    label,
-    tone,
-    onPress,
-    disabled,
-  }: {
-    icon: any;
-    label: string;
-    tone?: "neutral" | "danger";
-    onPress: () => void;
-    disabled?: boolean;
-  }) => (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      disabled={disabled}
-      onPress={onPress}
-      style={({ pressed }) => ({
-        width: 36,
-        height: 36,
-        borderRadius: 12,
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: Colors.surface,
-        borderWidth: 1,
-        borderColor: tone === "danger" ? Colors.dangerTint : Colors.border,
-        opacity: disabled ? 0.5 : pressed ? 0.92 : 1,
-      })}
-    >
-      <Ionicons name={icon} size={18} color={tone === "danger" ? "#FCA5A5" : Colors.text} />
-    </Pressable>
-  );
-
-  const ActionButton = ({
-    title,
-    icon,
-    iconColor,
-    variant,
-    onPress,
-  }: {
-    title: string;
-    icon: any;
-    iconColor?: string;
-    variant: "primary" | "secondary";
-    onPress: () => void;
-  }) => (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={title}
-      onPress={onPress}
-      style={({ pressed }) => ({
-        flex: 1,
-        minWidth: 0,
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 6,
-        paddingVertical: 12,
-        paddingHorizontal: Spacing.sm,
-        borderRadius: Radius.lg,
-        backgroundColor: variant === "primary" ? Colors.primary : Colors.card,
-        borderWidth: variant === "primary" ? 0 : 1,
-        borderColor: variant === "primary" ? "transparent" : Colors.border,
-        opacity: pressed ? 0.92 : 1,
-        ...(variant === "primary"
-          ? {
-              shadowColor: Colors.primary,
-              shadowOffset: { width: 0, height: 6 },
-              shadowOpacity: 0.45,
-              shadowRadius: 10,
-              elevation: 8,
-            }
-          : null),
-      })}
-    >
-      <Ionicons
-        name={icon}
-        size={18}
-        color={iconColor ?? (variant === "primary" ? Colors.onPrimary : Colors.primary)}
-      />
-      <Text
-        numberOfLines={3}
-        style={{
-          ...Typography.section,
-          fontSize: FontSizes.note,
-          lineHeight: 16,
-          fontWeight: variant === "primary" ? "800" : "700",
-          color: variant === "primary" ? Colors.onPrimary : Colors.text,
-          textAlign: "center",
-          flexShrink: 1,
-        }}
-      >
-        {title}
-      </Text>
-    </Pressable>
-  );
-
   return (
     <ScreenLayout>
-      <View style={{ flex: 1, backgroundColor: Colors.bg }}>
-        <ScrollView contentContainerStyle={{ padding: Spacing.md, paddingBottom: Spacing.lg, paddingTop: Spacing.lg }}>
-          {/* Top bar */}
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginBottom: Spacing.md,
-            }}
-          >
+      <View style={styles.root}>
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <View style={styles.topBar}>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Back"
               onPress={() => router.back()}
-              style={({ pressed }) => ({
-                width: 40,
-                height: 40,
-                borderRadius: Radius.lg,
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: Colors.card,
-                borderWidth: 1,
-                borderColor: Colors.border,
-                opacity: pressed ? 0.9 : 1,
-              })}
+              style={({ pressed }) => [styles.backBtn, pressed && styles.pressedOpacity9]}
             >
               <Ionicons name="chevron-back" size={20} color={Colors.text} />
             </Pressable>
-
-            <Text style={{ ...Typography.section, fontWeight: "900" }}>Student Command Center</Text>
-            <View style={{ width: 40, height: 40 }} />
+            <Text style={styles.topTitle}>Student Command Center</Text>
+            <View style={styles.topBarSpacer} />
           </View>
 
-          {/* Hero profile card */}
-          <View
-            style={{
-              backgroundColor: Colors.card,
-              borderRadius: Radius.lg,
-              padding: Spacing.lg,
-              marginBottom: Spacing.md,
-              borderWidth: 1,
-              borderColor: Colors.border,
-            }}
-          >
-            <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.md }}>
-              <View
-                style={{
-                  width: 64,
-                  height: 64,
-                  borderRadius: 32,
-                  backgroundColor: Colors.surface,
-                  borderWidth: 2,
-                  borderColor: Colors.primary,
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Text style={{ ...Typography.section, fontSize: FontSizes.h3, fontWeight: "900" }}>{initials}</Text>
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={{ ...Typography.title, fontSize: 24 }}>{displayName}</Text>
-                <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 6 }}>
-                  {student.email}
-                </Text>
-                <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: Spacing.sm }}>
-                  <View
-                    style={{
-                      paddingVertical: 6,
-                      paddingHorizontal: 10,
-                      borderRadius: 10,
-                      backgroundColor: Colors.surface,
-                      borderWidth: 1,
-                      borderColor: Colors.border,
-                    }}
-                  >
-                    <Text style={{ ...Typography.secondary, color: Colors.textMuted }}>
-                      {latestGroup?.name?.trim() ? latestGroup.name.trim() : "No active training split"}
-                    </Text>
-                  </View>
-                  <View
-                    style={{
-                      paddingVertical: 6,
-                      paddingHorizontal: 10,
-                      borderRadius: 10,
-                      backgroundColor: Colors.surface,
-                      borderWidth: 1,
-                      borderColor: Colors.border,
-                    }}
-                  >
-                    <Text style={{ ...Typography.secondary, color: Colors.textMuted }}>
-                      {latestGroup?.workoutsPerWeek ? `${latestGroup.workoutsPerWeek} workouts/week` : "Workouts/week —"}
-                    </Text>
-                  </View>
-                  <View
-                    style={{
-                      paddingVertical: 6,
-                      paddingHorizontal: 10,
-                      borderRadius: 10,
-                      backgroundColor: Colors.surface,
-                      borderWidth: 1,
-                      borderColor: Colors.border,
-                    }}
-                  >
-                    <Text style={{ ...Typography.secondary, color: Colors.textMuted }}>
-                      {lastWorkoutLabel ? `Last workout: ${lastWorkoutLabel}` : "Last workout: —"}
-                    </Text>
-                  </View>
-                </View>
-              </View>
-            </View>
-          </View>
+          <StudentProfileHero
+            displayName={displayName}
+            email={student.email}
+            initials={initials}
+            latestGroup={latestGroup}
+            lastWorkoutLabel={lastWorkoutLbl}
+          />
 
-          {/* Coach actions bar */}
-          <View style={{ flexDirection: "row", gap: Spacing.sm, marginBottom: Spacing.md }}>
-            <ActionButton
+          <View style={styles.actionsRow}>
+            <StudentActionButton
               title="Assign Workout"
               icon="barbell"
               variant="primary"
               onPress={() =>
-                router.push({
-                  pathname: "/coach/selectTrainingGroup",
-                  params: { studentId, studentName: displayName },
-                })
+                router.push({ pathname: "/coach/selectTrainingGroup", params: { studentId, studentName: displayName } })
               }
             />
-            <ActionButton
+            <StudentActionButton
               title="Create New Group"
               icon="add-circle-outline"
               variant="secondary"
               onPress={() =>
-                router.push({
-                  pathname: "/coach/createTrainingGroup",
-                  params: { studentId, studentName: displayName },
-                })
+                router.push({ pathname: "/coach/createTrainingGroup", params: { studentId, studentName: displayName } })
               }
             />
-            <ActionButton
+            <StudentActionButton
               title="View Progress"
               icon="stats-chart-outline"
               iconColor="#64D2FF"
               variant="secondary"
-              onPress={() =>
-                router.push({
-                  pathname: "/coach/progress",
-                  params: { studentId, focusProgress: "1" },
-                })
-              }
+              onPress={() => router.push({ pathname: "/coach/progress", params: { studentId, focusProgress: "1" } })}
             />
           </View>
 
-          {/* Quick stats */}
-          <Text style={{ ...Typography.section, marginBottom: Spacing.xs }}>Quick stats</Text>
-          <View style={{ flexDirection: "row", gap: Spacing.sm, marginBottom: Spacing.sm }}>
-            <StatCard
-              label="Workouts completed"
-              value={String(workoutsCompleted)}
-              icon="barbell-outline"
-              tint={Colors.primary}
-            />
-            <StatCard
+          <Text style={styles.sectionLabel}>Quick stats</Text>
+          <View style={styles.statsRow}>
+            <StudentStatCard label="Workouts completed" value={String(logs.length)} icon="barbell-outline" tint={Colors.primary} />
+            <StudentStatCard
               label="Compliance"
-              value={compliancePercent != null ? `${compliancePercent}%` : "—"}
+              value={compliancePct != null ? `${compliancePct}%` : "—"}
               icon="checkmark-done-outline"
               tint="#FF6B6B"
             />
           </View>
-          <View style={{ flexDirection: "row", gap: Spacing.sm, marginBottom: Spacing.md }}>
-            <StatCard
+          <View style={[styles.statsRow, styles.mbMd]}>
+            <StudentStatCard
               label="Current streak"
-              value={currentStreakDays ? `${currentStreakDays}d` : "—"}
+              value={streakDays ? `${streakDays}d` : "—"}
               icon="flame-outline"
               tint="#FF8C42"
             />
-            <StatCard
-              label="Avg duration"
-              value={avgDurationLabel ?? "—"}
-              icon="time-outline"
-              tint="#64D2FF"
-            />
+            <StudentStatCard label="Avg duration" value={avgDurationLabel ?? "—"} icon="time-outline" tint="#64D2FF" />
           </View>
 
-          {/* Active training group card */}
-          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
-            <Text style={{ ...Typography.section }}>Assigned Program</Text>
+          <View style={styles.assignedHeader}>
+            <Text style={Typography.section}>Assigned Program</Text>
             {latestGroup ? (
               <Pressable
                 accessibilityRole="button"
@@ -554,143 +213,37 @@ export default function StudentDetails() {
                     params: { studentId, studentName: displayName, selectedGroupId: latestGroup.id },
                   })
                 }
-                style={({ pressed }) => ({ opacity: pressed ? 0.9 : 1 })}
+                style={({ pressed }) => [pressed && styles.pressedOpacity9]}
               >
-                <Text style={{ ...Typography.secondary, color: Colors.primary, fontWeight: "800" }}>Change</Text>
+                <Text style={styles.changeLink}>Change</Text>
               </Pressable>
             ) : null}
           </View>
 
-          <Pressable
-            onPress={() => {
+          <StudentProgramProgressCard
+            latestGroup={latestGroup}
+            assignedPct={assignedPct}
+            compliancePct={compliancePct}
+            weeklyProg={weeklyProg}
+            onPressCard={() => {
               if (!latestGroup?.id) return;
               router.push({
                 pathname: "/coach/assignedWorkouts",
-                params: {
-                  studentId,
-                  studentName: displayName,
-                  groupId: latestGroup.id,
-                  groupName: latestGroup.name,
-                },
+                params: { studentId, studentName: displayName, groupId: latestGroup.id, groupName: latestGroup.name },
               });
             }}
-            style={({ pressed }) => ({
-              // Slight blue-tinted card like the reference screenshot.
-              backgroundColor: "#121A26",
-              borderRadius: Radius.lg,
-              padding: Spacing.md,
-              borderWidth: 1,
-              borderColor: Colors.surfaceHighlight,
-              marginBottom: Spacing.md,
-              opacity: pressed ? 0.96 : 1,
-            })}
-          >
-            {latestGroup ? (
-              <>
-                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: Spacing.md }}>
-                  <View style={{ flex: 1, minWidth: 0 }}>
-                    <Text style={{ ...Typography.title, fontSize: FontSizes.subheading }}>{latestGroup.name}</Text>
-                    <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4 }}>
-                      {latestGroup.workoutsPerWeek ? `${latestGroup.workoutsPerWeek} days/week` : "Days/week —"}
-                    </Text>
-                  </View>
-                  <View
-                    style={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: Radius.lg,
-                      backgroundColor: Colors.surfaceSubtle,
-                      borderWidth: 1,
-                      borderColor: Colors.surfaceHighlight,
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Ionicons name="flash" size={18} color={Colors.primary} />
-                  </View>
-                </View>
+            onPressCreateGroup={() =>
+              router.push({ pathname: "/coach/createTrainingGroup", params: { studentId, studentName: displayName } })
+            }
+          />
 
-                <View style={{ marginTop: Spacing.md }}>
-                  <View
-                    style={{
-                      height: 8,
-                      borderRadius: 999,
-                      backgroundColor: Colors.surfaceHighlight,
-                      overflow: "hidden",
-                    }}
-                  >
-                    <View
-                      style={{
-                        width: `${assignedProgramPercent}%`,
-                        height: "100%",
-                        backgroundColor: Colors.primary,
-                      }}
-                    />
-                  </View>
-                  <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 8 }}>
-                    <Text style={{ ...Typography.secondary, color: Colors.textMuted }}>
-                      Progress
-                    </Text>
-                    <Text style={{ ...Typography.secondary, color: Colors.textMuted }}>
-                      {typeof compliancePercent === "number" ? `${assignedProgramPercent}%` : weeklyProgress.target ? `${weeklyProgress.completed} of ${weeklyProgress.target} this week` : "—"}
-                    </Text>
-                  </View>
-                </View>
-
-                <View style={{ marginTop: Spacing.sm, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-                  <Text style={{ ...Typography.secondary, color: Colors.textMuted }}>
-                    Tap to view assigned workouts
-                  </Text>
-                  <Ionicons
-                    name="chevron-forward"
-                    size={18}
-                    color={Colors.textMuted}
-                  />
-                </View>
-              </>
-            ) : (
-              <>
-                <Text style={{ ...Typography.title, fontSize: FontSizes.subheading }}>No active training split</Text>
-                <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 6 }}>
-                  Create a split to start assigning workouts.
-                </Text>
-                <PrimaryButton
-                  title="Create New Group"
-                  onPress={() =>
-                    router.push({
-                      pathname: "/coach/createTrainingGroup",
-                      params: { studentId, studentName: displayName },
-                    })
-                  }
-                  style={{ backgroundColor: Colors.border, marginTop: Spacing.md }}
-                />
-              </>
-            )}
-          </Pressable>
-
-          {/* Compliance insights */}
-          <Text style={{ ...Typography.section, marginTop: Spacing.lg, marginBottom: Spacing.xs }}>
-            Compliance insights
-          </Text>
-          <View
-            style={{
-              backgroundColor: Colors.card,
-              borderRadius: Radius.lg,
-              padding: Spacing.md,
-              borderWidth: 1,
-              borderColor: Colors.border,
-              marginBottom: Spacing.md,
-            }}
-          >
-            <Text style={{ ...Typography.secondary, color: Colors.textMuted }}>
-              {compliancePercent != null
-                ? `This week: ${compliancePercent}% of target (${latestGroup?.workoutsPerWeek ?? "—"} workouts/week).`
-                : "Set a workouts/week target to track compliance."}
+          <Text style={styles.insightsTitle}>Compliance insights</Text>
+          <View style={styles.insightsCard}>
+            <Text style={styles.mutedSecondary}>
+              {compliancePct != null ? `This week: ${compliancePct}% of target (${latestGroup?.workoutsPerWeek ?? "—"} workouts/week).` : "Set a workouts/week target to track compliance."}
             </Text>
-            <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 6 }}>
-              {currentStreakDays
-                ? `Current streak: ${currentStreakDays} day${currentStreakDays === 1 ? "" : "s"}.`
-                : "No active streak yet."}
+            <Text style={[styles.mutedSecondary, styles.insightsSecondLine]}>
+              {streakDays ? `Current streak: ${streakDays} day${streakDays === 1 ? "" : "s"}.` : "No active streak yet."}
             </Text>
           </View>
         </ScrollView>
@@ -699,5 +252,26 @@ export default function StudentDetails() {
   );
 }
 
-
-
+const styles = StyleSheet.create({
+  loading: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: Colors.bg },
+  errorWrap: { flex: 1, justifyContent: "center", padding: Spacing.md, backgroundColor: Colors.bg },
+  errorWrapPad16: { flex: 1, justifyContent: "center", padding: 16, backgroundColor: Colors.bg },
+  errorText: { color: Colors.danger, marginBottom: Spacing.sm },
+  root: { flex: 1, backgroundColor: Colors.bg },
+  scrollContent: { padding: Spacing.md, paddingBottom: Spacing.lg, paddingTop: Spacing.lg },
+  topBar: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: Spacing.md },
+  backBtn: { width: 40, height: 40, borderRadius: Radius.lg, alignItems: "center", justifyContent: "center", backgroundColor: Colors.card, borderWidth: 1, borderColor: Colors.border },
+  pressedOpacity9: { opacity: 0.9 },
+  topTitle: { ...Typography.section, fontWeight: "900" },
+  topBarSpacer: { width: 40, height: 40 },
+  actionsRow: { flexDirection: "row", gap: Spacing.sm, marginBottom: Spacing.md },
+  sectionLabel: { ...Typography.section, marginBottom: Spacing.xs },
+  statsRow: { flexDirection: "row", gap: Spacing.sm, marginBottom: Spacing.sm },
+  mbMd: { marginBottom: Spacing.md },
+  assignedHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 6 },
+  changeLink: { ...Typography.secondary, color: Colors.primary, fontWeight: "800" },
+  insightsTitle: { ...Typography.section, marginTop: Spacing.lg, marginBottom: Spacing.xs },
+  insightsCard: { backgroundColor: Colors.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: Colors.border, marginBottom: Spacing.md },
+  mutedSecondary: { ...Typography.secondary, color: Colors.textMuted },
+  insightsSecondLine: { marginTop: 6 },
+});
