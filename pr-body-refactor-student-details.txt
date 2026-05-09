@@ -1,0 +1,111 @@
+# phase-2: refactor studentDetails into utils + components
+
+## Commits
+- `B: extract utils/studentMetrics.ts`
+- `C: extract StudentStatCard component`
+- `D: extract StudentActionRow component`
+- `E: extract StudentActionButton component`
+- `F: trim studentDetails screen, move residual components`
+
+---
+
+## Task A — Responsibility map (pre-refactor `app/coach/studentDetails.tsx`)
+
+### `useState` / `useRef`
+- **None.** No local React state or refs; data came from `useAsyncData` and derived values were plain `const` IIFEs or inline functions after early returns.
+
+### `useEffect` / `useFocusEffect` / `useAsyncData`
+- **`useMemo`**: `studentId` from route params (`String(params.studentId ?? "").trim()`).
+- **`useCallback`**: `fetcher` for coach-gated load (`studentId`, `userId`, `userRole` deps).
+- **`useAsyncData<StudentDetailsData>`**: runs `fetcher` whenever `fetcher` identity changes; exposes `data`, `loading`, `error`.
+- **`useMemo`**: `plans` → `detailsData?.plans ?? []`, `logs` → `detailsData?.logs ?? []` (stable empty-array pattern from context-split).
+
+### Async functions and side effects
+- **`fetcher`** (inside `useCallback`):  
+  - Validates `studentId` and coach role → throws on missing access.  
+  - **`await studentService.getStudentById`** → throws if missing or wrong `coachId`.  
+  - **`Promise.allSettled`** on: `getLatestTrainingGroupForStudent`, `getWorkoutPlansForStudentAsCoach`, `getWorkoutHistory`; logs partial failures; substitutes `[]` / `null` on rejection (**Phase 1.9**).  
+  - Returns `{ student, latestGroup, plans, logs }` (no navigation).
+
+**Note:** The current screen has **no** delete-student, edit-profile, or “View plans / View history” row handlers—those flows are not present on this branch’s file. Navigation is: back, assign workout, create group, view progress, change split, assigned workouts card, dashboard on error.
+
+### JSX sections (approx. line ranges in pre-refactor file ~504 lines before trim extraction)
+- **~116–129**: Full-screen loading (`ActivityIndicator`).
+- **~131–145**: Load error + “Back to Dashboard”.
+- **~147–154**: “Student not loaded” + back.
+- **~160–498**: Main `ScreenLayout` / `ScrollView`: top bar (back + title), hero profile card, three `ActionButton`s, “Quick stats” + four `StatCard`s, “Assigned Program” header + `Change`, large assigned-program `Pressable` (progress bar + empty state + `PrimaryButton`), “Compliance insights” card.
+
+### Metrics computed inline (extraction targets for Task B)
+1. **`lastWorkoutMs` / `lastWorkoutLabel`** — first log’s `completedAt` / `date` via `toMs`; format `toLocaleDateString` month short + day.
+2. **`workoutsCompleted`** — `logs.length`.
+3. **`avgDurationSeconds` / `avgDurationLabel`** — mean of first ≤10 logs with finite `durationSeconds > 0`, floor; `formatDurationForHistory`.
+4. **`compliancePercent`** — rolling 7-day count vs `latestGroup?.workoutsPerWeek`; **null** if target missing/zero/non-finite (**Phase 1.6**); else `round((count7/wpw)*100)` clamped `[0, 999]`.
+5. **`currentStreakDays`** — unique local day keys from logs; today + consecutive past days (**Phase 1.7**).
+6. **`planById`** — `Map` from `plans` by `id`.
+7. **Local `startOfWeekMs`** — Monday 00:00 local for “this week” window (replaced by `startOfWeekMonday` from `dateRanges` in `studentMetrics`, same calendar math).
+8. **`weeklyProgress`** — if no `latestGroup.id` or invalid `workoutsPerWeek`, `{ completed: 0, target: wpw, ratio: 0 }`; else count logs in `[weekStart, now]` whose plan’s `groupId === latestGroup.id`; `ratio = clamp(completed/wp w, 0, 1)`.
+9. **`assignedProgramPercent`** — if `compliancePercent` is finite, `clamp(round(compliance), 0, 100)`; else `round(ratio * 100)`.
+
+### Inline UI helpers (pre C–E)
+- **`StatCard`** — label, value, optional Ionicons + tint.
+- **`RowAction`** — 36×36 icon button (`tone` neutral/danger); **defined but unused** in JSX (lint debt noted).
+- **`ActionButton`** — primary/secondary column button with shadow on primary.
+
+---
+
+## Line counts (after refactor)
+
+| Path | Lines |
+|------|------:| 
+| `app/coach/studentDetails.tsx` | **277** |
+| `utils/studentMetrics.ts` | 125 |
+| `components/student/StudentStatCard.tsx` | 44 |
+| `components/student/StudentActionRow.tsx` | 39 |
+| `components/student/StudentActionButton.tsx` | 70 |
+| `components/student/StudentProfileHero.tsx` | 89 |
+| `components/student/StudentProgramProgressCard.tsx` | 109 |
+
+---
+
+## Verification (Task G)
+
+### 1. `npx tsc --noEmit`
+Clean (no errors).
+
+### 2. `npx expo lint`
+No **new** issues reported for the touched student-details / student component / `studentMetrics` files (workspace may still show pre-existing warnings elsewhere).
+
+### 3. `grep` — `toMs` not redefined in `utils/studentMetrics.ts`
+```bash
+grep -n "function toMs\|const toMs\b" utils/studentMetrics.ts
+```
+→ **no matches** (only `import { toMs } from "@/utils/dateConvert"`).
+
+### 4. `grep` — no bare `Promise.all` in screen (Phase 1.9)
+```bash
+grep -n "Promise\.all[^S]" app/coach/studentDetails.tsx
+```
+→ **no matches** (only `Promise.allSettled`).
+
+### 5. `grep` — inline `StatCard` / `RowAction` / `ActionButton` removed
+```bash
+grep -n "function StatCard\|function RowAction\|function ActionButton" app/coach/studentDetails.tsx
+```
+→ **no matches**.
+
+### Metric correctness
+- **Not run in CI:** Pick a student with rich history on **main** vs this branch; confirm streak, compliance %, last-workout label, weekly progress text/bar, and assigned-program % match. If anything differs, `studentMetrics` drifted.
+
+### Manual smoke (iOS)
+- Coach opens student → UI parity with main.
+- Assign workout / create group / view progress / change split / tap assigned program card (and empty-state create flow).
+- Simulated partial fetch failure: one `allSettled` leg rejects → screen still renders with empty segment + logs; no crash.
+
+---
+
+## PR notes / follow-ups
+- **`StudentActionRow`** mirrors the old unused `RowAction`; kept for reuse and to clear inline definition from the screen.
+- **Weekly boundary:** `weeklyProgress` now uses `startOfWeekMonday` from `utils/dateRanges` (equivalent Monday-midnight window to the inlined `startOfWeekMs`).
+- **PR title:** `phase-2: refactor studentDetails into utils + components`
+
+Open PR: https://github.com/SotQA/coach_app/compare/main...phase-2-refactor-student-details
