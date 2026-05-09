@@ -11,7 +11,8 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { useAuth } from "../../context/AuthContext";
-import { useActiveWorkout, type ActiveExerciseDraft } from "../../context/ActiveWorkoutContext";
+import { useActiveWorkoutSession, type ActiveExerciseDraft } from "../../context/ActiveWorkoutSessionContext";
+import { useElapsedSeconds } from "../../context/ElapsedTimeContext";
 import { useI18n } from "../../context/I18nContext";
 import { workoutService } from "../../services/workoutService";
 import type { LoggedSet, WorkoutLog, WorkoutPlan } from "../../types/Workout";
@@ -76,7 +77,8 @@ function toLocalDrafts(exercises: ActiveExerciseDraft[]): ExerciseDraft[] {
 export default function WorkoutExecution() {
   const router = useRouter();
   const { user: authUser } = useAuth();
-  const activeWorkout = useActiveWorkout();
+  const activeWorkout = useActiveWorkoutSession();
+  const elapsedSeconds = useElapsedSeconds();
   const { t } = useI18n();
   const authUserId = authUser?.id;
   const authUserRole = authUser?.role;
@@ -413,7 +415,7 @@ export default function WorkoutExecution() {
                   fontVariant: ["tabular-nums"],
                 }}
               >
-                {formatElapsedForTimer(activeWorkout.elapsedSeconds)}
+                {formatElapsedForTimer(elapsedSeconds)}
               </Text>
             </View>
           </View>

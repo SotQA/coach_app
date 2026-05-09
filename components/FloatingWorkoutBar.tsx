@@ -2,7 +2,8 @@ import { Pressable, Text, View } from "react-native";
 import { useRouter, usePathname } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { useActiveWorkout } from "../context/ActiveWorkoutContext";
+import { useActiveWorkoutSession } from "../context/ActiveWorkoutSessionContext";
+import { useElapsedSeconds } from "../context/ElapsedTimeContext";
 import { useI18n } from "../context/I18nContext";
 import { formatElapsedForTimer } from "../utils/workoutDuration";
 import { Colors } from "../theme/colors";
@@ -24,7 +25,8 @@ function formatRestCountdown(seconds: number): string {
 }
 
 export function FloatingWorkoutBar() {
-  const { session, elapsedSeconds, restSecondsRemaining } = useActiveWorkout();
+  const { session, restSecondsRemaining } = useActiveWorkoutSession();
+  const elapsedSeconds = useElapsedSeconds();
   const { t } = useI18n();
   const router = useRouter();
   const pathname = usePathname();

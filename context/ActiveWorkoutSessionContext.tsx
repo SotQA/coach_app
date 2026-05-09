@@ -83,10 +83,8 @@ interface StartSessionParams {
   notes?: string;
 }
 
-interface ActiveWorkoutContextValue {
+interface ActiveWorkoutSessionContextValue {
   session: ActiveWorkoutSession | null;
-  /** Live workout elapsed seconds, derived from session.startedAt. */
-  elapsedSeconds: number;
   /** Live rest seconds remaining (float). 0 when inactive. */
   restSecondsRemaining: number;
   startSession: (params: StartSessionParams) => Promise<void>;
@@ -155,12 +153,13 @@ function calcRestRemaining(rt: RestTimer): number {
 
 // ─── Context ─────────────────────────────────────────────────────────────────
 
-const ActiveWorkoutContext = createContext<ActiveWorkoutContextValue | undefined>(undefined);
+const ActiveWorkoutSessionContext = createContext<ActiveWorkoutSessionContextValue | undefined>(
+  undefined
+);
 
-export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
+export function ActiveWorkoutSessionProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [session, setSession] = useState<ActiveWorkoutSession | null>(null);
-  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [restSecondsRemaining, setRestSecondsRemaining] = useState(0);
 
   const sessionRef = useRef<ActiveWorkoutSession | null>(null);
@@ -175,7 +174,6 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
     hydrate().then((loaded) => {
       if (!loaded) return;
       setSession(loaded);
-      setElapsedSeconds(Math.max(0, Math.floor((Date.now() - loaded.startedAt) / 1000)));
       if (loaded.restTimer?.isActive) {
         const rem = calcRestRemaining(loaded.restTimer);
         setRestSecondsRemaining(rem);
@@ -194,22 +192,10 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
     if (!user) {
       cancelAllScheduledNotifications();
       setSession(null);
-      setElapsedSeconds(0);
       setRestSecondsRemaining(0);
       persist(null);
     }
   }, [user]);
-
-  // ── Workout elapsed timer (1 s tick) ─────────────────────────────────────
-  useEffect(() => {
-    if (!session) { setElapsedSeconds(0); return; }
-    const tick = () =>
-      setElapsedSeconds(Math.max(0, Math.floor((Date.now() - session.startedAt) / 1000)));
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.sessionId, session?.startedAt]);
 
   // ── Rest timer tick (250 ms — smooth countdown + auto-stop at 0) ─────────
   useEffect(() => {
@@ -264,7 +250,7 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.sessionId]);
 
-  // ── AppState: save on background, resync timers on foreground ────────────
+  // ── AppState: save on background, resync rest timer on foreground ─────────
   useEffect(() => {
     const handler = (state: AppStateStatus) => {
       if (state === "background" || state === "inactive") {
@@ -272,7 +258,6 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
       } else if (state === "active") {
         const s = sessionRef.current;
         if (!s) return;
-        setElapsedSeconds(Math.max(0, Math.floor((Date.now() - s.startedAt) / 1000)));
         if (s.restTimer?.isActive) {
           const rem = calcRestRemaining(s.restTimer);
           setRestSecondsRemaining(rem);
@@ -299,7 +284,6 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
       ...params,
     };
     setSession(newSession);
-    setElapsedSeconds(0);
     await persist(newSession);
   }, []);
 
@@ -336,7 +320,6 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
     await cancelRestNotification(pendingId);
 
     setSession(null);
-    setElapsedSeconds(0);
     setRestSecondsRemaining(0);
     await persist(null);
   }, []);
@@ -497,10 +480,9 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <ActiveWorkoutContext.Provider
+    <ActiveWorkoutSessionContext.Provider
       value={{
         session,
-        elapsedSeconds,
         restSecondsRemaining,
         startSession,
         updateSet,
@@ -513,12 +495,12 @@ export function ActiveWorkoutProvider({ children }: { children: ReactNode }) {
       }}
     >
       {children}
-    </ActiveWorkoutContext.Provider>
+    </ActiveWorkoutSessionContext.Provider>
   );
 }
 
-export function useActiveWorkout(): ActiveWorkoutContextValue {
-  const ctx = useContext(ActiveWorkoutContext);
-  if (!ctx) throw new Error("useActiveWorkout must be used within ActiveWorkoutProvider");
+export function useActiveWorkoutSession(): ActiveWorkoutSessionContextValue {
+  const ctx = useContext(ActiveWorkoutSessionContext);
+  if (!ctx) throw new Error("useActiveWorkoutSession must be used within ActiveWorkoutSessionProvider");
   return ctx;
 }

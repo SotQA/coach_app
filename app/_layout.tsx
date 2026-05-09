@@ -3,7 +3,8 @@ import { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
 import * as Notifications from "expo-notifications";
 import { AuthProvider, useAuth } from "../context/AuthContext";
-import { ActiveWorkoutProvider, useActiveWorkout } from "../context/ActiveWorkoutContext";
+import { ActiveWorkoutSessionProvider, useActiveWorkoutSession } from "../context/ActiveWorkoutSessionContext";
+import { ElapsedTimeProvider } from "../context/ElapsedTimeContext";
 import { I18nProvider } from "../context/I18nContext";
 import * as SystemUI from "expo-system-ui";
 import { DarkTheme, ThemeProvider } from "@react-navigation/native";
@@ -22,7 +23,7 @@ configureForegroundHandler();
 
 function RootNavigator() {
   const { loading } = useAuth();
-  const { session } = useActiveWorkout();
+  const { session } = useActiveWorkoutSession();
   const router = useRouter();
 
   // ── One-time setup on mount ───────────────────────────────────────────────
@@ -104,13 +105,15 @@ export default function Layout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <I18nProvider>
         <AuthProvider>
-          <ActiveWorkoutProvider>
-            <ThemeProvider value={navTheme}>
-              <ErrorBoundary>
-                <RootNavigator />
-              </ErrorBoundary>
-            </ThemeProvider>
-          </ActiveWorkoutProvider>
+          <ActiveWorkoutSessionProvider>
+            <ElapsedTimeProvider>
+              <ThemeProvider value={navTheme}>
+                <ErrorBoundary>
+                  <RootNavigator />
+                </ErrorBoundary>
+              </ThemeProvider>
+            </ElapsedTimeProvider>
+          </ActiveWorkoutSessionProvider>
         </AuthProvider>
       </I18nProvider>
     </GestureHandlerRootView>

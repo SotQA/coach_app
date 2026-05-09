@@ -11,7 +11,8 @@ import { useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../../context/AuthContext";
-import { useActiveWorkout } from "../../../context/ActiveWorkoutContext";
+import { useActiveWorkoutSession } from "../../../context/ActiveWorkoutSessionContext";
+import { useElapsedSeconds } from "../../../context/ElapsedTimeContext";
 import { useI18n } from "../../../context/I18nContext";
 import { workoutService } from "../../../services/workoutService";
 import { trainingGroupService } from "../../../services/trainingGroupService";
@@ -104,7 +105,8 @@ export default function StudentWorkouts() {
   const router = useRouter();
   const { user } = useAuth();
   const { t, locale } = useI18n();
-  const activeWorkout = useActiveWorkout();
+  const activeWorkout = useActiveWorkoutSession();
+  const elapsedSeconds = useElapsedSeconds();
   const [plans, setPlans] = useState<WorkoutPlan[]>([]);
   const [logs, setLogs] = useState<WorkoutLog[]>([]);
   const [activeGroup, setActiveGroup] = useState<TrainingGroup | null>(null);
@@ -404,7 +406,7 @@ export default function StudentWorkouts() {
                     marginTop: 2,
                   }}
                 >
-                  {formatElapsedForTimer(activeWorkout.elapsedSeconds)} · {t("tapToResume")}
+                  {formatElapsedForTimer(elapsedSeconds)} · {t("tapToResume")}
                 </Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color={Colors.onPrimary} />

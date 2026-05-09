@@ -1,6 +1,6 @@
 import { Pressable, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useActiveWorkout } from "../context/ActiveWorkoutContext";
+import { useActiveWorkoutSession } from "../context/ActiveWorkoutSessionContext";
 import { useI18n } from "../context/I18nContext";
 import { Colors } from "../theme/colors";
 import { Radius, Spacing } from "../theme/spacing";
@@ -27,7 +27,7 @@ export function RestTimerBar() {
     pauseRestTimer,
     resumeRestTimer,
     skipRestTimer,
-  } = useActiveWorkout();
+  } = useActiveWorkoutSession();
   const { t } = useI18n();
 
   const rt = session?.restTimer;
