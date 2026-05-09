@@ -15,6 +15,7 @@ import { Radius, Spacing } from "../../theme/spacing";
 import { Typography, FontSizes } from "../../theme/typography";
 import { ScreenLayout } from "../../components/ScreenLayout";
 import { StudentStatCard } from "../../components/student/StudentStatCard";
+import { StudentActionButton } from "../../components/student/StudentActionButton";
 import type { TrainingGroup } from "../../types/TrainingGroup";
 import { logger } from "@/utils/logger";
 import { getUserInitials, getDisplayName } from "@/utils/userDisplay";
@@ -156,70 +157,6 @@ export default function StudentDetails() {
   const displayName = getDisplayName(student, "Student");
   const initials = getUserInitials(student, "S");
 
-  const ActionButton = ({
-    title,
-    icon,
-    iconColor,
-    variant,
-    onPress,
-  }: {
-    title: string;
-    icon: any;
-    iconColor?: string;
-    variant: "primary" | "secondary";
-    onPress: () => void;
-  }) => (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={title}
-      onPress={onPress}
-      style={({ pressed }) => ({
-        flex: 1,
-        minWidth: 0,
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 6,
-        paddingVertical: 12,
-        paddingHorizontal: Spacing.sm,
-        borderRadius: Radius.lg,
-        backgroundColor: variant === "primary" ? Colors.primary : Colors.card,
-        borderWidth: variant === "primary" ? 0 : 1,
-        borderColor: variant === "primary" ? "transparent" : Colors.border,
-        opacity: pressed ? 0.92 : 1,
-        ...(variant === "primary"
-          ? {
-              shadowColor: Colors.primary,
-              shadowOffset: { width: 0, height: 6 },
-              shadowOpacity: 0.45,
-              shadowRadius: 10,
-              elevation: 8,
-            }
-          : null),
-      })}
-    >
-      <Ionicons
-        name={icon}
-        size={18}
-        color={iconColor ?? (variant === "primary" ? Colors.onPrimary : Colors.primary)}
-      />
-      <Text
-        numberOfLines={3}
-        style={{
-          ...Typography.section,
-          fontSize: FontSizes.note,
-          lineHeight: 16,
-          fontWeight: variant === "primary" ? "800" : "700",
-          color: variant === "primary" ? Colors.onPrimary : Colors.text,
-          textAlign: "center",
-          flexShrink: 1,
-        }}
-      >
-        {title}
-      </Text>
-    </Pressable>
-  );
-
   return (
     <ScreenLayout>
       <View style={{ flex: 1, backgroundColor: Colors.bg }}>
@@ -337,7 +274,7 @@ export default function StudentDetails() {
 
           {/* Coach actions bar */}
           <View style={{ flexDirection: "row", gap: Spacing.sm, marginBottom: Spacing.md }}>
-            <ActionButton
+            <StudentActionButton
               title="Assign Workout"
               icon="barbell"
               variant="primary"
@@ -348,7 +285,7 @@ export default function StudentDetails() {
                 })
               }
             />
-            <ActionButton
+            <StudentActionButton
               title="Create New Group"
               icon="add-circle-outline"
               variant="secondary"
@@ -359,7 +296,7 @@ export default function StudentDetails() {
                 })
               }
             />
-            <ActionButton
+            <StudentActionButton
               title="View Progress"
               icon="stats-chart-outline"
               iconColor="#64D2FF"
