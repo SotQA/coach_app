@@ -19,7 +19,7 @@ import { trainingGroupService } from "../../services/trainingGroupService";
 import { workoutService } from "../../services/workoutService";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
-import { Typography } from "../../theme/typography";
+import { Typography, FontSizes } from "../../theme/typography";
 import type { TrainingGroup } from "../../types/TrainingGroup";
 import type { Exercise } from "../../types/Workout";
 
@@ -287,7 +287,7 @@ export default function CreateWorkoutPlan() {
             <>
               {/* Header */}
               <View style={{ marginBottom: Spacing.md }}>
-                <Text style={{ ...Typography.title, fontSize: 26, marginBottom: 6 }}>
+                <Text style={{ ...Typography.title, fontSize: FontSizes.h2, marginBottom: 6 }}>
                   Create Workout Plan
                 </Text>
                 <Text style={{ ...Typography.section, fontWeight: "900" }}>{studentName}</Text>
@@ -497,4 +497,6 @@ export default function CreateWorkoutPlan() {
     </ScreenLayout>
   );
 }
+
+
 

@@ -19,65 +19,17 @@ import type { TrainingGroup } from "../../../types/TrainingGroup";
 import type { WorkoutLog, WorkoutPlan } from "../../../types/Workout";
 import { Colors } from "../../../theme/colors";
 import { Radius, Spacing } from "../../../theme/spacing";
-import { Typography } from "../../../theme/typography";
+import { Typography, FontSizes } from "../../../theme/typography";
 import { PrimaryButton } from "../../../components/PrimaryButton";
 import { ScreenLayout } from "../../../components/ScreenLayout";
 import { formatElapsedForTimer } from "../../../utils/workoutDuration";
 import { FLOATING_BAR_SCROLL_OFFSET } from "../../../components/FloatingWorkoutBar";
 import { formatDateShort } from "../../../utils/formatLocale";
 import type { SupportedLocale } from "../../../context/I18nContext";
-import { logger } from "../../../utils/logger";
+import { toMs } from "../../../utils/dateConvert";
+import { dayKeyFromMs, startOfWeekMonday, isInCurrentWeek, isInCurrentMonth } from "../../../utils/dateRanges";
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
-
-function toMs(value: unknown): number {
-  if (!value) return 0;
-  if (typeof value === "string") {
-    const ms = Date.parse(value);
-    return Number.isFinite(ms) ? ms : 0;
-  }
-  if (value instanceof Date) return value.getTime();
-  if (typeof (value as { toDate?: () => Date })?.toDate === "function") {
-    try {
-      const d = (value as { toDate: () => Date }).toDate();
-      return d instanceof Date ? d.getTime() : 0;
-    } catch (e) {
-      logger.warn("[workouts] toMs failed", e, value);
-      return 0;
-    }
-  }
-  return 0;
-}
-
-function dayKeyFromMs(ms: number): string {
-  const d = new Date(ms);
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
-
-function startOfWeekMonday(d: Date): Date {
-  const x = new Date(d);
-  x.setHours(0, 0, 0, 0);
-  const day = x.getDay();
-  const diff = day === 0 ? -6 : 1 - day;
-  x.setDate(x.getDate() + diff);
-  return x;
-}
-
-function isInCurrentWeek(ms: number): boolean {
-  if (!ms) return false;
-  const start = startOfWeekMonday(new Date()).getTime();
-  return ms >= start && ms < start + WEEK_MS;
-}
-
-function isInCurrentMonth(ms: number): boolean {
-  if (!ms) return false;
-  const now = new Date();
-  const d = new Date(ms);
-  return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
-}
 
 function formatRelativeDone(
   ms: number,
@@ -389,7 +341,7 @@ export default function StudentWorkouts() {
               marginBottom: Spacing.md,
             }}
           >
-            <Text style={{ ...Typography.title, fontSize: 22 }}>{t("workouts")}</Text>
+            <Text style={{ ...Typography.title, fontSize: FontSizes.h3 }}>{t("workouts")}</Text>
             <Pressable
               onPress={() => router.push("/student/workoutHistory")}
               hitSlop={12}
@@ -522,7 +474,7 @@ export default function StudentWorkouts() {
                       <Text style={{ ...Typography.secondary, color: Colors.primary, fontWeight: "800", marginBottom: 6 }}>
                         {t("nextUp")}
                       </Text>
-                      <Text style={{ ...Typography.title, fontSize: 22, marginBottom: Spacing.xs }}>
+                      <Text style={{ ...Typography.title, fontSize: FontSizes.h3, marginBottom: Spacing.xs }}>
                         {recommendedPlan.name}
                       </Text>
                       <Text style={{ ...Typography.secondary, color: Colors.textSecondary, marginBottom: Spacing.sm }}>
@@ -576,7 +528,7 @@ export default function StudentWorkouts() {
                     >
                       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" }}>
                         <View style={{ flex: 1, marginRight: Spacing.sm }}>
-                          <Text style={{ ...Typography.section, fontSize: 18, fontWeight: "800" }}>{plan.name}</Text>
+                          <Text style={{ ...Typography.section, fontSize: FontSizes.subheading, fontWeight: "800" }}>{plan.name}</Text>
                           <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4 }}>
                             {t(exCount === 1 ? "exerciseCount_one" : "exerciseCount_other", { count: exCount })} · {t("lastWhen", { when: formatRelativeDone(lastMs, t, locale) })}
                           </Text>
@@ -590,7 +542,7 @@ export default function StudentWorkouts() {
                                   borderRadius: Radius.sm,
                                 }}
                               >
-                                <Text style={{ color: Colors.primary, fontSize: 12, fontWeight: "700" }}>{t("new")}</Text>
+                                <Text style={{ color: Colors.primary, fontSize: FontSizes.caption, fontWeight: "700" }}>{t("new")}</Text>
                               </View>
                             ) : null}
                             {doneThisWeek && !isNew ? (
@@ -602,7 +554,7 @@ export default function StudentWorkouts() {
                                   borderRadius: Radius.sm,
                                 }}
                               >
-                                <Text style={{ color: Colors.success, fontSize: 12, fontWeight: "700" }}>
+                                <Text style={{ color: Colors.success, fontSize: FontSizes.caption, fontWeight: "700" }}>
                                   {t("doneThisWeek")}
                                 </Text>
                               </View>
@@ -664,3 +616,5 @@ export default function StudentWorkouts() {
     </ScreenLayout>
   );
 }
+
+

@@ -5,8 +5,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScreenLayout } from "../../../components/ScreenLayout";
 import { Colors } from "../../../theme/colors";
-import { Spacing } from "../../../theme/spacing";
-import { Typography } from "../../../theme/typography";
+import { Radius, Spacing } from "../../../theme/spacing";
+import { Typography, FontSizes } from "../../../theme/typography";
 import { useAuth } from "../../../context/AuthContext";
 import {
   useI18n,
@@ -19,14 +19,10 @@ import { ExerciseLibraryModal } from "../../../components/ExerciseLibraryModal";
 import { SettingsProfileCard } from "../../../components/settings/SettingsProfileCard";
 import { SettingsSection } from "../../../components/settings/SettingsSection";
 import { SettingsRow } from "../../../components/settings/SettingsRow";
+import { getUserInitials } from "../../../utils/userDisplay";
 
-function initialsFromUser(user: { firstName?: string | null; lastName?: string | null } | null): string {
-  if (!user) return "C";
-  const a = user.firstName?.trim()?.[0] ?? "";
-  const b = user.lastName?.trim()?.[0] ?? "";
-  const s = `${a}${b}`.toUpperCase();
-  return s || "C";
-}
+const initialsFromUser = (user: { firstName?: string | null; lastName?: string | null } | null) =>
+  getUserInitials(user, "C");
 
 export default function CoachProfile() {
   const router = useRouter();
@@ -113,7 +109,7 @@ export default function CoachProfile() {
               borderBottomColor: Colors.border,
             }}
           >
-            <Text style={{ ...Typography.title, fontSize: 22 }}>{t("settings")}</Text>
+            <Text style={{ ...Typography.title, fontSize: FontSizes.h3 }}>{t("settings")}</Text>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={t("notifications")}
@@ -125,7 +121,7 @@ export default function CoachProfile() {
               style={({ pressed }) => ({
                 width: 44,
                 height: 44,
-                borderRadius: 22,
+                borderRadius: Radius.xl,
                 backgroundColor: Colors.card,
                 borderWidth: 1,
                 borderColor: Colors.border,
@@ -248,3 +244,5 @@ export default function CoachProfile() {
     </ScreenLayout>
   );
 }
+
+

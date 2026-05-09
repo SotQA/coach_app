@@ -17,31 +17,14 @@ import {
 import { workoutService } from "../../../services/workoutService";
 import type { WorkoutLog } from "../../../types/Workout";
 import { Colors } from "../../../theme/colors";
-import { Spacing } from "../../../theme/spacing";
-import { Typography } from "../../../theme/typography";
+import { Radius, Spacing } from "../../../theme/spacing";
+import { Typography, FontSizes } from "../../../theme/typography";
 import { formatDateFull } from "../../../utils/formatLocale";
+import { toMs } from "../../../utils/dateConvert";
+import { getUserInitials } from "../../../utils/userDisplay";
 
-function initialsFromUser(user: { firstName?: string | null; lastName?: string | null } | null): string {
-  if (!user) return "S";
-  const a = user.firstName?.trim()?.[0] ?? "";
-  const b = user.lastName?.trim()?.[0] ?? "";
-  const s = `${a}${b}`.toUpperCase();
-  return s || "S";
-}
-
-const toMs = (value: unknown): number => {
-  if (!value) return 0;
-  if (typeof value === "string") {
-    const ms = Date.parse(value);
-    return Number.isFinite(ms) ? ms : 0;
-  }
-  if (value instanceof Date) return value.getTime();
-  if (typeof (value as { toDate?: () => Date })?.toDate === "function") {
-    const d = (value as { toDate: () => Date }).toDate();
-    return d instanceof Date ? d.getTime() : 0;
-  }
-  return 0;
-};
+const initialsFromUser = (user: { firstName?: string | null; lastName?: string | null } | null) =>
+  getUserInitials(user, "S");
 
 export default function StudentProfile() {
   const router = useRouter();
@@ -135,7 +118,7 @@ export default function StudentProfile() {
               borderBottomColor: Colors.border,
             }}
           >
-            <Text style={{ ...Typography.title, fontSize: 22 }}>{t("settings")}</Text>
+            <Text style={{ ...Typography.title, fontSize: FontSizes.h3 }}>{t("settings")}</Text>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={t("notifications")}
@@ -147,7 +130,7 @@ export default function StudentProfile() {
               style={({ pressed }) => ({
                 width: 44,
                 height: 44,
-                borderRadius: 22,
+                borderRadius: Radius.xl,
                 backgroundColor: Colors.card,
                 borderWidth: 1,
                 borderColor: Colors.border,
@@ -285,3 +268,5 @@ export default function StudentProfile() {
     </ScreenLayout>
   );
 }
+
+

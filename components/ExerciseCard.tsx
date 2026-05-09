@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Platform, Pressable, Text, TextInput, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "../theme/colors";
+import { parseFloatInput } from "../utils/inputParsing";
 import { Radius, Spacing } from "../theme/spacing";
 import { Typography } from "../theme/typography";
 
@@ -69,17 +70,7 @@ export function ExerciseCard({
     const n = Number(cleaned);
     return Number.isFinite(n) ? n : value.sets;
   };
-  const parseFloatSafe = (t: string) => {
-    const cleaned = t
-      .trim()
-      .replace(/,/g, ".")
-      // keep only digits and dots
-      .replace(/[^0-9.]/g, "")
-      // collapse multiple dots → single dot
-      .replace(/\.(?=.*\.)/g, "");
-    const n = Number(cleaned);
-    return Number.isFinite(n) ? n : value.weight ?? undefined;
-  };
+  const parseFloatSafe = (t: string) => parseFloatInput(t) ?? value.weight ?? undefined;
 
   return (
     <View

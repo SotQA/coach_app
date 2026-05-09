@@ -9,6 +9,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import type { StudentSummary } from "../types/StudentSummary";
+import type { UserFirestoreDoc } from "../types/firestore";
 
 const USERS_COLLECTION = "users";
 
@@ -20,13 +21,7 @@ const assertNonEmpty = (value: string, label: string) => {
 };
 
 const mapStudentDoc = (snap: { id: string; data: () => any }): StudentSummary => {
-  const data = snap.data() as {
-    email?: string;
-    firstName?: string;
-    lastName?: string;
-    role?: string;
-    coachId?: string;
-  };
+  const data = snap.data() as UserFirestoreDoc | undefined ?? {};
 
   return {
     id: snap.id,
@@ -44,8 +39,8 @@ export const studentService = {
     const ref = doc(db, USERS_COLLECTION, studentId);
     const snap = await getDoc(ref);
     if (!snap.exists()) return null;
-    const data = snap.data() as { role?: string };
-    if (data.role !== "student") return null;
+    const data = snap.data() as UserFirestoreDoc | undefined;
+    if (data?.role !== "student") return null;
     return mapStudentDoc(snap);
   },
 
@@ -71,8 +66,8 @@ export const studentService = {
     if (!snap.exists()) {
       throw new Error("Student user not found.");
     }
-    const data = snap.data() as { role?: string; coachId?: string };
-    if (data.role !== "student") {
+    const data = snap.data() as UserFirestoreDoc | undefined;
+    if (data?.role !== "student") {
       throw new Error("That user is not a student.");
     }
     if (data.coachId && data.coachId !== coachId) {
@@ -113,8 +108,8 @@ export const studentService = {
     }
 
     const match = snapshot.docs[0];
-    const data = match.data() as { role?: string; coachId?: string };
-    if (data.role !== "student") {
+    const data = match.data() as UserFirestoreDoc | undefined;
+    if (data?.role !== "student") {
       throw new Error("That user is not a student (cannot add a coach).");
     }
     if (data.coachId && data.coachId !== coachId) {

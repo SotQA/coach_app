@@ -3,7 +3,7 @@ import { View, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "../../theme/colors";
 import { Spacing } from "../../theme/spacing";
-import { Typography } from "../../theme/typography";
+import { Typography, FontSizes } from "../../theme/typography";
 
 type Props = {
   label: string;
@@ -34,7 +34,7 @@ export function InfoRow({ label, value, icon, right, showDivider = true }: Props
           </View>
         ) : null}
         <View style={{ flex: 1 }}>
-          <Text style={{ ...Typography.secondary, color: Colors.textMuted, fontSize: 12 }}>{label}</Text>
+          <Text style={{ ...Typography.secondary, color: Colors.textMuted, fontSize: FontSizes.caption }}>{label}</Text>
           <Text style={{ ...Typography.section, marginTop: 2 }}>{v}</Text>
         </View>
       </View>
@@ -42,4 +42,6 @@ export function InfoRow({ label, value, icon, right, showDivider = true }: Props
     </View>
   );
 }
+
+
 

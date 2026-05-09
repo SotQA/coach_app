@@ -19,4 +19,10 @@ export const Colors = {
 
   // Button
   disabled: "#48484A",
+
+  // --- Semantic tokens (added in phase-2-utils) ---
+  // Only literals that appeared 2+ times across the codebase are promoted here.
+  surfaceSubtle:   "rgba(255,255,255,0.06)",  // subtle inset backgrounds, grid lines
+  surfaceHighlight:"rgba(255,255,255,0.10)",  // slightly brighter surface tint, active rows
+  dangerTint:      "rgba(220,38,38,0.35)",    // danger-tone card border
 } as const;

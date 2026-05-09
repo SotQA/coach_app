@@ -4,7 +4,7 @@ import type { StudentSummary } from "../types/StudentSummary";
 import { PrimaryButton } from "./PrimaryButton";
 import { Colors } from "../theme/colors";
 import { Radius, Spacing } from "../theme/spacing";
-import { Typography } from "../theme/typography";
+import { Typography, FontSizes } from "../theme/typography";
 
 interface StudentCardProps {
   student: StudentSummary;
@@ -53,7 +53,7 @@ export const StudentCard: FC<StudentCardProps> = ({
           style={{
             width: 44,
             height: 44,
-            borderRadius: 22,
+            borderRadius: Radius.xl,
             backgroundColor: Colors.surface,
             borderWidth: 1,
             borderColor: Colors.border,
@@ -89,7 +89,7 @@ export const StudentCard: FC<StudentCardProps> = ({
                 paddingVertical: 11,
                 paddingHorizontal: Spacing.xs,
               }}
-              textStyle={{ color: Colors.text, fontWeight: "800", fontSize: 13 }}
+              textStyle={{ color: Colors.text, fontWeight: "800", fontSize: FontSizes.note }}
             />
           </View>
           <View style={{ flex: 1, minWidth: 0 }}>
@@ -117,7 +117,7 @@ export const StudentCard: FC<StudentCardProps> = ({
                   : { elevation: 8 }),
               })}
             >
-              <Text style={{ ...Typography.section, fontWeight: "800", fontSize: 13, color: Colors.onPrimary }}>
+              <Text style={{ ...Typography.section, fontWeight: "800", fontSize: FontSizes.note, color: Colors.onPrimary }}>
                 {actionTitle}
               </Text>
             </Pressable>
@@ -135,4 +135,6 @@ export const StudentCard: FC<StudentCardProps> = ({
     </View>
   );
 };
+
+
 

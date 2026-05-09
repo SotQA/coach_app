@@ -2,6 +2,7 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword, User } from
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "../firebase/firebaseConfig";
 import type { AppUser, SignupPayload, Sex } from "../types/User";
+import type { UserFirestoreDoc } from "../types/firestore";
 
 const USERS_COLLECTION = "users";
 
@@ -64,7 +65,8 @@ export const authService = {
       throw new Error("User profile not found.");
     }
 
-    const data = docSnap.data() as any;
+    const data = docSnap.data() as UserFirestoreDoc | undefined;
+    if (!data) throw new Error("User profile not found.");
     return mapToAppUser(user, data.role as AppUser["role"], data);
   },
 
@@ -77,7 +79,8 @@ export const authService = {
     if (!user) return null;
     const docSnap = await getDoc(doc(db, USERS_COLLECTION, user.uid));
     if (!docSnap.exists()) return null;
-    const data = docSnap.data() as any;
+    const data = docSnap.data() as UserFirestoreDoc | undefined;
+    if (!data) return null;
     return mapToAppUser(user, data.role as AppUser["role"], data);
   },
 };

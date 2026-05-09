@@ -18,7 +18,7 @@ import { StudentCard } from "../../../components/StudentCard";
 import { PrimaryButton } from "../../../components/PrimaryButton";
 import { Colors } from "../../../theme/colors";
 import { Radius, Spacing } from "../../../theme/spacing";
-import { Typography } from "../../../theme/typography";
+import { Typography, FontSizes } from "../../../theme/typography";
 import { ScreenLayout } from "../../../components/ScreenLayout";
 import { logger } from "@/utils/logger";
 
@@ -152,10 +152,10 @@ export default function CoachStudents() {
                   opacity: pressed ? 0.9 : 1,
                 })}
               >
-                <Text style={{ ...Typography.section, fontSize: 18, fontWeight: "900" }}>{coachInitials}</Text>
+                <Text style={{ ...Typography.section, fontSize: FontSizes.subheading, fontWeight: "900" }}>{coachInitials}</Text>
               </Pressable>
               <View style={{ flex: 1 }}>
-                <Text style={{ ...Typography.title, fontSize: 22 }}>Students</Text>
+                <Text style={{ ...Typography.title, fontSize: FontSizes.h3 }}>Students</Text>
                 <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 2 }}>
                   {students.length} Active Students
                 </Text>
@@ -245,4 +245,6 @@ export default function CoachStudents() {
     </ScreenLayout>
   );
 }
+
+
 

@@ -19,9 +19,10 @@ import { formatDurationForHistory } from "../../utils/workoutDuration";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { EmptyState } from "../../components/EmptyState";
 import { Colors } from "../../theme/colors";
-import { logger } from "../../utils/logger";
+import { toMs } from "../../utils/dateConvert";
+import { dayKeyFromMs, dayKeyFromDate, startOfMonth, addMonths, isSameMonth, mondayIndexFromDate } from "../../utils/dateRanges";
 import { Radius, Spacing } from "../../theme/spacing";
-import { Typography } from "../../theme/typography";
+import { Typography, FontSizes } from "../../theme/typography";
 import { ScreenLayout } from "../../components/ScreenLayout";
 
 type LogWithMeta = WorkoutLog & {
@@ -42,37 +43,6 @@ const CHIP_ORDER: { key: WorkoutCategory; label: string }[] = [
   { key: "mobility", label: "Mobility" },
   { key: "other", label: "Other" },
 ];
-
-function toMs(value: unknown): number {
-  if (!value) return 0;
-  if (typeof value === "string") {
-    const ms = Date.parse(value);
-    return Number.isFinite(ms) ? ms : 0;
-  }
-  if (value instanceof Date) return value.getTime();
-  if (typeof (value as { toDate?: () => Date })?.toDate === "function") {
-    try {
-      const d = (value as { toDate: () => Date }).toDate();
-      return d instanceof Date ? d.getTime() : 0;
-    } catch (e) {
-      logger.warn("[workoutHistory] toMs failed", e, value);
-      return 0;
-    }
-  }
-  return 0;
-}
-
-function dayKeyFromMs(ms: number): string {
-  const d = new Date(ms);
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
-
-function dayKeyFromDate(d: Date): string {
-  return dayKeyFromMs(d.getTime());
-}
 
 function categorizeWorkoutName(name: string): Exclude<WorkoutCategory, "all"> {
   const n = name.toLowerCase();
@@ -108,22 +78,6 @@ function formatVolumeCompact(kg: number): string {
   return `${Math.round(kg)} kg`;
 }
 
-function startOfMonth(d: Date): Date {
-  return new Date(d.getFullYear(), d.getMonth(), 1);
-}
-
-function addMonths(d: Date, delta: number): Date {
-  return new Date(d.getFullYear(), d.getMonth() + delta, 1);
-}
-
-function isSameMonth(a: Date, b: Date): boolean {
-  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth();
-}
-
-/** Monday = 0 … Sunday = 6 */
-function mondayIndexFromDate(d: Date): number {
-  return (d.getDay() + 6) % 7;
-}
 
 export default function WorkoutHistory() {
   const router = useRouter();
@@ -365,7 +319,7 @@ export default function WorkoutHistory() {
             backgroundColor: Colors.bg,
           }}
         >
-          <Text style={{ ...Typography.title, fontSize: 26, marginBottom: Spacing.xs }}>History</Text>
+          <Text style={{ ...Typography.title, fontSize: FontSizes.h2, marginBottom: Spacing.xs }}>History</Text>
           <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: Spacing.lg }}>{monthLabel}</Text>
           <EmptyState
             icon="calendar-outline"
@@ -393,7 +347,7 @@ export default function WorkoutHistory() {
         <View style={{ paddingHorizontal: Spacing.md, paddingTop: insets.top + Spacing.md }}>
           <View style={{ flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", marginBottom: Spacing.sm }}>
             <View style={{ flex: 1 }}>
-              <Text style={{ ...Typography.title, fontSize: 26 }}>History</Text>
+              <Text style={{ ...Typography.title, fontSize: FontSizes.h2 }}>History</Text>
               <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4 }}>{monthLabel}</Text>
             </View>
             <Pressable
@@ -403,7 +357,7 @@ export default function WorkoutHistory() {
               style={({ pressed }) => ({
                 width: 44,
                 height: 44,
-                borderRadius: 22,
+                borderRadius: Radius.xl,
                 backgroundColor: Colors.card,
                 borderWidth: 1,
                 borderColor: Colors.border,
@@ -466,7 +420,7 @@ export default function WorkoutHistory() {
             <View style={{ flexDirection: "row", marginBottom: 10, gap: rowGap }}>
               {["M", "T", "W", "T", "F", "S", "S"].map((L, i) => (
                 <View key={`${L}-${i}`} style={{ width: cellW, alignItems: "center" }}>
-                  <Text style={{ ...Typography.secondary, fontSize: 12, fontWeight: "800", color: Colors.textMuted }}>{L}</Text>
+                  <Text style={{ ...Typography.secondary, fontSize: FontSizes.caption, fontWeight: "800", color: Colors.textMuted }}>{L}</Text>
                 </View>
               ))}
             </View>
@@ -525,7 +479,7 @@ export default function WorkoutHistory() {
 
             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: Spacing.md, flexWrap: "wrap", gap: Spacing.sm }}>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                <Text style={{ ...Typography.secondary, fontSize: 12, color: Colors.textMuted, fontWeight: "600" }}>Less</Text>
+                <Text style={{ ...Typography.secondary, fontSize: FontSizes.caption, color: Colors.textMuted, fontWeight: "600" }}>Less</Text>
                 {[0.15, 0.35, 0.55, 0.85].map((a, i) => (
                   <View
                     key={i}
@@ -538,12 +492,12 @@ export default function WorkoutHistory() {
                     }}
                   />
                 ))}
-                <Text style={{ ...Typography.secondary, fontSize: 12, color: Colors.textMuted, fontWeight: "600" }}>More</Text>
+                <Text style={{ ...Typography.secondary, fontSize: FontSizes.caption, color: Colors.textMuted, fontWeight: "600" }}>More</Text>
               </View>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
                   <View style={{ width: 7, height: 7, borderRadius: 3.5, backgroundColor: Colors.success }} />
-                  <Text style={{ ...Typography.secondary, fontSize: 12, color: Colors.textMuted, fontWeight: "600" }}>Completed</Text>
+                  <Text style={{ ...Typography.secondary, fontSize: FontSizes.caption, color: Colors.textMuted, fontWeight: "600" }}>Completed</Text>
                 </View>
               </View>
             </View>
@@ -567,7 +521,7 @@ export default function WorkoutHistory() {
                 >
                   <Text
                     style={{
-                      fontSize: 13,
+                      fontSize: FontSizes.note,
                       fontWeight: sel ? "800" : "600",
                       color: sel ? Colors.onPrimary : Colors.text,
                     }}
@@ -626,11 +580,11 @@ export default function WorkoutHistory() {
                     <View style={{ flex: 1, minWidth: 0 }}>
                       <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 6 }}>
                         <Ionicons name="checkmark-circle" size={16} color={Colors.success} />
-                        <Text style={{ fontSize: 11, fontWeight: "800", color: Colors.success, letterSpacing: 0.5 }}>
+                        <Text style={{ fontSize: FontSizes.tiny, fontWeight: "800", color: Colors.success, letterSpacing: 0.5 }}>
                           COMPLETED
                         </Text>
                       </View>
-                      <Text style={{ ...Typography.section, fontSize: 18, fontWeight: "800" }} numberOfLines={2}>
+                      <Text style={{ ...Typography.section, fontSize: FontSizes.subheading, fontWeight: "800" }} numberOfLines={2}>
                         {log.workoutName || "Workout"}
                       </Text>
                       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: Spacing.md, marginTop: Spacing.sm }}>
@@ -670,7 +624,7 @@ export default function WorkoutHistory() {
                             borderColor: Colors.primary,
                           }}
                         >
-                          <Text style={{ ...Typography.section, fontSize: 13, color: Colors.primary, marginBottom: 4 }}>Coach feedback</Text>
+                          <Text style={{ ...Typography.section, fontSize: FontSizes.note, color: Colors.primary, marginBottom: 4 }}>Coach feedback</Text>
                           <Text style={{ ...Typography.secondary, color: Colors.text }}>{log.coachFeedback}</Text>
                         </View>
                       ) : null}
@@ -685,20 +639,20 @@ export default function WorkoutHistory() {
                             <View style={{ flexDirection: "row", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
                               <Text style={{ ...Typography.section, fontSize: 15 }}>{ex.name}</Text>
                               {exRow.isPr ? (
-                                <Text style={{ color: Colors.primary, fontWeight: "800", fontSize: 12 }}>PR</Text>
+                                <Text style={{ color: Colors.primary, fontWeight: "800", fontSize: FontSizes.caption }}>PR</Text>
                               ) : null}
                             </View>
-                            <Text style={{ ...Typography.secondary, fontSize: 13, marginTop: 4 }}>Planned: {ex.repsPlanned || "—"}</Text>
+                            <Text style={{ ...Typography.secondary, fontSize: FontSizes.note, marginTop: 4 }}>Planned: {ex.repsPlanned || "—"}</Text>
                             {(exRow.sets ?? []).map((s) => {
                               const wLabel = s.weight != null && Number.isFinite(s.weight) ? `${s.weight} kg` : "BW";
                               return (
-                                <Text key={`${log.id}-${i}-${s.setNumber}`} style={{ ...Typography.secondary, fontSize: 13 }}>
+                                <Text key={`${log.id}-${i}-${s.setNumber}`} style={{ ...Typography.secondary, fontSize: FontSizes.note }}>
                                   Set {s.setNumber}: {wLabel} × {s.reps}
                                 </Text>
                               );
                             })}
                             {v > 0 ? (
-                              <Text style={{ ...Typography.secondary, fontSize: 12, marginTop: 4, color: Colors.textMuted }}>
+                              <Text style={{ ...Typography.secondary, fontSize: FontSizes.caption, marginTop: 4, color: Colors.textMuted }}>
                                 Volume: {Math.round(v)} kg
                               </Text>
                             ) : null}
@@ -720,3 +674,5 @@ export default function WorkoutHistory() {
     </ScreenLayout>
   );
 }
+
+

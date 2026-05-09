@@ -55,6 +55,8 @@ function sanitizeForFirestore<T>(value: T): T {
 }
 
 import { logger } from "../utils/logger";
+import { toMs } from "../utils/dateConvert";
+import type { WorkoutPlanFirestoreDoc, WorkoutLogFirestoreDoc, UserFirestoreDoc } from "../types/firestore";
 
 const assertNonEmpty = (value: string, label: string) => {
   if (!value || !value.trim()) throw new Error(`Missing ${label}.`);
@@ -63,24 +65,6 @@ const assertNonEmpty = (value: string, label: string) => {
   }
 };
 
-const toMs = (value: any): number => {
-  if (!value) return 0;
-  if (typeof value === "string") {
-    const ms = Date.parse(value);
-    return Number.isFinite(ms) ? ms : 0;
-  }
-  if (value instanceof Date) return value.getTime();
-  if (typeof value?.toDate === "function") {
-    try {
-      const d = value.toDate();
-      return d instanceof Date ? d.getTime() : 0;
-    } catch (e) {
-      logger.warn("[workoutService] toMs failed", e, value);
-      return 0;
-    }
-  }
-  return 0;
-};
 
 const normalizeExercise = (ex: any): Exercise => {
   const reps = ex?.reps != null ? String(ex.reps) : "";
@@ -124,7 +108,8 @@ const normalizePlanData = (id: string, data: any): WorkoutPlan => ({
 });
 
 const mapPlanDoc = (snap: QueryDocumentSnapshot): WorkoutPlan => {
-  const data = snap.data() as any;
+  const data = snap.data() as WorkoutPlanFirestoreDoc | undefined;
+  if (!data) return normalizePlanData(snap.id, {});
   return normalizePlanData(snap.id, data);
 };
 
@@ -171,24 +156,25 @@ export function normalizeLoggedExercise(ex: any): WorkoutLogExercise {
 }
 
 const mapLogDoc = (snap: QueryDocumentSnapshot): WorkoutLog => {
-  const data = snap.data() as any;
+  const raw = snap.data() as WorkoutLogFirestoreDoc | undefined;
+  const data: WorkoutLogFirestoreDoc = raw ?? {};
   const exercises: WorkoutLogExercise[] = Array.isArray(data.exercises)
     ? data.exercises.map(normalizeLoggedExercise)
     : [
         normalizeLoggedExercise({
           name: data.exercise,
-          sets: data.sets,
+          sets: data.sets as any,
           repsPlanned: data.reps,
           repsDone: data.reps,
           weight: data.weight,
-        } as any),
+        }),
       ];
 
   const totalVol = data.totalVolume;
   return {
     id: snap.id,
-    studentId: data.studentId,
-    workoutPlanId: data.workoutPlanId,
+    studentId: data.studentId ?? "",
+    workoutPlanId: data.workoutPlanId ?? "",
     workoutName: data.workoutName != null ? String(data.workoutName) : "Workout",
     exercises,
     completedAt: data.completedAt ?? data.date,
@@ -197,7 +183,7 @@ const mapLogDoc = (snap: QueryDocumentSnapshot): WorkoutLog => {
         ? String(data.sessionNotes)
         : undefined,
     totalVolume:
-      totalVol != null && totalVol !== "" && Number.isFinite(Number(totalVol))
+      totalVol != null && Number.isFinite(Number(totalVol))
         ? Number(totalVol)
         : undefined,
     coachFeedback:
@@ -207,14 +193,14 @@ const mapLogDoc = (snap: QueryDocumentSnapshot): WorkoutLog => {
     feedbackCreatedAt:
       data.feedbackCreatedAt != null ? String(data.feedbackCreatedAt) : undefined,
     durationSeconds:
-      data.durationSeconds != null && data.durationSeconds !== "" && Number.isFinite(Number(data.durationSeconds))
+      data.durationSeconds != null && Number.isFinite(Number(data.durationSeconds))
         ? Math.max(0, Math.floor(Number(data.durationSeconds)))
         : undefined,
     // Keep legacy fields available for older consumers while migrating.
     exercise: data.exercise,
-    sets: data.sets,
+    sets: typeof data.sets === "number" ? data.sets : undefined,
     reps: data.reps != null ? String(data.reps) : undefined,
-    weight: data.weight,
+    weight: typeof data.weight === "number" ? data.weight : undefined,
     date: data.date,
   };
 };
@@ -274,8 +260,8 @@ export const workoutService = {
     const ref = doc(db, WORKOUT_PLANS_COLLECTION, planId);
     const snap = await getDoc(ref);
     if (!snap.exists()) return null;
-    const data = snap.data() as any;
-    return normalizePlanData(snap.id, data);
+    const data = snap.data() as WorkoutPlanFirestoreDoc | undefined;
+    return normalizePlanData(snap.id, data ?? {});
   },
 
   // Retrieves all workout plans for a student.
@@ -482,8 +468,8 @@ export const workoutService = {
     const logSnap = await getDoc(logRef);
     if (!logSnap.exists()) throw new Error("Workout log not found.");
 
-    const logData = logSnap.data() as any;
-    const studentId = logData.studentId;
+    const logData = logSnap.data() as WorkoutLogFirestoreDoc | undefined;
+    const studentId = logData?.studentId;
     if (!studentId || typeof studentId !== "string") {
       throw new Error("Invalid workout log.");
     }
@@ -491,8 +477,8 @@ export const workoutService = {
     const userRef = doc(db, USERS_COLLECTION, studentId);
     const userSnap = await getDoc(userRef);
     if (!userSnap.exists()) throw new Error("Student not found.");
-    const profile = userSnap.data() as any;
-    if (profile.coachId !== coachId) {
+    const profile = userSnap.data() as UserFirestoreDoc | undefined;
+    if (profile?.coachId !== coachId) {
       throw new Error("You can only add feedback for your own students.");
     }
 

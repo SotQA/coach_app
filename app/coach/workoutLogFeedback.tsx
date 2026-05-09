@@ -16,7 +16,7 @@ import { workoutService } from "../../services/workoutService";
 import type { WorkoutLog } from "../../types/Workout";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
-import { Typography } from "../../theme/typography";
+import { Typography, FontSizes } from "../../theme/typography";
 import { formatLogWhen } from "../../utils/formatLogWhen";
 
 export default function WorkoutLogFeedback() {
@@ -107,7 +107,7 @@ export default function WorkoutLogFeedback() {
           contentContainerStyle={{ padding: Spacing.md, paddingBottom: Spacing.xl }}
           keyboardShouldPersistTaps="handled"
         >
-          <Text style={{ ...Typography.title, fontSize: 22, marginBottom: Spacing.xs }}>
+          <Text style={{ ...Typography.title, fontSize: FontSizes.h3, marginBottom: Spacing.xs }}>
             Workout feedback
           </Text>
           <Text style={{ ...Typography.secondary, marginBottom: Spacing.md }}>
@@ -134,7 +134,7 @@ export default function WorkoutLogFeedback() {
               marginBottom: Spacing.sm,
             }}
           />
-          <Text style={{ ...Typography.secondary, fontSize: 12, marginBottom: Spacing.md }}>
+          <Text style={{ ...Typography.secondary, fontSize: FontSizes.caption, marginBottom: Spacing.md }}>
             {feedback.trim().length}/2000
           </Text>
 
@@ -152,3 +152,5 @@ export default function WorkoutLogFeedback() {
     </ScreenLayout>
   );
 }
+
+

@@ -26,7 +26,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useI18n } from "../../context/I18nContext";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
-import { Typography } from "../../theme/typography";
+import { Typography, FontSizes } from "../../theme/typography";
 
 const TOTAL_STEPS = 3;
 
@@ -295,7 +295,7 @@ export default function Signup() {
             <Ionicons name="chevron-back" size={24} color={Colors.text} />
           </Pressable>
           <View style={{ flex: 1 }}>
-            <Text style={{ ...Typography.secondary, color: Colors.textMuted, fontWeight: "700", fontSize: 12 }}>
+            <Text style={{ ...Typography.secondary, color: Colors.textMuted, fontWeight: "700", fontSize: FontSizes.caption }}>
               {t("stepOf", { n: step + 1, total: TOTAL_STEPS })}
             </Text>
             <Text style={{ ...Typography.title, fontSize: 20, marginTop: 2 }}>{STEP_TITLES[step]}</Text>
@@ -522,3 +522,5 @@ export default function Signup() {
     </View>
   );
 }
+
+

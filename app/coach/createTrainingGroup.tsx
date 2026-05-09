@@ -8,7 +8,7 @@ import { PrimaryButton } from "../../components/PrimaryButton";
 import { ScreenLayout } from "../../components/ScreenLayout";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
-import { Typography } from "../../theme/typography";
+import { Typography, FontSizes } from "../../theme/typography";
 
 const typeLabel = (t: TrainingGroupType): string => {
   switch (t) {
@@ -59,7 +59,7 @@ export default function CreateTrainingGroup() {
         contentContainerStyle={{ padding: Spacing.md, paddingBottom: Spacing.lg, paddingTop: Spacing.lg }}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={{ ...Typography.title, fontSize: 26, marginBottom: 6 }}>Create Training Group</Text>
+        <Text style={{ ...Typography.title, fontSize: FontSizes.h2, marginBottom: 6 }}>Create Training Group</Text>
         <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: Spacing.md }}>
           For: {studentName}
         </Text>
@@ -180,4 +180,6 @@ export default function CreateTrainingGroup() {
     </ScreenLayout>
   );
 }
+
+
 

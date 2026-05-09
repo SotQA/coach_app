@@ -12,10 +12,13 @@ import { formatDurationForHistory } from "../../utils/workoutDuration";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
-import { Typography } from "../../theme/typography";
+import { Typography, FontSizes } from "../../theme/typography";
 import { ScreenLayout } from "../../components/ScreenLayout";
 import type { TrainingGroup } from "../../types/TrainingGroup";
 import { logger } from "@/utils/logger";
+import { toMs } from "@/utils/dateConvert";
+import { dayKeyFromMs } from "@/utils/dateRanges";
+import { getUserInitials, getDisplayName } from "@/utils/userDisplay";
 
 export default function StudentDetails() {
   const router = useRouter();
@@ -160,30 +163,9 @@ export default function StudentDetails() {
     );
   }
 
-  const studentFullName = [student.firstName, student.lastName].filter(Boolean).join(" ").trim();
-  const displayName = studentFullName || "Student";
-  const initials =
-    `${student.firstName?.trim()?.[0] ?? ""}${student.lastName?.trim()?.[0] ?? ""}`.toUpperCase() || "S";
+  const displayName = getDisplayName(student, "Student");
+  const initials = getUserInitials(student, "S");
 
-  const toMs = (value: any): number => {
-    if (!value) return 0;
-    if (typeof value === "number" && Number.isFinite(value)) return value;
-    if (typeof value === "string") {
-      const t = Date.parse(value);
-      return Number.isFinite(t) ? t : 0;
-    }
-    if (value instanceof Date) return value.getTime();
-    if (typeof value?.toDate === "function") {
-      try {
-        const d = value.toDate();
-        return d instanceof Date ? d.getTime() : 0;
-      } catch (e) {
-        logger.warn("[studentDetails] toMs failed", e, value);
-        return 0;
-      }
-    }
-    return 0;
-  };
 
   const lastWorkoutMs = logs[0] ? toMs((logs[0] as any).completedAt ?? (logs[0] as any).date) : 0;
   const lastWorkoutLabel =
@@ -219,20 +201,13 @@ export default function StudentDetails() {
 
   const currentStreakDays = (() => {
     if (logs.length === 0) return 0;
-    const dayKey = (ms: number) => {
-      const d = new Date(ms);
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, "0");
-      const dd = String(d.getDate()).padStart(2, "0");
-      return `${y}-${m}-${dd}`;
-    };
     const days = new Set<string>();
     for (const l of logs) {
       const ms = toMs((l as any).completedAt ?? (l as any).date);
-      if (ms > 0) days.add(dayKey(ms));
+      if (ms > 0) days.add(dayKeyFromMs(ms));
     }
     const today = new Date();
-    const keyFor = (d: Date) => dayKey(d.getTime());
+    const keyFor = (d: Date) => dayKeyFromMs(d.getTime());
     const hasToday = days.has(keyFor(today));
     // streak counts today + each previous consecutive day with a logged workout
     let streak = hasToday ? 1 : 0;
@@ -276,7 +251,7 @@ export default function StudentDetails() {
       <Text style={{ ...Typography.secondary, color: Colors.textMuted, textAlign: "center", width: "100%" }}>
         {label}
       </Text>
-      <Text style={{ ...Typography.title, fontSize: 22, marginTop: 6, textAlign: "center", width: "100%" }}>
+      <Text style={{ ...Typography.title, fontSize: FontSizes.h3, marginTop: 6, textAlign: "center", width: "100%" }}>
         {value}
       </Text>
     </View>
@@ -348,7 +323,7 @@ export default function StudentDetails() {
         justifyContent: "center",
         backgroundColor: Colors.surface,
         borderWidth: 1,
-        borderColor: tone === "danger" ? "rgba(220,38,38,0.35)" : Colors.border,
+        borderColor: tone === "danger" ? Colors.dangerTint : Colors.border,
         opacity: disabled ? 0.5 : pressed ? 0.92 : 1,
       })}
     >
@@ -407,7 +382,7 @@ export default function StudentDetails() {
         numberOfLines={3}
         style={{
           ...Typography.section,
-          fontSize: 13,
+          fontSize: FontSizes.note,
           lineHeight: 16,
           fontWeight: variant === "primary" ? "800" : "700",
           color: variant === "primary" ? Colors.onPrimary : Colors.text,
@@ -440,7 +415,7 @@ export default function StudentDetails() {
               style={({ pressed }) => ({
                 width: 40,
                 height: 40,
-                borderRadius: 20,
+                borderRadius: Radius.lg,
                 alignItems: "center",
                 justifyContent: "center",
                 backgroundColor: Colors.card,
@@ -480,7 +455,7 @@ export default function StudentDetails() {
                   justifyContent: "center",
                 }}
               >
-                <Text style={{ ...Typography.section, fontSize: 22, fontWeight: "900" }}>{initials}</Text>
+                <Text style={{ ...Typography.section, fontSize: FontSizes.h3, fontWeight: "900" }}>{initials}</Text>
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={{ ...Typography.title, fontSize: 24 }}>{displayName}</Text>
@@ -643,7 +618,7 @@ export default function StudentDetails() {
               borderRadius: Radius.lg,
               padding: Spacing.md,
               borderWidth: 1,
-              borderColor: "rgba(255,255,255,0.10)",
+              borderColor: Colors.surfaceHighlight,
               marginBottom: Spacing.md,
               opacity: pressed ? 0.96 : 1,
             })}
@@ -652,7 +627,7 @@ export default function StudentDetails() {
               <>
                 <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: Spacing.md }}>
                   <View style={{ flex: 1, minWidth: 0 }}>
-                    <Text style={{ ...Typography.title, fontSize: 18 }}>{latestGroup.name}</Text>
+                    <Text style={{ ...Typography.title, fontSize: FontSizes.subheading }}>{latestGroup.name}</Text>
                     <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4 }}>
                       {latestGroup.workoutsPerWeek ? `${latestGroup.workoutsPerWeek} days/week` : "Days/week —"}
                     </Text>
@@ -661,10 +636,10 @@ export default function StudentDetails() {
                     style={{
                       width: 40,
                       height: 40,
-                      borderRadius: 20,
-                      backgroundColor: "rgba(255,255,255,0.06)",
+                      borderRadius: Radius.lg,
+                      backgroundColor: Colors.surfaceSubtle,
                       borderWidth: 1,
-                      borderColor: "rgba(255,255,255,0.10)",
+                      borderColor: Colors.surfaceHighlight,
                       alignItems: "center",
                       justifyContent: "center",
                     }}
@@ -678,7 +653,7 @@ export default function StudentDetails() {
                     style={{
                       height: 8,
                       borderRadius: 999,
-                      backgroundColor: "rgba(255,255,255,0.10)",
+                      backgroundColor: Colors.surfaceHighlight,
                       overflow: "hidden",
                     }}
                   >
@@ -713,7 +688,7 @@ export default function StudentDetails() {
               </>
             ) : (
               <>
-                <Text style={{ ...Typography.title, fontSize: 18 }}>No active training split</Text>
+                <Text style={{ ...Typography.title, fontSize: FontSizes.subheading }}>No active training split</Text>
                 <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 6 }}>
                   Create a split to start assigning workouts.
                 </Text>
@@ -761,4 +736,6 @@ export default function StudentDetails() {
     </ScreenLayout>
   );
 }
+
+
 

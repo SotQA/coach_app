@@ -19,23 +19,16 @@ import type { StudentSummary } from "../../../types/StudentSummary";
 import { PrimaryButton } from "../../../components/PrimaryButton";
 import { Colors } from "../../../theme/colors";
 import { Radius, Spacing } from "../../../theme/spacing";
-import { Typography } from "../../../theme/typography";
+import { Typography, FontSizes } from "../../../theme/typography";
 import { ScreenLayout } from "../../../components/ScreenLayout";
 import { formatDate } from "../../../utils/formatLocale";
+import { getUserInitials, getDisplayName } from "../../../utils/userDisplay";
 
-function coachDisplayName(user: { firstName: string; lastName: string } | null): string {
-  if (!user) return "Coach";
-  const n = `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim();
-  return n || "Coach";
-}
+const coachDisplayName = (user: { firstName?: string | null; lastName?: string | null } | null) =>
+  getDisplayName(user, "Coach");
 
-function initials(user: { firstName: string; lastName: string } | null): string {
-  if (!user) return "C";
-  const a = user.firstName?.trim()?.[0] ?? "";
-  const b = user.lastName?.trim()?.[0] ?? "";
-  const s = `${a}${b}`.toUpperCase();
-  return s || "C";
-}
+const initials = (user: { firstName?: string | null; lastName?: string | null } | null) =>
+  getUserInitials(user, "C");
 
 export default function CoachDashboard() {
   const router = useRouter();
@@ -228,10 +221,10 @@ export default function CoachDashboard() {
                   opacity: pressed ? 0.9 : 1,
                 })}
               >
-                <Text style={{ ...Typography.section, fontSize: 18, fontWeight: "800" }}>{ini}</Text>
+                <Text style={{ ...Typography.section, fontSize: FontSizes.subheading, fontWeight: "800" }}>{ini}</Text>
               </Pressable>
               <View style={{ flex: 1 }}>
-                <Text style={{ ...Typography.title, fontSize: 22 }}>{name}</Text>
+                <Text style={{ ...Typography.title, fontSize: FontSizes.h3 }}>{name}</Text>
                 <Text style={{ ...Typography.secondary, color: Colors.primary, marginTop: 2, fontWeight: "600" }}>
                   {t("activeNow")}
                 </Text>
@@ -243,7 +236,7 @@ export default function CoachDashboard() {
               style={{
                 width: 44,
                 height: 44,
-                borderRadius: 22,
+                borderRadius: Radius.xl,
                 backgroundColor: Colors.card,
                 borderWidth: 1,
                 borderColor: Colors.border,
@@ -266,7 +259,7 @@ export default function CoachDashboard() {
             </Pressable>
           </View>
 
-          <Text style={{ ...Typography.title, fontSize: 26, marginBottom: 4 }}>{t("overview")}</Text>
+          <Text style={{ ...Typography.title, fontSize: FontSizes.h2, marginBottom: 4 }}>{t("overview")}</Text>
           <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: Spacing.md }}>
             {todayLine}
           </Text>
@@ -413,3 +406,5 @@ export default function CoachDashboard() {
     </ScreenLayout>
   );
 }
+
+

@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Platform, Text, View, type ViewStyle } from "react-native";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
+import { FontSizes } from "../../theme/typography";
 
 type Props = {
   title: string;
@@ -24,7 +25,7 @@ export function SettingsSection({ title, children, style }: Props) {
     <View style={[{ marginBottom: Spacing.md }, style]}>
       <Text
         style={{
-          fontSize: 12,
+          fontSize: FontSizes.caption,
           fontWeight: "800",
           letterSpacing: 1.2,
           color: Colors.primary,
@@ -51,3 +52,5 @@ export function SettingsSection({ title, children, style }: Props) {
     </View>
   );
 }
+
+

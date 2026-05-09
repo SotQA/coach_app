@@ -3,6 +3,7 @@ import { Tabs, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Colors } from "../../../theme/colors";
+import { FontSizes } from "../../../theme/typography";
 import { useI18n } from "../../../context/I18nContext";
 
 export default function CoachTabsLayout() {
@@ -34,7 +35,7 @@ export default function CoachTabsLayout() {
         },
         tabBarActiveTintColor: Colors.primary,
         tabBarInactiveTintColor: Colors.textMuted,
-        tabBarLabelStyle: { fontSize: 11, fontWeight: "600" },
+        tabBarLabelStyle: { fontSize: FontSizes.tiny, fontWeight: "600" },
       }}
     >
       <Tabs.Screen
@@ -109,3 +110,5 @@ export default function CoachTabsLayout() {
     </Tabs>
   );
 }
+
+

@@ -8,7 +8,7 @@ import { workoutService } from "../../services/workoutService";
 import type { WorkoutPlan } from "../../types/Workout";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
-import { Typography } from "../../theme/typography";
+import { Typography, FontSizes } from "../../theme/typography";
 import { ScreenLayout } from "../../components/ScreenLayout";
 import { logger } from "@/utils/logger";
 
@@ -99,7 +99,7 @@ export default function CoachWorkout() {
             borderColor: Colors.border,
           }}
         >
-          <Text style={{ ...Typography.title, fontSize: 22, marginBottom: 4 }}>Workout</Text>
+          <Text style={{ ...Typography.title, fontSize: FontSizes.h3, marginBottom: 4 }}>Workout</Text>
           <Text style={Typography.secondary}>Review the plan, then edit if needed.</Text>
         </View>
 
@@ -150,4 +150,6 @@ export default function CoachWorkout() {
     </ScreenLayout>
   );
 }
+
+
 

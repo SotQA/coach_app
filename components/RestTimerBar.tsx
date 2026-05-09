@@ -4,7 +4,7 @@ import { useActiveWorkout } from "../context/ActiveWorkoutContext";
 import { useI18n } from "../context/I18nContext";
 import { Colors } from "../theme/colors";
 import { Radius, Spacing } from "../theme/spacing";
-import { Typography } from "../theme/typography";
+import { Typography, FontSizes } from "../theme/typography";
 
 /** Format seconds into mm:ss, always ceiling so "0:01" shows for the last tick. */
 function formatRest(seconds: number): string {
@@ -67,7 +67,7 @@ export function RestTimerBar() {
             style={{
               ...Typography.secondary,
               color: Colors.textMuted,
-              fontSize: 11,
+              fontSize: FontSizes.tiny,
               textTransform: "uppercase",
               letterSpacing: 0.8,
               marginBottom: 2,
@@ -96,7 +96,7 @@ export function RestTimerBar() {
             style={({ pressed }) => ({
               width: 44,
               height: 44,
-              borderRadius: 22,
+              borderRadius: Radius.xl,
               borderWidth: 1,
               borderColor: Colors.border,
               backgroundColor: Colors.surface,
@@ -132,7 +132,7 @@ export function RestTimerBar() {
                 ...Typography.secondary,
                 color: Colors.onPrimary,
                 fontWeight: "700",
-                fontSize: 13,
+                fontSize: FontSizes.note,
               }}
             >
               {t("skip")}
@@ -165,7 +165,7 @@ export function RestTimerBar() {
         style={{
           ...Typography.secondary,
           color: Colors.textMuted,
-          fontSize: 11,
+          fontSize: FontSizes.tiny,
           marginTop: 6,
           textAlign: "right",
         }}
@@ -175,3 +175,5 @@ export function RestTimerBar() {
     </View>
   );
 }
+
+

@@ -24,32 +24,16 @@ import {
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
-import { Typography } from "../../theme/typography";
+import { Typography, FontSizes } from "../../theme/typography";
 import { ScreenLayout } from "../../components/ScreenLayout";
 import { RestTimerBar } from "../../components/RestTimerBar";
 import { formatElapsedForTimer, parseRestSeconds } from "../../utils/workoutDuration";
 import { logger } from "../../utils/logger";
+import { parseKgInput, normalizeDecimalInput } from "../../utils/inputParsing";
 
 // ─── Local draft types (mirror ActiveSetDraft, using `done` for UI clarity) ──
 type SetDraft = { weight: string; reps: string; rpe: string; done: boolean };
 type ExerciseDraft = { sets: SetDraft[] };
-
-function parseKgInput(text: string): number | null {
-  const t = text.trim().replace(",", ".");
-  if (t === "") return null;
-  const n = Number(t);
-  return Number.isFinite(n) && n >= 0 ? n : null;
-}
-
-function normalizeDecimalInput(text: string): string {
-  let t = text.replace(",", ".").replace(/[^0-9.]/g, "");
-  const firstDot = t.indexOf(".");
-  if (firstDot >= 0) {
-    t = t.slice(0, firstDot + 1) + t.slice(firstDot + 1).replace(/\./g, "");
-  }
-  if (t.startsWith(".")) t = `0${t}`;
-  return t;
-}
 
 function getNextSetFocus(
   exIdx: number,
@@ -422,7 +406,7 @@ export default function WorkoutExecution() {
               style={({ pressed }) => ({
                 width: 40,
                 height: 40,
-                borderRadius: 20,
+                borderRadius: Radius.lg,
                 alignItems: "center",
                 justifyContent: "center",
                 backgroundColor: Colors.card,
@@ -457,7 +441,7 @@ export default function WorkoutExecution() {
             </View>
           </View>
 
-          <Text style={{ ...Typography.title, fontSize: 22, marginTop: Spacing.sm }}>{plan.name}</Text>
+          <Text style={{ ...Typography.title, fontSize: FontSizes.h3, marginTop: Spacing.sm }}>{plan.name}</Text>
           <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4 }}>
             {(authUser?.firstName || authUser?.lastName
               ? `${authUser?.firstName ?? ""} ${authUser?.lastName ?? ""}`.trim()
@@ -518,7 +502,7 @@ export default function WorkoutExecution() {
                 padding: 14,
                 marginBottom: Spacing.sm,
                 borderWidth: 1,
-                borderColor: "rgba(255,255,255,0.06)",
+                borderColor: Colors.surfaceSubtle,
               }}
             >
               <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.sm, marginBottom: Spacing.sm }}>
@@ -529,7 +513,7 @@ export default function WorkoutExecution() {
                     borderRadius: 7,
                     backgroundColor: "rgba(255,255,255,0.05)",
                     borderWidth: 1,
-                    borderColor: "rgba(255,255,255,0.10)",
+                    borderColor: Colors.surfaceHighlight,
                     alignItems: "center",
                     justifyContent: "center",
                   }}
@@ -626,12 +610,12 @@ export default function WorkoutExecution() {
                       style={{
                         flex: 1,
                         borderWidth: 1,
-                        borderColor: "rgba(255,255,255,0.10)",
+                        borderColor: Colors.surfaceHighlight,
                         paddingVertical: 8,
                         paddingHorizontal: 12,
                         borderRadius: Radius.sm,
                         color: Colors.text,
-                        backgroundColor: "rgba(255,255,255,0.06)",
+                        backgroundColor: Colors.surfaceSubtle,
                         textAlign: "center",
                       }}
                     />
@@ -654,12 +638,12 @@ export default function WorkoutExecution() {
                       style={{
                         flex: 1,
                         borderWidth: 1,
-                        borderColor: "rgba(255,255,255,0.10)",
+                        borderColor: Colors.surfaceHighlight,
                         paddingVertical: 8,
                         paddingHorizontal: 12,
                         borderRadius: Radius.sm,
                         color: Colors.text,
-                        backgroundColor: "rgba(255,255,255,0.06)",
+                        backgroundColor: Colors.surfaceSubtle,
                         textAlign: "center",
                       }}
                     />
@@ -682,12 +666,12 @@ export default function WorkoutExecution() {
                       style={{
                         flex: 1,
                         borderWidth: 1,
-                        borderColor: "rgba(255,255,255,0.10)",
+                        borderColor: Colors.surfaceHighlight,
                         paddingVertical: 8,
                         paddingHorizontal: 12,
                         borderRadius: Radius.sm,
                         color: Colors.text,
-                        backgroundColor: "rgba(255,255,255,0.06)",
+                        backgroundColor: Colors.surfaceSubtle,
                         textAlign: "center",
                       }}
                     />
@@ -712,8 +696,8 @@ export default function WorkoutExecution() {
                         height: 34,
                         borderRadius: 10,
                         borderWidth: 1,
-                        borderColor: done ? "rgba(212,255,68,0.55)" : "rgba(255,255,255,0.10)",
-                        backgroundColor: done ? Colors.primary : "rgba(255,255,255,0.06)",
+                        borderColor: done ? "rgba(212,255,68,0.55)" : Colors.surfaceHighlight,
+                        backgroundColor: done ? Colors.primary : Colors.surfaceSubtle,
                         alignItems: "center",
                         justifyContent: "center",
                         opacity: pressed ? 0.9 : 1,
@@ -765,3 +749,5 @@ export default function WorkoutExecution() {
     </ScreenLayout>
   );
 }
+
+

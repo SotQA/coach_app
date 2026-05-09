@@ -14,7 +14,7 @@ import { PrimaryButton } from "../../components/PrimaryButton";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Colors } from "../../theme/colors";
 import { Spacing } from "../../theme/spacing";
-import { Typography } from "../../theme/typography";
+import { Typography, FontSizes } from "../../theme/typography";
 import { ScreenLayout } from "../../components/ScreenLayout";
 import { logger } from "@/utils/logger";
 
@@ -132,13 +132,13 @@ export default function WorkoutScreen() {
     <ScreenLayout>
       <KeyboardAwareScrollView
         style={{ flex: 1, backgroundColor: Colors.bg }}
-        contentContainerStyle={{ padding: Spacing.md, paddingBottom: 48 }}
+        contentContainerStyle={{ padding: Spacing.md, paddingBottom: Spacing.screenBottom }}
         keyboardShouldPersistTaps="handled"
         enableOnAndroid
         enableResetScrollToCoords={false}
         extraScrollHeight={24}
       >
-        <Text style={{ ...Typography.title, fontSize: 22, marginBottom: Spacing.sm }}>
+        <Text style={{ ...Typography.title, fontSize: FontSizes.h3, marginBottom: Spacing.sm }}>
           Log Workout
         </Text>
         <ExerciseInput value={exercise} onChange={setExercise} showAdvancedFields={false} />
@@ -151,4 +151,6 @@ export default function WorkoutScreen() {
     </ScreenLayout>
   );
 }
+
+
 
