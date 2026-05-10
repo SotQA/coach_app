@@ -9,10 +9,10 @@ import { computeExerciseVolumeFromLoggedSets } from "@/utils/workoutMetrics";
 import { formatDurationForHistory } from "@/utils/workoutDuration";
 import {
   countPrs,
-  formatVolumeCompact,
   sessionVolumeKg,
 } from "@/utils/workoutLogStats";
 import type { LogWithMeta } from "@/hooks/useWorkoutHistory";
+import { useUnits } from "@/context/UnitsContext";
 
 interface WorkoutLogCardProps {
   log: LogWithMeta;
@@ -28,6 +28,7 @@ interface WorkoutLogCardProps {
  * `app/student/workoutHistory.tsx`.
  */
 function WorkoutLogCardImpl({ log, expanded, onToggle }: WorkoutLogCardProps) {
+  const { formatWeight } = useUnits();
   const vol = sessionVolumeKg(log);
   const prs = countPrs(log);
   const dur = formatDurationForHistory(log.durationSeconds);
@@ -126,7 +127,7 @@ function WorkoutLogCardImpl({ log, expanded, onToggle }: WorkoutLogCardProps) {
                 color={Colors.textMuted}
               />
               <Text style={{ ...Typography.secondary, color: Colors.text }}>
-                {formatVolumeCompact(vol)}
+                {formatWeight(vol)}
               </Text>
             </View>
             {prs > 0 ? (
@@ -243,7 +244,7 @@ function WorkoutLogCardImpl({ log, expanded, onToggle }: WorkoutLogCardProps) {
                 {(exRow.sets ?? []).map((s) => {
                   const wLabel =
                     s.weight != null && Number.isFinite(s.weight)
-                      ? `${s.weight} kg`
+                      ? formatWeight(s.weight)
                       : "BW";
                   return (
                     <Text
@@ -266,7 +267,7 @@ function WorkoutLogCardImpl({ log, expanded, onToggle }: WorkoutLogCardProps) {
                       color: Colors.textMuted,
                     }}
                   >
-                    Volume: {Math.round(v)} kg
+                    Volume: {formatWeight(v)}
                   </Text>
                 ) : null}
               </View>
