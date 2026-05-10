@@ -1,8 +1,10 @@
+import { useEffect, useMemo, useState } from "react";
 import { Alert, Pressable, ScrollView, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScreenLayout } from "../../../components/ScreenLayout";
+import { SettingsProfileCard } from "../../../components/settings/SettingsProfileCard";
 import { SettingsSection } from "../../../components/settings/SettingsSection";
 import { SettingsRow } from "../../../components/settings/SettingsRow";
 import { useAuth } from "../../../context/AuthContext";
@@ -13,9 +15,14 @@ import {
   type SupportedLocale,
 } from "../../../context/I18nContext";
 import { useUnits } from "../../../context/UnitsContext";
+import { workoutService } from "../../../services/workoutService";
+import type { WorkoutLog } from "../../../types/Workout";
 import { Colors } from "../../../theme/colors";
 import { Radius, Spacing } from "../../../theme/spacing";
 import { Typography, FontSizes } from "../../../theme/typography";
+import { formatDateFull } from "../../../utils/formatLocale";
+import { toMs } from "../../../utils/dateConvert";
+import { getUserInitials } from "../../../utils/userDisplay";
 
 export default function StudentProfile() {
   const router = useRouter();
@@ -23,6 +30,54 @@ export default function StudentProfile() {
   const { t, locale, setLocale } = useI18n();
   const { unit, setUnit } = useUnits();
   const insets = useSafeAreaInsets();
+
+  const [statsLoading, setStatsLoading] = useState(true);
+  const [logs, setLogs] = useState<WorkoutLog[]>([]);
+  const [statsError, setStatsError] = useState<string | null>(null);
+
+  const fullName = useMemo(() => {
+    const n = `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim();
+    return n || "—";
+  }, [user?.firstName, user?.lastName]);
+
+  const initials = useMemo(
+    () => getUserInitials(user ?? null, "S"),
+    [user]
+  );
+
+  useEffect(() => {
+    if (!user?.id) return;
+    let cancelled = false;
+    (async () => {
+      setStatsLoading(true);
+      setStatsError(null);
+      try {
+        const history = await workoutService.getWorkoutHistory(user.id);
+        if (cancelled) return;
+        setLogs(Array.isArray(history) ? history : []);
+      } catch (e: unknown) {
+        if (cancelled) return;
+        setStatsError(e instanceof Error ? e.message : t("failedToLoad"));
+        setLogs([]);
+      } finally {
+        if (!cancelled) setStatsLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [user?.id, t]);
+
+  const metaLine = useMemo(() => {
+    if (statsLoading || statsError) return null;
+    const count = logs.length;
+    const lastMs = count
+      ? toMs(
+          (logs[0] as { completedAt?: string; date?: string })?.completedAt ??
+          (logs[0] as { date?: string })?.date
+        )
+      : 0;
+    const lastDate = lastMs > 0 ? formatDateFull(lastMs, locale) : "—";
+    return t(count === 1 ? "workoutsLogged_one" : "workoutsLogged_other", { count, date: lastDate });
+  }, [statsLoading, statsError, logs, locale, t]);
 
   const openLanguagePicker = () => {
     Alert.alert(
@@ -66,6 +121,7 @@ export default function StudentProfile() {
           }}
           showsVerticalScrollIndicator={false}
         >
+          {/* Header */}
           <View
             style={{
               flexDirection: "row",
@@ -102,13 +158,24 @@ export default function StudentProfile() {
             </Pressable>
           </View>
 
+          {/* Profile card */}
+          <SettingsProfileCard
+            fullName={fullName}
+            email={user.email ?? ""}
+            roleLabel={t("roleStudent")}
+            initials={initials}
+            statsLoading={statsLoading}
+            metaLine={metaLine}
+            onEditProfile={() => router.push("/(profile)/edit")}
+          />
+
+          {statsError ? (
+            <Text style={{ ...Typography.secondary, color: Colors.danger, marginBottom: Spacing.sm }}>
+              {statsError}
+            </Text>
+          ) : null}
+
           <SettingsSection title={t("appPreferences")}>
-            <SettingsRow
-              icon="person-circle-outline"
-              title={t("editProfile")}
-              subtitle={`${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || (user.email ?? undefined)}
-              onPress={() => router.push("/(profile)/edit")}
-            />
             <SettingsRow
               icon="language-outline"
               title={t("language")}
