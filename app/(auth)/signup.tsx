@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type ComponentProps } from "react";
+import { useCallback, useEffect, useRef, useState, type ComponentProps, type ReactNode } from "react";
 import {
   ActivityIndicator,
   Platform,
@@ -12,16 +12,11 @@ import { useRouter } from "expo-router";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-  SlideInRight,
-  SlideOutLeft,
-} from "react-native-reanimated";
+import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from "react-native-reanimated";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import type { Sex, UserRole } from "../../types/User";
 import { PrimaryButton } from "../../components/PrimaryButton";
+import { InputField } from "../../components/InputField";
 import { useAuth } from "../../context/AuthContext";
 import { useI18n } from "../../context/I18nContext";
 import { Colors } from "../../theme/colors";
@@ -29,6 +24,46 @@ import { Radius, Spacing } from "../../theme/spacing";
 import { Typography, FontSizes } from "../../theme/typography";
 
 const TOTAL_STEPS = 3;
+const PRESS_SCALE = 0.97;
+
+/** Reanimated spring scale on press for `Pressable`s (0.97). */
+function SpringPressScale({
+  children,
+  disabled,
+  onPress,
+  fullWidth,
+  accessibilityRole,
+  accessibilityLabel,
+}: {
+  children: ReactNode;
+  disabled?: boolean;
+  onPress: () => void;
+  fullWidth?: boolean;
+  accessibilityRole?: ComponentProps<typeof Pressable>["accessibilityRole"];
+  accessibilityLabel?: string;
+}) {
+  const scale = useSharedValue(1);
+  const animStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+  return (
+    <Pressable
+      disabled={disabled}
+      onPress={onPress}
+      accessibilityRole={accessibilityRole}
+      accessibilityLabel={accessibilityLabel}
+      onPressIn={() => {
+        if (!disabled) scale.value = withSpring(PRESS_SCALE);
+      }}
+      onPressOut={() => {
+        scale.value = withSpring(1);
+      }}
+      style={fullWidth ? { width: "100%" } : undefined}
+    >
+      <Animated.View style={fullWidth ? [{ width: "100%" }, animStyle] : animStyle}>{children}</Animated.View>
+    </Pressable>
+  );
+}
 
 function parseYMD(value: string): Date | null {
   const parts = value.split("-");
@@ -50,6 +85,142 @@ function formatYMD(value: Date): string {
 function validateEmail(e: string): boolean {
   const t = e.trim();
   return Boolean(t && /^\S+@\S+\.\S+$/.test(t));
+}
+
+function SignupSexChip({
+  value,
+  label,
+  selected,
+  onSelect,
+}: {
+  value: Sex;
+  label: string;
+  selected: boolean;
+  onSelect: (v: Sex) => void;
+}) {
+  const pressM = useSharedValue(1);
+  const chipAnim = useAnimatedStyle(() => ({
+    transform: [{ scale: pressM.value }],
+  }));
+  return (
+    <Pressable
+      onPress={() => onSelect(value)}
+      onPressIn={() => {
+        pressM.value = withSpring(PRESS_SCALE);
+      }}
+      onPressOut={() => {
+        pressM.value = withSpring(1);
+      }}
+      style={{ flex: 1 }}
+    >
+      <Animated.View
+        style={[
+          {
+            flex: 1,
+            paddingVertical: 12,
+            paddingHorizontal: Spacing.sm,
+            borderWidth: 1,
+            borderColor: selected ? Colors.primary : Colors.border,
+            borderRadius: Radius.sm,
+            backgroundColor: selected ? Colors.primaryGlow : Colors.surface,
+            alignItems: "center",
+          },
+          chipAnim,
+        ]}
+      >
+        <Text style={{ ...Typography.section, fontSize: 14, fontWeight: "700" }}>{label}</Text>
+      </Animated.View>
+    </Pressable>
+  );
+}
+
+function SignupRoleCard({
+  value,
+  title,
+  subtitle,
+  icon,
+  selected,
+  submitting,
+  onSelect,
+}: {
+  value: UserRole;
+  title: string;
+  subtitle: string;
+  icon: ComponentProps<typeof Ionicons>["name"];
+  selected: boolean;
+  submitting: boolean;
+  onSelect: (v: UserRole) => void;
+}) {
+  const selectScale = useSharedValue(1);
+  const pressMult = useSharedValue(1);
+
+  useEffect(() => {
+    selectScale.value = withSpring(selected ? 1.02 : 1);
+  }, [selected, selectScale]);
+
+  const cardAnim = useAnimatedStyle(() => ({
+    transform: [{ scale: selectScale.value * pressMult.value }],
+  }));
+
+  return (
+    <Pressable
+      disabled={submitting}
+      onPress={() => onSelect(value)}
+      onPressIn={() => {
+        if (!submitting) pressMult.value = withSpring(PRESS_SCALE);
+      }}
+      onPressOut={() => {
+        pressMult.value = withSpring(1);
+      }}
+    >
+      <Animated.View
+        style={[
+          {
+            flexDirection: "row",
+            alignItems: "center",
+            gap: Spacing.md,
+            padding: Spacing.md,
+            borderRadius: Radius.lg,
+            borderWidth: 2,
+            borderColor: selected ? Colors.primary : Colors.border,
+            backgroundColor: selected ? Colors.primaryGlow : Colors.surface,
+            marginBottom: Spacing.sm,
+            ...(Platform.OS === "ios"
+              ? {
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: selected ? 0.2 : 0.12,
+                  shadowRadius: 10,
+                }
+              : { elevation: selected ? 4 : 2 }),
+          },
+          cardAnim,
+        ]}
+      >
+        <View
+          style={{
+            width: 52,
+            height: 52,
+            borderRadius: Radius.md,
+            backgroundColor: selected ? "rgba(212,255,68,0.2)" : Colors.card,
+            alignItems: "center",
+            justifyContent: "center",
+            borderWidth: 1,
+            borderColor: selected ? Colors.primary : Colors.border,
+          }}
+        >
+          <Ionicons name={icon} size={26} color={selected ? Colors.primary : Colors.textMuted} />
+        </View>
+        <View style={{ flex: 1, minWidth: 0 }}>
+          <Text style={{ ...Typography.section, fontSize: 17, fontWeight: "800" }}>{title}</Text>
+          <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4, lineHeight: 20 }}>
+            {subtitle}
+          </Text>
+        </View>
+        {selected ? <Ionicons name="checkmark-circle" size={26} color={Colors.primary} /> : null}
+      </Animated.View>
+    </Pressable>
+  );
 }
 
 export default function Signup() {
@@ -76,7 +247,7 @@ export default function Signup() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const STEP_TITLES = [t("stepAccount"), t("stepAboutYou"), t("stepYourRole")] as const;
+  const STEP_TITLES = [t("stepYourRole"), t("stepAboutYou"), t("stepAccount")] as const;
 
   useEffect(() => {
     const w = Math.max(0, windowWidth - Spacing.lg * 2);
@@ -91,29 +262,40 @@ export default function Signup() {
     scrollRef.current?.scrollToPosition(0, 0, true);
   }, [step]);
 
-  const validateStep0 = useCallback((): string | null => {
-    if (!validateEmail(email)) return t("errorInvalidEmail");
-    if (password.length < 8) return t("errorPasswordMin");
-    if (password !== confirmPassword) return t("errorPasswordMatch");
+  const validateRoleStep = useCallback((): string | null => {
+    if (role == null) return t("errorSelectRole");
     return null;
-  }, [email, password, confirmPassword, t]);
+  }, [role, t]);
 
-  const validateStep1 = useCallback((): string | null => {
+  const validateAboutStep = useCallback((): string | null => {
     if (!firstName.trim()) return t("errorFirstNameRequired");
     if (!lastName.trim()) return t("errorLastNameRequired");
     if (!dateOfBirth.trim()) return t("errorDobRequired");
     return null;
   }, [firstName, lastName, dateOfBirth, t]);
 
+  const validateAccountStep = useCallback((): string | null => {
+    if (!validateEmail(email)) return t("errorInvalidEmail");
+    if (password.length < 8) return t("errorPasswordMin");
+    if (password !== confirmPassword) return t("errorPasswordMatch");
+    return null;
+  }, [email, password, confirmPassword, t]);
+
   const goNext = () => {
     setError(null);
     if (step === 0) {
-      const err = validateStep0();
-      if (err) { setError(err); return; }
+      const err = validateRoleStep();
+      if (err) {
+        setError(err);
+        return;
+      }
     }
     if (step === 1) {
-      const err = validateStep1();
-      if (err) { setError(err); return; }
+      const err = validateAboutStep();
+      if (err) {
+        setError(err);
+        return;
+      }
     }
     if (step < TOTAL_STEPS - 1) setStep((s) => s + 1);
   };
@@ -126,16 +308,14 @@ export default function Signup() {
 
   const handleCreateAccount = async () => {
     setError(null);
-    if (role == null) {
-      setError(t("errorSelectRole"));
+    const eRole = validateRoleStep();
+    const eAbout = validateAboutStep();
+    const eAccount = validateAccountStep();
+    if (eRole || eAbout || eAccount) {
+      setError(eRole ?? eAbout ?? eAccount ?? t("errorCompleteSteps"));
       return;
     }
-    const e0 = validateStep0();
-    const e1 = validateStep1();
-    if (e0 || e1) {
-      setError(e0 ?? e1 ?? t("errorCompleteSteps"));
-      return;
-    }
+    if (role == null) return;
 
     setSubmitting(true);
     try {
@@ -168,85 +348,6 @@ export default function Signup() {
     backgroundColor: Colors.surface,
   } as const;
 
-  const SexChip = ({ value, label }: { value: Sex; label: string }) => {
-    const selected = sex === value;
-    return (
-      <Pressable
-        onPress={() => setSex(value)}
-        style={({ pressed }) => ({
-          flex: 1,
-          paddingVertical: 12,
-          paddingHorizontal: Spacing.sm,
-          borderWidth: 1,
-          borderColor: selected ? Colors.primary : Colors.border,
-          borderRadius: Radius.sm,
-          backgroundColor: selected ? "rgba(212,255,68,0.12)" : Colors.surface,
-          alignItems: "center",
-          opacity: pressed ? 0.88 : 1,
-        })}
-      >
-        <Text style={{ ...Typography.section, fontSize: 14, fontWeight: "700" }}>{label}</Text>
-      </Pressable>
-    );
-  };
-
-  const RoleCard = ({
-    value,
-    title,
-    subtitle,
-    icon,
-  }: {
-    value: UserRole;
-    title: string;
-    subtitle: string;
-    icon: ComponentProps<typeof Ionicons>["name"];
-  }) => {
-    const selected = role === value;
-    return (
-      <Pressable
-        disabled={submitting}
-        onPress={() => { setRole(value); setError(null); }}
-        style={({ pressed }) => ({
-          flexDirection: "row",
-          alignItems: "center",
-          gap: Spacing.md,
-          padding: Spacing.md,
-          borderRadius: Radius.lg,
-          borderWidth: 2,
-          borderColor: selected ? Colors.primary : Colors.border,
-          backgroundColor: selected ? "rgba(212,255,68,0.08)" : Colors.surface,
-          marginBottom: Spacing.sm,
-          opacity: pressed ? 0.92 : 1,
-          ...(Platform.OS === "ios"
-            ? { shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: selected ? 0.2 : 0.12, shadowRadius: 10 }
-            : { elevation: selected ? 4 : 2 }),
-        })}
-      >
-        <View
-          style={{
-            width: 52,
-            height: 52,
-            borderRadius: Radius.md,
-            backgroundColor: selected ? "rgba(212,255,68,0.2)" : Colors.card,
-            alignItems: "center",
-            justifyContent: "center",
-            borderWidth: 1,
-            borderColor: selected ? Colors.primary : Colors.border,
-          }}
-        >
-          <Ionicons name={icon} size={26} color={selected ? Colors.primary : Colors.textMuted} />
-        </View>
-        <View style={{ flex: 1, minWidth: 0 }}>
-          <Text style={{ ...Typography.section, fontSize: 17, fontWeight: "800" }}>{title}</Text>
-          <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4, lineHeight: 20 }}>
-            {subtitle}
-          </Text>
-        </View>
-        {selected ? <Ionicons name="checkmark-circle" size={26} color={Colors.primary} /> : null}
-      </Pressable>
-    );
-  };
-
   if (authLoading) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: Colors.bg }}>
@@ -275,25 +376,27 @@ export default function Signup() {
         showsVerticalScrollIndicator={false}
       >
         <View style={{ flexDirection: "row", alignItems: "center", marginBottom: Spacing.md }}>
-          <Pressable
+          <SpringPressScale
             accessibilityRole="button"
-            accessibilityLabel={step === 0 ? t("back") : t("back")}
+            accessibilityLabel={t("back")}
             onPress={goBack}
-            style={({ pressed }) => ({
-              width: 44,
-              height: 44,
-              borderRadius: Radius.md,
-              backgroundColor: Colors.card,
-              borderWidth: 1,
-              borderColor: Colors.border,
-              alignItems: "center",
-              justifyContent: "center",
-              marginRight: Spacing.sm,
-              opacity: pressed ? 0.85 : 1,
-            })}
           >
-            <Ionicons name="chevron-back" size={24} color={Colors.text} />
-          </Pressable>
+            <View
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: Radius.md,
+                backgroundColor: Colors.card,
+                borderWidth: 1,
+                borderColor: Colors.border,
+                alignItems: "center",
+                justifyContent: "center",
+                marginRight: Spacing.sm,
+              }}
+            >
+              <Ionicons name="chevron-back" size={24} color={Colors.text} />
+            </View>
+          </SpringPressScale>
           <View style={{ flex: 1 }}>
             <Text style={{ ...Typography.secondary, color: Colors.textMuted, fontWeight: "700", fontSize: FontSizes.caption }}>
               {t("stepOf", { n: step + 1, total: TOTAL_STEPS })}
@@ -314,12 +417,7 @@ export default function Signup() {
           <Animated.View style={[{ height: 4, borderRadius: 2, backgroundColor: Colors.primary }, barStyle]} />
         </View>
 
-        <Animated.View
-          key={step}
-          entering={SlideInRight.springify().damping(22).stiffness(200)}
-          exiting={SlideOutLeft.duration(240)}
-          style={{ width: "100%" }}
-        >
+        <View key={step} style={{ width: "100%" }}>
           <View
             style={{
               backgroundColor: Colors.card,
@@ -335,40 +433,33 @@ export default function Signup() {
             {step === 0 ? (
               <>
                 <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: Spacing.lg, lineHeight: 22 }}>
-                  {t("createCredentials")}
+                  {t("howWillYouUse")}
                 </Text>
-                <Text style={{ ...Typography.secondary, marginBottom: 6, fontWeight: "600" }}>{t("email")}</Text>
-                <TextInput
-                  placeholder={t("emailPlaceholder")}
-                  placeholderTextColor={Colors.textMuted}
-                  autoCapitalize="none"
-                  keyboardType="email-address"
-                  autoComplete="email"
-                  value={email}
-                  onChangeText={setEmail}
-                  style={{ ...inputStyle, marginBottom: Spacing.sm }}
+                <SignupRoleCard
+                  value="coach"
+                  title={t("roleCoach")}
+                  subtitle={t("roleCoachDesc")}
+                  icon="school-outline"
+                  selected={role === "coach"}
+                  submitting={submitting}
+                  onSelect={(v) => {
+                    setRole(v);
+                    setError(null);
+                  }}
                 />
-                <Text style={{ ...Typography.secondary, marginBottom: 6, fontWeight: "600" }}>{t("password")}</Text>
-                <TextInput
-                  placeholder={t("passwordMin")}
-                  placeholderTextColor={Colors.textMuted}
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry
-                  autoComplete="password-new"
-                  style={{ ...inputStyle, marginBottom: Spacing.sm }}
+                <SignupRoleCard
+                  value="student"
+                  title={t("roleStudent")}
+                  subtitle={t("roleStudentDesc")}
+                  icon="barbell-outline"
+                  selected={role === "student"}
+                  submitting={submitting}
+                  onSelect={(v) => {
+                    setRole(v);
+                    setError(null);
+                  }}
                 />
-                <Text style={{ ...Typography.secondary, marginBottom: 6, fontWeight: "600" }}>{t("confirmPassword")}</Text>
-                <TextInput
-                  placeholder={t("reEnterPassword")}
-                  placeholderTextColor={Colors.textMuted}
-                  value={confirmPassword}
-                  onChangeText={setConfirmPassword}
-                  secureTextEntry
-                  autoComplete="password-new"
-                  style={{ ...inputStyle, marginBottom: Spacing.md }}
-                />
-                <PrimaryButton title={t("continue")} onPress={goNext} />
+                <PrimaryButton title={t("continue")} onPress={goNext} disabled={submitting} />
               </>
             ) : null}
 
@@ -396,22 +487,22 @@ export default function Signup() {
                   style={{ ...inputStyle, marginBottom: Spacing.sm }}
                 />
                 <Text style={{ ...Typography.secondary, marginBottom: 6, fontWeight: "600" }}>{t("dateOfBirth")}</Text>
-                <Pressable
-                  onPress={() => setDobPickerOpen(true)}
-                  style={({ pressed }) => ({
-                    borderWidth: 1,
-                    borderColor: Colors.border,
-                    borderRadius: Radius.sm,
-                    marginBottom: Spacing.md,
-                    padding: 14,
-                    backgroundColor: Colors.surface,
-                    opacity: pressed ? 0.9 : 1,
-                  })}
-                >
-                  <Text style={[Typography.body, { color: dateOfBirth ? Colors.text : Colors.textMuted }]}>
-                    {dateOfBirth ? dateOfBirth : t("selectDate")}
-                  </Text>
-                </Pressable>
+                <SpringPressScale fullWidth onPress={() => setDobPickerOpen(true)}>
+                  <View
+                    style={{
+                      borderWidth: 1,
+                      borderColor: Colors.border,
+                      borderRadius: Radius.sm,
+                      marginBottom: Spacing.md,
+                      padding: 14,
+                      backgroundColor: Colors.surface,
+                    }}
+                  >
+                    <Text style={[Typography.body, { color: dateOfBirth ? Colors.text : Colors.textMuted }]}>
+                      {dateOfBirth ? dateOfBirth : t("selectDate")}
+                    </Text>
+                  </View>
+                </SpringPressScale>
 
                 {dobPickerOpen ? (
                   <DateTimePicker
@@ -447,60 +538,82 @@ export default function Signup() {
                         }}
                       />
                     </View>
-                    <Pressable
-                      onPress={() => { setDobDraft(null); setDobPickerOpen(false); }}
-                      style={{
-                        flexShrink: 0,
-                        justifyContent: "center",
-                        paddingVertical: 15,
-                        paddingHorizontal: Spacing.md,
-                        borderRadius: Radius.lg,
-                        backgroundColor: Colors.surface,
-                        borderWidth: 1,
-                        borderColor: Colors.border,
+                    <SpringPressScale
+                      onPress={() => {
+                        setDobDraft(null);
+                        setDobPickerOpen(false);
                       }}
                     >
-                      <Text style={{ ...Typography.section, color: Colors.textMuted, fontWeight: "700" }}>{t("cancel")}</Text>
-                    </Pressable>
+                      <View
+                        style={{
+                          flexShrink: 0,
+                          justifyContent: "center",
+                          paddingVertical: 15,
+                          paddingHorizontal: Spacing.md,
+                          borderRadius: Radius.lg,
+                          backgroundColor: Colors.surface,
+                          borderWidth: 1,
+                          borderColor: Colors.border,
+                        }}
+                      >
+                        <Text style={{ ...Typography.section, color: Colors.textMuted, fontWeight: "700" }}>
+                          {t("cancel")}
+                        </Text>
+                      </View>
+                    </SpringPressScale>
                   </View>
                 ) : null}
 
                 <Text style={{ ...Typography.secondary, marginBottom: Spacing.xs, fontWeight: "600" }}>{t("sex")}</Text>
                 <View style={{ flexDirection: "row", gap: Spacing.xs, marginBottom: Spacing.md }}>
-                  <SexChip value="male" label={t("male")} />
-                  <SexChip value="female" label={t("female")} />
+                  <SignupSexChip value="male" label={t("male")} selected={sex === "male"} onSelect={setSex} />
+                  <SignupSexChip value="female" label={t("female")} selected={sex === "female"} onSelect={setSex} />
                 </View>
-                <PrimaryButton title={t("continue")} onPress={goNext} />
+                <PrimaryButton title={t("continue")} onPress={goNext} disabled={submitting} />
               </>
             ) : null}
 
             {step === 2 ? (
               <>
                 <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: Spacing.lg, lineHeight: 22 }}>
-                  {t("howWillYouUse")}
+                  {t("createCredentials")}
                 </Text>
-                <RoleCard
-                  value="coach"
-                  title={t("roleCoach")}
-                  subtitle={t("roleCoachDesc")}
-                  icon="school-outline"
+                <View style={{ marginBottom: Spacing.sm }}>
+                  <InputField
+                    label={t("email")}
+                    placeholder={t("emailPlaceholder")}
+                    autoCapitalize="none"
+                    keyboardType="email-address"
+                    autoComplete="email"
+                    value={email}
+                    onChangeText={setEmail}
+                  />
+                </View>
+                <View style={{ marginBottom: Spacing.sm }}>
+                  <InputField
+                    label={t("password")}
+                    placeholder={t("passwordMin")}
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry
+                    autoComplete="password-new"
+                  />
+                </View>
+                <View style={{ marginBottom: Spacing.md }}>
+                  <InputField
+                    label={t("confirmPassword")}
+                    placeholder={t("reEnterPassword")}
+                    value={confirmPassword}
+                    onChangeText={setConfirmPassword}
+                    secureTextEntry
+                    autoComplete="password-new"
+                  />
+                </View>
+                <PrimaryButton
+                  title={t("createAccountBtn")}
+                  onPress={handleCreateAccount}
+                  loading={submitting}
                 />
-                <RoleCard
-                  value="student"
-                  title={t("roleStudent")}
-                  subtitle={t("roleStudentDesc")}
-                  icon="barbell-outline"
-                />
-                {submitting ? (
-                  <View style={{ alignItems: "center", paddingVertical: Spacing.lg }}>
-                    <ActivityIndicator size="large" color={Colors.primary} />
-                    <Text style={[Typography.secondary, { color: Colors.textMuted, marginTop: Spacing.md }]}>
-                      {t("creatingAccount")}
-                    </Text>
-                  </View>
-                ) : (
-                  <PrimaryButton title={t("createAccountBtn")} onPress={handleCreateAccount} />
-                )}
               </>
             ) : null}
 
@@ -510,14 +623,18 @@ export default function Signup() {
               </Text>
             ) : null}
           </View>
-        </Animated.View>
+        </View>
 
-        <Pressable onPress={() => router.replace("/login")} style={{ marginTop: Spacing.lg, paddingVertical: Spacing.sm }}>
-          <Text style={[Typography.secondary, { color: Colors.textMuted, textAlign: "center", fontWeight: "600" }]}>
-            {t("alreadyHaveAccount")}{" "}
-            <Text style={{ color: Colors.primary }}>{t("logInLink")}</Text>
-          </Text>
-        </Pressable>
+        {step === 0 ? (
+          <SpringPressScale fullWidth onPress={() => router.replace("/login")}>
+            <View style={{ marginTop: Spacing.lg, paddingVertical: Spacing.sm }}>
+              <Text style={[Typography.secondary, { color: Colors.textMuted, textAlign: "center", fontWeight: "600" }]}>
+                {t("alreadyHaveAccount")}{" "}
+                <Text style={{ color: Colors.primary }}>{t("logInLink")}</Text>
+              </Text>
+            </View>
+          </SpringPressScale>
+        ) : null}
       </KeyboardAwareScrollView>
     </View>
   );
