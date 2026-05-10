@@ -190,5 +190,17 @@
   "studentsOnRoster_one": "%{count} ученик в ростере",
   "studentsOnRoster_other": "%{count} учеников в ростере",
   "workoutsLogged_one": "%{count} тренировка записана · Последняя: %{date}",
-  "workoutsLogged_other": "%{count} тренировок записано · Последняя: %{date}"
+  "workoutsLogged_other": "%{count} тренировок записано · Последняя: %{date}",
+
+  "saveChanges": "Сохранить изменения",
+  "profileUpdated": "Профиль обновлён",
+  "failedToUpdateProfile": "Не удалось сохранить изменения. Попробуйте ещё раз.",
+  "emailNotEditable": "Email — это ваш логин, его нельзя изменить здесь.",
+  "roleNotEditable": "Роль нельзя изменить после выбора.",
+  "noChangesYet": "Нет изменений для сохранения.",
+
+  "units_kg": "Килограммы (кг)",
+  "units_lb": "Фунты (фунт)",
+  "unitsActiveSubtitle_kg": "Килограммы",
+  "unitsActiveSubtitle_lb": "Фунты"
 }

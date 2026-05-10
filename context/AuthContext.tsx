@@ -1,5 +1,6 @@
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useState,
@@ -18,6 +19,14 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "../firebase/firebaseConfig";
 import type { AppUser, UserRole, Sex } from "../types/User";
 import { logger } from "../utils/logger";
+import { authService } from "../services/authService";
+
+type ProfilePatch = {
+  firstName?: string;
+  lastName?: string;
+  dateOfBirth?: string;
+  sex?: Sex;
+};
 
 type AuthContextValue = {
   user: AppUser | null;
@@ -34,6 +43,7 @@ type AuthContextValue = {
     sex: Sex
   ) => Promise<AppUser>;
   logout: () => Promise<void>;
+  updateProfile: (patch: ProfilePatch) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -227,8 +237,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await signOut(auth);
   };
 
+  const updateProfile = useCallback(
+    async (patch: ProfilePatch): Promise<void> => {
+      const currentUser = auth.currentUser;
+      if (!currentUser) throw new Error("Not authenticated.");
+      await authService.updateUserProfile(currentUser.uid, patch);
+      setUser((prev) =>
+        prev
+          ? {
+              ...prev,
+              ...(patch.firstName !== undefined && { firstName: patch.firstName.trim() }),
+              ...(patch.lastName !== undefined && { lastName: patch.lastName.trim() }),
+              ...(patch.dateOfBirth !== undefined && { dateOfBirth: patch.dateOfBirth.trim() }),
+              ...(patch.sex !== undefined && { sex: patch.sex }),
+            }
+          : prev
+      );
+    },
+    []
+  );
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, loginWithGoogleIdToken, signup, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, loginWithGoogleIdToken, signup, logout, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );

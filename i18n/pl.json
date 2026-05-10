@@ -190,5 +190,17 @@
   "studentsOnRoster_one": "%{count} uczeń w rosterze",
   "studentsOnRoster_other": "%{count} uczniów w rosterze",
   "workoutsLogged_one": "%{count} trening zapisany · Ostatni: %{date}",
-  "workoutsLogged_other": "%{count} treningów zapisanych · Ostatni: %{date}"
+  "workoutsLogged_other": "%{count} treningów zapisanych · Ostatni: %{date}",
+
+  "saveChanges": "Zapisz zmiany",
+  "profileUpdated": "Profil zaktualizowany",
+  "failedToUpdateProfile": "Nie udało się zapisać zmian. Spróbuj ponownie.",
+  "emailNotEditable": "Email to twój login i nie można go tu zmienić.",
+  "roleNotEditable": "Roli nie można zmienić po wyborze.",
+  "noChangesYet": "Brak zmian do zapisania.",
+
+  "units_kg": "Kilogramy (kg)",
+  "units_lb": "Funty (lb)",
+  "unitsActiveSubtitle_kg": "Kilogramy",
+  "unitsActiveSubtitle_lb": "Funty"
 }
