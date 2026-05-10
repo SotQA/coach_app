@@ -1,5 +1,7 @@
 import { StyleSheet, Text, TextInput, View } from "react-native";
 import { useI18n } from "../../context/I18nContext";
+import { useUnits } from "../../context/UnitsContext";
+import { toUnit, unitSuffix } from "../../utils/units";
 import type { Exercise } from "../../types/Workout";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
@@ -35,10 +37,15 @@ export function ExerciseGroup({
   registerRef,
 }: ExerciseGroupProps) {
   const { t } = useI18n();
+  const { unit } = useUnits();
 
-  const weightSuffix =
+  const displayWeight =
     exercise.weight != null && Number.isFinite(Number(exercise.weight))
-      ? ` @ ${exercise.weight}kg`
+      ? toUnit(Number(exercise.weight), unit)
+      : null;
+  const weightSuffix =
+    displayWeight != null
+      ? ` @ ${unit === "lb" ? displayWeight.toFixed(1) : Math.round(displayWeight * 10) / 10}${unitSuffix(unit)}`
       : "";
   const rpeSuffix = exercise.rpe != null ? ` RPE ${exercise.rpe}` : "";
 
@@ -67,7 +74,7 @@ export function ExerciseGroup({
       {/* Set table header */}
       <View style={styles.tableHeader}>
         <Text style={[styles.tableHeaderCell, { width: 32 }]}>{t("setColumn")}</Text>
-        <Text style={[styles.tableHeaderCell, { flex: 1 }]}>{t("kgColumn")}</Text>
+        <Text style={[styles.tableHeaderCell, { flex: 1 }]}>{unitSuffix(unit).toUpperCase()}</Text>
         <Text style={[styles.tableHeaderCell, { flex: 1 }]}>{t("repsColumn")}</Text>
         <Text style={[styles.tableHeaderCell, { flex: 1 }]}>{t("rpeColumn")}</Text>
         <Text style={[styles.tableHeaderCell, { width: 34 }]}>✓</Text>

@@ -5,6 +5,8 @@ import { Colors } from "../theme/colors";
 import { parseFloatInput } from "../utils/inputParsing";
 import { Radius, Spacing } from "../theme/spacing";
 import { Typography } from "../theme/typography";
+import { useUnits } from "../context/UnitsContext";
+import { toKg, toUnit, unitSuffix } from "../utils/units";
 
 export type ExerciseDraft = {
   _key: string;
@@ -30,15 +32,15 @@ type Props = {
   dragHandleProps?: any;
 };
 
-const toSummary = (e: ExerciseDraft): string => {
+function makeSummary(e: ExerciseDraft, displayUnit: string): string {
   const n = (e.name ?? "").trim() || "New exercise";
   const sets = Math.max(0, Math.round(Number(e.sets) || 0));
   const reps = String(e.reps ?? "").trim();
-  const w = e.weight != null && Number.isFinite(Number(e.weight)) ? `${Number(e.weight)}kg` : "";
+  const w = e.weight != null && Number.isFinite(Number(e.weight)) ? `${Number(e.weight)}${displayUnit}` : "";
   const mid = sets > 0 && reps ? `${sets} x ${reps}` : sets > 0 ? `${sets} sets` : reps ? reps : "";
   const parts = [n, mid, w].filter(Boolean);
   return parts.join(" • ");
-};
+}
 
 export function ExerciseCard({
   value,
@@ -50,27 +52,43 @@ export function ExerciseCard({
   onDelete,
   dragHandleProps,
 }: Props) {
+  const { unit } = useUnits();
   const nameRef = useRef<TextInput | null>(null);
-  const [weightText, setWeightText] = useState<string>(
-    value.weight == null ? "" : String(value.weight)
-  );
+
+  // Convert stored kg → display unit for the weight input.
+  const toDisplayWeight = (kg: number | undefined): string => {
+    if (kg == null || !Number.isFinite(kg)) return "";
+    const display = toUnit(kg, unit);
+    if (display == null) return "";
+    return unit === "lb" ? display.toFixed(1) : String(Math.round(display * 10) / 10);
+  };
+
+  const [weightText, setWeightText] = useState<string>(toDisplayWeight(value.weight));
   const [weightFocused, setWeightFocused] = useState(false);
 
   useEffect(() => {
     if (weightFocused) return;
-    setWeightText(value.weight == null ? "" : String(value.weight));
-  }, [value.weight, weightFocused]);
+    setWeightText(toDisplayWeight(value.weight));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value.weight, weightFocused, unit]);
 
-  const summary = useMemo(() => toSummary(value), [value]);
+  const suffix = unitSuffix(unit);
+  const summary = useMemo(() => makeSummary(value, suffix), [value, suffix]);
 
   const update = (patch: Partial<ExerciseDraft>) => onChange({ ...value, ...patch });
 
-  const parseIntSafe = (t: string) => {
-    const cleaned = t.trim().replace(/[^0-9-]/g, "");
+  const parseIntSafe = (text: string) => {
+    const cleaned = text.trim().replace(/[^0-9-]/g, "");
     const n = Number(cleaned);
     return Number.isFinite(n) ? n : value.sets;
   };
-  const parseFloatSafe = (t: string) => parseFloatInput(t) ?? value.weight ?? undefined;
+  // Parse display-unit value and convert back to kg for storage.
+  const parseFloatSafe = (text: string): number | undefined => {
+    const displayVal = parseFloatInput(text);
+    if (displayVal === null || displayVal === undefined) return value.weight ?? undefined;
+    const kgVal = toKg(displayVal, unit);
+    return kgVal != null ? kgVal : value.weight ?? undefined;
+  };
 
   return (
     <View
@@ -238,7 +256,7 @@ export function ExerciseCard({
 
           <View style={{ flexDirection: "row", gap: Spacing.sm, marginTop: Spacing.sm }}>
             <View style={{ flex: 1 }}>
-              <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Weight (kg)</Text>
+              <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Weight ({suffix.toUpperCase()})</Text>
               <TextInput
                 // iOS supports decimal-pad; Android may show a numeric keyboard with locale comma.
                 keyboardType={Platform.OS === "ios" ? "decimal-pad" : "numeric"}

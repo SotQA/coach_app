@@ -6,6 +6,7 @@ import { AuthProvider, useAuth } from "../context/AuthContext";
 import { ActiveWorkoutSessionProvider, useActiveWorkoutSession } from "../context/ActiveWorkoutSessionContext";
 import { ElapsedTimeProvider } from "../context/ElapsedTimeContext";
 import { I18nProvider } from "../context/I18nContext";
+import { UnitsProvider } from "../context/UnitsContext";
 import * as SystemUI from "expo-system-ui";
 import { DarkTheme, ThemeProvider } from "@react-navigation/native";
 import { Colors } from "../theme/colors";
@@ -104,6 +105,7 @@ export default function Layout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <I18nProvider>
+        <UnitsProvider>
         <AuthProvider>
           <ActiveWorkoutSessionProvider>
             <ElapsedTimeProvider>
@@ -115,6 +117,7 @@ export default function Layout() {
             </ElapsedTimeProvider>
           </ActiveWorkoutSessionProvider>
         </AuthProvider>
+        </UnitsProvider>
       </I18nProvider>
     </GestureHandlerRootView>
   );

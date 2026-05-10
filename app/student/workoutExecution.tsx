@@ -21,15 +21,29 @@ import { logger } from "../../utils/logger";
 import { useWorkoutExecutionData } from "../../hooks/useWorkoutExecutionData";
 import { useFinishWorkout } from "../../hooks/useFinishWorkout";
 import { useSetInputRefs } from "../../hooks/useSetInputRefs";
+import { useUnits } from "../../context/UnitsContext";
+import { toKg, toUnit } from "../../utils/units";
+import type { WeightUnit } from "../../context/UnitsContext";
 
 type ExerciseDraft = { sets: SetDraft[] };
 
-/** Build ActiveExerciseDraft[] from a loaded WorkoutPlan (fresh session). */
-function buildExerciseDrafts(plan: WorkoutPlan): ActiveExerciseDraft[] {
+function weightToDisplay(kg: number | null | undefined, unit: WeightUnit): string {
+  if (kg == null || !Number.isFinite(kg)) return "";
+  const display = toUnit(kg, unit);
+  if (display == null) return "";
+  return unit === "lb" ? display.toFixed(1) : String(Math.round(display * 10) / 10);
+}
+
+/** Build ActiveExerciseDraft[] from a loaded WorkoutPlan (fresh session).
+ *  Drafts always store kg; prescribed weight is converted for display via weightToDisplay. */
+function buildExerciseDrafts(plan: WorkoutPlan, unit: WeightUnit): ActiveExerciseDraft[] {
   return plan.exercises.map((ex) => ({
     name: ex.name,
     sets: Array.from({ length: Math.max(1, Number(ex.sets) || 1) }, () => ({
-      weight: ex.weight != null && Number.isFinite(Number(ex.weight)) ? String(ex.weight) : "",
+      weight: weightToDisplay(
+        ex.weight != null && Number.isFinite(Number(ex.weight)) ? Number(ex.weight) : null,
+        unit
+      ),
       reps: "",
       rpe: ex.rpe != null && Number.isFinite(Number(ex.rpe)) ? String(ex.rpe) : "",
       completed: false,
@@ -37,10 +51,16 @@ function buildExerciseDrafts(plan: WorkoutPlan): ActiveExerciseDraft[] {
   }));
 }
 
-/** Convert persisted ActiveExerciseDraft[] → local ExerciseDraft[] for UI. */
-function toLocalDrafts(exercises: ActiveExerciseDraft[]): ExerciseDraft[] {
+/** Convert persisted ActiveExerciseDraft[] → local ExerciseDraft[] for UI.
+ *  Session stores kg strings; convert to active unit for display. */
+function toLocalDrafts(exercises: ActiveExerciseDraft[], unit: WeightUnit): ExerciseDraft[] {
   return exercises.map((ex) => ({
-    sets: ex.sets.map((s) => ({ weight: s.weight, reps: s.reps, rpe: s.rpe, done: s.completed })),
+    sets: ex.sets.map((s) => {
+      const kg = parseFloat(s.weight);
+      const displayW =
+        s.weight !== "" && Number.isFinite(kg) ? weightToDisplay(kg, unit) : s.weight;
+      return { weight: displayW, reps: s.reps, rpe: s.rpe, done: s.completed };
+    }),
   }));
 }
 
@@ -56,6 +76,7 @@ export default function WorkoutExecution() {
   const workoutPlanId = useMemo(() => String(params.workoutPlanId ?? "").trim(), [params.workoutPlanId]);
   const groupId = useMemo(() => String(params.groupId ?? "").trim(), [params.groupId]);
 
+  const { unit } = useUnits();
   const { data: execData, loading, error: loadError } = useWorkoutExecutionData(workoutPlanId);
   const plan = execData?.plan ?? null;
   const bestWeightByExercise = execData?.bestWeightByExercise ?? new Map<string, number>();
@@ -86,12 +107,12 @@ export default function WorkoutExecution() {
     sessionInitRef.current = true;
     const existing = activeWorkout.session;
     if (existing && existing.workoutPlanId === workoutPlanId) {
-      setDrafts(toLocalDrafts(existing.exercises));
+      setDrafts(toLocalDrafts(existing.exercises, unit));
       setSessionNotes(existing.notes ?? "");
     } else if (!existing) {
-      const exercises = buildExerciseDrafts(plan);
+      const exercises = buildExerciseDrafts(plan, unit);
       activeWorkout.startSession({ studentId: authUserId!, workoutPlanId: plan.id, workoutName: plan.name, groupId, exercises, notes: "" });
-      setDrafts(toLocalDrafts(exercises));
+      setDrafts(toLocalDrafts(exercises, unit));
       setSessionNotes("");
     } else {
       router.replace({ pathname: "/student/workoutExecution", params: { workoutPlanId: existing.workoutPlanId } });
@@ -111,8 +132,19 @@ export default function WorkoutExecution() {
     if (!draftsForEx || draftsForEx.sets[setIdx] === undefined) {
       logger.warn("[workoutExecution] missing set at idx", { exIdx, setIdx }); return;
     }
+    // Convert the display-unit weight to kg before persisting into the session context.
+    let sessionWeight: string | undefined;
+    if (patch.weight !== undefined) {
+      const displayVal = parseFloat(patch.weight);
+      if (Number.isFinite(displayVal)) {
+        const kgVal = toKg(displayVal, unit);
+        sessionWeight = kgVal != null ? String(kgVal) : "";
+      } else {
+        sessionWeight = patch.weight;
+      }
+    }
     activeWorkout.updateSet(exIdx, setIdx, {
-      ...(patch.weight !== undefined && { weight: patch.weight }),
+      ...(patch.weight !== undefined && { weight: sessionWeight! }),
       ...(patch.reps !== undefined && { reps: patch.reps }),
       ...(patch.rpe !== undefined && { rpe: patch.rpe }),
       ...(patch.done !== undefined && { completed: patch.done }),

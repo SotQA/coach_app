@@ -1,4 +1,3 @@
-import { useEffect, useMemo, useState } from "react";
 import { Alert, Pressable, ScrollView, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -14,61 +13,19 @@ import {
   LOCALE_LABELS,
   type SupportedLocale,
 } from "../../../context/I18nContext";
-import { studentService } from "../../../services/studentService";
+import { useUnits } from "../../../context/UnitsContext";
 import { ExerciseLibraryModal } from "../../../components/ExerciseLibraryModal";
-import { SettingsProfileCard } from "../../../components/settings/SettingsProfileCard";
 import { SettingsSection } from "../../../components/settings/SettingsSection";
 import { SettingsRow } from "../../../components/settings/SettingsRow";
-import { getUserInitials } from "../../../utils/userDisplay";
-
-const initialsFromUser = (user: { firstName?: string | null; lastName?: string | null } | null) =>
-  getUserInitials(user, "C");
+import { useState } from "react";
 
 export default function CoachProfile() {
   const router = useRouter();
   const { user, logout } = useAuth();
   const { t, locale, setLocale } = useI18n();
+  const { unit, setUnit } = useUnits();
   const insets = useSafeAreaInsets();
-  const [statsLoading, setStatsLoading] = useState(true);
-  const [studentCount, setStudentCount] = useState<number | null>(null);
-  const [statsError, setStatsError] = useState<string | null>(null);
   const [libraryOpen, setLibraryOpen] = useState(false);
-
-  const fullName = useMemo(() => {
-    const n = `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim();
-    return n || "—";
-  }, [user?.firstName, user?.lastName]);
-
-  const coachInitials = useMemo(() => initialsFromUser(user ?? null), [user]);
-
-  useEffect(() => {
-    if (!user?.id) return;
-    let cancelled = false;
-    const load = async () => {
-      setStatsLoading(true);
-      setStatsError(null);
-      try {
-        const students = await studentService.getStudentsForCoach(user.id);
-        if (cancelled) return;
-        setStudentCount(Array.isArray(students) ? students.length : 0);
-      } catch (e: unknown) {
-        if (cancelled) return;
-        const msg = e instanceof Error ? e.message : t("failedToLoad");
-        setStatsError(msg);
-        setStudentCount(null);
-      } finally {
-        if (!cancelled) setStatsLoading(false);
-      }
-    };
-    load();
-    return () => { cancelled = true; };
-  }, [user?.id]);
-
-  const metaLine = useMemo(() => {
-    if (statsLoading || studentCount == null) return null;
-    const count = studentCount;
-    return t(count === 1 ? "studentsOnRoster_one" : "studentsOnRoster_other", { count });
-  }, [statsLoading, studentCount, t]);
 
   const openLanguagePicker = () => {
     Alert.alert(
@@ -82,6 +39,20 @@ export default function CoachProfile() {
         { text: t("cancel"), style: "cancel" as const },
       ]
     );
+  };
+
+  const openUnitPicker = () => {
+    Alert.alert(t("measurementUnits"), undefined, [
+      {
+        text: t("units_kg") + (unit === "kg" ? " ✓" : ""),
+        onPress: () => setUnit("kg"),
+      },
+      {
+        text: t("units_lb") + (unit === "lb" ? " ✓" : ""),
+        onPress: () => setUnit("lb"),
+      },
+      { text: t("cancel"), style: "cancel" as const },
+    ]);
   };
 
   if (!user) return null;
@@ -134,27 +105,13 @@ export default function CoachProfile() {
             </Pressable>
           </View>
 
-          {statsError ? (
-            <Text style={{ ...Typography.secondary, color: Colors.danger, marginBottom: Spacing.sm }}>
-              {statsError}
-            </Text>
-          ) : null}
-
-          <SettingsProfileCard
-            fullName={fullName}
-            email={user.email ?? ""}
-            roleLabel={t("roleCoach")}
-            initials={coachInitials}
-            statsLoading={statsLoading}
-            metaLine={metaLine}
-            onEditProfile={() =>
-              Alert.alert(t("comingSoon"), t("profileEditComingSoon"), [
-                { text: t("ok"), style: "default" },
-              ])
-            }
-          />
-
           <SettingsSection title={t("appPreferences")}>
+            <SettingsRow
+              icon="person-circle-outline"
+              title={t("editProfile")}
+              subtitle={`${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || (user.email ?? undefined)}
+              onPress={() => router.push("/(profile)/edit")}
+            />
             <SettingsRow
               icon="language-outline"
               title={t("language")}
@@ -164,22 +121,8 @@ export default function CoachProfile() {
             <SettingsRow
               icon="scale-outline"
               title={t("measurementUnits")}
-              subtitle={t("measurementUnitsSubtitle")}
-              onPress={() =>
-                Alert.alert(t("measurementUnits"), t("measurementUnitsComing"), [
-                  { text: t("ok"), style: "default" },
-                ])
-              }
-            />
-            <SettingsRow
-              icon="moon-outline"
-              title={t("theme")}
-              subtitle={t("themeDark")}
-              onPress={() =>
-                Alert.alert(t("theme"), t("themeComing"), [
-                  { text: t("ok"), style: "default" },
-                ])
-              }
+              subtitle={unit === "lb" ? t("unitsActiveSubtitle_lb") : t("unitsActiveSubtitle_kg")}
+              onPress={openUnitPicker}
             />
             <SettingsRow
               icon="notifications-outline"
@@ -244,5 +187,3 @@ export default function CoachProfile() {
     </ScreenLayout>
   );
 }
-
-
