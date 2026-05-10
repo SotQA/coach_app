@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useState } from "react";
 import { Alert, Pressable, ScrollView, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -14,10 +15,12 @@ import {
   type SupportedLocale,
 } from "../../../context/I18nContext";
 import { useUnits } from "../../../context/UnitsContext";
+import { studentService } from "../../../services/studentService";
 import { ExerciseLibraryModal } from "../../../components/ExerciseLibraryModal";
+import { SettingsProfileCard } from "../../../components/settings/SettingsProfileCard";
 import { SettingsSection } from "../../../components/settings/SettingsSection";
 import { SettingsRow } from "../../../components/settings/SettingsRow";
-import { useState } from "react";
+import { getUserInitials } from "../../../utils/userDisplay";
 
 export default function CoachProfile() {
   const router = useRouter();
@@ -25,7 +28,49 @@ export default function CoachProfile() {
   const { t, locale, setLocale } = useI18n();
   const { unit, setUnit } = useUnits();
   const insets = useSafeAreaInsets();
+
+  const [statsLoading, setStatsLoading] = useState(true);
+  const [studentCount, setStudentCount] = useState<number | null>(null);
+  const [statsError, setStatsError] = useState<string | null>(null);
   const [libraryOpen, setLibraryOpen] = useState(false);
+
+  const fullName = useMemo(() => {
+    const n = `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim();
+    return n || "—";
+  }, [user?.firstName, user?.lastName]);
+
+  const coachInitials = useMemo(
+    () => getUserInitials(user ?? null, "C"),
+    [user]
+  );
+
+  useEffect(() => {
+    if (!user?.id) return;
+    let cancelled = false;
+    const load = async () => {
+      setStatsLoading(true);
+      setStatsError(null);
+      try {
+        const students = await studentService.getStudentsForCoach(user.id);
+        if (cancelled) return;
+        setStudentCount(Array.isArray(students) ? students.length : 0);
+      } catch (e: unknown) {
+        if (cancelled) return;
+        setStatsError(e instanceof Error ? e.message : t("failedToLoad"));
+        setStudentCount(null);
+      } finally {
+        if (!cancelled) setStatsLoading(false);
+      }
+    };
+    load();
+    return () => { cancelled = true; };
+  }, [user?.id]);
+
+  const metaLine = useMemo(() => {
+    if (statsLoading || studentCount == null) return null;
+    const count = studentCount;
+    return t(count === 1 ? "studentsOnRoster_one" : "studentsOnRoster_other", { count });
+  }, [statsLoading, studentCount, t]);
 
   const openLanguagePicker = () => {
     Alert.alert(
@@ -69,6 +114,7 @@ export default function CoachProfile() {
           }}
           showsVerticalScrollIndicator={false}
         >
+          {/* Header */}
           <View
             style={{
               flexDirection: "row",
@@ -105,13 +151,24 @@ export default function CoachProfile() {
             </Pressable>
           </View>
 
+          {/* Profile card */}
+          <SettingsProfileCard
+            fullName={fullName}
+            email={user.email ?? ""}
+            roleLabel={t("roleCoach")}
+            initials={coachInitials}
+            statsLoading={statsLoading}
+            metaLine={metaLine}
+            onEditProfile={() => router.push("/(profile)/edit")}
+          />
+
+          {statsError ? (
+            <Text style={{ ...Typography.secondary, color: Colors.danger, marginBottom: Spacing.sm }}>
+              {statsError}
+            </Text>
+          ) : null}
+
           <SettingsSection title={t("appPreferences")}>
-            <SettingsRow
-              icon="person-circle-outline"
-              title={t("editProfile")}
-              subtitle={`${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || (user.email ?? undefined)}
-              onPress={() => router.push("/(profile)/edit")}
-            />
             <SettingsRow
               icon="language-outline"
               title={t("language")}
