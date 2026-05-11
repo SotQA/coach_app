@@ -1,0 +1,38 @@
+rules_version = '2';
+
+// Mentorix — Firebase Storage Security Rules
+//
+// Source-of-truth lives here. Paste into Firebase Console → Storage → Rules
+// (or `firebase deploy --only storage` if you have the CLI configured).
+//
+// Scope covered: avatars at /users/{uid}/avatar.jpg.
+// Anything not matched by an explicit `match` block is denied by the
+// catch-all at the bottom.
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ─────────────────────────────────────────────────────────────────────
+    // /users/{userId}/avatar.jpg — user profile photo
+    // ─────────────────────────────────────────────────────────────────────
+    match /users/{userId}/avatar.jpg {
+      // Any signed-in user can view avatars (coach sees student, etc.).
+      allow read: if request.auth != null;
+
+      // Only the owner can write their own avatar.
+      // Cap upload at 5 MB and require an image content type.
+      allow write: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // Catch-all DENY for anything else. Add a `match` block above this
+    // for any new path BEFORE it goes to production.
+    // ─────────────────────────────────────────────────────────────────────
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
