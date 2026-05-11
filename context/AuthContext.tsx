@@ -44,6 +44,8 @@ type AuthContextValue = {
   ) => Promise<AppUser>;
   logout: () => Promise<void>;
   updateProfile: (patch: ProfilePatch) => Promise<void>;
+  /** Re-fetches the user doc from Firestore and refreshes in-memory state. */
+  refreshUser: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -77,6 +79,7 @@ const mapToAppUser = (user: User, data: any): AppUser | null => {
     lastName: data?.lastName ?? "",
     dateOfBirth: data?.dateOfBirth ?? "",
     sex: normalizeSex(data?.sex),
+    photoURL: data?.photoURL ?? null,
   };
 };
 
@@ -257,8 +260,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     []
   );
 
+  const refreshUser = useCallback(async (): Promise<void> => {
+    const currentUser = auth.currentUser;
+    if (!currentUser) return;
+    const snap = await getDoc(doc(db, USERS_COLLECTION, currentUser.uid));
+    if (!snap.exists()) return;
+    const appUser = mapToAppUser(currentUser, snap.data() as any);
+    if (appUser) setUser(appUser);
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, loginWithGoogleIdToken, signup, logout, updateProfile }}>
+    <AuthContext.Provider value={{ user, loading, login, loginWithGoogleIdToken, signup, logout, updateProfile, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

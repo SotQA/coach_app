@@ -15,6 +15,7 @@ export interface UserFirestoreDoc {
   dateOfBirth?: string;
   sex?: string;
   createdAt?: Timestamp | string;
+  photoURL?: string;
 }
 
 export interface ExerciseFirestoreDoc {
