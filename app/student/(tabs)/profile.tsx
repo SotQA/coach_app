@@ -166,6 +166,7 @@ export default function StudentProfile() {
             initials={initials}
             statsLoading={statsLoading}
             metaLine={metaLine}
+            photoURL={user.photoURL}
             onEditProfile={() => router.push("/(profile)/edit")}
           />
 

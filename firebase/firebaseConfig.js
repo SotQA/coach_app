@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
 import { Platform } from "react-native";
 
@@ -53,3 +54,4 @@ function createAuth() {
 
 export const auth = createAuth();
 export const db = getFirestore(app);
+export const storage = getStorage(app);

@@ -10,6 +10,7 @@ export interface AppUser {
   lastName: string;
   dateOfBirth: string;
   sex: Sex;
+  photoURL?: string | null;
 }
 
 // Shape used when signing up a new user

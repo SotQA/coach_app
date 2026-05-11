@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
   ScrollView,
+  StyleSheet,
   Text,
   View,
 } from "react-native";
@@ -11,16 +14,22 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
+import { Image } from "expo-image";
+import * as ImagePicker from "expo-image-picker";
 import { InputField } from "../../components/InputField";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { useAuth } from "../../context/AuthContext";
 import { useI18n } from "../../context/I18nContext";
+import { avatarService } from "../../services/avatarService";
+import { logger } from "../../utils/logger";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography, FontSizes } from "../../theme/typography";
+import { getUserInitials } from "../../utils/userDisplay";
 import type { Sex } from "../../types/User";
 
 const PRESS_SCALE = 0.97;
+const AVATAR_SIZE = 88;
 
 function parseYMD(value: string): Date | null {
   const parts = value.split("-");
@@ -113,7 +122,7 @@ function SexChipGroup({ value, onChange }: { value: Sex; onChange: (v: Sex) => v
 
 export default function EditProfile() {
   const router = useRouter();
-  const { user, updateProfile } = useAuth();
+  const { user, updateProfile, refreshUser } = useAuth();
   const { t } = useI18n();
 
   const [firstName, setFirstName] = useState(user?.firstName ?? "");
@@ -123,9 +132,9 @@ export default function EditProfile() {
   const [dobPickerOpen, setDobPickerOpen] = useState(false);
   const [dobDraft, setDobDraft] = useState<Date | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [photoUploading, setPhotoUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Track originals so we can detect changes.
   const originals = useRef({
     firstName: user?.firstName ?? "",
     lastName: user?.lastName ?? "",
@@ -133,7 +142,6 @@ export default function EditProfile() {
     sex: (user?.sex ?? "other") as Sex,
   });
 
-  // Re-sync originals if user object changes (e.g. on mount after fast-refresh).
   useEffect(() => {
     originals.current = {
       firstName: user?.firstName ?? "",
@@ -164,6 +172,86 @@ export default function EditProfile() {
   const roleLabel =
     user?.role === "coach" ? t("roleCoach") : user?.role === "student" ? t("roleStudent") : "—";
 
+  const currentPhotoURL = user?.photoURL ?? null;
+  const initials = getUserInitials(user ?? null, user?.role === "coach" ? "C" : "S");
+
+  // ── Photo upload helpers ────────────────────────────────────────────────────
+
+  const handleUpload = async (localUri: string) => {
+    if (!user?.id) return;
+    setError(null);
+    setPhotoUploading(true);
+    try {
+      await avatarService.uploadAvatar(user.id, localUri);
+      await refreshUser();
+    } catch (e) {
+      logger.error("[edit-profile] avatar upload failed", e);
+      setError(t("photoUploadFailed"));
+    } finally {
+      setPhotoUploading(false);
+    }
+  };
+
+  const pickFromCamera = async () => {
+    const perm = await ImagePicker.requestCameraPermissionsAsync();
+    if (!perm.granted) {
+      setError(t("cameraPermissionDenied"));
+      return;
+    }
+    const res = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.9,
+    });
+    if (res.canceled || !res.assets?.[0]?.uri) return;
+    await handleUpload(res.assets[0].uri);
+  };
+
+  const pickFromLibrary = async () => {
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) {
+      setError(t("photoPermissionDenied"));
+      return;
+    }
+    const res = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.9,
+    });
+    if (res.canceled || !res.assets?.[0]?.uri) return;
+    await handleUpload(res.assets[0].uri);
+  };
+
+  const removePhoto = async () => {
+    if (!user?.id) return;
+    setError(null);
+    setPhotoUploading(true);
+    try {
+      await avatarService.deleteAvatar(user.id);
+      await refreshUser();
+    } catch (e) {
+      logger.error("[edit-profile] avatar delete failed", e);
+      setError(t("photoUploadFailed"));
+    } finally {
+      setPhotoUploading(false);
+    }
+  };
+
+  const openPhotoActionSheet = () => {
+    Alert.alert(t("profilePhoto"), undefined, [
+      { text: t("takePhoto"), onPress: () => pickFromCamera() },
+      { text: t("chooseFromLibrary"), onPress: () => pickFromLibrary() },
+      ...(currentPhotoURL
+        ? [{ text: t("removePhoto"), style: "destructive" as const, onPress: () => removePhoto() }]
+        : []),
+      { text: t("cancel"), style: "cancel" as const },
+    ]);
+  };
+
+  // ── Profile field save ──────────────────────────────────────────────────────
+
   const handleSave = async () => {
     if (!hasChanges()) {
       setError(t("noChangesYet"));
@@ -186,6 +274,8 @@ export default function EditProfile() {
       setSubmitting(false);
     }
   };
+
+  const isWorking = submitting || photoUploading;
 
   return (
     <KeyboardAvoidingView
@@ -210,10 +300,7 @@ export default function EditProfile() {
             gap: Spacing.sm,
           }}
         >
-          <SpringPress
-            onPress={() => router.back()}
-            style={{ flexShrink: 0 }}
-          >
+          <SpringPress onPress={() => router.back()} style={{ flexShrink: 0 }}>
             <View
               style={{
                 width: 44,
@@ -233,6 +320,70 @@ export default function EditProfile() {
         </View>
 
         <View style={{ paddingHorizontal: Spacing.md, paddingTop: Spacing.lg, gap: Spacing.md }}>
+          {/* Avatar section */}
+          <View style={{ alignItems: "center", marginBottom: Spacing.sm }}>
+            <Pressable
+              onPress={photoUploading ? undefined : openPhotoActionSheet}
+              accessibilityRole="button"
+              accessibilityLabel={currentPhotoURL ? t("changePhoto") : t("addPhoto")}
+            >
+              <View
+                style={{
+                  width: AVATAR_SIZE,
+                  height: AVATAR_SIZE,
+                  borderRadius: AVATAR_SIZE / 2,
+                  overflow: "hidden",
+                  borderWidth: 2,
+                  borderColor: Colors.primary,
+                  backgroundColor: Colors.surface,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                {currentPhotoURL ? (
+                  <Image
+                    source={{ uri: currentPhotoURL }}
+                    style={{ width: AVATAR_SIZE, height: AVATAR_SIZE }}
+                    contentFit="cover"
+                    transition={200}
+                  />
+                ) : (
+                  <Text style={{ fontSize: 32, fontWeight: "900", color: Colors.primary }}>
+                    {initials}
+                  </Text>
+                )}
+                {photoUploading ? (
+                  <View
+                    style={{
+                      ...StyleSheet.absoluteFillObject,
+                      backgroundColor: "rgba(0,0,0,0.5)",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <ActivityIndicator color={Colors.primary} />
+                  </View>
+                ) : null}
+              </View>
+            </Pressable>
+
+            <Pressable
+              onPress={photoUploading ? undefined : openPhotoActionSheet}
+              disabled={photoUploading}
+              style={{ marginTop: Spacing.sm }}
+            >
+              <Text
+                style={{
+                  ...Typography.secondary,
+                  color: photoUploading ? Colors.textMuted : Colors.primary,
+                  fontWeight: "700",
+                }}
+              >
+                {currentPhotoURL ? t("changePhoto") : t("addPhoto")}
+              </Text>
+            </Pressable>
+          </View>
+
           {/* First name */}
           <InputField
             label={t("firstName")}
@@ -255,19 +406,10 @@ export default function EditProfile() {
 
           {/* Date of birth */}
           <View>
-            <Text
-              style={{
-                fontSize: 14,
-                fontWeight: "600",
-                color: Colors.text,
-                marginBottom: 8,
-              }}
-            >
+            <Text style={{ fontSize: 14, fontWeight: "600", color: Colors.text, marginBottom: 8 }}>
               {t("dateOfBirth")}
             </Text>
-            <SpringPress
-              onPress={() => setDobPickerOpen(true)}
-            >
+            <SpringPress onPress={() => setDobPickerOpen(true)}>
               <View
                 style={{
                   height: 56,
@@ -405,7 +547,7 @@ export default function EditProfile() {
             title={t("saveChanges")}
             onPress={handleSave}
             loading={submitting}
-            disabled={submitting}
+            disabled={isWorking}
           />
         </View>
       </ScrollView>

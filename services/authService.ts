@@ -21,6 +21,7 @@ const mapToAppUser = (user: User, role: AppUser["role"], data: any): AppUser => 
   lastName: data?.lastName ?? "",
   dateOfBirth: data?.dateOfBirth ?? "",
   sex: normalizeSex(data?.sex),
+  photoURL: data?.photoURL ?? null,
 });
 
 export const authService = {

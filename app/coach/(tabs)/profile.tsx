@@ -159,6 +159,7 @@ export default function CoachProfile() {
             initials={coachInitials}
             statsLoading={statsLoading}
             metaLine={metaLine}
+            photoURL={user.photoURL}
             onEditProfile={() => router.push("/(profile)/edit")}
           />
 

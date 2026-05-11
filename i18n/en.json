@@ -202,5 +202,15 @@
   "units_kg": "Kilograms (kg)",
   "units_lb": "Pounds (lb)",
   "unitsActiveSubtitle_kg": "Kilograms",
-  "unitsActiveSubtitle_lb": "Pounds"
+  "unitsActiveSubtitle_lb": "Pounds",
+
+  "profilePhoto": "Profile photo",
+  "changePhoto": "Change photo",
+  "addPhoto": "Add photo",
+  "takePhoto": "Take photo",
+  "chooseFromLibrary": "Choose from library",
+  "removePhoto": "Remove photo",
+  "photoPermissionDenied": "Photo library access denied. Enable it in Settings.",
+  "cameraPermissionDenied": "Camera access denied. Enable it in Settings.",
+  "photoUploadFailed": "Could not save photo. Try again."
 }
