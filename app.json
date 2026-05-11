@@ -2,7 +2,7 @@
   "expo": {
     "name": "gym-coach-app",
     "slug": "gym-coach-app",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "backgroundColor": "#000000",
@@ -12,7 +12,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.sergey.gymcoachapp",
-      "buildNumber": "3",
+      "buildNumber": "1",
       "backgroundColor": "#000000",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
