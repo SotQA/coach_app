@@ -202,5 +202,15 @@
   "units_kg": "Kilogramy (kg)",
   "units_lb": "Funty (lb)",
   "unitsActiveSubtitle_kg": "Kilogramy",
-  "unitsActiveSubtitle_lb": "Funty"
+  "unitsActiveSubtitle_lb": "Funty",
+
+  "profilePhoto": "Zdjęcie profilowe",
+  "changePhoto": "Zmień zdjęcie",
+  "addPhoto": "Dodaj zdjęcie",
+  "takePhoto": "Zrób zdjęcie",
+  "chooseFromLibrary": "Wybierz z biblioteki",
+  "removePhoto": "Usuń zdjęcie",
+  "photoPermissionDenied": "Brak dostępu do biblioteki zdjęć. Włącz go w Ustawieniach.",
+  "cameraPermissionDenied": "Brak dostępu do aparatu. Włącz go w Ustawieniach.",
+  "photoUploadFailed": "Nie udało się zapisać zdjęcia. Spróbuj ponownie."
 }

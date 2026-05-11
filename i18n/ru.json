@@ -202,5 +202,15 @@
   "units_kg": "Килограммы (кг)",
   "units_lb": "Фунты (фунт)",
   "unitsActiveSubtitle_kg": "Килограммы",
-  "unitsActiveSubtitle_lb": "Фунты"
+  "unitsActiveSubtitle_lb": "Фунты",
+
+  "profilePhoto": "Фото профиля",
+  "changePhoto": "Изменить фото",
+  "addPhoto": "Добавить фото",
+  "takePhoto": "Сделать фото",
+  "chooseFromLibrary": "Выбрать из галереи",
+  "removePhoto": "Удалить фото",
+  "photoPermissionDenied": "Доступ к галерее запрещён. Включите его в настройках.",
+  "cameraPermissionDenied": "Доступ к камере запрещён. Включите его в настройках.",
+  "photoUploadFailed": "Не удалось сохранить фото. Попробуйте ещё раз."
 }
