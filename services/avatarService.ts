@@ -13,12 +13,26 @@ export const avatarService = {
   /**
    * Compress + upload + persist URL on the user document.
    * Returns the resulting public URL (with Firebase Storage access token).
+   *
+   * Pass `options.flipHorizontal = true` for front-camera captures so the
+   * saved photo matches what the user saw in the viewfinder (not mirrored).
    */
-  async uploadAvatar(uid: string, localUri: string): Promise<string> {
-    // 1. Resize + compress
+  async uploadAvatar(
+    uid: string,
+    localUri: string,
+    options?: { flipHorizontal?: boolean }
+  ): Promise<string> {
+    // 1. Build operation list: optional horizontal flip, then resize.
+    const operations: ImageManipulator.Action[] = [];
+    if (options?.flipHorizontal) {
+      operations.push({ flip: ImageManipulator.FlipType.Horizontal });
+    }
+    operations.push({ resize: { width: MAX_DIMENSION, height: MAX_DIMENSION } });
+
+    // 2. Resize (+ optional flip) + compress
     const manipulated = await ImageManipulator.manipulateAsync(
       localUri,
-      [{ resize: { width: MAX_DIMENSION, height: MAX_DIMENSION } }],
+      operations,
       { compress: JPEG_QUALITY, format: ImageManipulator.SaveFormat.JPEG }
     );
 

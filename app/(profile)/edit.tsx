@@ -178,13 +178,13 @@ export default function EditProfile() {
 
   // ── Photo upload helpers ────────────────────────────────────────────────────
 
-  const handleUpload = async (localUri: string) => {
+  const handleUpload = async (localUri: string, fromCamera = false) => {
     if (!user?.id) return;
     setError(null);
     setPhotoStatus("idle");
     setPhotoUploading(true);
     try {
-      await avatarService.uploadAvatar(user.id, localUri);
+      await avatarService.uploadAvatar(user.id, localUri, { flipHorizontal: fromCamera });
       await refreshUser();
       setPhotoStatus("success");
       setTimeout(() => setPhotoStatus("idle"), 2000);
@@ -209,7 +209,7 @@ export default function EditProfile() {
       quality: 0.9,
     });
     if (res.canceled || !res.assets?.[0]?.uri) return;
-    await handleUpload(res.assets[0].uri);
+    await handleUpload(res.assets[0].uri, true);
   };
 
   const pickFromLibrary = async () => {
