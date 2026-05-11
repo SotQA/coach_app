@@ -212,5 +212,6 @@
   "removePhoto": "Usuń zdjęcie",
   "photoPermissionDenied": "Brak dostępu do biblioteki zdjęć. Włącz go w Ustawieniach.",
   "cameraPermissionDenied": "Brak dostępu do aparatu. Włącz go w Ustawieniach.",
-  "photoUploadFailed": "Nie udało się zapisać zdjęcia. Spróbuj ponownie."
+  "photoUploadFailed": "Nie udało się zapisać zdjęcia. Spróbuj ponownie.",
+  "photoSaved": "Zdjęcie zapisane"
 }

@@ -212,5 +212,6 @@
   "removePhoto": "Remove photo",
   "photoPermissionDenied": "Photo library access denied. Enable it in Settings.",
   "cameraPermissionDenied": "Camera access denied. Enable it in Settings.",
-  "photoUploadFailed": "Could not save photo. Try again."
+  "photoUploadFailed": "Could not save photo. Try again.",
+  "photoSaved": "Photo saved"
 }
