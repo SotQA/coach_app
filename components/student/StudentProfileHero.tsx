@@ -3,7 +3,7 @@ import { View, Text, StyleSheet } from "react-native";
 import { Avatar } from "../Avatar";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
-import { Typography, FontSizes } from "../../theme/typography";
+import { Typography } from "../../theme/typography";
 import type { TrainingGroup } from "../../types/TrainingGroup";
 
 export interface StudentProfileHeroProps {

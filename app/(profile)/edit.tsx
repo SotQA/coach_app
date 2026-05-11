@@ -11,6 +11,7 @@ import {
   View,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
@@ -122,6 +123,7 @@ function SexChipGroup({ value, onChange }: { value: Sex; onChange: (v: Sex) => v
 
 export default function EditProfile() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { user, updateProfile, refreshUser } = useAuth();
   const { t } = useI18n();
 
@@ -286,7 +288,7 @@ export default function EditProfile() {
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: Colors.bg }}
+      style={{ flex: 1, backgroundColor: Colors.bg, paddingTop: insets.top }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView
