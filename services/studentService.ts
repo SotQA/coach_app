@@ -29,6 +29,7 @@ const mapStudentDoc = (snap: { id: string; data: () => any }): StudentSummary =>
     coachId: data.coachId,
     firstName: data.firstName,
     lastName: data.lastName,
+    photoURL: data.photoURL ?? null,
   };
 };
 

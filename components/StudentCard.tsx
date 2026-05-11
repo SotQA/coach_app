@@ -1,6 +1,7 @@
 import { FC } from "react";
 import { Platform, Pressable, View, Text } from "react-native";
 import type { StudentSummary } from "../types/StudentSummary";
+import { Avatar } from "./Avatar";
 import { PrimaryButton } from "./PrimaryButton";
 import { Colors } from "../theme/colors";
 import { Radius, Spacing } from "../theme/spacing";
@@ -49,20 +50,15 @@ export const StudentCard: FC<StudentCardProps> = ({
       }}
     >
       <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.sm }}>
-        <View
-          style={{
-            width: 44,
-            height: 44,
-            borderRadius: Radius.xl,
-            backgroundColor: Colors.surface,
-            borderWidth: 1,
-            borderColor: Colors.border,
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Text style={{ ...Typography.section, fontWeight: "900" }}>{initials}</Text>
-        </View>
+        <Avatar
+          photoURL={student.photoURL}
+          initials={initials}
+          size={44}
+          backgroundColor={Colors.surface}
+          textColor={Colors.text}
+          borderColor={Colors.border}
+          borderWidth={1}
+        />
         <View style={{ flex: 1 }}>
           <Text style={{ ...Typography.section, fontSize: 16, fontWeight: "800" }}>{header}</Text>
           <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 2 }}>

@@ -4,5 +4,6 @@ export interface StudentSummary {
   coachId?: string;
   firstName?: string;
   lastName?: string;
+  photoURL?: string | null;
 }
 

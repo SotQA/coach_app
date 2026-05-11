@@ -11,11 +11,12 @@ import {
   View,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
-import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
+import { Avatar } from "../../components/Avatar";
 import { InputField } from "../../components/InputField";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { useAuth } from "../../context/AuthContext";
@@ -122,6 +123,7 @@ function SexChipGroup({ value, onChange }: { value: Sex; onChange: (v: Sex) => v
 
 export default function EditProfile() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { user, updateProfile, refreshUser } = useAuth();
   const { t } = useI18n();
 
@@ -133,6 +135,7 @@ export default function EditProfile() {
   const [dobDraft, setDobDraft] = useState<Date | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [photoUploading, setPhotoUploading] = useState(false);
+  const [photoStatus, setPhotoStatus] = useState<"idle" | "success">("idle");
   const [error, setError] = useState<string | null>(null);
 
   const originals = useRef({
@@ -177,13 +180,16 @@ export default function EditProfile() {
 
   // ── Photo upload helpers ────────────────────────────────────────────────────
 
-  const handleUpload = async (localUri: string) => {
+  const handleUpload = async (localUri: string, fromCamera = false) => {
     if (!user?.id) return;
     setError(null);
+    setPhotoStatus("idle");
     setPhotoUploading(true);
     try {
-      await avatarService.uploadAvatar(user.id, localUri);
+      await avatarService.uploadAvatar(user.id, localUri, { flipHorizontal: fromCamera });
       await refreshUser();
+      setPhotoStatus("success");
+      setTimeout(() => setPhotoStatus("idle"), 2000);
     } catch (e) {
       logger.error("[edit-profile] avatar upload failed", e);
       setError(t("photoUploadFailed"));
@@ -205,7 +211,7 @@ export default function EditProfile() {
       quality: 0.9,
     });
     if (res.canceled || !res.assets?.[0]?.uri) return;
-    await handleUpload(res.assets[0].uri);
+    await handleUpload(res.assets[0].uri, true);
   };
 
   const pickFromLibrary = async () => {
@@ -227,10 +233,13 @@ export default function EditProfile() {
   const removePhoto = async () => {
     if (!user?.id) return;
     setError(null);
+    setPhotoStatus("idle");
     setPhotoUploading(true);
     try {
       await avatarService.deleteAvatar(user.id);
       await refreshUser();
+      setPhotoStatus("success");
+      setTimeout(() => setPhotoStatus("idle"), 2000);
     } catch (e) {
       logger.error("[edit-profile] avatar delete failed", e);
       setError(t("photoUploadFailed"));
@@ -254,7 +263,7 @@ export default function EditProfile() {
 
   const handleSave = async () => {
     if (!hasChanges()) {
-      setError(t("noChangesYet"));
+      router.back();
       return;
     }
     setError(null);
@@ -279,7 +288,7 @@ export default function EditProfile() {
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: Colors.bg }}
+      style={{ flex: 1, backgroundColor: Colors.bg, paddingTop: insets.top }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView
@@ -327,35 +336,21 @@ export default function EditProfile() {
               accessibilityRole="button"
               accessibilityLabel={currentPhotoURL ? t("changePhoto") : t("addPhoto")}
             >
-              <View
-                style={{
-                  width: AVATAR_SIZE,
-                  height: AVATAR_SIZE,
-                  borderRadius: AVATAR_SIZE / 2,
-                  overflow: "hidden",
-                  borderWidth: 2,
-                  borderColor: Colors.primary,
-                  backgroundColor: Colors.surface,
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                {currentPhotoURL ? (
-                  <Image
-                    source={{ uri: currentPhotoURL }}
-                    style={{ width: AVATAR_SIZE, height: AVATAR_SIZE }}
-                    contentFit="cover"
-                    transition={200}
-                  />
-                ) : (
-                  <Text style={{ fontSize: 32, fontWeight: "900", color: Colors.primary }}>
-                    {initials}
-                  </Text>
-                )}
+              <View style={{ width: AVATAR_SIZE, height: AVATAR_SIZE }}>
+                <Avatar
+                  photoURL={currentPhotoURL}
+                  initials={initials}
+                  size={AVATAR_SIZE}
+                  backgroundColor={Colors.surface}
+                  textColor={Colors.primary}
+                  borderColor={Colors.primary}
+                  borderWidth={2}
+                />
                 {photoUploading ? (
                   <View
                     style={{
                       ...StyleSheet.absoluteFillObject,
+                      borderRadius: AVATAR_SIZE / 2,
                       backgroundColor: "rgba(0,0,0,0.5)",
                       alignItems: "center",
                       justifyContent: "center",
@@ -382,6 +377,12 @@ export default function EditProfile() {
                 {currentPhotoURL ? t("changePhoto") : t("addPhoto")}
               </Text>
             </Pressable>
+
+            {photoStatus === "success" ? (
+              <Text style={{ ...Typography.secondary, color: Colors.success, marginTop: 4 }}>
+                {t("photoSaved")}
+              </Text>
+            ) : null}
           </View>
 
           {/* First name */}

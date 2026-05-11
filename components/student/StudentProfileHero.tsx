@@ -1,14 +1,16 @@
 import { memo } from "react";
 import { View, Text, StyleSheet } from "react-native";
+import { Avatar } from "../Avatar";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
-import { Typography, FontSizes } from "../../theme/typography";
+import { Typography } from "../../theme/typography";
 import type { TrainingGroup } from "../../types/TrainingGroup";
 
 export interface StudentProfileHeroProps {
   displayName: string;
   email: string;
   initials: string;
+  photoURL?: string | null;
   latestGroup: TrainingGroup | null;
   lastWorkoutLabel: string | null;
 }
@@ -17,15 +19,22 @@ function StudentProfileHeroImpl({
   displayName,
   email,
   initials,
+  photoURL,
   latestGroup,
   lastWorkoutLabel: lastLbl,
 }: StudentProfileHeroProps) {
   return (
     <View style={styles.heroCard}>
       <View style={styles.heroRow}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{initials}</Text>
-        </View>
+        <Avatar
+          photoURL={photoURL}
+          initials={initials}
+          size={64}
+          backgroundColor={Colors.surface}
+          textColor={Colors.text}
+          borderColor={Colors.primary}
+          borderWidth={2}
+        />
         <View style={styles.heroTextCol}>
           <Text style={styles.displayName}>{displayName}</Text>
           <Text style={styles.email}>{email}</Text>
@@ -62,17 +71,6 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
   },
   heroRow: { flexDirection: "row", alignItems: "center", gap: Spacing.md },
-  avatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: Colors.surface,
-    borderWidth: 2,
-    borderColor: Colors.primary,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  avatarText: { ...Typography.section, fontSize: FontSizes.h3, fontWeight: "900" },
   heroTextCol: { flex: 1 },
   displayName: { ...Typography.title, fontSize: 24 },
   email: { ...Typography.secondary, color: Colors.textMuted, marginTop: 6 },
