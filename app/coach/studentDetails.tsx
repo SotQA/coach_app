@@ -151,6 +151,7 @@ export default function StudentDetails() {
             displayName={displayName}
             email={student.email}
             initials={initials}
+            photoURL={student.photoURL}
             latestGroup={latestGroup}
             lastWorkoutLabel={lastWorkoutLbl}
           />

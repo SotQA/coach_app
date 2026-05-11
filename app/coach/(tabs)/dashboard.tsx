@@ -16,6 +16,7 @@ import { useI18n } from "../../../context/I18nContext";
 import { studentService } from "../../../services/studentService";
 import { workoutService } from "../../../services/workoutService";
 import type { StudentSummary } from "../../../types/StudentSummary";
+import { Avatar } from "../../../components/Avatar";
 import { PrimaryButton } from "../../../components/PrimaryButton";
 import { Colors } from "../../../theme/colors";
 import { Radius, Spacing } from "../../../theme/spacing";
@@ -209,19 +210,17 @@ export default function CoachDashboard() {
                 accessibilityRole="button"
                 accessibilityLabel="Open profile settings"
                 onPress={() => router.push("/coach/profile")}
-                style={({ pressed }) => ({
-                  width: 52,
-                  height: 52,
-                  borderRadius: 26,
-                  borderWidth: 2,
-                  borderColor: Colors.primary,
-                  backgroundColor: Colors.surface,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  opacity: pressed ? 0.9 : 1,
-                })}
+                style={({ pressed }) => ({ opacity: pressed ? 0.9 : 1 })}
               >
-                <Text style={{ ...Typography.section, fontSize: FontSizes.subheading, fontWeight: "800" }}>{ini}</Text>
+                <Avatar
+                  photoURL={user?.photoURL}
+                  initials={ini}
+                  size={52}
+                  backgroundColor={Colors.surface}
+                  textColor={Colors.text}
+                  borderColor={Colors.primary}
+                  borderWidth={2}
+                />
               </Pressable>
               <View style={{ flex: 1 }}>
                 <Text style={{ ...Typography.title, fontSize: FontSizes.h3 }}>{name}</Text>
