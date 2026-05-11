@@ -1,0 +1,178 @@
+rules_version = '2';
+
+// Mentorix — Firestore Security Rules
+//
+// Source-of-truth lives here. Deploy with:
+//   firebase deploy --only firestore:rules
+// Or paste this file's contents into Firebase Console → Firestore → Rules.
+//
+// Scope covered: users, workoutPlans, workoutLogs, trainingGroups, exerciseTemplates.
+// Anything not matched by an explicit `match` block is denied by the catch-all
+// at the bottom.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─────────────────────────────────────────────────────────────────────
+    // Helpers
+    // ─────────────────────────────────────────────────────────────────────
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isMe(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function getUser(uid) {
+      return get(/databases/$(database)/documents/users/$(uid)).data;
+    }
+
+    function isCoach() {
+      return isSignedIn() && getUser(request.auth.uid).role == 'coach';
+    }
+
+    // True iff the signed-in coach is the assigned coach of the given student.
+    function isCoachOf(studentId) {
+      return isCoach() && getUser(studentId).get('coachId', null) == request.auth.uid;
+    }
+
+    // True for both: the student themselves, or their assigned coach.
+    function isStudentOrTheirCoach(studentId) {
+      return isMe(studentId) || isCoachOf(studentId);
+    }
+
+
+    // ─────────────────────────────────────────────────────────────────────
+    // /users/{userId}
+    //
+    // PRIVACY NOTE: any signed-in user can READ any user document. This is
+    // required by the existing "coach assigns student by email" flow, which
+    // queries the users collection by email. To tighten further, split the
+    // collection into:
+    //   /users/{uid}        — public profile (name, role)
+    //   /usersPrivate/{uid} — DOB, sex, coachId, etc.
+    // and update the app accordingly. That's a separate refactor.
+    // ─────────────────────────────────────────────────────────────────────
+    match /users/{userId} {
+      allow read: if isSignedIn();
+
+      // Signup creates the doc; only the user themselves can create their own.
+      allow create: if isMe(userId);
+
+      // Editable fields by the user: firstName, lastName, dateOfBirth, sex, photoURL.
+      // Blocked fields: role, email, coachId, createdAt (security-sensitive).
+      allow update: if isMe(userId)
+        && !request.resource.data.diff(resource.data).affectedKeys()
+            .hasAny(['role', 'email', 'coachId', 'createdAt']);
+
+      // A coach may claim a student (set their coachId to self) or release
+      // their own student (set their coachId to null). No other field changes.
+      allow update: if isCoach()
+        && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['coachId'])
+        && (
+          request.resource.data.coachId == request.auth.uid
+          || (
+            resource.data.get('coachId', null) == request.auth.uid
+            && request.resource.data.get('coachId', null) == null
+          )
+        );
+
+      // No client-side deletes.
+      allow delete: if false;
+    }
+
+
+    // ─────────────────────────────────────────────────────────────────────
+    // /workoutPlans/{planId}
+    // ─────────────────────────────────────────────────────────────────────
+    match /workoutPlans/{planId} {
+      allow read: if isStudentOrTheirCoach(resource.data.studentId);
+
+      // Only a coach can create a plan; the plan must be FOR a student
+      // they coach, and the coachId on the plan must be themselves.
+      allow create: if isCoach()
+        && request.resource.data.coachId == request.auth.uid
+        && isCoachOf(request.resource.data.studentId);
+
+      // Coach who owns the plan can update it. studentId/coachId are pinned.
+      allow update: if isCoach()
+        && resource.data.coachId == request.auth.uid
+        && request.resource.data.coachId == resource.data.coachId
+        && request.resource.data.studentId == resource.data.studentId;
+
+      // Only the owning coach can delete a plan.
+      allow delete: if isCoach() && resource.data.coachId == request.auth.uid;
+    }
+
+
+    // ─────────────────────────────────────────────────────────────────────
+    // /workoutLogs/{logId}
+    // ─────────────────────────────────────────────────────────────────────
+    match /workoutLogs/{logId} {
+      allow read: if isStudentOrTheirCoach(resource.data.studentId);
+
+      // A student creates logs only for themselves.
+      allow create: if isMe(request.resource.data.studentId);
+
+      // The student CANNOT modify a log after creation. Only the assigned
+      // coach can update — and only the `coachFeedback` field.
+      allow update: if isCoachOf(resource.data.studentId)
+        && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['coachFeedback']);
+
+      // Either side can delete (history cleanup).
+      allow delete: if isMe(resource.data.studentId)
+        || isCoachOf(resource.data.studentId);
+    }
+
+
+    // ─────────────────────────────────────────────────────────────────────
+    // /trainingGroups/{groupId}
+    // ─────────────────────────────────────────────────────────────────────
+    match /trainingGroups/{groupId} {
+      // SCHEMA NOTE: each group has a singular `studentId` (one group per
+      // coach-student pair) — NOT a `studentIds` array.
+      // Read: the student the group is for, or the owning coach.
+      allow read:
+        if isMe(resource.data.studentId)
+        || (isCoach() && resource.data.coachId == request.auth.uid);
+
+      allow create: if isCoach()
+        && request.resource.data.coachId == request.auth.uid;
+
+      allow update: if isCoach()
+        && resource.data.coachId == request.auth.uid
+        && request.resource.data.coachId == resource.data.coachId;
+
+      allow delete: if isCoach() && resource.data.coachId == request.auth.uid;
+    }
+
+
+    // ─────────────────────────────────────────────────────────────────────
+    // /exerciseTemplates/{templateId}
+    // ─────────────────────────────────────────────────────────────────────
+    match /exerciseTemplates/{templateId} {
+      // A coach's library is private to that coach.
+      allow read: if isCoach() && resource.data.coachId == request.auth.uid;
+
+      allow create: if isCoach()
+        && request.resource.data.coachId == request.auth.uid;
+
+      allow update, delete: if isCoach()
+        && resource.data.coachId == request.auth.uid;
+    }
+
+
+    // ─────────────────────────────────────────────────────────────────────
+    // Catch-all DENY for anything else (including future collections you
+    // forget to add a rule for). Add a `match` block above this for any
+    // new collection BEFORE it goes to production.
+    // ─────────────────────────────────────────────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
