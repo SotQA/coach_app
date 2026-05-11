@@ -1,4 +1,5 @@
 import { ActivityIndicator, Platform, Text, View } from "react-native";
+import { Image } from "expo-image";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography, FontSizes } from "../../theme/typography";
@@ -24,6 +25,8 @@ type Props = {
   statsLoading?: boolean;
   /** Optional line under role (e.g. roster count or workout summary). */
   metaLine?: string | null;
+  /** Profile photo URL. When present, displays instead of the initials circle. */
+  photoURL?: string | null;
 };
 
 export function SettingsProfileCard({
@@ -34,6 +37,7 @@ export function SettingsProfileCard({
   onEditProfile,
   statsLoading = false,
   metaLine = null,
+  photoURL = null,
 }: Props) {
   return (
     <View
@@ -50,20 +54,35 @@ export function SettingsProfileCard({
       ]}
     >
       <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.md, marginBottom: Spacing.md }}>
-        <View
-          style={{
-            width: 72,
-            height: 72,
-            borderRadius: 36,
-            backgroundColor: Colors.surface,
-            borderWidth: 2,
-            borderColor: Colors.primary,
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Text style={{ fontSize: FontSizes.h2, fontWeight: "900", color: Colors.primary }}>{initials}</Text>
-        </View>
+        {photoURL ? (
+          <Image
+            source={{ uri: photoURL }}
+            style={{
+              width: 72,
+              height: 72,
+              borderRadius: 36,
+              borderWidth: 2,
+              borderColor: Colors.primary,
+            }}
+            contentFit="cover"
+            transition={200}
+          />
+        ) : (
+          <View
+            style={{
+              width: 72,
+              height: 72,
+              borderRadius: 36,
+              backgroundColor: Colors.surface,
+              borderWidth: 2,
+              borderColor: Colors.primary,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Text style={{ fontSize: FontSizes.h2, fontWeight: "900", color: Colors.primary }}>{initials}</Text>
+          </View>
+        )}
         <View style={{ flex: 1, minWidth: 0 }}>
           <Text style={{ ...Typography.title, fontSize: FontSizes.h3 }} numberOfLines={2}>
             {fullName}
