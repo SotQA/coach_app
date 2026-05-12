@@ -105,7 +105,8 @@ export default function StudentWorkouts() {
   const router = useRouter();
   const { user } = useAuth();
   const { t, locale } = useI18n();
-  const activeWorkout = useActiveWorkoutSession();
+  const { session } = useActiveWorkoutSession();
+  const activePlanId = session?.workoutPlanId ?? null;
   const elapsedSeconds = useElapsedSeconds();
   const [plans, setPlans] = useState<WorkoutPlan[]>([]);
   const [logs, setLogs] = useState<WorkoutLog[]>([]);
@@ -268,10 +269,10 @@ export default function StudentWorkouts() {
   const openExecution = useCallback(
     (plan: WorkoutPlan) => {
       // If another session is already active, redirect to it instead of starting a new one.
-      if (activeWorkout.session) {
+      if (session) {
         router.push({
           pathname: "/student/workoutExecution",
-          params: { workoutPlanId: activeWorkout.session.workoutPlanId },
+          params: { workoutPlanId: session.workoutPlanId },
         });
         return;
       }
@@ -284,7 +285,7 @@ export default function StudentWorkouts() {
         },
       });
     },
-    [router, activeGroup?.id, activeWorkout.session]
+    [router, activeGroup?.id, session]
   );
 
   const openDetail = useCallback(
@@ -331,7 +332,7 @@ export default function StudentWorkouts() {
           contentContainerStyle={{
             padding: Spacing.md,
             // Extra bottom padding when floating bar is visible so content isn't hidden under it.
-            paddingBottom: activeWorkout.session ? FLOATING_BAR_SCROLL_OFFSET + Spacing.xl : Spacing.xl * 2,
+            paddingBottom: session ? FLOATING_BAR_SCROLL_OFFSET + Spacing.xl : Spacing.xl * 2,
           }}
           showsVerticalScrollIndicator={false}
         >
@@ -358,12 +359,12 @@ export default function StudentWorkouts() {
           </View>
 
           {/* ── Active session resume banner ── */}
-          {activeWorkout.session ? (
+          {session ? (
             <Pressable
               onPress={() =>
                 router.push({
                   pathname: "/student/workoutExecution",
-                  params: { workoutPlanId: activeWorkout.session!.workoutPlanId },
+                  params: { workoutPlanId: session.workoutPlanId },
                 })
               }
               style={({ pressed }) => ({
@@ -396,7 +397,7 @@ export default function StudentWorkouts() {
                   }}
                   numberOfLines={1}
                 >
-                  {t("workoutInProgress", { name: activeWorkout.session.workoutName })}
+                  {t("workoutInProgress", { name: session.workoutName })}
                 </Text>
                 <Text
                   style={{
@@ -476,9 +477,27 @@ export default function StudentWorkouts() {
                       <Text style={{ ...Typography.secondary, color: Colors.primary, fontWeight: "800", marginBottom: 6 }}>
                         {t("nextUp")}
                       </Text>
-                      <Text style={{ ...Typography.title, fontSize: FontSizes.h3, marginBottom: Spacing.xs }}>
-                        {recommendedPlan.name}
-                      </Text>
+                      <View style={{ flexDirection: "row", alignItems: "center", flexWrap: "wrap", gap: Spacing.sm }}>
+                        <Text style={{ ...Typography.title, fontSize: FontSizes.h3, marginBottom: Spacing.xs }}>
+                          {recommendedPlan.name}
+                        </Text>
+                        {recommendedPlan.id === activePlanId ? (
+                          <View
+                            style={{
+                              backgroundColor: "rgba(212,255,68,0.18)",
+                              paddingHorizontal: Spacing.sm,
+                              paddingVertical: 4,
+                              borderRadius: Radius.sm,
+                              borderWidth: 1,
+                              borderColor: "rgba(212,255,68,0.45)",
+                            }}
+                          >
+                            <Text style={{ ...Typography.micro, color: Colors.primary, fontWeight: "700" }}>
+                              {t("inProgress")}
+                            </Text>
+                          </View>
+                        ) : null}
+                      </View>
                       <Text style={{ ...Typography.secondary, color: Colors.textSecondary, marginBottom: Spacing.sm }}>
                         {focusFromPlan(recommendedPlan)}
                       </Text>
@@ -496,7 +515,11 @@ export default function StudentWorkouts() {
                     </View>
                   </View>
                   <View style={{ marginTop: Spacing.md }} pointerEvents="box-none">
-                    <PrimaryButton title={t("startWorkout")} onPress={() => openExecution(recommendedPlan)} />
+                    <PrimaryButton
+                      title={recommendedPlan.id === activePlanId ? t("inProgress") : t("startWorkout")}
+                      variant={recommendedPlan.id === activePlanId ? "secondary" : "primary"}
+                      onPress={() => openExecution(recommendedPlan)}
+                    />
                   </View>
                 </ScaleCard>
               ) : null}
@@ -517,6 +540,7 @@ export default function StudentWorkouts() {
                   const exCount = plan.exercises?.length ?? 0;
                   const doneThisWeek = isInCurrentWeek(lastMs);
                   const isNew = !lastMs;
+                  const isActive = plan.id === activePlanId;
                   return (
                     <ScaleCard
                       key={plan.id}
@@ -530,7 +554,27 @@ export default function StudentWorkouts() {
                     >
                       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" }}>
                         <View style={{ flex: 1, marginRight: Spacing.sm }}>
-                          <Text style={{ ...Typography.section, fontSize: FontSizes.subheading, fontWeight: "800" }}>{plan.name}</Text>
+                          <View style={{ flexDirection: "row", alignItems: "center", flexWrap: "wrap", gap: Spacing.sm }}>
+                            <Text style={{ ...Typography.section, fontSize: FontSizes.subheading, fontWeight: "800" }}>
+                              {plan.name}
+                            </Text>
+                            {isActive ? (
+                              <View
+                                style={{
+                                  backgroundColor: "rgba(212,255,68,0.18)",
+                                  paddingHorizontal: Spacing.sm,
+                                  paddingVertical: 4,
+                                  borderRadius: Radius.sm,
+                                  borderWidth: 1,
+                                  borderColor: "rgba(212,255,68,0.45)",
+                                }}
+                              >
+                                <Text style={{ ...Typography.micro, color: Colors.primary, fontWeight: "700" }}>
+                                  {t("inProgress")}
+                                </Text>
+                              </View>
+                            ) : null}
+                          </View>
                           <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4 }}>
                             {t(exCount === 1 ? "exerciseCount_one" : "exerciseCount_other", { count: exCount })} · {t("lastWhen", { when: formatRelativeDone(lastMs, t, locale) })}
                           </Text>
@@ -566,7 +610,11 @@ export default function StudentWorkouts() {
                       </View>
                       <View style={{ flexDirection: "row", gap: Spacing.sm, marginTop: Spacing.md }}>
                         <View style={{ flex: 1 }}>
-                          <PrimaryButton title={t("start")} onPress={() => openExecution(plan)} />
+                          <PrimaryButton
+                            title={isActive ? t("inProgress") : t("start")}
+                            variant={isActive ? "secondary" : "primary"}
+                            onPress={() => openExecution(plan)}
+                          />
                         </View>
                         <Pressable
                           onPress={() => openDetail(plan.id)}
