@@ -358,6 +358,31 @@ export function ActiveWorkoutSessionProvider({ children }: { children: ReactNode
         persistDebounced(updated);
         return updated;
       });
+
+      // Set completion is a critical state change — write immediately so a
+      // force-quit right after ticking a set done doesn't lose progress.
+      // We re-compute the update from sessionRef (pre-update snapshot) rather
+      // than waiting for the functional updater above to commit.
+      if (patch.completed === true) {
+        const current = sessionRef.current;
+        if (current) {
+          const exercises = current.exercises.map((ex, i) =>
+            i !== exIdx
+              ? ex
+              : { ...ex, sets: ex.sets.map((s, j) => (j !== setIdx ? s : { ...s, ...patch })) }
+          );
+          const updated = { ...current, exercises };
+          // Sync the queued ref so any subsequent flush sees the completed state.
+          lastQueuedSessionRef.current = updated;
+          if (persistTimerRef.current) {
+            clearTimeout(persistTimerRef.current);
+            persistTimerRef.current = null;
+          }
+          writeToStorage(updated).catch((e) =>
+            logger.warn("[ActiveWorkout] set-complete persist failed", e)
+          );
+        }
+      }
     },
     [persistDebounced]
   );
