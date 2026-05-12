@@ -84,11 +84,22 @@ export interface ScheduleRestOptions {
 /**
  * Schedule a "Rest Complete" local notification.
  *
- * Uses a TIME_INTERVAL trigger (`seconds: N`) which is OS-scheduled and fires
- * even when the app is fully closed — no in-process timer is involved.
+ * Bug-3 audit (fires while app is closed):
+ *   ✓ Trigger is TIME_INTERVAL `{ seconds: N }` — OS-level scheduling, no
+ *     in-process timer. The notification is delivered by the OS regardless of
+ *     app state (closed, backgrounded, killed by the system).
+ *   ✓ `scheduleNotificationAsync` is awaited inside this function, so the IPC
+ *     call to the OS notification daemon completes before we return.
+ *   ✓ The AppState "background" listener in ActiveWorkoutSessionContext flushes
+ *     any pending session writes, so session state is persisted before
+ *     the OS suspends the app.
+ *
+ * If the notification still fails to fire on a physical device after these
+ * fixes, suspect OS-level blockers: Focus / Do Not Disturb mode, notification
+ * permissions revoked, or low-power mode restricting background activity.
  *
  * Returns the notification identifier (for later cancellation),
- * or `null` if scheduling failed.
+ * or `null` if scheduling failed or permissions are not granted.
  */
 export async function scheduleRestNotification(
   opts: ScheduleRestOptions
