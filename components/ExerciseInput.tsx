@@ -166,6 +166,7 @@ export const ExerciseInput: FC<ExerciseInputProps> = ({
             keyboardType="numeric"
             value={String(value.sets)}
             onChangeText={(text) => updateField("sets", text)}
+            selectTextOnFocus
             style={{
               borderWidth: 1,
               borderColor: Colors.border,
@@ -204,7 +205,14 @@ export const ExerciseInput: FC<ExerciseInputProps> = ({
               setWeightText(text);
               updateField("weight", text);
             }}
-            onFocus={() => setWeightFocused(true)}
+            onFocus={() => {
+              setWeightFocused(true);
+              if (weightText === "0") {
+                setWeightText("");
+                updateField("weight", "");
+              }
+            }}
+            selectTextOnFocus
             onBlur={() => {
               setWeightFocused(false);
               // Normalize commas to dots and drop trailing-only separators when possible.
@@ -238,6 +246,10 @@ export const ExerciseInput: FC<ExerciseInputProps> = ({
                 keyboardType="numeric"
                 value={value.rest ?? ""}
                 onChangeText={(text) => updateField("rest", text)}
+                onFocus={() => {
+                  if (value.rest === "0") updateField("rest", "");
+                }}
+                selectTextOnFocus
                 placeholder=""
                 style={{
                   borderWidth: 1,
@@ -256,6 +268,11 @@ export const ExerciseInput: FC<ExerciseInputProps> = ({
                 keyboardType="numeric"
                 value={value.rpe === null || value.rpe === undefined ? "" : String(value.rpe)}
                 onChangeText={(text) => updateField("rpe", text)}
+                onFocus={() => {
+                  const s = value.rpe === null || value.rpe === undefined ? "" : String(value.rpe);
+                  if (s === "0") updateField("rpe", "");
+                }}
+                selectTextOnFocus
                 placeholder=""
                 style={{
                   borderWidth: 1,

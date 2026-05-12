@@ -44,6 +44,10 @@ export function SetInputRow({
         ref={(r) => registerRef("weight", r)}
         value={draft.weight}
         onChangeText={(v) => onChange({ weight: normalizeDecimalInput(v) })}
+        onFocus={() => {
+          if (draft.weight === "0") onChange({ weight: "" });
+        }}
+        selectTextOnFocus
         inputMode="decimal"
         keyboardType="decimal-pad"
         placeholder="—"
@@ -55,6 +59,10 @@ export function SetInputRow({
         ref={(r) => registerRef("reps", r)}
         value={draft.reps}
         onChangeText={(v) => onChange({ reps: v.replace(/[^\d]/g, "") })}
+        onFocus={() => {
+          if (draft.reps === "0") onChange({ reps: "" });
+        }}
+        selectTextOnFocus
         inputMode="numeric"
         keyboardType="number-pad"
         placeholder="0"
@@ -66,6 +74,10 @@ export function SetInputRow({
         ref={(r) => registerRef("rpe", r)}
         value={draft.rpe}
         onChangeText={(v) => onChange({ rpe: normalizeDecimalInput(v) })}
+        onFocus={() => {
+          if (draft.rpe === "0") onChange({ rpe: "" });
+        }}
+        selectTextOnFocus
         inputMode="decimal"
         keyboardType="decimal-pad"
         placeholder="—"
