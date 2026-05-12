@@ -27,6 +27,26 @@ import type { WeightUnit } from "../../context/UnitsContext";
 
 type ExerciseDraft = { sets: SetDraft[] };
 
+/**
+ * Returns the first uncompleted set that comes after (completedExIdx, completedSetIdx).
+ * Used to carry deep-link indices in the rest notification so tapping it
+ * focuses the correct input field.
+ */
+function findNextPendingSet(
+  drafts: ExerciseDraft[],
+  completedExIdx: number,
+  completedSetIdx: number
+): { exIdx: number; setIdx: number } | null {
+  for (let ei = completedExIdx; ei < drafts.length; ei++) {
+    const sets = drafts[ei]?.sets ?? [];
+    const startSi = ei === completedExIdx ? completedSetIdx + 1 : 0;
+    for (let si = startSi; si < sets.length; si++) {
+      if (!sets[si].done) return { exIdx: ei, setIdx: si };
+    }
+  }
+  return null;
+}
+
 function weightToDisplay(kg: number | null | undefined, unit: WeightUnit): string {
   if (kg == null || !Number.isFinite(kg)) return "";
   const display = toUnit(kg, unit);
@@ -151,7 +171,10 @@ export default function WorkoutExecution() {
     });
     if (patch.done === true) {
       const restSecs = parseRestSeconds(exercise.rest);
-      if (restSecs && restSecs > 0) activeWorkout.startRestTimer(restSecs);
+      if (restSecs && restSecs > 0) {
+        const next = findNextPendingSet(draftsRef.current, exIdx, setIdx);
+        activeWorkout.startRestTimer(restSecs, next?.exIdx ?? -1, next?.setIdx ?? -1);
+      }
     }
     setDrafts((prev) =>
       prev.map((row, i) =>

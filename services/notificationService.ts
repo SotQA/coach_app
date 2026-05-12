@@ -75,10 +75,17 @@ export interface ScheduleRestOptions {
   delaySeconds: number;
   workoutPlanId: string;
   workoutName: string;
+  /** 0-based index of the next uncompleted exercise. -1 signals no more sets. */
+  nextExerciseIndex: number;
+  /** 0-based index of the next uncompleted set within that exercise. -1 signals no more sets. */
+  nextSetIndex: number;
 }
 
 /**
  * Schedule a "Rest Complete" local notification.
+ *
+ * Uses a TIME_INTERVAL trigger (`seconds: N`) which is OS-scheduled and fires
+ * even when the app is fully closed — no in-process timer is involved.
  *
  * Returns the notification identifier (for later cancellation),
  * or `null` if scheduling failed.
@@ -98,8 +105,14 @@ export async function scheduleRestNotification(
         title: "Rest Complete",
         body: "Time for your next set 💪",
         sound: "default",
-        // Carry planId so the tap handler can deep-link to the right screen.
-        data: { workoutPlanId: opts.workoutPlanId, workoutName: opts.workoutName },
+        data: {
+          type: "rest-end",
+          workoutPlanId: opts.workoutPlanId,
+          workoutName: opts.workoutName,
+          // Deep-link indices so the tap handler can focus the right set.
+          nextExerciseIndex: opts.nextExerciseIndex,
+          nextSetIndex: opts.nextSetIndex,
+        },
         ...(Platform.OS === "android" ? { channelId: REST_CHANNEL_ID } : {}),
       },
       trigger: {

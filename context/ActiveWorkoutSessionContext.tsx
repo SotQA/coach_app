@@ -91,7 +91,7 @@ interface ActiveWorkoutSessionContextValue {
   updateSet: (exIdx: number, setIdx: number, patch: Partial<ActiveSetDraft>) => void;
   updateNotes: (notes: string) => void;
   finishSession: () => Promise<void>;
-  startRestTimer: (durationSeconds: number) => void;
+  startRestTimer: (durationSeconds: number, nextExerciseIndex: number, nextSetIndex: number) => void;
   skipRestTimer: () => void;
   pauseRestTimer: () => void;
   resumeRestTimer: () => void;
@@ -139,6 +139,19 @@ async function hydrate(): Promise<ActiveWorkoutSession | null> {
     } catch {}
     return null;
   }
+}
+
+/** Returns the first uncompleted set in the session, or null if all done. */
+function findFirstUncompletedSet(
+  exercises: ActiveExerciseDraft[]
+): { exIdx: number; setIdx: number } | null {
+  for (let ei = 0; ei < exercises.length; ei++) {
+    const sets = exercises[ei]?.sets ?? [];
+    for (let si = 0; si < sets.length; si++) {
+      if (!sets[si].completed) return { exIdx: ei, setIdx: si };
+    }
+  }
+  return null;
 }
 
 function calcRestRemaining(rt: RestTimer): number {
@@ -421,7 +434,11 @@ export function ActiveWorkoutSessionProvider({ children }: { children: ReactNode
 
   // ── Rest timer actions ────────────────────────────────────────────────────
 
-  const startRestTimer = useCallback((durationSeconds: number) => {
+  const startRestTimer = useCallback((
+    durationSeconds: number,
+    nextExerciseIndex: number,
+    nextSetIndex: number
+  ) => {
     if (durationSeconds <= 0) return;
     if (!sessionRef.current) return;
 
@@ -455,10 +472,13 @@ export function ActiveWorkoutSessionProvider({ children }: { children: ReactNode
     const { workoutPlanId, workoutName } = sessionRef.current;
 
     // Schedule the OS notification asynchronously, then store its ID.
+    // TIME_INTERVAL trigger: OS-level scheduling — fires even if app is killed.
     scheduleRestNotification({
       delaySeconds: durationSeconds,
       workoutPlanId,
       workoutName,
+      nextExerciseIndex,
+      nextSetIndex,
     }).then((notificationId) => {
       if (!notificationId) return;
       pendingRestNotificationIdRef.current = notificationId;
@@ -550,10 +570,13 @@ export function ActiveWorkoutSessionProvider({ children }: { children: ReactNode
     // Reschedule the OS notification for the remaining duration.
     if (remaining > 0) {
       const s = sessionRef.current!;
+      const next = findFirstUncompletedSet(s.exercises);
       scheduleRestNotification({
         delaySeconds: remaining,
         workoutPlanId: s.workoutPlanId,
         workoutName: s.workoutName,
+        nextExerciseIndex: next?.exIdx ?? -1,
+        nextSetIndex: next?.setIdx ?? -1,
       }).then((notificationId) => {
         if (!notificationId) return;
         pendingRestNotificationIdRef.current = notificationId;
