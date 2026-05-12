@@ -92,6 +92,9 @@ function RootNavigator() {
     return () => clearTimeout(timer);
   // Re-run when the response identifier changes (new tap) or when the
   // session hydrates (cold-launch: session goes null → planId).
+  // `session` itself is intentionally excluded — we only care about the
+  // null→non-null and planId transitions, not every set-level update.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     lastResponse?.notification.request.identifier,
     session?.workoutPlanId,
