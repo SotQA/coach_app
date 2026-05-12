@@ -92,9 +92,17 @@ export default function WorkoutExecution() {
   const { t } = useI18n();
   const authUserId = authUser?.id;
 
-  const params = useLocalSearchParams<{ workoutPlanId?: string; groupId?: string }>();
+  const params = useLocalSearchParams<{
+    workoutPlanId?: string;
+    groupId?: string;
+    nextExerciseIndex?: string;
+    nextSetIndex?: string;
+  }>();
   const workoutPlanId = useMemo(() => String(params.workoutPlanId ?? "").trim(), [params.workoutPlanId]);
   const groupId = useMemo(() => String(params.groupId ?? "").trim(), [params.groupId]);
+  // Deep-link indices from a rest notification tap (-1 = no specific target).
+  const nextExIdx = params.nextExerciseIndex != null ? Number(params.nextExerciseIndex) : null;
+  const nextSetIdx = params.nextSetIndex != null ? Number(params.nextSetIndex) : null;
 
   const { unit } = useUnits();
   const { data: execData, loading, error: loadError } = useWorkoutExecutionData(workoutPlanId);
@@ -144,6 +152,34 @@ export default function WorkoutExecution() {
   useEffect(() => {
     return () => { if (notesDebounceRef.current) clearTimeout(notesDebounceRef.current); };
   }, []);
+
+  // Deep-link focus: when the screen is opened from a rest notification tap,
+  // scroll/focus to the indicated next-pending set.
+  useEffect(() => {
+    if (!plan || nextExIdx == null || nextSetIdx == null) return;
+    if (nextExIdx < 0 || nextSetIdx < 0) return;
+    // Wait until drafts are initialised (session-init effect runs setDrafts asynchronously).
+    if (drafts.length === 0) return;
+    const t = setTimeout(() => {
+      const setDraft = drafts[nextExIdx]?.sets[nextSetIdx];
+      if (setDraft && !setDraft.done) {
+        refs.focusSet(nextExIdx, nextSetIdx);
+      } else {
+        // The indicated set is already done (race / session advanced) —
+        // fall back to the first uncompleted set.
+        outer: for (let ei = 0; ei < drafts.length; ei++) {
+          for (let si = 0; si < (drafts[ei]?.sets.length ?? 0); si++) {
+            if (!drafts[ei].sets[si].done) {
+              refs.focusSet(ei, si);
+              break outer;
+            }
+          }
+        }
+      }
+    }, 50);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [plan?.id, nextExIdx, nextSetIdx, drafts.length]);
 
   const updateSet = (exIdx: number, setIdx: number, patch: Partial<SetDraft>) => {
     const exercise = planRef.current?.exercises?.[exIdx];
