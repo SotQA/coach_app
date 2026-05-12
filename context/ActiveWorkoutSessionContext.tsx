@@ -410,10 +410,12 @@ export function ActiveWorkoutSessionProvider({ children }: { children: ReactNode
   }, [persistDebounced]);
 
   const finishSession = useCallback(async () => {
-    // Cancel any pending rest notification before clearing the session.
-    const pendingId = pendingRestNotificationIdRef.current ?? sessionRef.current?.restTimer?.notificationId;
+    // Cancel ALL scheduled notifications — this is the safety net for bug 6
+    // (phantom sessions). A stale rest notification that fires after the workout
+    // ends would otherwise open workoutExecution with no active session, which
+    // auto-creates a new session and records a phantom workout.
     pendingRestNotificationIdRef.current = null;
-    await cancelRestNotification(pendingId);
+    await cancelAllScheduledNotifications();
 
     // Flush any pending debounced write while the session is still set.
     await flushPersist();
