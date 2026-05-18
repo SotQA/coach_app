@@ -16,6 +16,7 @@ import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import * as ImagePicker from "expo-image-picker";
+import * as ImageManipulator from "expo-image-manipulator";
 import { Avatar } from "../../components/Avatar";
 import { InputField } from "../../components/InputField";
 import { PrimaryButton } from "../../components/PrimaryButton";
@@ -211,7 +212,17 @@ export default function EditProfile() {
       quality: 0.9,
     });
     if (res.canceled || !res.assets?.[0]?.uri) return;
-    await handleUpload(res.assets[0].uri, true);
+
+    // Pre-flip the captured URI so any preview matches what we upload.
+    // iOS front-camera assets are mirrored like the viewfinder; normalize here
+    // so we don't rely on upload-time flip (avoids preview vs final mismatch).
+    const flipped = await ImageManipulator.manipulateAsync(
+      res.assets[0].uri,
+      [{ flip: ImageManipulator.FlipType.Horizontal }],
+      { format: ImageManipulator.SaveFormat.JPEG }
+    );
+
+    await handleUpload(flipped.uri, false);
   };
 
   const pickFromLibrary = async () => {

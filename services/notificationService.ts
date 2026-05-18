@@ -75,13 +75,31 @@ export interface ScheduleRestOptions {
   delaySeconds: number;
   workoutPlanId: string;
   workoutName: string;
+  /** 0-based index of the next uncompleted exercise. -1 signals no more sets. */
+  nextExerciseIndex: number;
+  /** 0-based index of the next uncompleted set within that exercise. -1 signals no more sets. */
+  nextSetIndex: number;
 }
 
 /**
  * Schedule a "Rest Complete" local notification.
  *
+ * Bug-3 audit (fires while app is closed):
+ *   ✓ Trigger is TIME_INTERVAL `{ seconds: N }` — OS-level scheduling, no
+ *     in-process timer. The notification is delivered by the OS regardless of
+ *     app state (closed, backgrounded, killed by the system).
+ *   ✓ `scheduleNotificationAsync` is awaited inside this function, so the IPC
+ *     call to the OS notification daemon completes before we return.
+ *   ✓ The AppState "background" listener in ActiveWorkoutSessionContext flushes
+ *     any pending session writes, so session state is persisted before
+ *     the OS suspends the app.
+ *
+ * If the notification still fails to fire on a physical device after these
+ * fixes, suspect OS-level blockers: Focus / Do Not Disturb mode, notification
+ * permissions revoked, or low-power mode restricting background activity.
+ *
  * Returns the notification identifier (for later cancellation),
- * or `null` if scheduling failed.
+ * or `null` if scheduling failed or permissions are not granted.
  */
 export async function scheduleRestNotification(
   opts: ScheduleRestOptions
@@ -98,8 +116,14 @@ export async function scheduleRestNotification(
         title: "Rest Complete",
         body: "Time for your next set 💪",
         sound: "default",
-        // Carry planId so the tap handler can deep-link to the right screen.
-        data: { workoutPlanId: opts.workoutPlanId, workoutName: opts.workoutName },
+        data: {
+          type: "rest-end",
+          workoutPlanId: opts.workoutPlanId,
+          workoutName: opts.workoutName,
+          // Deep-link indices so the tap handler can focus the right set.
+          nextExerciseIndex: opts.nextExerciseIndex,
+          nextSetIndex: opts.nextSetIndex,
+        },
         ...(Platform.OS === "android" ? { channelId: REST_CHANNEL_ID } : {}),
       },
       trigger: {

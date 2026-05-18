@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
 import * as Notifications from "expo-notifications";
 import { AuthProvider, useAuth } from "../context/AuthContext";
+import { logger } from "../utils/logger";
 import { ActiveWorkoutSessionProvider, useActiveWorkoutSession } from "../context/ActiveWorkoutSessionContext";
 import { ElapsedTimeProvider } from "../context/ElapsedTimeContext";
 import { I18nProvider } from "../context/I18nContext";
@@ -45,23 +46,55 @@ function RootNavigator() {
     if (!lastResponse) return;
 
     const data = lastResponse.notification.request.content.data as
-      | { workoutPlanId?: string }
+      | {
+          type?: string;
+          workoutPlanId?: string;
+          nextExerciseIndex?: number;
+          nextSetIndex?: number;
+        }
       | undefined;
 
-    const planId = data?.workoutPlanId ?? session?.workoutPlanId;
-    if (!planId) return;
+    // Only handle rest-end notifications from this app.
+    if (data?.type !== "rest-end") return;
+    const notifPlanId = data?.workoutPlanId;
+    if (!notifPlanId) return;
 
-    // Defer slightly to let navigation stack settle after a cold launch.
-    const timer = setTimeout(() => {
-      router.push({
-        pathname: "/student/workoutExecution",
-        params: { workoutPlanId: planId },
+    // During cold launch, session is null until AsyncStorage hydration completes.
+    // Returning here causes the effect to re-run once session?.workoutPlanId
+    // populates (it's in the deps), so the check runs after hydration.
+    if (session === null) return;
+
+    let timer: ReturnType<typeof setTimeout>;
+
+    if (session.workoutPlanId !== notifPlanId) {
+      // Stale notification (workout already ended) — navigating to
+      // workoutExecution would start a phantom session.
+      logger.warn("[notification] tap ignored — no matching active session", {
+        notifPlanId,
+        activePlanId: session.workoutPlanId,
       });
-    }, 150);
+      timer = setTimeout(() => {
+        router.push({ pathname: "/student/workouts" });
+      }, 150);
+    } else {
+      timer = setTimeout(() => {
+        router.push({
+          pathname: "/student/workoutExecution",
+          params: {
+            workoutPlanId: notifPlanId,
+            nextExerciseIndex: String(data?.nextExerciseIndex ?? -1),
+            nextSetIndex: String(data?.nextSetIndex ?? -1),
+          },
+        });
+      }, 150);
+    }
 
     return () => clearTimeout(timer);
   // Re-run when the response identifier changes (new tap) or when the
-  // session hydrates (cold-launch case where session loads after the tap).
+  // session hydrates (cold-launch: session goes null → planId).
+  // `session` itself is intentionally excluded — we only care about the
+  // null→non-null and planId transitions, not every set-level update.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     lastResponse?.notification.request.identifier,
     session?.workoutPlanId,

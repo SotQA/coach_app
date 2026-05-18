@@ -25,6 +25,12 @@ export interface SetInputRefs {
    * keyboard time to fully open before the focus request lands).
    */
   focusNextSet: (currentExIdx: number, currentSetIdx: number) => void;
+  /**
+   * Focus the weight input at an explicit (exIdx, setIdx) position.
+   * Used for notification deep-links that carry the target set indices.
+   * No-ops silently if the ref isn't mounted yet.
+   */
+  focusSet: (exIdx: number, setIdx: number) => void;
   /** Clear the ref map — call when the workout plan changes so stale refs don't linger. */
   reset: () => void;
 }
@@ -62,9 +68,15 @@ export function useSetInputRefs(): SetInputRefs {
     }, 80);
   }, []);
 
+  const focusSet = useCallback((exIdx: number, setIdx: number) => {
+    setTimeout(() => {
+      inputRefs.current[exIdx]?.[setIdx]?.weight?.focus();
+    }, 80);
+  }, []);
+
   const reset = useCallback(() => {
     inputRefs.current = [];
   }, []);
 
-  return { registerRef, focusNextSet, reset };
+  return { registerRef, focusNextSet, focusSet, reset };
 }
