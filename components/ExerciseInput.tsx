@@ -28,7 +28,9 @@ export const ExerciseInput: FC<ExerciseInputProps> = ({
   // doesn't instantly “disappear” due to parsing from the numeric value.
   const [weightText, setWeightText] = useState<string>(String(value.weight ?? 0));
   const [weightFocused, setWeightFocused] = useState(false);
-  const [nameSuggestions, setNameSuggestions] = useState<string[]>([]);
+  const [nameSuggestions, setNameSuggestions] = useState<
+    Array<{ name: string; gifUrl?: string }>
+  >([]);
   const suggestTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -52,10 +54,10 @@ export const ExerciseInput: FC<ExerciseInputProps> = ({
       try {
         const rows = await exerciseTemplateService.searchByPrefix(name, 10);
         const lower = name.toLowerCase();
-        const names = rows
-          .map((r) => r.name)
-          .filter((n) => n && n.toLowerCase() !== lower);
-        setNameSuggestions(names);
+        const suggestions = rows
+          .filter((r) => r.name && r.name.toLowerCase() !== lower)
+          .map((r) => ({ name: r.name, gifUrl: r.gifUrl }));
+        setNameSuggestions(suggestions);
       } catch {
         setNameSuggestions([]);
       }
@@ -137,8 +139,8 @@ export const ExerciseInput: FC<ExerciseInputProps> = ({
         <View style={{ marginBottom: Spacing.sm }}>
           {nameSuggestions.slice(0, 6).map((s) => (
             <Pressable
-              key={s}
-              onPress={() => onChange({ ...value, name: s })}
+              key={s.name}
+              onPress={() => onChange({ ...value, name: s.name })}
               style={({ pressed }) => ({
                 flexDirection: "row",
                 alignItems: "center",
@@ -152,8 +154,14 @@ export const ExerciseInput: FC<ExerciseInputProps> = ({
                 borderColor: Colors.border,
               })}
             >
-              <Ionicons name="flash-outline" size={16} color={Colors.textMuted} />
-              <Text style={{ ...Typography.secondary, color: Colors.text, flex: 1 }}>{s}</Text>
+              {s.gifUrl ? (
+                <Text style={{ fontSize: 14 }}>🎥</Text>
+              ) : (
+                <Ionicons name="flash-outline" size={16} color={Colors.textMuted} />
+              )}
+              <Text style={{ ...Typography.secondary, color: Colors.text, flex: 1 }}>
+                {s.name}
+              </Text>
             </Pressable>
           ))}
         </View>

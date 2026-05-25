@@ -2,7 +2,6 @@ import {
   addDoc,
   collection,
   doc,
-  getDoc,
   getDocs,
   limit,
   query,
@@ -11,8 +10,11 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import type { ExerciseTemplateFirestoreDoc } from "../types/firestore";
+import type { CachedExercise } from "./exerciseDbService";
+import { cacheMappedExerciseToFirestore } from "./exerciseDbService";
 
 const COLLECTION = "exerciseTemplates";
+const GLOBAL_EXERCISES_COLLECTION = "globalExercises";
 
 function sanitizeForFirestore<T>(value: T): T {
   if (value === undefined) return value;
@@ -44,9 +46,18 @@ export type ExerciseTemplate = {
   createdAt?: any;
   usageCount?: number;
   lastUsedAt?: any;
+  source?: "custom" | "exerciseDB";
+  exerciseDbId?: string;
+  gifUrl?: string;
+  targetMuscle?: string;
+  secondaryMuscles?: string[];
+  instructions?: string[];
 };
 
-function mapDoc(id: string, data: ExerciseTemplateFirestoreDoc | undefined): ExerciseTemplate {
+function mapDoc(
+  id: string,
+  data: ExerciseTemplateFirestoreDoc | undefined
+): ExerciseTemplate {
   return {
     id,
     name: data?.name != null ? String(data.name).trim() : "",
@@ -59,10 +70,25 @@ function mapDoc(id: string, data: ExerciseTemplateFirestoreDoc | undefined): Exe
         ? Number(data.usageCount)
         : undefined,
     lastUsedAt: data?.lastUsedAt,
+    source: data?.source,
+    exerciseDbId:
+      data?.exerciseDbId != null ? String(data.exerciseDbId) : undefined,
+    gifUrl: data?.gifUrl != null ? String(data.gifUrl) : undefined,
+    targetMuscle:
+      data?.targetMuscle != null ? String(data.targetMuscle) : undefined,
+    secondaryMuscles: Array.isArray(data?.secondaryMuscles)
+      ? (data.secondaryMuscles as string[])
+      : undefined,
+    instructions: Array.isArray(data?.instructions)
+      ? (data.instructions as string[])
+      : undefined,
   };
 }
 
-async function scanAndFilter(lowerPrefix: string, max: number): Promise<ExerciseTemplate[]> {
+async function scanAndFilter(
+  lowerPrefix: string,
+  max: number
+): Promise<ExerciseTemplate[]> {
   const ref = collection(db, COLLECTION);
   const snap = await getDocs(query(ref, limit(400)));
   const all = snap.docs
@@ -71,12 +97,68 @@ async function scanAndFilter(lowerPrefix: string, max: number): Promise<Exercise
   return all.slice(0, max);
 }
 
+/** Query /globalExercises for exercises matching the prefix and return as ExerciseTemplate. */
+async function scanGlobalExercises(
+  lowerPrefix: string,
+  max: number
+): Promise<ExerciseTemplate[]> {
+  try {
+    const ref = collection(db, GLOBAL_EXERCISES_COLLECTION);
+    const snap = await getDocs(query(ref, limit(200)));
+    return snap.docs
+      .map((d) => {
+        const data = d.data();
+        return {
+          id: d.id,
+          name: String(data.name ?? ""),
+          category: String(data.category ?? ""),
+          equipment: String(data.equipment ?? ""),
+          source: "exerciseDB" as const,
+          exerciseDbId: d.id,
+          gifUrl: data.gifUrl != null ? String(data.gifUrl) : undefined,
+          targetMuscle:
+            data.targetMuscle != null ? String(data.targetMuscle) : undefined,
+          secondaryMuscles: Array.isArray(data.secondaryMuscles)
+            ? (data.secondaryMuscles as string[])
+            : undefined,
+          instructions: Array.isArray(data.instructions)
+            ? (data.instructions as string[])
+            : undefined,
+        };
+      })
+      .filter((t) => t.name.toLowerCase().startsWith(lowerPrefix))
+      .slice(0, max);
+  } catch (e) {
+    console.warn("[exerciseTemplateService] scanGlobalExercises error", e);
+    return [];
+  }
+}
+
 /** Case-insensitive prefix search (scans up to 400 templates; no index required). */
 export const exerciseTemplateService = {
+  /**
+   * Case-insensitive prefix search across both coach templates and the global
+   * ExerciseDB cache. Results are deduplicated by name.
+   */
   async searchByPrefix(prefix: string, max = 12): Promise<ExerciseTemplate[]> {
     const q = prefix.trim().toLowerCase();
     if (!q) return [];
-    return scanAndFilter(q, max);
+
+    const [localResults, globalResults] = await Promise.all([
+      scanAndFilter(q, max),
+      scanGlobalExercises(q, max),
+    ]);
+
+    // Merge, deduplicated by lowercase name (local results take precedence).
+    const seen = new Set(localResults.map((t) => t.name.toLowerCase()));
+    const merged = [...localResults];
+    for (const t of globalResults) {
+      if (!seen.has(t.name.toLowerCase())) {
+        seen.add(t.name.toLowerCase());
+        merged.push(t);
+      }
+    }
+    return merged.slice(0, max);
   },
 
   /** Create a template doc if the name is non-empty (best-effort for autocomplete corpus). */
@@ -86,7 +168,9 @@ export const exerciseTemplateService = {
 
     try {
       const ref = collection(db, COLLECTION);
-      const snap = await getDocs(query(ref, where("name", "==", name), limit(1)));
+      const snap = await getDocs(
+        query(ref, where("name", "==", name), limit(1))
+      );
       if (!snap.empty) return;
       // Firestore rejects undefined fields; always sanitize writes.
       await addDoc(ref, sanitizeForFirestore({ name }) as any);
@@ -96,7 +180,9 @@ export const exerciseTemplateService = {
   },
 
   normalizeName(rawName: string): string {
-    return String(rawName ?? "").trim().replace(/\s+/g, " ");
+    return String(rawName ?? "")
+      .trim()
+      .replace(/\s+/g, " ");
   },
 
   /**
@@ -105,12 +191,16 @@ export const exerciseTemplateService = {
   async listForCoach(coachId: string, max = 500): Promise<ExerciseTemplate[]> {
     const ref = collection(db, COLLECTION);
     try {
-      const snap = await getDocs(query(ref, where("coachId", "==", coachId), limit(max)));
+      const snap = await getDocs(
+        query(ref, where("coachId", "==", coachId), limit(max))
+      );
       return snap.docs.map((d) => mapDoc(d.id, d.data()));
     } catch {
       // Legacy: scan a slice and filter.
       const snap = await getDocs(query(ref, limit(max)));
-      return snap.docs.map((d) => mapDoc(d.id, d.data())).filter((t) => !t.coachId || t.coachId === coachId);
+      return snap.docs
+        .map((d) => mapDoc(d.id, d.data()))
+        .filter((t) => !t.coachId || t.coachId === coachId);
     }
   },
 
@@ -132,7 +222,14 @@ export const exerciseTemplateService = {
     if (!category) throw new Error("Category is required.");
 
     const ref = collection(db, COLLECTION);
-    const snap = await getDocs(query(ref, where("coachId", "==", coachId), where("name", "==", name), limit(1)));
+    const snap = await getDocs(
+      query(
+        ref,
+        where("coachId", "==", coachId),
+        where("name", "==", name),
+        limit(1)
+      )
+    );
     if (!snap.empty) {
       const d = snap.docs[0];
       return mapDoc(d.id, d.data());
@@ -164,6 +261,70 @@ export const exerciseTemplateService = {
   },
 
   /**
+   * Add a template from ExerciseDB. Checks for duplicates by exerciseDbId before
+   * inserting. Also caches the exercise to /globalExercises.
+   */
+  async addFromExerciseDB(
+    coachId: string,
+    exercise: CachedExercise
+  ): Promise<ExerciseTemplate> {
+    const ref = collection(db, COLLECTION);
+
+    // Check for existing template with the same exerciseDbId for this coach.
+    const dupSnap = await getDocs(
+      query(
+        ref,
+        where("coachId", "==", coachId),
+        where("exerciseDbId", "==", exercise.id),
+        limit(1)
+      )
+    );
+    if (!dupSnap.empty) {
+      return mapDoc(dupSnap.docs[0].id, dupSnap.docs[0].data());
+    }
+
+    // Ensure the exercise is cached in the global collection.
+    cacheMappedExerciseToFirestore(exercise).catch(() => {});
+
+    const now = new Date();
+    const docRef = await addDoc(
+      ref,
+      sanitizeForFirestore({
+        coachId,
+        name: exercise.name,
+        category: exercise.category,
+        equipment: exercise.equipment,
+        source: "exerciseDB",
+        exerciseDbId: exercise.id,
+        gifUrl: exercise.gifUrl,
+        targetMuscle: exercise.targetMuscle,
+        secondaryMuscles: exercise.secondaryMuscles,
+        instructions: exercise.instructions,
+        createdAt: now,
+        usageCount: 0,
+        lastUsedAt: now,
+      }) as any
+    );
+
+    return {
+      id: docRef.id,
+      coachId,
+      name: exercise.name,
+      category: exercise.category,
+      equipment: exercise.equipment,
+      source: "exerciseDB",
+      exerciseDbId: exercise.id,
+      gifUrl: exercise.gifUrl,
+      targetMuscle: exercise.targetMuscle,
+      secondaryMuscles: exercise.secondaryMuscles,
+      instructions: exercise.instructions,
+      createdAt: now,
+      usageCount: 0,
+      lastUsedAt: now,
+    };
+  },
+
+  /**
    * Increment usage counters for templates (creates coach-scoped doc if missing).
    */
   async recordUsage(payload: {
@@ -177,7 +338,14 @@ export const exerciseTemplateService = {
     if (!coachId || name.length < 2) return;
 
     const ref = collection(db, COLLECTION);
-    const snap = await getDocs(query(ref, where("coachId", "==", coachId), where("name", "==", name), limit(1)));
+    const snap = await getDocs(
+      query(
+        ref,
+        where("coachId", "==", coachId),
+        where("name", "==", name),
+        limit(1)
+      )
+    );
     const now = new Date();
     if (snap.empty) {
       await addDoc(
@@ -211,4 +379,3 @@ export const exerciseTemplateService = {
     );
   },
 };
-

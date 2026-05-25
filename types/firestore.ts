@@ -96,4 +96,14 @@ export interface ExerciseTemplateFirestoreDoc {
   usageCount?: number | string;
   createdAt?: Timestamp | string;
   lastUsedAt?: Timestamp | string;
+  source?: "custom" | "exerciseDB";
+  exerciseDbId?: string;
+  gifUrl?: string;
+  imageUrls?: { "360p": string; "480p": string; "720p": string; "1080p": string };
+  videoUrl?: string;
+  overview?: string;
+  exerciseTips?: string[];
+  targetMuscle?: string;
+  secondaryMuscles?: string[];
+  instructions?: string[];
 }
