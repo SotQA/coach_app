@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -20,10 +20,15 @@ import {
   type ExerciseTemplate,
 } from "../services/exerciseTemplateService";
 import {
+  BODY_PART_MAP,
+  EQUIPMENT_MAP,
   cacheExerciseToFirestore,
+  getBodyPartList,
   getByBodyPart,
+  getEquipmentList,
   searchExercises,
   type ExerciseDBExercise,
+  type ExercisePageResult,
 } from "../services/exerciseDbService";
 import { toMs } from "../utils/dateConvert";
 
@@ -43,23 +48,49 @@ const LIBRARY_CATEGORIES = [
   "Mobility",
 ] as const;
 
-const DB_BODY_PART_CHIPS = [
-  { label: "All", bodyPart: null },
-  { label: "Chest", bodyPart: "Chest" },
-  { label: "Back", bodyPart: "Back" },
-  { label: "Legs", bodyPart: "Legs" },
-  { label: "Shoulders", bodyPart: "Shoulders" },
-  { label: "Arms", bodyPart: "Arms" },
-  { label: "Core", bodyPart: "Core" },
-  { label: "Cardio", bodyPart: "Cardio" },
-  { label: "Mobility", bodyPart: "Mobility" },
-] as const;
+const BODY_PART_OPTIONS: { label: string; value: string | null }[] = [
+  { label: "All", value: null },
+  { label: "Chest", value: "Chest" },
+  { label: "Back", value: "Back" },
+  { label: "Legs", value: "Legs" },
+  { label: "Shoulders", value: "Shoulders" },
+  { label: "Arms", value: "Arms" },
+  { label: "Core", value: "Core" },
+  { label: "Cardio", value: "Cardio" },
+  { label: "Mobility", value: "Mobility" },
+];
+
+const EQUIPMENT_OPTIONS: { label: string; value: string | null }[] = [
+  { label: "All", value: null },
+  { label: "Barbell", value: "Barbell" },
+  { label: "Dumbbell", value: "Dumbbell" },
+  { label: "Cable", value: "Cable" },
+  { label: "Machine", value: "Machine" },
+  { label: "Body Weight", value: "Body Weight" },
+  { label: "Kettlebell", value: "Kettlebell" },
+  { label: "Resistance Band", value: "Resistance Band" },
+  { label: "EZ Bar", value: "EZ Bar" },
+];
+
+// Reverse maps: API UPPERCASE value → display label (built once at module level).
+const API_TO_BODY_PART: Record<string, string> = {};
+for (const [label, apiValues] of Object.entries(BODY_PART_MAP)) {
+  for (const v of apiValues) {
+    API_TO_BODY_PART[v] = label;
+  }
+}
+
+const API_TO_EQUIPMENT: Record<string, string> = {};
+for (const [label, apiValue] of Object.entries(EQUIPMENT_MAP)) {
+  API_TO_EQUIPMENT[apiValue] = label;
+}
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
 type Tab = "db" | "library";
+type Picker = "bodyPart" | "equipment";
 
 type Props = {
   visible: boolean;
@@ -253,12 +284,20 @@ export function ExerciseLibraryModal({
   const dbSearchRef = useRef<TextInput | null>(null);
   const [dbQuery, setDbQuery] = useState("");
   const [dbDebounced, setDbDebounced] = useState("");
-  const [selectedBodyPart, setSelectedBodyPart] = useState<string | null>("Chest");
+  const [selectedBodyPart, setSelectedBodyPart] = useState<string | null>(null);
+  const [selectedEquipment, setSelectedEquipment] = useState<string | null>(null);
+  const [openPicker, setOpenPicker] = useState<Picker | null>(null);
   const [dbResults, setDbResults] = useState<ExerciseDBExercise[]>([]);
   const [dbLoading, setDbLoading] = useState(false);
+  const [dbLoadingMore, setDbLoadingMore] = useState(false);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [hasNextPage, setHasNextPage] = useState(false);
   const [offlineBanner, setOfflineBanner] = useState(false);
   const [addingId, setAddingId] = useState<string | null>(null);
   const [successIds, setSuccessIds] = useState<Set<string>>(new Set());
+  // Dynamic filter chip lists — seeded with hardcoded fallbacks.
+  const [bodyPartOptions, setBodyPartOptions] = useState<{ label: string; value: string | null }[]>(BODY_PART_OPTIONS);
+  const [equipmentOptions, setEquipmentOptions] = useState<{ label: string; value: string | null }[]>(EQUIPMENT_OPTIONS);
 
   // ---- My Library tab state ----
   const librarySearchRef = useRef<TextInput | null>(null);
@@ -275,6 +314,47 @@ export function ExerciseLibraryModal({
   // ---------------------------------------------------------------------------
   // Effects
   // ---------------------------------------------------------------------------
+
+  // Fetch dynamic filter options from the API on first DB tab open.
+  useEffect(() => {
+    if (!visible || activeTab !== "db") return;
+    Promise.all([getBodyPartList(), getEquipmentList()])
+      .then(([rawBodyParts, rawEquipments]) => {
+        // Body parts: map API values → display labels, deduplicate.
+        if (rawBodyParts.length > 0) {
+          const seen = new Set<string>();
+          const opts: { label: string; value: string | null }[] = [{ label: "All", value: null }];
+          for (const rawItem of rawBodyParts) {
+            // Coerce to string — guards against API returning objects instead of strings.
+            const raw = String(rawItem);
+            const label: string = API_TO_BODY_PART[raw] ?? toTitleCase(raw.toLowerCase());
+            if (!seen.has(label)) {
+              seen.add(label);
+              opts.push({ label, value: label });
+            }
+          }
+          setBodyPartOptions(opts);
+        }
+        // Equipment: map API values → display labels, deduplicate.
+        if (rawEquipments.length > 0) {
+          const seen = new Set<string>();
+          const opts: { label: string; value: string | null }[] = [{ label: "All", value: null }];
+          for (const rawItem of rawEquipments) {
+            // Coerce to string — guards against API returning objects instead of strings.
+            const raw = String(rawItem);
+            const label: string = API_TO_EQUIPMENT[raw] ?? toTitleCase(raw.toLowerCase());
+            if (!seen.has(label)) {
+              seen.add(label);
+              opts.push({ label, value: label });
+            }
+          }
+          setEquipmentOptions(opts);
+        }
+      })
+      .catch(() => {
+        // Silently fall back to hardcoded lists already in state.
+      });
+  }, [visible, activeTab]);
 
   // Debounce DB search query (400ms).
   useEffect(() => {
@@ -296,8 +376,13 @@ export function ExerciseLibraryModal({
     setDbQuery("");
     setDbDebounced("");
     setSelectedBodyPart(null);
+    setSelectedEquipment(null);
+    setOpenPicker(null);
     setDbResults([]);
     setDbLoading(false);
+    setDbLoadingMore(false);
+    setNextCursor(null);
+    setHasNextPage(false);
     setOfflineBanner(false);
     setAddingId(null);
     setSuccessIds(new Set());
@@ -335,18 +420,21 @@ export function ExerciseLibraryModal({
     if (!q) {
       setDbResults([]);
       setOfflineBanner(false);
+      setNextCursor(null);
+      setHasNextPage(false);
       return;
     }
     let cancelled = false;
     setDbLoading(true);
     setOfflineBanner(false);
+    setNextCursor(null);
+    setHasNextPage(false);
     searchExercises(q)
-      .then((results) => {
+      .then((result: ExercisePageResult) => {
         if (cancelled) return;
-        setDbResults(results);
-        // If results came from cache (API failed), they have mapped bodyPart == category.
-        // We detect "offline" by trying the API independently; for simplicity,
-        // show the banner if results look like they came from cache (no raw bodyPart data).
+        setDbResults(result.exercises);
+        setNextCursor(result.nextCursor);
+        setHasNextPage(result.hasNextPage);
       })
       .catch(() => {
         if (cancelled) return;
@@ -361,28 +449,22 @@ export function ExerciseLibraryModal({
     };
   }, [dbDebounced, visible, activeTab]);
 
-  // Fetch by body part when a chip is selected and no search query.
+  // Fetch by body part / equipment when filters change and no search query.
   useEffect(() => {
     if (!visible || activeTab !== "db") return;
     if (dbDebounced.trim()) return; // search query takes precedence
-    if (!selectedBodyPart) {
-      // "All" selected — fetch a general list
-      setDbLoading(true);
-      setOfflineBanner(false);
-      getByBodyPart("").then((results) => {
-        if (!cancelled) { setDbResults(results); setDbLoading(false); }
-      }).catch(() => {
-        if (!cancelled) { setOfflineBanner(true); setDbResults([]); setDbLoading(false); }
-      });
-      return;
-    }
+    // Both "All" — fetch a general list instead of showing nothing
     let cancelled = false;
     setDbLoading(true);
     setOfflineBanner(false);
-    getByBodyPart(selectedBodyPart)
-      .then((results) => {
+    setNextCursor(null);
+    setHasNextPage(false);
+    getByBodyPart(selectedBodyPart ?? "", selectedEquipment ?? undefined)
+      .then((result: ExercisePageResult) => {
         if (cancelled) return;
-        setDbResults(results);
+        setDbResults(result.exercises);
+        setNextCursor(result.nextCursor);
+        setHasNextPage(result.hasNextPage);
       })
       .catch(() => {
         if (cancelled) return;
@@ -395,7 +477,36 @@ export function ExerciseLibraryModal({
     return () => {
       cancelled = true;
     };
-  }, [selectedBodyPart, dbDebounced, visible, activeTab]);
+  }, [selectedBodyPart, selectedEquipment, dbDebounced, visible, activeTab]);
+
+  // ---------------------------------------------------------------------------
+  // Pagination
+  // ---------------------------------------------------------------------------
+
+  const handleLoadMore = useCallback(async () => {
+    if (!hasNextPage || dbLoadingMore || dbLoading || !nextCursor) return;
+    setDbLoadingMore(true);
+    try {
+      const q = dbDebounced.trim();
+      let result: ExercisePageResult;
+      if (q) {
+        result = await searchExercises(q, nextCursor);
+      } else {
+        result = await getByBodyPart(
+          selectedBodyPart ?? "",
+          selectedEquipment ?? undefined,
+          nextCursor
+        );
+      }
+      setDbResults((prev) => [...prev, ...result.exercises]);
+      setNextCursor(result.nextCursor);
+      setHasNextPage(result.hasNextPage);
+    } catch (e) {
+      console.warn("[ExerciseLibraryModal] loadMore error", e);
+    } finally {
+      setDbLoadingMore(false);
+    }
+  }, [hasNextPage, dbLoadingMore, dbLoading, nextCursor, dbDebounced, selectedBodyPart, selectedEquipment]);
 
   // ---------------------------------------------------------------------------
   // Computed (Library tab)
@@ -509,15 +620,20 @@ export function ExerciseLibraryModal({
   };
 
   // ---------------------------------------------------------------------------
-  // Render
+  // Render helpers
   // ---------------------------------------------------------------------------
 
-  const tabBarHeight =
-    Math.max(insets.top, 12) +
-    40 + // header row
-    Spacing.sm +
-    44 + // tab bar
-    Spacing.sm;
+  const pickerOptions = openPicker === "bodyPart" ? bodyPartOptions : equipmentOptions;
+  const pickerTitle = openPicker === "bodyPart" ? "Body Part" : "Equipment";
+
+  const isBodyPartActive = selectedBodyPart !== null;
+  const isEquipmentActive = selectedEquipment !== null;
+  const hasActiveFilter = isBodyPartActive || isEquipmentActive;
+  const hasSearchQuery = dbDebounced.trim().length > 0;
+
+  // ---------------------------------------------------------------------------
+  // Render
+  // ---------------------------------------------------------------------------
 
   return (
     <Modal
@@ -621,6 +737,15 @@ export function ExerciseLibraryModal({
             keyExtractor={(item) => item.id}
             keyboardShouldPersistTaps="handled"
             contentContainerStyle={{ padding: Spacing.md, paddingBottom: 40 }}
+            onEndReached={handleLoadMore}
+            onEndReachedThreshold={0.2}
+            ListFooterComponent={
+              dbLoadingMore ? (
+                <View style={{ paddingVertical: Spacing.md, alignItems: "center" }}>
+                  <ActivityIndicator size="small" color={Colors.textMuted} />
+                </View>
+              ) : null
+            }
             ListHeaderComponent={
               <View>
                 {/* Search bar */}
@@ -672,6 +797,93 @@ export function ExerciseLibraryModal({
                   ) : null}
                 </View>
 
+                {/* Two-button filter bar */}
+                <View
+                  style={{
+                    flexDirection: "row",
+                    gap: Spacing.sm,
+                    marginBottom: Spacing.sm,
+                  }}
+                >
+                  {/* Body Part button */}
+                  <Pressable
+                    onPress={() => setOpenPicker("bodyPart")}
+                    style={({ pressed }) => ({
+                      flex: 1,
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      paddingVertical: 10,
+                      paddingHorizontal: Spacing.sm,
+                      borderRadius: Radius.lg,
+                      backgroundColor: Colors.card,
+                      borderWidth: 1,
+                      borderColor: isBodyPartActive ? Colors.primary : Colors.border,
+                      opacity: pressed ? 0.9 : 1,
+                    })}
+                  >
+                    <View style={{ flex: 1, marginRight: 4 }}>
+                      <Text style={{ ...Typography.micro, marginBottom: 2 }}>
+                        BODY PART
+                      </Text>
+                      <Text
+                        style={{
+                          ...Typography.secondary,
+                          fontWeight: "600",
+                          color: isBodyPartActive ? Colors.primary : Colors.text,
+                        }}
+                        numberOfLines={1}
+                      >
+                        {selectedBodyPart ?? "All"}
+                      </Text>
+                    </View>
+                    <Ionicons
+                      name="chevron-down"
+                      size={14}
+                      color={isBodyPartActive ? Colors.primary : Colors.textMuted}
+                    />
+                  </Pressable>
+
+                  {/* Equipment button */}
+                  <Pressable
+                    onPress={() => setOpenPicker("equipment")}
+                    style={({ pressed }) => ({
+                      flex: 1,
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      paddingVertical: 10,
+                      paddingHorizontal: Spacing.sm,
+                      borderRadius: Radius.lg,
+                      backgroundColor: Colors.card,
+                      borderWidth: 1,
+                      borderColor: isEquipmentActive ? Colors.primary : Colors.border,
+                      opacity: pressed ? 0.9 : 1,
+                    })}
+                  >
+                    <View style={{ flex: 1, marginRight: 4 }}>
+                      <Text style={{ ...Typography.micro, marginBottom: 2 }}>
+                        EQUIPMENT
+                      </Text>
+                      <Text
+                        style={{
+                          ...Typography.secondary,
+                          fontWeight: "600",
+                          color: isEquipmentActive ? Colors.primary : Colors.text,
+                        }}
+                        numberOfLines={1}
+                      >
+                        {selectedEquipment ?? "All"}
+                      </Text>
+                    </View>
+                    <Ionicons
+                      name="chevron-down"
+                      size={14}
+                      color={isEquipmentActive ? Colors.primary : Colors.textMuted}
+                    />
+                  </Pressable>
+                </View>
+
                 {/* Offline banner */}
                 {offlineBanner ? (
                   <View
@@ -700,58 +912,8 @@ export function ExerciseLibraryModal({
                   </View>
                 ) : null}
 
-                {/* Body part chips (only when no search query) */}
-                {!dbDebounced.trim() ? (
-                  <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={{ gap: Spacing.xs, paddingBottom: Spacing.sm }}
-                  >
-                    {DB_BODY_PART_CHIPS.map((chip) => {
-                      const active =
-                        chip.bodyPart === null
-                          ? selectedBodyPart === null
-                          : selectedBodyPart === chip.bodyPart;
-                      return (
-                        <Pressable
-                          key={chip.label}
-                          onPress={() =>
-                            setSelectedBodyPart(
-                              chip.bodyPart === null
-                                ? null
-                                : active
-                                ? null
-                                : chip.bodyPart
-                            )
-                          }
-                          style={({ pressed }) => ({
-                            paddingVertical: 8,
-                            paddingHorizontal: 14,
-                            borderRadius: Radius.pill,
-                            backgroundColor: active
-                              ? Colors.primary
-                              : Colors.surface,
-                            borderWidth: 1,
-                            borderColor: active ? Colors.primary : Colors.border,
-                            opacity: pressed ? 0.9 : 1,
-                          })}
-                        >
-                          <Text
-                            style={{
-                              ...Typography.secondary,
-                              color: active ? Colors.onPrimary : Colors.text,
-                            }}
-                          >
-                            {chip.label}
-                          </Text>
-                        </Pressable>
-                      );
-                    })}
-                  </ScrollView>
-                ) : null}
-
                 {/* Empty state prompt */}
-                {!dbDebounced.trim() && !selectedBodyPart && !dbLoading ? (
+                {!hasSearchQuery && !hasActiveFilter && !dbLoading ? (
                   <View style={{ paddingVertical: Spacing.lg, alignItems: "center" }}>
                     <Ionicons
                       name="barbell-outline"
@@ -766,7 +928,7 @@ export function ExerciseLibraryModal({
                         marginTop: Spacing.sm,
                       }}
                     >
-                      Search for exercises or select a body part above
+                      Search for exercises or use the filters above
                     </Text>
                   </View>
                 ) : null}
@@ -787,8 +949,7 @@ export function ExerciseLibraryModal({
               />
             )}
             ListEmptyComponent={
-              !dbLoading &&
-              (dbDebounced.trim() || selectedBodyPart) ? (
+              !dbLoading && (hasSearchQuery || hasActiveFilter) ? (
                 <View style={{ paddingVertical: Spacing.lg }}>
                   <Text
                     style={{
@@ -1262,6 +1423,114 @@ export function ExerciseLibraryModal({
             }
           />
         ) : null}
+
+        {/* ---------------------------------------------------------------- */}
+        {/* Filter Picker bottom sheet                                        */}
+        {/* ---------------------------------------------------------------- */}
+        <Modal
+          visible={openPicker !== null}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setOpenPicker(null)}
+        >
+          <View style={{ flex: 1, justifyContent: "flex-end" }}>
+            {/* Backdrop */}
+            <Pressable
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: "rgba(0,0,0,0.6)",
+              }}
+              onPress={() => setOpenPicker(null)}
+            />
+
+            {/* Sheet */}
+            <View
+              style={{
+                backgroundColor: Colors.card,
+                borderTopLeftRadius: Radius.xl,
+                borderTopRightRadius: Radius.xl,
+                paddingBottom: Math.max(insets.bottom, Spacing.md),
+                maxHeight: "65%",
+              }}
+            >
+              {/* Sheet header */}
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  paddingHorizontal: Spacing.md,
+                  paddingVertical: Spacing.sm,
+                  borderBottomWidth: 1,
+                  borderBottomColor: Colors.border,
+                }}
+              >
+                <Text style={{ ...Typography.section, fontWeight: "900" }}>
+                  {pickerTitle}
+                </Text>
+                <Pressable
+                  onPress={() => setOpenPicker(null)}
+                  style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+                >
+                  <Ionicons name="close" size={20} color={Colors.text} />
+                </Pressable>
+              </View>
+
+              {/* Options list */}
+              <ScrollView bounces={false} keyboardShouldPersistTaps="handled">
+                {pickerOptions.map((option) => {
+                  const isSelected =
+                    openPicker === "bodyPart"
+                      ? selectedBodyPart === option.value
+                      : selectedEquipment === option.value;
+                  return (
+                    <Pressable
+                      key={option.label}
+                      onPress={() => {
+                        if (openPicker === "bodyPart") {
+                          setSelectedBodyPart(option.value);
+                        } else {
+                          setSelectedEquipment(option.value);
+                        }
+                        setOpenPicker(null);
+                      }}
+                      style={({ pressed }) => ({
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        paddingVertical: Spacing.sm,
+                        paddingHorizontal: Spacing.md,
+                        borderBottomWidth: 1,
+                        borderBottomColor: Colors.border,
+                        backgroundColor: isSelected
+                          ? Colors.surfaceSubtle
+                          : "transparent",
+                        opacity: pressed ? 0.8 : 1,
+                      })}
+                    >
+                      <Text
+                        style={{
+                          ...Typography.body,
+                          color: isSelected ? Colors.primary : Colors.text,
+                          fontWeight: isSelected ? "700" : "400",
+                        }}
+                      >
+                        {String(option.label)}
+                      </Text>
+                      {isSelected ? (
+                        <Ionicons name="checkmark" size={18} color={Colors.primary} />
+                      ) : null}
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+            </View>
+          </View>
+        </Modal>
       </View>
     </Modal>
   );

@@ -24,11 +24,47 @@ export const RAPIDAPI_HEADERS: Record<string, string> = {
   "X-RapidAPI-Host": "edb-with-videos-and-images-by-ascendapi.p.rapidapi.com",
 };
 
+// Display label → V2 API body part value(s). "Legs" and "Arms" map to two values each.
+export const BODY_PART_MAP: Record<string, string[]> = {
+  Chest: ["CHEST"],
+  Back: ["BACK"],
+  Legs: ["UPPER LEGS", "LOWER LEGS"],
+  Shoulders: ["SHOULDERS"],
+  Arms: ["UPPER ARMS", "LOWER ARMS"],
+  Core: ["WAIST"],
+  Glutes: ["GLUTES"],
+  Cardio: ["CARDIO"],
+  Mobility: ["NECK"],
+};
+
+// Display label → V2 API equipment value.
+export const EQUIPMENT_MAP: Record<string, string> = {
+  Barbell: "BARBELL",
+  Dumbbell: "DUMBBELL",
+  Cable: "CABLE",
+  Machine: "LEVERAGE MACHINE",
+  "Body Weight": "BODY WEIGHT",
+  Kettlebell: "KETTLEBELL",
+  "Resistance Band": "RESISTANCE BAND",
+  "Smith Machine": "SMITH MACHINE",
+  "EZ Bar": "EZ BARBELL",
+};
+
+// Module-level caches for list endpoints.
+let _bodyPartListCache: string[] | null = null;
+let _equipmentListCache: string[] | null = null;
+
 const GLOBAL_EXERCISES_COLLECTION = "globalExercises";
 
 // ---------------------------------------------------------------------------
 // Public types
 // ---------------------------------------------------------------------------
+
+export type ExercisePageResult = {
+  exercises: ExerciseDBExercise[];
+  nextCursor: string | null;
+  hasNextPage: boolean;
+};
 
 export type ExerciseDBExercise = {
   // Core identity (V2 native names)
@@ -342,77 +378,201 @@ export async function fetchExerciseDetail(
 // API calls
 // ---------------------------------------------------------------------------
 
-/** Search exercises by name (limit 10). Falls back to global cache silently. */
+/** Search exercises by name (limit 50). Falls back to global cache silently. */
 export async function searchExercises(
-  queryStr: string
-): Promise<ExerciseDBExercise[]> {
+  queryStr: string,
+  cursor?: string
+): Promise<ExercisePageResult> {
   try {
-    const encoded = encodeURIComponent(queryStr.trim());
-    const res = await fetch(
-      `${EXERCISEDB_BASE}/api/v1/exercises/search?search=${encoded}&limit=10`,
-      { headers: RAPIDAPI_HEADERS }
-    );
+    const trimmed = queryStr.trim();
+    // Build URL manually so encodeURIComponent is not double-encoded by URLSearchParams.
+    let url = `${EXERCISEDB_BASE}/api/v1/exercises/search?search=${encodeURIComponent(trimmed)}&limit=50`;
+    if (cursor) url += `&after=${encodeURIComponent(cursor)}`;
+
+    const res = await fetch(url, { headers: RAPIDAPI_HEADERS });
     if (!res.ok) throw new Error(`ExerciseDB API error: ${res.status}`);
     const json: unknown = await res.json();
-    const arr = Array.isArray(json)
+    const jsonObj = json as Record<string, unknown>;
+    let arr: Record<string, unknown>[] = Array.isArray(json)
       ? (json as Record<string, unknown>[])
-      : Array.isArray((json as Record<string, unknown>)?.data)
-      ? ((json as Record<string, unknown>).data as Record<string, unknown>[])
+      : Array.isArray(jsonObj?.data)
+      ? (jsonObj.data as Record<string, unknown>[])
       : [];
-    return arr.map(buildExercise);
+    let meta = (jsonObj?.meta ?? {}) as Record<string, unknown>;
+
+    // If no results and query is multi-word, retry with only the first word.
+    if (arr.length === 0 && trimmed.includes(" ")) {
+      const firstWord = trimmed.split(" ")[0];
+      const fallbackUrl = `${EXERCISEDB_BASE}/api/v1/exercises/search?search=${encodeURIComponent(firstWord)}&limit=50`;
+      const fallbackRes = await fetch(fallbackUrl, { headers: RAPIDAPI_HEADERS });
+      if (fallbackRes.ok) {
+        const fallbackJson: unknown = await fallbackRes.json();
+        const fallbackObj = fallbackJson as Record<string, unknown>;
+        arr = Array.isArray(fallbackJson)
+          ? (fallbackJson as Record<string, unknown>[])
+          : Array.isArray(fallbackObj?.data)
+          ? (fallbackObj.data as Record<string, unknown>[])
+          : [];
+        meta = (fallbackObj?.meta ?? {}) as Record<string, unknown>;
+      }
+    }
+
+    const hasNextPage = Boolean(meta.hasNextPage);
+    const nextCursor = hasNextPage ? ((meta.nextCursor as string | null) ?? null) : null;
+    return { exercises: arr.map(buildExercise), nextCursor, hasNextPage };
   } catch (e) {
     console.warn(
       "[exerciseDbService] searchExercises API failed, using cache",
       e
     );
     const cached = await searchGlobalCache(queryStr);
-    return cached.map(cachedToDBExercise);
+    return { exercises: cached.map(cachedToDBExercise), nextCursor: null, hasNextPage: false };
   }
 }
 
-/** Fetch exercises by body part (limit 20). Falls back to global cache silently. */
+/** Fetch exercises by body part and/or equipment (limit 20, cursor-paginated). Falls back to global cache silently. */
 export async function getByBodyPart(
-  bodyPart: string
-): Promise<ExerciseDBExercise[]> {
+  bodyPart: string,
+  equipment?: string,
+  cursor?: string
+): Promise<ExercisePageResult> {
   try {
-    const url = bodyPart
-      ? `${EXERCISEDB_BASE}/api/v1/exercises?bodyParts=${encodeURIComponent(bodyPart)}&limit=20`
-      : `${EXERCISEDB_BASE}/api/v1/exercises?limit=30`;
+    const apiBodyParts = bodyPart ? BODY_PART_MAP[bodyPart] ?? null : null;
+    const apiEquipment = equipment
+      ? (EQUIPMENT_MAP[equipment] ?? equipment.toUpperCase())
+      : null;
+
+    // Multi-value body parts (Legs, Arms) — fire parallel requests and merge.
+    if (apiBodyParts && apiBodyParts.length > 1) {
+      const batches = await Promise.all(
+        apiBodyParts.map(async (part) => {
+          const params = new URLSearchParams();
+          params.set("bodyParts", part);
+          if (apiEquipment) params.set("equipments", apiEquipment);
+          params.set("limit", "20");
+          const url = `${EXERCISEDB_BASE}/api/v1/exercises?${params.toString()}`;
+          const res = await fetch(url, { headers: RAPIDAPI_HEADERS });
+          if (!res.ok) throw new Error(`ExerciseDB API error: ${res.status}`);
+          const json: unknown = await res.json();
+          const jsonObj = json as Record<string, unknown>;
+          return Array.isArray(json)
+            ? (json as Record<string, unknown>[])
+            : Array.isArray(jsonObj?.data)
+            ? (jsonObj.data as Record<string, unknown>[])
+            : [];
+        })
+      );
+      // Flatten and deduplicate by exerciseId.
+      const seen = new Set<string>();
+      const flat: Record<string, unknown>[] = [];
+      for (const batch of batches) {
+        for (const item of batch) {
+          const id = String(
+            (item as Record<string, unknown>).exerciseId ??
+              (item as Record<string, unknown>).id ??
+              ""
+          );
+          if (id && !seen.has(id)) {
+            seen.add(id);
+            flat.push(item);
+          }
+        }
+      }
+      return { exercises: flat.map(buildExercise), nextCursor: null, hasNextPage: false };
+    }
+
+    // Single body part (or "All").
+    const params = new URLSearchParams();
+    if (apiBodyParts) params.set("bodyParts", apiBodyParts[0]);
+    if (apiEquipment) params.set("equipments", apiEquipment);
+    params.set("limit", "20");
+    if (cursor) params.set("after", cursor);
+    const url = `${EXERCISEDB_BASE}/api/v1/exercises?${params.toString()}`;
     const res = await fetch(url, { headers: RAPIDAPI_HEADERS });
     if (!res.ok) throw new Error(`ExerciseDB API error: ${res.status}`);
     const json: unknown = await res.json();
+    const jsonObj = json as Record<string, unknown>;
     const arr = Array.isArray(json)
       ? (json as Record<string, unknown>[])
-      : Array.isArray((json as Record<string, unknown>)?.data)
-      ? ((json as Record<string, unknown>).data as Record<string, unknown>[])
+      : Array.isArray(jsonObj?.data)
+      ? (jsonObj.data as Record<string, unknown>[])
       : [];
-    return arr.map(buildExercise);
+    const meta = (jsonObj?.meta ?? {}) as Record<string, unknown>;
+    const hasNextPage = Boolean(meta.hasNextPage);
+    const nextCursor = hasNextPage ? ((meta.nextCursor as string | null) ?? null) : null;
+    return { exercises: arr.map(buildExercise), nextCursor, hasNextPage };
   } catch (e) {
     console.warn(
       "[exerciseDbService] getByBodyPart API failed, using cache",
       e
     );
     const cached = await searchGlobalCache(bodyPart);
-    return cached.map(cachedToDBExercise);
+    return { exercises: cached.map(cachedToDBExercise), nextCursor: null, hasNextPage: false };
   }
 }
 
-/** List all available body parts. Falls back to empty silently. */
+/** List all available body parts. Cached after first successful fetch. */
 export async function getBodyPartList(): Promise<string[]> {
+  if (_bodyPartListCache) return _bodyPartListCache;
   try {
     const res = await fetch(`${EXERCISEDB_BASE}/api/v1/bodyparts`, {
       headers: RAPIDAPI_HEADERS,
     });
     if (!res.ok) throw new Error(`ExerciseDB API error: ${res.status}`);
     const json: unknown = await res.json();
-    const arr = Array.isArray(json)
-      ? (json as string[])
+    const rawArr: unknown[] = Array.isArray(json)
+      ? (json as unknown[])
       : Array.isArray((json as Record<string, unknown>)?.data)
-      ? ((json as Record<string, unknown>).data as string[])
+      ? ((json as Record<string, unknown>).data as unknown[])
       : [];
+    // Guarantee every element is a non-empty string regardless of API response shape.
+    const arr = rawArr
+      .map((item) => {
+        if (typeof item === "string") return item;
+        if (typeof item === "object" && item !== null) {
+          const obj = item as Record<string, unknown>;
+          return String(obj.name ?? obj.bodyPart ?? obj.value ?? "");
+        }
+        return String(item);
+      })
+      .filter(Boolean) as string[];
+    _bodyPartListCache = arr;
     return arr;
   } catch (e) {
     console.warn("[exerciseDbService] getBodyPartList API failed", e);
+    return [];
+  }
+}
+
+/** List all available equipment types. Cached after first successful fetch. */
+export async function getEquipmentList(): Promise<string[]> {
+  if (_equipmentListCache) return _equipmentListCache;
+  try {
+    const res = await fetch(`${EXERCISEDB_BASE}/api/v1/equipments`, {
+      headers: RAPIDAPI_HEADERS,
+    });
+    if (!res.ok) throw new Error(`ExerciseDB API error: ${res.status}`);
+    const json: unknown = await res.json();
+    const rawArr: unknown[] = Array.isArray(json)
+      ? (json as unknown[])
+      : Array.isArray((json as Record<string, unknown>)?.data)
+      ? ((json as Record<string, unknown>).data as unknown[])
+      : [];
+    // Guarantee every element is a non-empty string regardless of API response shape.
+    const arr = rawArr
+      .map((item) => {
+        if (typeof item === "string") return item;
+        if (typeof item === "object" && item !== null) {
+          const obj = item as Record<string, unknown>;
+          return String(obj.name ?? obj.equipment ?? obj.value ?? "");
+        }
+        return String(item);
+      })
+      .filter(Boolean) as string[];
+    _equipmentListCache = arr;
+    return arr;
+  } catch (e) {
+    console.warn("[exerciseDbService] getEquipmentList failed", e);
     return [];
   }
 }
