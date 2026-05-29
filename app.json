@@ -67,7 +67,8 @@
         {
           "color": "#D4FF44"
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "extra": {
       "googleWebClientId": "915193499412-nee8iipn919on2ir7eoj8e5a06mvov5p.apps.googleusercontent.com",

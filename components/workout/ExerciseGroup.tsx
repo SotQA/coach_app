@@ -1,4 +1,5 @@
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { TouchableOpacity, StyleSheet, Text, TextInput, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useI18n } from "../../context/I18nContext";
 import { useUnits } from "../../context/UnitsContext";
@@ -54,28 +55,30 @@ export function ExerciseGroup({
   return (
     <View style={styles.container}>
       {/* Exercise header */}
-      <View style={styles.header}>
+      <TouchableOpacity
+        activeOpacity={0.7}
+        onPress={() =>
+          router.push({
+            pathname: "/student/exerciseDetail",
+            params: {
+              exerciseName: exercise.name,
+              exerciseDbId: exercise.exerciseDbId ?? "",
+              videoUrl: exercise.videoUrl ?? "",
+              coachNote: exercise.coachNote ?? "",
+              lang: "en",
+            },
+          })
+        }
+        style={styles.header}
+      >
         <View style={styles.indexBadge}>
           <Text style={styles.indexBadgeText}>{exerciseIndex + 1}</Text>
         </View>
         <View style={{ flex: 1 }}>
-          <Pressable
-            onPress={() =>
-              router.push({
-                pathname: "/student/exerciseDetail",
-                params: {
-                  exerciseName: exercise.name,
-                  exerciseDbId: exercise.exerciseDbId ?? "",
-                  videoUrl: exercise.videoUrl ?? "",
-                  coachNote: exercise.coachNote ?? "",
-                  lang: "en",
-                },
-              })
-            }
-            hitSlop={4}
-          >
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
             <Text style={styles.exerciseName}>{exercise.name}</Text>
-          </Pressable>
+            <Ionicons name="information-circle" size={16} color={Colors.primary} />
+          </View>
           <Text style={styles.exerciseMeta}>
             {t("target", { sets: exercise.sets, reps: exercise.reps })}
             {weightSuffix}
@@ -87,7 +90,7 @@ export function ExerciseGroup({
             </Text>
           ) : null}
         </View>
-      </View>
+      </TouchableOpacity>
 
       {/* Set table header */}
       <View style={styles.tableHeader}>
@@ -125,9 +128,10 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     gap: Spacing.sm,
     marginBottom: Spacing.sm,
+    paddingVertical: 4,
   },
   indexBadge: {
     width: 26,

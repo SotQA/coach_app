@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, TouchableOpacity, ScrollView, Text, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -105,8 +105,21 @@ export default function WorkoutPlanDetail() {
         <Text style={{ ...Typography.section, marginBottom: Spacing.sm }}>Exercises</Text>
         <View style={{ gap: Spacing.sm, marginBottom: Spacing.lg }}>
           {(plan.exercises ?? []).map((ex, i) => (
-            <View
+            <TouchableOpacity
               key={`${ex.name}-${i}`}
+              activeOpacity={0.7}
+              onPress={() =>
+                router.push({
+                  pathname: "/student/exerciseDetail",
+                  params: {
+                    exerciseName: ex.name,
+                    exerciseDbId: ex.exerciseDbId ?? "",
+                    videoUrl: ex.videoUrl ?? "",
+                    coachNote: ex.coachNote ?? "",
+                    lang: "en",
+                  },
+                })
+              }
               style={{
                 backgroundColor: Colors.card,
                 borderRadius: Radius.lg,
@@ -115,27 +128,22 @@ export default function WorkoutPlanDetail() {
                 borderColor: Colors.border,
               }}
             >
-              <Pressable
-                onPress={() =>
-                  router.push({
-                    pathname: "/student/exerciseDetail",
-                    params: {
-                      exerciseName: ex.name,
-                      exerciseDbId: ex.exerciseDbId ?? "",
-                      videoUrl: ex.videoUrl ?? "",
-                      coachNote: ex.coachNote ?? "",
-                      lang: "en",
-                    },
-                  })
-                }
-              >
-                <Text style={{ ...Typography.section, fontWeight: "800" }}>{ex.name}</Text>
-              </Pressable>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                <Text style={{ ...Typography.section, fontWeight: "800", flex: 1 }}>
+                  {ex.name}
+                </Text>
+                <Ionicons name="information-circle" size={16} color={Colors.primary} />
+              </View>
               <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4 }}>
                 {ex.sets} sets · {ex.reps} reps
                 {ex.weight != null ? ` · ${ex.weight} kg` : ""}
               </Text>
-            </View>
+              {ex.coachNote ? (
+                <Text style={{ ...Typography.secondary, color: Colors.primary, marginTop: 4 }}>
+                  {ex.coachNote}
+                </Text>
+              ) : null}
+            </TouchableOpacity>
           ))}
         </View>
 
