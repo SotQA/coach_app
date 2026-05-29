@@ -9,7 +9,6 @@ import type { WorkoutPlan } from "../../types/Workout";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography, FontSizes } from "../../theme/typography";
-import { ScreenLayout } from "../../components/ScreenLayout";
 import { logger } from "@/utils/logger";
 
 export default function TodayWorkout() {
@@ -77,9 +76,8 @@ export default function TodayWorkout() {
   }
 
   return (
-    <ScreenLayout>
-      <View style={{ flex: 1, backgroundColor: Colors.bg }}>
-        <ScrollView contentContainerStyle={{ padding: Spacing.md, paddingBottom: Spacing.lg }}>
+    <View style={{ flex: 1, backgroundColor: Colors.bg }}>
+      <ScrollView contentContainerStyle={{ padding: Spacing.md, paddingBottom: Spacing.lg }}>
         <View
           style={{
             flexDirection: "row",
@@ -140,8 +138,7 @@ export default function TodayWorkout() {
           ))
         )}
         </ScrollView>
-      </View>
-    </ScreenLayout>
+    </View>
   );
 }
 

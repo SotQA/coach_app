@@ -15,7 +15,6 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { Colors } from "../../theme/colors";
 import { Spacing } from "../../theme/spacing";
 import { Typography, FontSizes } from "../../theme/typography";
-import { ScreenLayout } from "../../components/ScreenLayout";
 import { logger } from "@/utils/logger";
 
 // Simple workout logging screen:
@@ -129,7 +128,7 @@ export default function WorkoutScreen() {
   }
 
   return (
-    <ScreenLayout>
+    <View style={{ flex: 1, backgroundColor: Colors.bg }}>
       <KeyboardAwareScrollView
         style={{ flex: 1, backgroundColor: Colors.bg }}
         contentContainerStyle={{ padding: Spacing.md, paddingBottom: Spacing.screenBottom }}
@@ -148,7 +147,7 @@ export default function WorkoutScreen() {
         {message ? <Text style={{ color: Colors.success, marginTop: Spacing.xs }}>{message}</Text> : null}
         {error ? <Text style={{ color: Colors.danger, marginTop: Spacing.xs }}>{error}</Text> : null}
       </KeyboardAwareScrollView>
-    </ScreenLayout>
+    </View>
   );
 }
 

@@ -88,6 +88,8 @@ const normalizeExercise = (ex: any): Exercise => {
     tempo,
     rpe,
     coachNote: ex?.coachNote != null && String(ex.coachNote).trim() !== "" ? String(ex.coachNote) : undefined,
+    videoUrl: ex?.videoUrl != null && String(ex.videoUrl).trim() !== "" ? String(ex.videoUrl) : undefined,
+    exerciseDbId: ex?.exerciseDbId != null && String(ex.exerciseDbId).trim() !== "" ? String(ex.exerciseDbId) : undefined,
   };
 };
 

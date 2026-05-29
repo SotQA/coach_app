@@ -1,4 +1,5 @@
-import { StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { useRouter } from "expo-router";
 import { useI18n } from "../../context/I18nContext";
 import { useUnits } from "../../context/UnitsContext";
 import { toUnit, unitSuffix } from "../../utils/units";
@@ -38,6 +39,7 @@ export function ExerciseGroup({
 }: ExerciseGroupProps) {
   const { t } = useI18n();
   const { unit } = useUnits();
+  const router = useRouter();
 
   const displayWeight =
     exercise.weight != null && Number.isFinite(Number(exercise.weight))
@@ -57,7 +59,23 @@ export function ExerciseGroup({
           <Text style={styles.indexBadgeText}>{exerciseIndex + 1}</Text>
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={styles.exerciseName}>{exercise.name}</Text>
+          <Pressable
+            onPress={() =>
+              router.push({
+                pathname: "/student/exerciseDetail",
+                params: {
+                  exerciseName: exercise.name,
+                  exerciseDbId: exercise.exerciseDbId ?? "",
+                  videoUrl: exercise.videoUrl ?? "",
+                  coachNote: exercise.coachNote ?? "",
+                  lang: "en",
+                },
+              })
+            }
+            hitSlop={4}
+          >
+            <Text style={styles.exerciseName}>{exercise.name}</Text>
+          </Pressable>
           <Text style={styles.exerciseMeta}>
             {t("target", { sets: exercise.sets, reps: exercise.reps })}
             {weightSuffix}

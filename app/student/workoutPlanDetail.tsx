@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ActivityIndicator, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -7,7 +7,6 @@ import { useAuth } from "../../context/AuthContext";
 import { workoutService } from "../../services/workoutService";
 import type { WorkoutPlan } from "../../types/Workout";
 import { PrimaryButton } from "../../components/PrimaryButton";
-import { ScreenLayout } from "../../components/ScreenLayout";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
@@ -56,26 +55,22 @@ export default function WorkoutPlanDetail() {
 
   if (loading) {
     return (
-      <ScreenLayout>
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: Colors.bg }}>
-          <ActivityIndicator color={Colors.primary} />
-        </View>
-      </ScreenLayout>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: Colors.bg }}>
+        <ActivityIndicator color={Colors.primary} />
+      </View>
     );
   }
 
   if (error || !plan) {
     return (
-      <ScreenLayout>
-        <View style={{ flex: 1, padding: Spacing.md, paddingTop: insets.top, backgroundColor: Colors.bg }}>
-          <Text style={{ color: Colors.danger }}>{error ?? "Not found."}</Text>
-        </View>
-      </ScreenLayout>
+      <View style={{ flex: 1, padding: Spacing.md, backgroundColor: Colors.bg }}>
+        <Text style={{ color: Colors.danger }}>{error ?? "Not found."}</Text>
+      </View>
     );
   }
 
   return (
-    <ScreenLayout>
+    <View style={{ flex: 1, backgroundColor: Colors.bg }}>
       <ScrollView
         contentContainerStyle={{
           padding: Spacing.md,
@@ -120,7 +115,22 @@ export default function WorkoutPlanDetail() {
                 borderColor: Colors.border,
               }}
             >
-              <Text style={{ ...Typography.section, fontWeight: "800" }}>{ex.name}</Text>
+              <Pressable
+                onPress={() =>
+                  router.push({
+                    pathname: "/student/exerciseDetail",
+                    params: {
+                      exerciseName: ex.name,
+                      exerciseDbId: ex.exerciseDbId ?? "",
+                      videoUrl: ex.videoUrl ?? "",
+                      coachNote: ex.coachNote ?? "",
+                      lang: "en",
+                    },
+                  })
+                }
+              >
+                <Text style={{ ...Typography.section, fontWeight: "800" }}>{ex.name}</Text>
+              </Pressable>
               <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4 }}>
                 {ex.sets} sets · {ex.reps} reps
                 {ex.weight != null ? ` · ${ex.weight} kg` : ""}
@@ -143,6 +153,6 @@ export default function WorkoutPlanDetail() {
           }
         />
       </ScrollView>
-    </ScreenLayout>
+    </View>
   );
 }

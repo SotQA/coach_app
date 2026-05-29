@@ -1,0 +1,4367 @@
+[
+  {
+    "id": "3_4_Sit-Up",
+    "nameRu": "Скручивание 3/4",
+    "namePl": "Skłon 3/4"
+  },
+  {
+    "id": "90_90_Hamstring",
+    "nameRu": "Растяжка бицепса бедра 90/90",
+    "namePl": "Rozciąganie ścięgna podkolanowego 90/90"
+  },
+  {
+    "id": "Ab_Crunch_Machine",
+    "nameRu": "Тренажёр для скручиваний",
+    "namePl": "Maszyna do brzuszków"
+  },
+  {
+    "id": "Ab_Roller",
+    "nameRu": "Ролик для пресса",
+    "namePl": "Kółko do ćwiczeń brzucha"
+  },
+  {
+    "id": "Adductor",
+    "nameRu": "Аддуктор",
+    "namePl": "Przywodziciel"
+  },
+  {
+    "id": "Adductor_Groin",
+    "nameRu": "Аддуктор / пах",
+    "namePl": "Przywodziciel / pachwina"
+  },
+  {
+    "id": "Advanced_Kettlebell_Windmill",
+    "nameRu": "Ветряная мельница с гирей (продвинутый)",
+    "namePl": "Zaawansowany młyn z kettlebell"
+  },
+  {
+    "id": "Air_Bike",
+    "nameRu": "Эйр байк",
+    "namePl": "Air bike"
+  },
+  {
+    "id": "All_Fours_Quad_Stretch",
+    "nameRu": "Растяжка квадрицепса на четвереньках",
+    "namePl": "Rozciąganie czworogłowego na czworakach"
+  },
+  {
+    "id": "Alternate_Hammer_Curl",
+    "nameRu": "Поочерёдное сгибание молотковым хватом",
+    "namePl": "Naprzemienne uginanie młotkowe"
+  },
+  {
+    "id": "Alternate_Heel_Touchers",
+    "nameRu": "Поочерёдное касание пяток",
+    "namePl": "Naprzemienne dotykanie pięt"
+  },
+  {
+    "id": "Alternate_Incline_Dumbbell_Curl",
+    "nameRu": "Поочерёдное сгибание с гантелями на наклонной скамье",
+    "namePl": "Naprzemienne uginanie hantlami na ławce skośnej"
+  },
+  {
+    "id": "Alternate_Leg_Diagonal_Bound",
+    "nameRu": "Поочерёдные диагональные прыжки",
+    "namePl": "Naprzemienne skoki diagonalne"
+  },
+  {
+    "id": "Alternating_Cable_Shoulder_Press",
+    "nameRu": "Поочерёдный жим на плечи в кроссовере",
+    "namePl": "Naprzemienne wyciskanie na barki na wyciągu"
+  },
+  {
+    "id": "Alternating_Deltoid_Raise",
+    "nameRu": "Поочерёдный подъём на дельты",
+    "namePl": "Naprzemienne unoszenie na barki"
+  },
+  {
+    "id": "Alternating_Floor_Press",
+    "nameRu": "Поочерёдный жим лёжа на полу",
+    "namePl": "Naprzemienne wyciskanie na podłodze"
+  },
+  {
+    "id": "Alternating_Hang_Clean",
+    "nameRu": "Поочерёдный подъём на грудь с виса",
+    "namePl": "Naprzemienne zarzucanie z podwieszenia"
+  },
+  {
+    "id": "Alternating_Kettlebell_Press",
+    "nameRu": "Поочерёдный жим гири",
+    "namePl": "Naprzemienne wyciskanie kettlebell"
+  },
+  {
+    "id": "Alternating_Kettlebell_Row",
+    "nameRu": "Поочерёдная тяга гири в наклоне",
+    "namePl": "Naprzemienne wiosłowanie kettlebell"
+  },
+  {
+    "id": "Alternating_Renegade_Row",
+    "nameRu": "Поочерёдная тяга в упоре (Renegade Row)",
+    "namePl": "Naprzemienne wiosłowanie w podporze (Renegade Row)"
+  },
+  {
+    "id": "Ankle_Circles",
+    "nameRu": "Вращение голеностопного сустава",
+    "namePl": "Krążenia stawu skokowego"
+  },
+  {
+    "id": "Ankle_On_The_Knee",
+    "nameRu": "Лодыжка на колене",
+    "namePl": "Kostka na kolanie"
+  },
+  {
+    "id": "Anterior_Tibialis-SMR",
+    "nameRu": "Передняя большеберцовая мышца — СМР",
+    "namePl": "Piszczel przedni — SMR"
+  },
+  {
+    "id": "Anti-Gravity_Press",
+    "nameRu": "Жим против гравитации",
+    "namePl": "Wyciskanie antygrawit."
+  },
+  {
+    "id": "Arm_Circles",
+    "nameRu": "Вращение руками",
+    "namePl": "Krążenia ramionami"
+  },
+  {
+    "id": "Arnold_Dumbbell_Press",
+    "nameRu": "Жим Арнольда",
+    "namePl": "Wyciskanie Arnolda"
+  },
+  {
+    "id": "Around_The_Worlds",
+    "nameRu": "Разводка по кругу",
+    "namePl": "Okrężne unoszenie"
+  },
+  {
+    "id": "Atlas_Stone_Trainer",
+    "nameRu": "Тренажёр камня Атласа",
+    "namePl": "Trener kamienia atlasowego"
+  },
+  {
+    "id": "Atlas_Stones",
+    "nameRu": "Камни Атласа",
+    "namePl": "Kamienie atlasowe"
+  },
+  {
+    "id": "Axle_Deadlift",
+    "nameRu": "Становая тяга с осью (толстый гриф)",
+    "namePl": "Martwy ciąg na osi"
+  },
+  {
+    "id": "Back_Flyes_-_With_Bands",
+    "nameRu": "Разведение рук назад с лентой",
+    "namePl": "Odwodzenie ramion wstecz z taśmą"
+  },
+  {
+    "id": "Backward_Drag",
+    "nameRu": "Волочение саней назад",
+    "namePl": "Ciągnięcie sań w tył"
+  },
+  {
+    "id": "Backward_Medicine_Ball_Throw",
+    "nameRu": "Бросок медбола назад",
+    "namePl": "Rzut piłką lekarską w tył"
+  },
+  {
+    "id": "Balance_Board",
+    "nameRu": "Балансировочная доска",
+    "namePl": "Deska balansowa"
+  },
+  {
+    "id": "Ball_Leg_Curl",
+    "nameRu": "Сгибание ног на фитболе",
+    "namePl": "Uginanie nóg na piłce"
+  },
+  {
+    "id": "Band_Assisted_Pull-Up",
+    "nameRu": "Подтягивание с лентой",
+    "namePl": "Podciąganie z taśmą"
+  },
+  {
+    "id": "Band_Good_Morning",
+    "nameRu": "Наклон с лентой (Good Morning)",
+    "namePl": "Dzień dobry z taśmą"
+  },
+  {
+    "id": "Band_Good_Morning_Pull_Through",
+    "nameRu": "Наклон с лентой (протяжка)",
+    "namePl": "Dzień dobry z taśmą (pull through)"
+  },
+  {
+    "id": "Band_Hip_Adductions",
+    "nameRu": "Приведение бедра с лентой",
+    "namePl": "Przywiedzenie uda z taśmą"
+  },
+  {
+    "id": "Band_Pull_Apart",
+    "nameRu": "Растяжка ленты перед собой",
+    "namePl": "Rozciąganie taśmy"
+  },
+  {
+    "id": "Band_Skull_Crusher",
+    "nameRu": "Французский жим с лентой",
+    "namePl": "Łamanie czaszki z taśmą"
+  },
+  {
+    "id": "Barbell_Ab_Rollout",
+    "nameRu": "Катание штанги (ролик для пресса)",
+    "namePl": "Rollout ze sztangą"
+  },
+  {
+    "id": "Barbell_Ab_Rollout_-_On_Knees",
+    "nameRu": "Катание штанги на коленях",
+    "namePl": "Rollout ze sztangą na kolanach"
+  },
+  {
+    "id": "Barbell_Bench_Press_-_Medium_Grip",
+    "nameRu": "Жим штанги лёжа (средний хват)",
+    "namePl": "Wyciskanie sztangi leżąc (chwyt średni)"
+  },
+  {
+    "id": "Barbell_Curl",
+    "nameRu": "Сгибание рук со штангой стоя",
+    "namePl": "Uginanie ramion ze sztangą"
+  },
+  {
+    "id": "Barbell_Curls_Lying_Against_An_Incline",
+    "nameRu": "Сгибание рук со штангой на наклонной скамье",
+    "namePl": "Uginanie ramion ze sztangą na ławce skośnej"
+  },
+  {
+    "id": "Barbell_Deadlift",
+    "nameRu": "Становая тяга",
+    "namePl": "Martwy ciąg"
+  },
+  {
+    "id": "Barbell_Full_Squat",
+    "nameRu": "Присед со штангой (полный)",
+    "namePl": "Pełny przysiad ze sztangą"
+  },
+  {
+    "id": "Barbell_Glute_Bridge",
+    "nameRu": "Ягодичный мост со штангой",
+    "namePl": "Mostek biodrowy ze sztangą"
+  },
+  {
+    "id": "Barbell_Guillotine_Bench_Press",
+    "nameRu": "Жим штанги к шее (гильотина)",
+    "namePl": "Wyciskanie do szyi (gilotyna)"
+  },
+  {
+    "id": "Barbell_Hack_Squat",
+    "nameRu": "Гакк-присед со штангой",
+    "namePl": "Przysiad hack ze sztangą"
+  },
+  {
+    "id": "Barbell_Hip_Thrust",
+    "nameRu": "Тяга бедром со штангой",
+    "namePl": "Hip thrust ze sztangą"
+  },
+  {
+    "id": "Barbell_Incline_Bench_Press_-_Medium_Grip",
+    "nameRu": "Жим штанги на наклонной скамье (средний хват)",
+    "namePl": "Wyciskanie sztangi na ławce skośnej (chwyt średni)"
+  },
+  {
+    "id": "Barbell_Incline_Shoulder_Raise",
+    "nameRu": "Подъём штанги на дельты на наклонной скамье",
+    "namePl": "Unoszenie sztangi na barki na ławce skośnej"
+  },
+  {
+    "id": "Barbell_Lunge",
+    "nameRu": "Выпад со штангой",
+    "namePl": "Wykrok ze sztangą"
+  },
+  {
+    "id": "Barbell_Rear_Delt_Row",
+    "nameRu": "Тяга штанги для задней дельты",
+    "namePl": "Wiosłowanie sztangą do tylnego barku"
+  },
+  {
+    "id": "Barbell_Rollout_from_Bench",
+    "nameRu": "Катание штанги со скамьи",
+    "namePl": "Rollout ze sztangą z ławki"
+  },
+  {
+    "id": "Barbell_Seated_Calf_Raise",
+    "nameRu": "Подъём на носки со штангой сидя",
+    "namePl": "Wspięcia na palce ze sztangą w siadzie"
+  },
+  {
+    "id": "Barbell_Shoulder_Press",
+    "nameRu": "Жим штанги стоя",
+    "namePl": "Wyciskanie sztangi na barki"
+  },
+  {
+    "id": "Barbell_Shrug",
+    "nameRu": "Шраги со штангой",
+    "namePl": "Szragi ze sztangą"
+  },
+  {
+    "id": "Barbell_Shrug_Behind_The_Back",
+    "nameRu": "Шраги со штангой за спиной",
+    "namePl": "Szragi ze sztangą za plecami"
+  },
+  {
+    "id": "Barbell_Side_Bend",
+    "nameRu": "Боковые наклоны со штангой",
+    "namePl": "Skłony boczne ze sztangą"
+  },
+  {
+    "id": "Barbell_Side_Split_Squat",
+    "nameRu": "Боковой присед со штангой",
+    "namePl": "Boczny przysiad ze sztangą"
+  },
+  {
+    "id": "Barbell_Squat",
+    "nameRu": "Присед со штангой",
+    "namePl": "Przysiad ze sztangą"
+  },
+  {
+    "id": "Barbell_Squat_To_A_Bench",
+    "nameRu": "Присед со штангой до скамьи",
+    "namePl": "Przysiad ze sztangą do ławki"
+  },
+  {
+    "id": "Barbell_Step_Ups",
+    "nameRu": "Запрыгивание на платформу со штангой",
+    "namePl": "Wchodzenie na step ze sztangą"
+  },
+  {
+    "id": "Barbell_Walking_Lunge",
+    "nameRu": "Выпады в ходьбе со штангой",
+    "namePl": "Wykroki w marszu ze sztangą"
+  },
+  {
+    "id": "Battling_Ropes",
+    "nameRu": "Боевые канаты",
+    "namePl": "Liny bojowe"
+  },
+  {
+    "id": "Bear_Crawl_Sled_Drags",
+    "nameRu": "Волочение саней на четвереньках",
+    "namePl": "Ciągnięcie sań pełzaniem"
+  },
+  {
+    "id": "Behind_Head_Chest_Stretch",
+    "nameRu": "Растяжка груди за головой",
+    "namePl": "Rozciąganie klatki piersiowej za głową"
+  },
+  {
+    "id": "Bench_Dips",
+    "nameRu": "Отжимания от скамьи",
+    "namePl": "Pompki na ławce"
+  },
+  {
+    "id": "Bench_Jump",
+    "nameRu": "Прыжок на скамью",
+    "namePl": "Skok na ławkę"
+  },
+  {
+    "id": "Bench_Press_-_Powerlifting",
+    "nameRu": "Жим лёжа (пауэрлифтинг)",
+    "namePl": "Wyciskanie leżąc (powerlifting)"
+  },
+  {
+    "id": "Bench_Press_-_With_Bands",
+    "nameRu": "Жим лёжа с лентами",
+    "namePl": "Wyciskanie leżąc z taśmami"
+  },
+  {
+    "id": "Bench_Press_with_Chains",
+    "nameRu": "Жим лёжа с цепями",
+    "namePl": "Wyciskanie leżąc z łańcuchami"
+  },
+  {
+    "id": "Bench_Sprint",
+    "nameRu": "Спринт на скамье",
+    "namePl": "Sprint na ławce"
+  },
+  {
+    "id": "Bent-Arm_Barbell_Pullover",
+    "nameRu": "Пуловер со штангой (согнутые руки)",
+    "namePl": "Pullover ze sztangą na zgiętych ramionach"
+  },
+  {
+    "id": "Bent-Arm_Dumbbell_Pullover",
+    "nameRu": "Пуловер с гантелью (согнутые руки)",
+    "namePl": "Pullover z hantlem na zgiętych ramionach"
+  },
+  {
+    "id": "Bent-Knee_Hip_Raise",
+    "nameRu": "Подъём таза с согнутыми коленями",
+    "namePl": "Unoszenie bioder z ugiętymi kolanami"
+  },
+  {
+    "id": "Bent_Over_Barbell_Row",
+    "nameRu": "Тяга штанги в наклоне",
+    "namePl": "Wiosłowanie sztangą w opadzie tułowia"
+  },
+  {
+    "id": "Bent_Over_Dumbbell_Rear_Delt_Raise_With_Head_On_Bench",
+    "nameRu": "Подъём гантелей на заднюю дельту в наклоне с упором головы",
+    "namePl": "Unoszenie hantli na tylny bark w pochyleniu z oparciem głowy"
+  },
+  {
+    "id": "Bent_Over_Low-Pulley_Side_Lateral",
+    "nameRu": "Подъём через нижний блок в наклоне",
+    "namePl": "Unoszenie boczne w pochyleniu na dolnym wyciągu"
+  },
+  {
+    "id": "Bent_Over_One-Arm_Long_Bar_Row",
+    "nameRu": "Тяга длинного грифа одной рукой в наклоне",
+    "namePl": "Wiosłowanie długim gryfem jedną ręką w pochyleniu"
+  },
+  {
+    "id": "Bent_Over_Two-Arm_Long_Bar_Row",
+    "nameRu": "Тяга длинного грифа двумя руками в наклоне",
+    "namePl": "Wiosłowanie długim gryfem oburącz w pochyleniu"
+  },
+  {
+    "id": "Bent_Over_Two-Dumbbell_Row",
+    "nameRu": "Тяга двух гантелей в наклоне",
+    "namePl": "Wiosłowanie dwoma hantlami w pochyleniu"
+  },
+  {
+    "id": "Bent_Over_Two-Dumbbell_Row_With_Palms_In",
+    "nameRu": "Тяга двух гантелей в наклоне (нейтральный хват)",
+    "namePl": "Wiosłowanie dwoma hantlami w pochyleniu (chwyt neutralny)"
+  },
+  {
+    "id": "Bent_Press",
+    "nameRu": "Боковой жим стоя (Bent Press)",
+    "namePl": "Wyciskanie boczne (Bent Press)"
+  },
+  {
+    "id": "Bicycling",
+    "nameRu": "Езда на велосипеде",
+    "namePl": "Jazda na rowerze"
+  },
+  {
+    "id": "Bicycling_Stationary",
+    "nameRu": "Велотренажёр",
+    "namePl": "Rower stacjonarny"
+  },
+  {
+    "id": "Board_Press",
+    "nameRu": "Жим лёжа с досками",
+    "namePl": "Wyciskanie z deskami"
+  },
+  {
+    "id": "Body-Up",
+    "nameRu": "Боди-ап",
+    "namePl": "Body-up"
+  },
+  {
+    "id": "Body_Tricep_Press",
+    "nameRu": "Отжимания для трицепса",
+    "namePl": "Pompki na triceps"
+  },
+  {
+    "id": "Bodyweight_Flyes",
+    "nameRu": "Разводка с весом тела",
+    "namePl": "Rozpiętki z ciężarem ciała"
+  },
+  {
+    "id": "Bodyweight_Mid_Row",
+    "nameRu": "Горизонтальная тяга с весом тела",
+    "namePl": "Wiosłowanie z ciężarem ciała"
+  },
+  {
+    "id": "Bodyweight_Squat",
+    "nameRu": "Присед с весом тела",
+    "namePl": "Przysiad z ciężarem ciała"
+  },
+  {
+    "id": "Bodyweight_Walking_Lunge",
+    "nameRu": "Выпады в ходьбе с весом тела",
+    "namePl": "Wykroki w marszu z ciężarem ciała"
+  },
+  {
+    "id": "Bosu_Ball_Cable_Crunch_With_Side_Bends",
+    "nameRu": "Скручивания с боковыми наклонами на Bosu с блоком",
+    "namePl": "Brzuszki na Bosu z wyciągiem i skłonami bocznymi"
+  },
+  {
+    "id": "Bottoms-Up_Clean_From_The_Hang_Position",
+    "nameRu": "Подъём на грудь с виса (Bottoms-Up)",
+    "namePl": "Zarzucanie z podwieszenia odwróconym chwytem"
+  },
+  {
+    "id": "Bottoms_Up",
+    "nameRu": "Стойка вверх дном (Bottoms-Up)",
+    "namePl": "Bottoms Up"
+  },
+  {
+    "id": "Box_Jump_Multiple_Response",
+    "nameRu": "Прыжки на ящик (многократные)",
+    "namePl": "Skoki na skrzynię (wielokrotne)"
+  },
+  {
+    "id": "Box_Skip",
+    "nameRu": "Скип на ящик",
+    "namePl": "Skip na skrzynię"
+  },
+  {
+    "id": "Box_Squat",
+    "nameRu": "Присед на ящик",
+    "namePl": "Przysiad na skrzynię"
+  },
+  {
+    "id": "Box_Squat_with_Bands",
+    "nameRu": "Присед на ящик с лентами",
+    "namePl": "Przysiad na skrzynię z taśmami"
+  },
+  {
+    "id": "Box_Squat_with_Chains",
+    "nameRu": "Присед на ящик с цепями",
+    "namePl": "Przysiad na skrzynię z łańcuchami"
+  },
+  {
+    "id": "Brachialis-SMR",
+    "nameRu": "Плечевая мышца — СМР",
+    "namePl": "Mięsień ramienny — SMR"
+  },
+  {
+    "id": "Bradford_Rocky_Presses",
+    "nameRu": "Жим Брэдфорда",
+    "namePl": "Wyciskanie Bradforda"
+  },
+  {
+    "id": "Butt-Ups",
+    "nameRu": "Подъём таза",
+    "namePl": "Unoszenie bioder"
+  },
+  {
+    "id": "Butt_Lift_Bridge",
+    "nameRu": "Ягодичный мост",
+    "namePl": "Mostek biodrowy"
+  },
+  {
+    "id": "Butterfly",
+    "nameRu": "Бабочка",
+    "namePl": "Motyl"
+  },
+  {
+    "id": "Cable_Chest_Press",
+    "nameRu": "Жим в кроссовере",
+    "namePl": "Wyciskanie na wyciągu"
+  },
+  {
+    "id": "Cable_Crossover",
+    "nameRu": "Кроссовер",
+    "namePl": "Krzyżowanie wyciągów"
+  },
+  {
+    "id": "Cable_Crunch",
+    "nameRu": "Скручивание на блоке",
+    "namePl": "Brzuszek na wyciągu"
+  },
+  {
+    "id": "Cable_Deadlifts",
+    "nameRu": "Становая тяга на блоке",
+    "namePl": "Martwy ciąg na wyciągu"
+  },
+  {
+    "id": "Cable_Hammer_Curls_-_Rope_Attachment",
+    "nameRu": "Сгибание молотковым хватом на блоке (верёвка)",
+    "namePl": "Uginanie młotkowe na wyciągu (linka)"
+  },
+  {
+    "id": "Cable_Hip_Adduction",
+    "nameRu": "Приведение бедра на блоке",
+    "namePl": "Przywiedzenie uda na wyciągu"
+  },
+  {
+    "id": "Cable_Incline_Pushdown",
+    "nameRu": "Разгибание трицепса на блоке под углом",
+    "namePl": "Prostowanie ramion na wyciągu pod kątem"
+  },
+  {
+    "id": "Cable_Incline_Triceps_Extension",
+    "nameRu": "Разгибание трицепса на блоке (наклонная скамья)",
+    "namePl": "Prostowanie tricepsa na wyciągu na ławce skośnej"
+  },
+  {
+    "id": "Cable_Internal_Rotation",
+    "nameRu": "Внутренняя ротация на блоке",
+    "namePl": "Rotacja wewnętrzna na wyciągu"
+  },
+  {
+    "id": "Cable_Iron_Cross",
+    "nameRu": "Крест на блоке",
+    "namePl": "Krzyż na wyciągu"
+  },
+  {
+    "id": "Cable_Judo_Flip",
+    "nameRu": "Бросок дзюдо на блоке",
+    "namePl": "Rzut judo na wyciągu"
+  },
+  {
+    "id": "Cable_Lying_Triceps_Extension",
+    "nameRu": "Разгибание трицепса лёжа на блоке",
+    "namePl": "Prostowanie tricepsa leżąc na wyciągu"
+  },
+  {
+    "id": "Cable_One_Arm_Tricep_Extension",
+    "nameRu": "Разгибание трицепса одной рукой на блоке",
+    "namePl": "Prostowanie tricepsa jedną ręką na wyciągu"
+  },
+  {
+    "id": "Cable_Preacher_Curl",
+    "nameRu": "Сгибание рук на блоке (скамья Скотта)",
+    "namePl": "Uginanie na wyciągu (ławka Scotta)"
+  },
+  {
+    "id": "Cable_Rear_Delt_Fly",
+    "nameRu": "Разводка на заднюю дельту на блоке",
+    "namePl": "Odwodzenie na tylny bark na wyciągu"
+  },
+  {
+    "id": "Cable_Reverse_Crunch",
+    "nameRu": "Обратное скручивание на блоке",
+    "namePl": "Odwrócony brzuszek na wyciągu"
+  },
+  {
+    "id": "Cable_Rope_Overhead_Triceps_Extension",
+    "nameRu": "Разгибание трицепса над головой с верёвкой на блоке",
+    "namePl": "Prostowanie tricepsa nad głową z liną na wyciągu"
+  },
+  {
+    "id": "Cable_Rope_Rear-Delt_Rows",
+    "nameRu": "Тяга верёвки к лицу на блоке (задняя дельта)",
+    "namePl": "Wiosłowanie liną do tylnego barku na wyciągu"
+  },
+  {
+    "id": "Cable_Russian_Twists",
+    "nameRu": "Русские повороты на блоке",
+    "namePl": "Rosyjski skręt tułowia na wyciągu"
+  },
+  {
+    "id": "Cable_Seated_Crunch",
+    "nameRu": "Скручивание сидя на блоке",
+    "namePl": "Brzuszek siedzący na wyciągu"
+  },
+  {
+    "id": "Cable_Seated_Lateral_Raise",
+    "nameRu": "Подъём в сторону сидя на блоке",
+    "namePl": "Unoszenie boczne na wyciągu w siadzie"
+  },
+  {
+    "id": "Cable_Shoulder_Press",
+    "nameRu": "Жим на плечи на блоке",
+    "namePl": "Wyciskanie na barki na wyciągu"
+  },
+  {
+    "id": "Cable_Shrugs",
+    "nameRu": "Шраги на блоке",
+    "namePl": "Szragi na wyciągu"
+  },
+  {
+    "id": "Cable_Wrist_Curl",
+    "nameRu": "Сгибание запястья на блоке",
+    "namePl": "Uginanie nadgarstka na wyciągu"
+  },
+  {
+    "id": "Calf-Machine_Shoulder_Shrug",
+    "nameRu": "Шраги на тренажёре для икр",
+    "namePl": "Szragi na maszynie do łydek"
+  },
+  {
+    "id": "Calf_Press",
+    "nameRu": "Жим на носки",
+    "namePl": "Wspięcia na palce na prasie"
+  },
+  {
+    "id": "Calf_Press_On_The_Leg_Press_Machine",
+    "nameRu": "Жим на носки на тренажёре для ног",
+    "namePl": "Wspięcia na palce na maszynie do nóg"
+  },
+  {
+    "id": "Calf_Raise_On_A_Dumbbell",
+    "nameRu": "Подъём на носки с гантелью",
+    "namePl": "Wspięcia na palce z hantlem"
+  },
+  {
+    "id": "Calf_Raises_-_With_Bands",
+    "nameRu": "Подъём на носки с лентой",
+    "namePl": "Wspięcia na palce z taśmą"
+  },
+  {
+    "id": "Calf_Stretch_Elbows_Against_Wall",
+    "nameRu": "Растяжка икр с упором локтей в стену",
+    "namePl": "Rozciąganie łydki z oparciem łokci o ścianę"
+  },
+  {
+    "id": "Calf_Stretch_Hands_Against_Wall",
+    "nameRu": "Растяжка икр с упором рук в стену",
+    "namePl": "Rozciąganie łydki z oparciem rąk o ścianę"
+  },
+  {
+    "id": "Calves-SMR",
+    "nameRu": "Икроножные мышцы — СМР",
+    "namePl": "Łydki — SMR"
+  },
+  {
+    "id": "Car_Deadlift",
+    "nameRu": "Становая тяга автомобиля",
+    "namePl": "Martwy ciąg samochodu"
+  },
+  {
+    "id": "Car_Drivers",
+    "nameRu": "Вращение диска (руль)",
+    "namePl": "Obroty talerzem (kierownica)"
+  },
+  {
+    "id": "Carioca_Quick_Step",
+    "nameRu": "Кариока",
+    "namePl": "Krokstep boczny (Carioca)"
+  },
+  {
+    "id": "Cat_Stretch",
+    "nameRu": "Кошка (растяжка)",
+    "namePl": "Rozciąganie kota"
+  },
+  {
+    "id": "Catch_and_Overhead_Throw",
+    "nameRu": "Ловля и бросок медбола над головой",
+    "namePl": "Chwyt i rzut piłką nad głową"
+  },
+  {
+    "id": "Chain_Handle_Extension",
+    "nameRu": "Разгибание трицепса с цепью",
+    "namePl": "Prostowanie tricepsa z łańcuchem"
+  },
+  {
+    "id": "Chain_Press",
+    "nameRu": "Жим с цепями",
+    "namePl": "Wyciskanie z łańcuchami"
+  },
+  {
+    "id": "Chair_Leg_Extended_Stretch",
+    "nameRu": "Растяжка ноги на стуле",
+    "namePl": "Rozciąganie nogi na krześle"
+  },
+  {
+    "id": "Chair_Lower_Back_Stretch",
+    "nameRu": "Растяжка поясницы на стуле",
+    "namePl": "Rozciąganie odcinka lędźwiowego na krześle"
+  },
+  {
+    "id": "Chair_Squat",
+    "nameRu": "Присед на стул",
+    "namePl": "Przysiad na krzesło"
+  },
+  {
+    "id": "Chair_Upper_Body_Stretch",
+    "nameRu": "Растяжка верхней части тела на стуле",
+    "namePl": "Rozciąganie górnej części ciała na krześle"
+  },
+  {
+    "id": "Chest_And_Front_Of_Shoulder_Stretch",
+    "nameRu": "Растяжка груди и передней дельты",
+    "namePl": "Rozciąganie klatki i przedniego barku"
+  },
+  {
+    "id": "Chest_Push_from_3_point_stance",
+    "nameRu": "Толчок грудью из трёхточечной стойки",
+    "namePl": "Pchnięcie klatką z postawy trójpunktowej"
+  },
+  {
+    "id": "Chest_Push_multiple_response",
+    "nameRu": "Толчок грудью (многократный)",
+    "namePl": "Pchnięcie klatką (wielokrotne)"
+  },
+  {
+    "id": "Chest_Push_single_response",
+    "nameRu": "Толчок грудью (однократный)",
+    "namePl": "Pchnięcie klatką (jednokrotne)"
+  },
+  {
+    "id": "Chest_Push_with_Run_Release",
+    "nameRu": "Толчок грудью с последующим спринтом",
+    "namePl": "Pchnięcie klatką z wybiegiem"
+  },
+  {
+    "id": "Chest_Stretch_on_Stability_Ball",
+    "nameRu": "Растяжка груди на фитболе",
+    "namePl": "Rozciąganie klatki na piłce gimnastycznej"
+  },
+  {
+    "id": "Childs_Pose",
+    "nameRu": "Поза ребёнка",
+    "namePl": "Pozycja dziecka"
+  },
+  {
+    "id": "Chin-Up",
+    "nameRu": "Подтягивание обратным хватом",
+    "namePl": "Podciąganie podchwytem"
+  },
+  {
+    "id": "Chin_To_Chest_Stretch",
+    "nameRu": "Растяжка шеи (подбородок к груди)",
+    "namePl": "Rozciąganie szyi (broda do klatki)"
+  },
+  {
+    "id": "Circus_Bell",
+    "nameRu": "Цирковой колокол",
+    "namePl": "Dzwon cyrkowy"
+  },
+  {
+    "id": "Clean",
+    "nameRu": "Подъём на грудь",
+    "namePl": "Zarzut"
+  },
+  {
+    "id": "Clean_Deadlift",
+    "nameRu": "Тяга под подъём на грудь",
+    "namePl": "Martwy ciąg do zarzutu"
+  },
+  {
+    "id": "Clean_Pull",
+    "nameRu": "Тяга под подъём",
+    "namePl": "Wyciąg do zarzutu"
+  },
+  {
+    "id": "Clean_Shrug",
+    "nameRu": "Шраг под подъём",
+    "namePl": "Szragi do zarzutu"
+  },
+  {
+    "id": "Clean_and_Jerk",
+    "nameRu": "Толчок",
+    "namePl": "Podrzut"
+  },
+  {
+    "id": "Clean_and_Press",
+    "nameRu": "Подъём на грудь и жим",
+    "namePl": "Zarzut i wyciskanie"
+  },
+  {
+    "id": "Clean_from_Blocks",
+    "nameRu": "Подъём на грудь с блоков",
+    "namePl": "Zarzut z bloków"
+  },
+  {
+    "id": "Clock_Push-Up",
+    "nameRu": "Отжимание по часовой стрелке",
+    "namePl": "Pompka w zegar"
+  },
+  {
+    "id": "Close-Grip_Barbell_Bench_Press",
+    "nameRu": "Жим штанги лёжа узким хватом",
+    "namePl": "Wyciskanie sztangi leżąc wąskim chwytem"
+  },
+  {
+    "id": "Close-Grip_Dumbbell_Press",
+    "nameRu": "Жим гантелей узким хватом",
+    "namePl": "Wyciskanie hantlami wąskim chwytem"
+  },
+  {
+    "id": "Close-Grip_EZ-Bar_Curl_with_Band",
+    "nameRu": "Сгибание с EZ-грифом узким хватом с лентой",
+    "namePl": "Uginanie z gryfem EZ wąskim chwytem z taśmą"
+  },
+  {
+    "id": "Close-Grip_EZ-Bar_Press",
+    "nameRu": "Жим EZ-грифа узким хватом",
+    "namePl": "Wyciskanie gryfu EZ wąskim chwytem"
+  },
+  {
+    "id": "Close-Grip_EZ_Bar_Curl",
+    "nameRu": "Сгибание с EZ-грифом узким хватом",
+    "namePl": "Uginanie z gryfem EZ wąskim chwytem"
+  },
+  {
+    "id": "Close-Grip_Front_Lat_Pulldown",
+    "nameRu": "Тяга верхнего блока узким хватом",
+    "namePl": "Ściąganie na wyciągu górnym wąskim chwytem"
+  },
+  {
+    "id": "Close-Grip_Push-Up_off_of_a_Dumbbell",
+    "nameRu": "Отжимание узким хватом от гантели",
+    "namePl": "Pompka wąskim chwytem na hantlu"
+  },
+  {
+    "id": "Close-Grip_Standing_Barbell_Curl",
+    "nameRu": "Сгибание со штангой стоя узким хватом",
+    "namePl": "Uginanie ze sztangą stojąc wąskim chwytem"
+  },
+  {
+    "id": "Cocoons",
+    "nameRu": "Коконы (скручивания)",
+    "namePl": "Kokony (brzuszki)"
+  },
+  {
+    "id": "Conans_Wheel",
+    "nameRu": "Колесо Конана",
+    "namePl": "Koło Conana"
+  },
+  {
+    "id": "Concentration_Curls",
+    "nameRu": "Концентрированное сгибание",
+    "namePl": "Uginanie koncentryczne"
+  },
+  {
+    "id": "Cross-Body_Crunch",
+    "nameRu": "Скручивание с поворотом",
+    "namePl": "Brzuszek skrętny"
+  },
+  {
+    "id": "Cross_Body_Hammer_Curl",
+    "nameRu": "Молотковое сгибание к противоположному плечу",
+    "namePl": "Uginanie młotkowe przez ciało"
+  },
+  {
+    "id": "Cross_Over_-_With_Bands",
+    "nameRu": "Кроссовер с лентами",
+    "namePl": "Krzyżowanie z taśmami"
+  },
+  {
+    "id": "Crossover_Reverse_Lunge",
+    "nameRu": "Обратный выпад крест-накрест",
+    "namePl": "Odwrócony wykrok skrzyżny"
+  },
+  {
+    "id": "Crucifix",
+    "nameRu": "Распятие",
+    "namePl": "Krucyfiks"
+  },
+  {
+    "id": "Crunch_-_Hands_Overhead",
+    "nameRu": "Скручивание с руками над головой",
+    "namePl": "Brzuszek z rękami nad głową"
+  },
+  {
+    "id": "Crunch_-_Legs_On_Exercise_Ball",
+    "nameRu": "Скручивание с ногами на мяче",
+    "namePl": "Brzuszek z nogami na piłce"
+  },
+  {
+    "id": "Crunches",
+    "nameRu": "Скручивания",
+    "namePl": "Brzuszki"
+  },
+  {
+    "id": "Cuban_Press",
+    "nameRu": "Кубинский жим",
+    "namePl": "Wyciskanie kubańskie"
+  },
+  {
+    "id": "Dancers_Stretch",
+    "nameRu": "Растяжка танцора",
+    "namePl": "Rozciąganie tancerza"
+  },
+  {
+    "id": "Dead_Bug",
+    "nameRu": "Мёртвый жук",
+    "namePl": "Martwy robak"
+  },
+  {
+    "id": "Deadlift_with_Bands",
+    "nameRu": "Становая тяга с лентами",
+    "namePl": "Martwy ciąg z taśmami"
+  },
+  {
+    "id": "Deadlift_with_Chains",
+    "nameRu": "Становая тяга с цепями",
+    "namePl": "Martwy ciąg z łańcuchami"
+  },
+  {
+    "id": "Decline_Barbell_Bench_Press",
+    "nameRu": "Жим штанги на скамье с отрицательным углом",
+    "namePl": "Wyciskanie sztangi na ławce ujemnej"
+  },
+  {
+    "id": "Decline_Close-Grip_Bench_To_Skull_Crusher",
+    "nameRu": "Жим узким хватом / французский жим на отрицательной скамье",
+    "namePl": "Wyciskanie wąskim chwytem i łamanie czaszki na ławce ujemnej"
+  },
+  {
+    "id": "Decline_Crunch",
+    "nameRu": "Скручивание на наклонной скамье (голова вниз)",
+    "namePl": "Brzuszek na ławce ujemnej"
+  },
+  {
+    "id": "Decline_Dumbbell_Bench_Press",
+    "nameRu": "Жим гантелей на скамье с отрицательным углом",
+    "namePl": "Wyciskanie hantlami na ławce ujemnej"
+  },
+  {
+    "id": "Decline_Dumbbell_Flyes",
+    "nameRu": "Разводка гантелей на скамье с отрицательным углом",
+    "namePl": "Rozpiętki hantlami na ławce ujemnej"
+  },
+  {
+    "id": "Decline_Dumbbell_Triceps_Extension",
+    "nameRu": "Разгибание трицепса с гантелями на наклонной скамье",
+    "namePl": "Prostowanie tricepsa z hantlami na ławce ujemnej"
+  },
+  {
+    "id": "Decline_EZ_Bar_Triceps_Extension",
+    "nameRu": "Французский жим с EZ-грифом на наклонной скамье",
+    "namePl": "Prostowanie tricepsa z gryfem EZ na ławce ujemnej"
+  },
+  {
+    "id": "Decline_Oblique_Crunch",
+    "nameRu": "Косое скручивание на наклонной скамье",
+    "namePl": "Skośny brzuszek na ławce ujemnej"
+  },
+  {
+    "id": "Decline_Push-Up",
+    "nameRu": "Отжимание с ногами вверху",
+    "namePl": "Pompka z nogami na podwyższeniu"
+  },
+  {
+    "id": "Decline_Reverse_Crunch",
+    "nameRu": "Обратное скручивание на наклонной скамье",
+    "namePl": "Odwrócony brzuszek na ławce ujemnej"
+  },
+  {
+    "id": "Decline_Smith_Press",
+    "nameRu": "Жим в Смите на наклонной скамье (голова вниз)",
+    "namePl": "Wyciskanie w maszynie Smitha na ławce ujemnej"
+  },
+  {
+    "id": "Deficit_Deadlift",
+    "nameRu": "Становая тяга с дефицитом",
+    "namePl": "Martwy ciąg z deficytem"
+  },
+  {
+    "id": "Depth_Jump_Leap",
+    "nameRu": "Прыжок в глубину с выпрыжкой",
+    "namePl": "Skok w głąb z wybiciem"
+  },
+  {
+    "id": "Dip_Machine",
+    "nameRu": "Тренажёр для отжиманий на брусьях",
+    "namePl": "Maszyna do dipów"
+  },
+  {
+    "id": "Dips_-_Chest_Version",
+    "nameRu": "Отжимания на брусьях (грудной вариант)",
+    "namePl": "Dipy na poręczach (wariant na klatkę)"
+  },
+  {
+    "id": "Dips_-_Triceps_Version",
+    "nameRu": "Отжимания на брусьях (трицепсовый вариант)",
+    "namePl": "Dipy na poręczach (wariant na triceps)"
+  },
+  {
+    "id": "Donkey_Calf_Raises",
+    "nameRu": "Подъём на носки (с партнёром на спине)",
+    "namePl": "Wspięcia na palce z partnerem"
+  },
+  {
+    "id": "Double_Kettlebell_Alternating_Hang_Clean",
+    "nameRu": "Поочерёдный подъём двух гирь на грудь с виса",
+    "namePl": "Naprzemienne zarzucanie dwóch kettlebell z podwieszenia"
+  },
+  {
+    "id": "Double_Kettlebell_Jerk",
+    "nameRu": "Толчок двух гирь",
+    "namePl": "Podrzut dwóch kettlebell"
+  },
+  {
+    "id": "Double_Kettlebell_Push_Press",
+    "nameRu": "Жим двух гирь с доталкиванием",
+    "namePl": "Wyciskanie dwóch kettlebell z dobiegu"
+  },
+  {
+    "id": "Double_Kettlebell_Snatch",
+    "nameRu": "Рывок двух гирь",
+    "namePl": "Rwanie dwóch kettlebell"
+  },
+  {
+    "id": "Double_Kettlebell_Windmill",
+    "nameRu": "Ветряная мельница с двумя гирями",
+    "namePl": "Młyn z dwoma kettlebell"
+  },
+  {
+    "id": "Double_Leg_Butt_Kick",
+    "nameRu": "Захлёст голеней назад двумя ногами",
+    "namePl": "Kopanie pięt obiema nogami"
+  },
+  {
+    "id": "Downward_Facing_Balance",
+    "nameRu": "Баланс лицом вниз",
+    "namePl": "Balans twarzą w dół"
+  },
+  {
+    "id": "Drag_Curl",
+    "nameRu": "Тяговое сгибание (Drag Curl)",
+    "namePl": "Drag curl"
+  },
+  {
+    "id": "Drop_Push",
+    "nameRu": "Дроп-пуш",
+    "namePl": "Drop push"
+  },
+  {
+    "id": "Dumbbell_Alternate_Bicep_Curl",
+    "nameRu": "Поочерёдное сгибание бицепса с гантелями",
+    "namePl": "Naprzemienne uginanie bicepsa z hantlami"
+  },
+  {
+    "id": "Dumbbell_Bench_Press",
+    "nameRu": "Жим гантелей лёжа",
+    "namePl": "Wyciskanie hantlami leżąc"
+  },
+  {
+    "id": "Dumbbell_Bench_Press_with_Neutral_Grip",
+    "nameRu": "Жим гантелей лёжа нейтральным хватом",
+    "namePl": "Wyciskanie hantlami leżąc chwytem neutralnym"
+  },
+  {
+    "id": "Dumbbell_Bicep_Curl",
+    "nameRu": "Сгибание бицепса с гантелью",
+    "namePl": "Uginanie bicepsa z hantlem"
+  },
+  {
+    "id": "Dumbbell_Clean",
+    "nameRu": "Подъём гантелей на грудь",
+    "namePl": "Zarzut hantlami"
+  },
+  {
+    "id": "Dumbbell_Floor_Press",
+    "nameRu": "Жим гантелей лёжа на полу",
+    "namePl": "Wyciskanie hantlami na podłodze"
+  },
+  {
+    "id": "Dumbbell_Flyes",
+    "nameRu": "Разводка гантелей лёжа",
+    "namePl": "Rozpiętki z hantlami"
+  },
+  {
+    "id": "Dumbbell_Incline_Row",
+    "nameRu": "Тяга гантели на наклонной скамье",
+    "namePl": "Wiosłowanie hantlem na ławce skośnej"
+  },
+  {
+    "id": "Dumbbell_Incline_Shoulder_Raise",
+    "nameRu": "Подъём гантелей на дельты на наклонной скамье",
+    "namePl": "Unoszenie hantli na barki na ławce skośnej"
+  },
+  {
+    "id": "Dumbbell_Lunges",
+    "nameRu": "Выпады с гантелями",
+    "namePl": "Wykroki z hantlami"
+  },
+  {
+    "id": "Dumbbell_Lying_One-Arm_Rear_Lateral_Raise",
+    "nameRu": "Подъём гантели на заднюю дельту лёжа (одной рукой)",
+    "namePl": "Unoszenie hantla na tylny bark leżąc (jedna ręka)"
+  },
+  {
+    "id": "Dumbbell_Lying_Pronation",
+    "nameRu": "Пронация кисти с гантелью лёжа",
+    "namePl": "Pronacja nadgarstka z hantlem leżąc"
+  },
+  {
+    "id": "Dumbbell_Lying_Rear_Lateral_Raise",
+    "nameRu": "Подъём гантелей на заднюю дельту лёжа",
+    "namePl": "Unoszenie hantli na tylny bark leżąc"
+  },
+  {
+    "id": "Dumbbell_Lying_Supination",
+    "nameRu": "Супинация кисти с гантелью лёжа",
+    "namePl": "Supinacja nadgarstka z hantlem leżąc"
+  },
+  {
+    "id": "Dumbbell_One-Arm_Shoulder_Press",
+    "nameRu": "Жим гантели одной рукой",
+    "namePl": "Wyciskanie hantla jedną ręką"
+  },
+  {
+    "id": "Dumbbell_One-Arm_Triceps_Extension",
+    "nameRu": "Разгибание трицепса с гантелью одной рукой",
+    "namePl": "Prostowanie tricepsa z hantlem jedną ręką"
+  },
+  {
+    "id": "Dumbbell_One-Arm_Upright_Row",
+    "nameRu": "Тяга гантели к подбородку одной рукой",
+    "namePl": "Podciąganie hantla jedną ręką do brody"
+  },
+  {
+    "id": "Dumbbell_Prone_Incline_Curl",
+    "nameRu": "Сгибание с гантелями лёжа на наклонной скамье",
+    "namePl": "Uginanie hantlami leżąc przodem na ławce skośnej"
+  },
+  {
+    "id": "Dumbbell_Raise",
+    "nameRu": "Подъём гантели",
+    "namePl": "Unoszenie hantla"
+  },
+  {
+    "id": "Dumbbell_Rear_Lunge",
+    "nameRu": "Выпад назад с гантелями",
+    "namePl": "Wykrok w tył z hantlami"
+  },
+  {
+    "id": "Dumbbell_Scaption",
+    "nameRu": "Подъём гантелей в плоскости лопатки",
+    "namePl": "Unoszenie hantli w płaszczyźnie łopatki"
+  },
+  {
+    "id": "Dumbbell_Seated_Box_Jump",
+    "nameRu": "Прыжок на ящик с гантелями из положения сидя",
+    "namePl": "Skok na skrzynię z hantlami z siadu"
+  },
+  {
+    "id": "Dumbbell_Seated_One-Leg_Calf_Raise",
+    "nameRu": "Подъём на носок одной ногой сидя с гантелью",
+    "namePl": "Wspięcia na palce jednej nogi w siadzie z hantlem"
+  },
+  {
+    "id": "Dumbbell_Shoulder_Press",
+    "nameRu": "Жим гантелей на плечи",
+    "namePl": "Wyciskanie hantlami na barki"
+  },
+  {
+    "id": "Dumbbell_Shrug",
+    "nameRu": "Шраги с гантелями",
+    "namePl": "Szragi z hantlami"
+  },
+  {
+    "id": "Dumbbell_Side_Bend",
+    "nameRu": "Боковые наклоны с гантелью",
+    "namePl": "Skłony boczne z hantlem"
+  },
+  {
+    "id": "Dumbbell_Squat",
+    "nameRu": "Присед с гантелями",
+    "namePl": "Przysiad z hantlami"
+  },
+  {
+    "id": "Dumbbell_Squat_To_A_Bench",
+    "nameRu": "Присед с гантелями до скамьи",
+    "namePl": "Przysiad z hantlami do ławki"
+  },
+  {
+    "id": "Dumbbell_Step_Ups",
+    "nameRu": "Запрыгивание на степ с гантелями",
+    "namePl": "Wchodzenie na step z hantlami"
+  },
+  {
+    "id": "Dumbbell_Tricep_Extension_-Pronated_Grip",
+    "nameRu": "Разгибание трицепса с гантелью пронированным хватом",
+    "namePl": "Prostowanie tricepsa z hantlem chwytem pronacyjnym"
+  },
+  {
+    "id": "Dynamic_Back_Stretch",
+    "nameRu": "Динамическая растяжка спины",
+    "namePl": "Dynamiczne rozciąganie pleców"
+  },
+  {
+    "id": "Dynamic_Chest_Stretch",
+    "nameRu": "Динамическая растяжка груди",
+    "namePl": "Dynamiczne rozciąganie klatki"
+  },
+  {
+    "id": "EZ-Bar_Curl",
+    "nameRu": "Сгибание рук с EZ-грифом",
+    "namePl": "Uginanie z gryfem EZ"
+  },
+  {
+    "id": "EZ-Bar_Skullcrusher",
+    "nameRu": "Французский жим с EZ-грифом",
+    "namePl": "Łamanie czaszki z gryfem EZ"
+  },
+  {
+    "id": "Elbow_Circles",
+    "nameRu": "Вращение локтями",
+    "namePl": "Krążenia łokciami"
+  },
+  {
+    "id": "Elbow_to_Knee",
+    "nameRu": "Локоть к колену",
+    "namePl": "Łokieć do kolana"
+  },
+  {
+    "id": "Elbows_Back",
+    "nameRu": "Локти назад",
+    "namePl": "Łokcie w tył"
+  },
+  {
+    "id": "Elevated_Back_Lunge",
+    "nameRu": "Выпад назад с возвышения",
+    "namePl": "Wykrok w tył z podwyższenia"
+  },
+  {
+    "id": "Elevated_Cable_Rows",
+    "nameRu": "Тяга блока с возвышения",
+    "namePl": "Wiosłowanie na wyciągu z podwyższenia"
+  },
+  {
+    "id": "Elliptical_Trainer",
+    "nameRu": "Эллиптический тренажёр",
+    "namePl": "Orbitrek"
+  },
+  {
+    "id": "Exercise_Ball_Crunch",
+    "nameRu": "Скручивание на фитболе",
+    "namePl": "Brzuszek na piłce"
+  },
+  {
+    "id": "Exercise_Ball_Pull-In",
+    "nameRu": "Подтягивание мяча к груди",
+    "namePl": "Przyciąganie piłki"
+  },
+  {
+    "id": "Extended_Range_One-Arm_Kettlebell_Floor_Press",
+    "nameRu": "Жим гири одной рукой лёжа с увеличенной амплитудой",
+    "namePl": "Wyciskanie kettlebell jedną ręką na podłodze z rozszerzoną amplitudą"
+  },
+  {
+    "id": "External_Rotation",
+    "nameRu": "Внешняя ротация",
+    "namePl": "Rotacja zewnętrzna"
+  },
+  {
+    "id": "External_Rotation_with_Band",
+    "nameRu": "Внешняя ротация с лентой",
+    "namePl": "Rotacja zewnętrzna z taśmą"
+  },
+  {
+    "id": "External_Rotation_with_Cable",
+    "nameRu": "Внешняя ротация на блоке",
+    "namePl": "Rotacja zewnętrzna na wyciągu"
+  },
+  {
+    "id": "Face_Pull",
+    "nameRu": "Тяга к лицу",
+    "namePl": "Ściąganie do twarzy"
+  },
+  {
+    "id": "Farmers_Walk",
+    "nameRu": "Прогулка фермера",
+    "namePl": "Marsz farmera"
+  },
+  {
+    "id": "Fast_Skipping",
+    "nameRu": "Быстрые прыжки со скакалкой",
+    "namePl": "Szybkie skakanie na skakance"
+  },
+  {
+    "id": "Finger_Curls",
+    "nameRu": "Сгибание пальцев",
+    "namePl": "Uginanie palców"
+  },
+  {
+    "id": "Flat_Bench_Cable_Flyes",
+    "nameRu": "Разводка на блоке лёжа",
+    "namePl": "Rozpiętki na wyciągu leżąc"
+  },
+  {
+    "id": "Flat_Bench_Leg_Pull-In",
+    "nameRu": "Подтягивание ног лёжа на скамье",
+    "namePl": "Przyciąganie nóg leżąc na ławce"
+  },
+  {
+    "id": "Flat_Bench_Lying_Leg_Raise",
+    "nameRu": "Подъём ног лёжа на скамье",
+    "namePl": "Unoszenie nóg leżąc na ławce"
+  },
+  {
+    "id": "Flexor_Incline_Dumbbell_Curls",
+    "nameRu": "Сгибание сгибателей с гантелями на наклонной скамье",
+    "namePl": "Uginanie zginaczy z hantlami na ławce skośnej"
+  },
+  {
+    "id": "Floor_Glute-Ham_Raise",
+    "nameRu": "Подъём ягодица-бедро на полу",
+    "namePl": "Uginanie glute-ham na podłodze"
+  },
+  {
+    "id": "Floor_Press",
+    "nameRu": "Жим лёжа на полу",
+    "namePl": "Wyciskanie na podłodze"
+  },
+  {
+    "id": "Floor_Press_with_Chains",
+    "nameRu": "Жим лёжа на полу с цепями",
+    "namePl": "Wyciskanie na podłodze z łańcuchami"
+  },
+  {
+    "id": "Flutter_Kicks",
+    "nameRu": "Ножницы лёжа (флаттер)",
+    "namePl": "Nożyce w leżeniu"
+  },
+  {
+    "id": "Foot-SMR",
+    "nameRu": "Стопа — СМР",
+    "namePl": "Stopa — SMR"
+  },
+  {
+    "id": "Forward_Drag_with_Press",
+    "nameRu": "Волочение саней вперёд с толчком",
+    "namePl": "Ciągnięcie sań do przodu z pchnięciem"
+  },
+  {
+    "id": "Frankenstein_Squat",
+    "nameRu": "Присед Франкенштейна",
+    "namePl": "Przysiad Frankensteina"
+  },
+  {
+    "id": "Freehand_Jump_Squat",
+    "nameRu": "Прыжковый присед без отягощения",
+    "namePl": "Skoczny przysiad bez obciążenia"
+  },
+  {
+    "id": "Frog_Hops",
+    "nameRu": "Прыжки лягушки",
+    "namePl": "Skoki żaby"
+  },
+  {
+    "id": "Frog_Sit-Ups",
+    "nameRu": "Скручивания лягушки",
+    "namePl": "Brzuszki żaby"
+  },
+  {
+    "id": "Front_Barbell_Squat",
+    "nameRu": "Фронтальный присед со штангой",
+    "namePl": "Przysiad frontalny ze sztangą"
+  },
+  {
+    "id": "Front_Barbell_Squat_To_A_Bench",
+    "nameRu": "Фронтальный присед со штангой до скамьи",
+    "namePl": "Przysiad frontalny ze sztangą do ławki"
+  },
+  {
+    "id": "Front_Box_Jump",
+    "nameRu": "Прыжок на ящик вперёд",
+    "namePl": "Skok na skrzynię do przodu"
+  },
+  {
+    "id": "Front_Cable_Raise",
+    "nameRu": "Подъём через блок перед собой",
+    "namePl": "Unoszenie przednie na wyciągu"
+  },
+  {
+    "id": "Front_Cone_Hops_or_hurdle_hops",
+    "nameRu": "Прыжки через конусы (барьеры) вперёд",
+    "namePl": "Skoki przez słupki (barierki) do przodu"
+  },
+  {
+    "id": "Front_Dumbbell_Raise",
+    "nameRu": "Подъём гантелей перед собой",
+    "namePl": "Unoszenie hantli przed sobą"
+  },
+  {
+    "id": "Front_Incline_Dumbbell_Raise",
+    "nameRu": "Подъём гантелей перед собой на наклонной скамье",
+    "namePl": "Unoszenie hantli przed sobą na ławce skośnej"
+  },
+  {
+    "id": "Front_Leg_Raises",
+    "nameRu": "Подъём ног вперёд",
+    "namePl": "Unoszenie nóg przed siebie"
+  },
+  {
+    "id": "Front_Plate_Raise",
+    "nameRu": "Подъём диска перед собой",
+    "namePl": "Unoszenie talerza przed sobą"
+  },
+  {
+    "id": "Front_Raise_And_Pullover",
+    "nameRu": "Подъём и пуловер",
+    "namePl": "Unoszenie i pullover"
+  },
+  {
+    "id": "Front_Squat_Clean_Grip",
+    "nameRu": "Фронтальный присед (толчковый хват)",
+    "namePl": "Przysiad frontalny (chwyt do zarzutu)"
+  },
+  {
+    "id": "Front_Squats_With_Two_Kettlebells",
+    "nameRu": "Фронтальный присед с двумя гирями",
+    "namePl": "Przysiad frontalny z dwoma kettlebell"
+  },
+  {
+    "id": "Front_Two-Dumbbell_Raise",
+    "nameRu": "Подъём двух гантелей перед собой",
+    "namePl": "Unoszenie dwóch hantli przed sobą"
+  },
+  {
+    "id": "Full_Range-Of-Motion_Lat_Pulldown",
+    "nameRu": "Тяга верхнего блока в полную амплитуду",
+    "namePl": "Ściąganie drążka w pełnym zakresie ruchu"
+  },
+  {
+    "id": "Gironda_Sternum_Chins",
+    "nameRu": "Подтягивания до грудины по Жиронде",
+    "namePl": "Podciąganie do mostka wg Girondy"
+  },
+  {
+    "id": "Glute_Ham_Raise",
+    "nameRu": "Подъём ягодица-бедро (GHR)",
+    "namePl": "Uginanie nóg (glute-ham raise)"
+  },
+  {
+    "id": "Glute_Kickback",
+    "nameRu": "Отведение ноги назад",
+    "namePl": "Odwodzenie nogi w tył"
+  },
+  {
+    "id": "Goblet_Squat",
+    "nameRu": "Присед с гирей (кубок)",
+    "namePl": "Przysiad kielichowy"
+  },
+  {
+    "id": "Good_Morning",
+    "nameRu": "Наклон со штангой (гуд морнинг)",
+    "namePl": "Dzień dobry"
+  },
+  {
+    "id": "Good_Morning_off_Pins",
+    "nameRu": "Наклон со штангой с упоров",
+    "namePl": "Dzień dobry z ograniczników"
+  },
+  {
+    "id": "Gorilla_Chin_Crunch",
+    "nameRu": "Подтягивание с одновременным скручиванием",
+    "namePl": "Podciąganie z brzuszkiem (Gorilla Chin)"
+  },
+  {
+    "id": "Groin_and_Back_Stretch",
+    "nameRu": "Растяжка паха и спины",
+    "namePl": "Rozciąganie pachwiny i pleców"
+  },
+  {
+    "id": "Groiners",
+    "nameRu": "Динамический выпад (гроинер)",
+    "namePl": "Groiners"
+  },
+  {
+    "id": "Hack_Squat",
+    "nameRu": "Гакк-присед",
+    "namePl": "Przysiad hack"
+  },
+  {
+    "id": "Hammer_Curls",
+    "nameRu": "Сгибание молотковым хватом",
+    "namePl": "Uginanie młotkowe"
+  },
+  {
+    "id": "Hammer_Grip_Incline_DB_Bench_Press",
+    "nameRu": "Жим гантелей нейтральным хватом на наклонной скамье",
+    "namePl": "Wyciskanie hantlami chwytem młotkowym na ławce skośnej"
+  },
+  {
+    "id": "Hamstring-SMR",
+    "nameRu": "Бицепс бедра — СМР",
+    "namePl": "Mięsień dwugłowy uda — SMR"
+  },
+  {
+    "id": "Hamstring_Stretch",
+    "nameRu": "Растяжка бицепса бедра",
+    "namePl": "Rozciąganie mięśnia dwugłowego uda"
+  },
+  {
+    "id": "Handstand_Push-Ups",
+    "nameRu": "Отжимания в стойке на руках",
+    "namePl": "Pompki w staniu na rękach"
+  },
+  {
+    "id": "Hang_Clean",
+    "nameRu": "Подъём на грудь с виса",
+    "namePl": "Zarzut z podwieszenia"
+  },
+  {
+    "id": "Hang_Clean_-_Below_the_Knees",
+    "nameRu": "Подъём на грудь с виса ниже колен",
+    "namePl": "Zarzut z podwieszenia poniżej kolan"
+  },
+  {
+    "id": "Hang_Snatch",
+    "nameRu": "Рывок с виса",
+    "namePl": "Rwanie z podwieszenia"
+  },
+  {
+    "id": "Hang_Snatch_-_Below_Knees",
+    "nameRu": "Рывок с виса ниже колен",
+    "namePl": "Rwanie z podwieszenia poniżej kolan"
+  },
+  {
+    "id": "Hanging_Bar_Good_Morning",
+    "nameRu": "Наклон с подвешенным грифом",
+    "namePl": "Dzień dobry z podwieszonym gryfem"
+  },
+  {
+    "id": "Hanging_Leg_Raise",
+    "nameRu": "Подъём ног в висе",
+    "namePl": "Unoszenie nóg w zwisie"
+  },
+  {
+    "id": "Hanging_Pike",
+    "nameRu": "Угол в висе",
+    "namePl": "Kąt w zwisie"
+  },
+  {
+    "id": "Heaving_Snatch_Balance",
+    "nameRu": "Баланс рывка с инерцией",
+    "namePl": "Balans rwaniowy z impulsem"
+  },
+  {
+    "id": "Heavy_Bag_Thrust",
+    "nameRu": "Удар по груше",
+    "namePl": "Uderzenie w worek treningowy"
+  },
+  {
+    "id": "High_Cable_Curls",
+    "nameRu": "Сгибание рук через верхний блок",
+    "namePl": "Uginanie na górnym wyciągu"
+  },
+  {
+    "id": "Hip_Circles_prone",
+    "nameRu": "Вращение бёдрами лёжа",
+    "namePl": "Krążenia bioder w leżeniu"
+  },
+  {
+    "id": "Hip_Extension_with_Bands",
+    "nameRu": "Разгибание бедра с лентой",
+    "namePl": "Wyprost biodra z taśmą"
+  },
+  {
+    "id": "Hip_Flexion_with_Band",
+    "nameRu": "Сгибание бедра с лентой",
+    "namePl": "Zgięcie biodra z taśmą"
+  },
+  {
+    "id": "Hip_Lift_with_Band",
+    "nameRu": "Подъём таза с лентой",
+    "namePl": "Unoszenie bioder z taśmą"
+  },
+  {
+    "id": "Hug_A_Ball",
+    "nameRu": "Обнять мяч",
+    "namePl": "Przytulenie piłki"
+  },
+  {
+    "id": "Hug_Knees_To_Chest",
+    "nameRu": "Подтянуть колени к груди",
+    "namePl": "Przyciąganie kolan do klatki"
+  },
+  {
+    "id": "Hurdle_Hops",
+    "nameRu": "Прыжки через барьеры",
+    "namePl": "Skoki przez płotki"
+  },
+  {
+    "id": "Hyperextensions_Back_Extensions",
+    "nameRu": "Гиперэкстензия",
+    "namePl": "Hyperekstensje"
+  },
+  {
+    "id": "Hyperextensions_With_No_Hyperextension_Bench",
+    "nameRu": "Гиперэкстензия без тренажёра",
+    "namePl": "Hyperekstensje bez ławki"
+  },
+  {
+    "id": "IT_Band_and_Glute_Stretch",
+    "nameRu": "Растяжка IT-полосы и ягодиц",
+    "namePl": "Rozciąganie pasma biodrowo-piszczelowego i pośladków"
+  },
+  {
+    "id": "Iliotibial_Tract-SMR",
+    "nameRu": "Подвздошно-большеберцовый тракт — СМР",
+    "namePl": "Pasmo biodrowo-piszczelowe — SMR"
+  },
+  {
+    "id": "Inchworm",
+    "nameRu": "Гусеница",
+    "namePl": "Gąsienica"
+  },
+  {
+    "id": "Incline_Barbell_Triceps_Extension",
+    "nameRu": "Разгибание трицепса со штангой на наклонной скамье",
+    "namePl": "Prostowanie tricepsa ze sztangą na ławce skośnej"
+  },
+  {
+    "id": "Incline_Bench_Pull",
+    "nameRu": "Тяга на наклонной скамье",
+    "namePl": "Przyciąganie na ławce skośnej"
+  },
+  {
+    "id": "Incline_Cable_Chest_Press",
+    "nameRu": "Жим в кроссовере на наклонной скамье",
+    "namePl": "Wyciskanie na wyciągu na ławce skośnej"
+  },
+  {
+    "id": "Incline_Cable_Flye",
+    "nameRu": "Разводка в кроссовере на наклонной скамье",
+    "namePl": "Rozpiętki na wyciągu na ławce skośnej"
+  },
+  {
+    "id": "Incline_Dumbbell_Bench_With_Palms_Facing_In",
+    "nameRu": "Жим гантелей на наклонной скамье (ладони внутрь)",
+    "namePl": "Wyciskanie hantlami na ławce skośnej (dłonie do wewnątrz)"
+  },
+  {
+    "id": "Incline_Dumbbell_Curl",
+    "nameRu": "Сгибание бицепса с гантелями на наклонной скамье",
+    "namePl": "Uginanie bicepsa z hantlami na ławce skośnej"
+  },
+  {
+    "id": "Incline_Dumbbell_Flyes",
+    "nameRu": "Разводка гантелей на наклонной скамье",
+    "namePl": "Rozpiętki z hantlami na ławce skośnej"
+  },
+  {
+    "id": "Incline_Dumbbell_Flyes_-_With_A_Twist",
+    "nameRu": "Разводка гантелей на наклонной скамье с ротацией",
+    "namePl": "Rozpiętki z hantlami na ławce skośnej z rotacją"
+  },
+  {
+    "id": "Incline_Dumbbell_Press",
+    "nameRu": "Жим гантелей на наклонной скамье",
+    "namePl": "Wyciskanie hantlami na ławce skośnej"
+  },
+  {
+    "id": "Incline_Hammer_Curls",
+    "nameRu": "Молотковое сгибание на наклонной скамье",
+    "namePl": "Uginanie młotkowe na ławce skośnej"
+  },
+  {
+    "id": "Incline_Inner_Biceps_Curl",
+    "nameRu": "Сгибание внутренней головки бицепса на наклонной скамье",
+    "namePl": "Uginanie wewnętrznej głowy bicepsa na ławce skośnej"
+  },
+  {
+    "id": "Incline_Push-Up",
+    "nameRu": "Отжимание с упором руками на возвышении",
+    "namePl": "Pompka z rękoma na podwyższeniu"
+  },
+  {
+    "id": "Incline_Push-Up_Close-Grip",
+    "nameRu": "Отжимание узким хватом с упором на возвышении",
+    "namePl": "Pompka wąskim chwytem z podwyższeniem"
+  },
+  {
+    "id": "Incline_Push-Up_Depth_Jump",
+    "nameRu": "Отжимание с прыжком на возвышение",
+    "namePl": "Pompka z wyskokiem na podwyższenie"
+  },
+  {
+    "id": "Incline_Push-Up_Medium",
+    "nameRu": "Отжимание средним хватом с упором на возвышении",
+    "namePl": "Pompka średnim chwytem z podwyższeniem"
+  },
+  {
+    "id": "Incline_Push-Up_Reverse_Grip",
+    "nameRu": "Отжимание обратным хватом с упором на возвышении",
+    "namePl": "Pompka odwróconym chwytem z podwyższeniem"
+  },
+  {
+    "id": "Incline_Push-Up_Wide",
+    "nameRu": "Отжимание широким хватом с упором на возвышении",
+    "namePl": "Pompka szerokim chwytem z podwyższeniem"
+  },
+  {
+    "id": "Intermediate_Groin_Stretch",
+    "nameRu": "Растяжка паха (средний уровень)",
+    "namePl": "Rozciąganie pachwiny (poziom średni)"
+  },
+  {
+    "id": "Intermediate_Hip_Flexor_and_Quad_Stretch",
+    "nameRu": "Растяжка сгибателей бедра и квадрицепса (средний уровень)",
+    "namePl": "Rozciąganie zginaczy biodra i czworogłowego (poziom średni)"
+  },
+  {
+    "id": "Internal_Rotation_with_Band",
+    "nameRu": "Внутренняя ротация с лентой",
+    "namePl": "Rotacja wewnętrzna z taśmą"
+  },
+  {
+    "id": "Inverted_Row",
+    "nameRu": "Горизонтальное подтягивание",
+    "namePl": "Wiosłowanie odwrócone"
+  },
+  {
+    "id": "Inverted_Row_with_Straps",
+    "nameRu": "Горизонтальное подтягивание с петлями",
+    "namePl": "Wiosłowanie odwrócone z taśmami"
+  },
+  {
+    "id": "Iron_Cross",
+    "nameRu": "Железный крест",
+    "namePl": "Żelazny krzyż"
+  },
+  {
+    "id": "Iron_Crosses_stretch",
+    "nameRu": "Железный крест (растяжка)",
+    "namePl": "Krzyż żelazny (rozciąganie)"
+  },
+  {
+    "id": "Isometric_Chest_Squeezes",
+    "nameRu": "Изометрическое сжатие грудных",
+    "namePl": "Izometryczny skurcz klatki"
+  },
+  {
+    "id": "Isometric_Neck_Exercise_-_Front_And_Back",
+    "nameRu": "Изометрическое упражнение для шеи (вперёд-назад)",
+    "namePl": "Izometryczne ćwiczenie szyi (przód-tył)"
+  },
+  {
+    "id": "Isometric_Neck_Exercise_-_Sides",
+    "nameRu": "Изометрическое упражнение для шеи (стороны)",
+    "namePl": "Izometryczne ćwiczenie szyi (boki)"
+  },
+  {
+    "id": "Isometric_Wipers",
+    "nameRu": "Изометрические дворники",
+    "namePl": "Izometryczne wycieraczki"
+  },
+  {
+    "id": "JM_Press",
+    "nameRu": "Жим JM",
+    "namePl": "Wyciskanie JM"
+  },
+  {
+    "id": "Jackknife_Sit-Up",
+    "nameRu": "Складка",
+    "namePl": "Nożyk (jackknife)"
+  },
+  {
+    "id": "Janda_Sit-Up",
+    "nameRu": "Скручивание по Янде",
+    "namePl": "Brzuszek Jandy"
+  },
+  {
+    "id": "Jefferson_Squats",
+    "nameRu": "Присед Джефферсона",
+    "namePl": "Przysiad Jeffersona"
+  },
+  {
+    "id": "Jerk_Balance",
+    "nameRu": "Баланс толчка",
+    "namePl": "Balans wybicia"
+  },
+  {
+    "id": "Jerk_Dip_Squat",
+    "nameRu": "Подсед толчка",
+    "namePl": "Podsiad wybicia"
+  },
+  {
+    "id": "Jogging_Treadmill",
+    "nameRu": "Бег трусцой на беговой дорожке",
+    "namePl": "Jogging na bieżni"
+  },
+  {
+    "id": "Keg_Load",
+    "nameRu": "Загрузка бочки",
+    "namePl": "Załadunek beczki"
+  },
+  {
+    "id": "Kettlebell_Arnold_Press",
+    "nameRu": "Жим Арнольда с гирей",
+    "namePl": "Wyciskanie Arnolda z kettlebell"
+  },
+  {
+    "id": "Kettlebell_Dead_Clean",
+    "nameRu": "Подъём гири на грудь с пола",
+    "namePl": "Martwy zarzut kettlebell"
+  },
+  {
+    "id": "Kettlebell_Figure_8",
+    "nameRu": "Восьмёрка с гирей",
+    "namePl": "Ósemka z kettlebell"
+  },
+  {
+    "id": "Kettlebell_Hang_Clean",
+    "nameRu": "Подъём гири на грудь с виса",
+    "namePl": "Zarzut kettlebell z podwieszenia"
+  },
+  {
+    "id": "Kettlebell_One-Legged_Deadlift",
+    "nameRu": "Становая тяга с гирей на одной ноге",
+    "namePl": "Martwy ciąg z kettlebell na jednej nodze"
+  },
+  {
+    "id": "Kettlebell_Pass_Between_The_Legs",
+    "nameRu": "Переброска гири между ног",
+    "namePl": "Podawanie kettlebell między nogami"
+  },
+  {
+    "id": "Kettlebell_Pirate_Ships",
+    "nameRu": "Пиратские корабли с гирей",
+    "namePl": "Pirackie okręty z kettlebell"
+  },
+  {
+    "id": "Kettlebell_Pistol_Squat",
+    "nameRu": "Пистолет с гирей",
+    "namePl": "Przysiad pistoletem z kettlebell"
+  },
+  {
+    "id": "Kettlebell_Seated_Press",
+    "nameRu": "Жим гири сидя",
+    "namePl": "Wyciskanie kettlebell w siadzie"
+  },
+  {
+    "id": "Kettlebell_Seesaw_Press",
+    "nameRu": "Жим гири качелями",
+    "namePl": "Wyciskanie kettlebell na zmianę (huśtawka)"
+  },
+  {
+    "id": "Kettlebell_Sumo_High_Pull",
+    "nameRu": "Тяга гири сумо в высокую тягу",
+    "namePl": "Sumo high pull z kettlebell"
+  },
+  {
+    "id": "Kettlebell_Thruster",
+    "nameRu": "Трастер с гирей",
+    "namePl": "Thruster z kettlebell"
+  },
+  {
+    "id": "Kettlebell_Turkish_Get-Up_Lunge_style",
+    "nameRu": "Турецкое вставание с гирей (через выпад)",
+    "namePl": "Tureckie wstanie z kettlebell (przez wykrok)"
+  },
+  {
+    "id": "Kettlebell_Turkish_Get-Up_Squat_style",
+    "nameRu": "Турецкое вставание с гирей (через присед)",
+    "namePl": "Tureckie wstanie z kettlebell (przez przysiad)"
+  },
+  {
+    "id": "Kettlebell_Windmill",
+    "nameRu": "Ветряная мельница с гирей",
+    "namePl": "Młyn z kettlebell"
+  },
+  {
+    "id": "Kipping_Muscle_Up",
+    "nameRu": "Выход силой с рывком (кипинг)",
+    "namePl": "Wyjście siłą z odbiciem (kipping)"
+  },
+  {
+    "id": "Knee_Across_The_Body",
+    "nameRu": "Колено через тело",
+    "namePl": "Kolano przez ciało"
+  },
+  {
+    "id": "Knee_Circles",
+    "nameRu": "Вращение коленями",
+    "namePl": "Krążenia kolanami"
+  },
+  {
+    "id": "Knee_Hip_Raise_On_Parallel_Bars",
+    "nameRu": "Подъём колен/бёдер на брусьях",
+    "namePl": "Unoszenie kolan/bioder na drążkach"
+  },
+  {
+    "id": "Knee_Tuck_Jump",
+    "nameRu": "Прыжок с подтягиванием колен",
+    "namePl": "Skok z podciąganiem kolan"
+  },
+  {
+    "id": "Kneeling_Arm_Drill",
+    "nameRu": "Работа руками в положении на коленях",
+    "namePl": "Praca ramionami w klęku"
+  },
+  {
+    "id": "Kneeling_Cable_Crunch_With_Alternating_Oblique_Twists",
+    "nameRu": "Скручивание на блоке в коленях с поворотами косых",
+    "namePl": "Brzuszek na wyciągu w klęku z rotacją skośną"
+  },
+  {
+    "id": "Kneeling_Cable_Triceps_Extension",
+    "nameRu": "Разгибание трицепса на блоке в коленях",
+    "namePl": "Prostowanie tricepsa na wyciągu w klęku"
+  },
+  {
+    "id": "Kneeling_Forearm_Stretch",
+    "nameRu": "Растяжка предплечья в коленях",
+    "namePl": "Rozciąganie przedramienia w klęku"
+  },
+  {
+    "id": "Kneeling_High_Pulley_Row",
+    "nameRu": "Тяга верхнего блока в положении на коленях",
+    "namePl": "Ściąganie górnego wyciągu w klęku"
+  },
+  {
+    "id": "Kneeling_Hip_Flexor",
+    "nameRu": "Растяжка сгибателей бедра в коленях",
+    "namePl": "Rozciąganie zginaczy biodra w klęku"
+  },
+  {
+    "id": "Kneeling_Jump_Squat",
+    "nameRu": "Прыжковый присед из положения на коленях",
+    "namePl": "Skoczny przysiad z klęku"
+  },
+  {
+    "id": "Kneeling_Single-Arm_High_Pulley_Row",
+    "nameRu": "Тяга верхнего блока одной рукой в коленях",
+    "namePl": "Ściąganie górnego wyciągu jedną ręką w klęku"
+  },
+  {
+    "id": "Kneeling_Squat",
+    "nameRu": "Присед из положения на коленях",
+    "namePl": "Przysiad z klęku"
+  },
+  {
+    "id": "Landmine_180s",
+    "nameRu": "Ротация штанги на 180° (лэндмайн)",
+    "namePl": "Obrót sztangą o 180° (Landmine)"
+  },
+  {
+    "id": "Landmine_Linear_Jammer",
+    "nameRu": "Линейный жим лэндмайн",
+    "namePl": "Liniowe wyciskanie Landmine"
+  },
+  {
+    "id": "Lateral_Bound",
+    "nameRu": "Боковой прыжок",
+    "namePl": "Skok boczny"
+  },
+  {
+    "id": "Lateral_Box_Jump",
+    "nameRu": "Боковой прыжок на ящик",
+    "namePl": "Boczny skok na skrzynię"
+  },
+  {
+    "id": "Lateral_Cone_Hops",
+    "nameRu": "Боковые прыжки через конусы",
+    "namePl": "Boczne skoki przez słupki"
+  },
+  {
+    "id": "Lateral_Raise_-_With_Bands",
+    "nameRu": "Подъём в стороны с лентой",
+    "namePl": "Unoszenie boczne z taśmą"
+  },
+  {
+    "id": "Latissimus_Dorsi-SMR",
+    "nameRu": "Широчайшая мышца спины — СМР",
+    "namePl": "Mięsień najszerszy grzbietu — SMR"
+  },
+  {
+    "id": "Leg-Over_Floor_Press",
+    "nameRu": "Жим лёжа на полу с перекрёстными ногами",
+    "namePl": "Wyciskanie na podłodze z nogą przerzuconą"
+  },
+  {
+    "id": "Leg-Up_Hamstring_Stretch",
+    "nameRu": "Растяжка бицепса бедра с ногой вверх",
+    "namePl": "Rozciąganie ścięgna podkolanowego z uniesioną nogą"
+  },
+  {
+    "id": "Leg_Extensions",
+    "nameRu": "Разгибание ног на тренажёре",
+    "namePl": "Prostowanie nóg na maszynie"
+  },
+  {
+    "id": "Leg_Lift",
+    "nameRu": "Подъём ног",
+    "namePl": "Unoszenie nóg"
+  },
+  {
+    "id": "Leg_Press",
+    "nameRu": "Жим ногами",
+    "namePl": "Prasa do nóg"
+  },
+  {
+    "id": "Leg_Pull-In",
+    "nameRu": "Подтягивание ног",
+    "namePl": "Przyciąganie nóg"
+  },
+  {
+    "id": "Leverage_Chest_Press",
+    "nameRu": "Жим для груди на рычажном тренажёре",
+    "namePl": "Wyciskanie na klatkę na maszynie dźwigniowej"
+  },
+  {
+    "id": "Leverage_Deadlift",
+    "nameRu": "Становая тяга на рычажном тренажёре",
+    "namePl": "Martwy ciąg na maszynie dźwigniowej"
+  },
+  {
+    "id": "Leverage_Decline_Chest_Press",
+    "nameRu": "Жим с отрицательным углом на рычажном тренажёре",
+    "namePl": "Wyciskanie na ławce ujemnej na maszynie dźwigniowej"
+  },
+  {
+    "id": "Leverage_High_Row",
+    "nameRu": "Высокая тяга на рычажном тренажёре",
+    "namePl": "Wiosłowanie górne na maszynie dźwigniowej"
+  },
+  {
+    "id": "Leverage_Incline_Chest_Press",
+    "nameRu": "Жим на наклонной скамье на рычажном тренажёре",
+    "namePl": "Wyciskanie na ławce skośnej na maszynie dźwigniowej"
+  },
+  {
+    "id": "Leverage_Iso_Row",
+    "nameRu": "Изолированная тяга на рычажном тренажёре",
+    "namePl": "Izolowane wiosłowanie na maszynie dźwigniowej"
+  },
+  {
+    "id": "Leverage_Shoulder_Press",
+    "nameRu": "Жим на плечи на рычажном тренажёре",
+    "namePl": "Wyciskanie na barki na maszynie dźwigniowej"
+  },
+  {
+    "id": "Leverage_Shrug",
+    "nameRu": "Шраги на рычажном тренажёре",
+    "namePl": "Szragi na maszynie dźwigniowej"
+  },
+  {
+    "id": "Linear_3-Part_Start_Technique",
+    "nameRu": "Линейная техника старта в 3 фазы",
+    "namePl": "Liniowa technika startu w 3 etapach"
+  },
+  {
+    "id": "Linear_Acceleration_Wall_Drill",
+    "nameRu": "Ускорение у стены (линейное)",
+    "namePl": "Przyspieszenie przy ścianie (liniowe)"
+  },
+  {
+    "id": "Linear_Depth_Jump",
+    "nameRu": "Линейный прыжок в глубину",
+    "namePl": "Liniowy skok w głąb"
+  },
+  {
+    "id": "Log_Lift",
+    "nameRu": "Подъём бревна",
+    "namePl": "Unoszenie kłody"
+  },
+  {
+    "id": "London_Bridges",
+    "nameRu": "Лондонские мосты",
+    "namePl": "Mosty londyńskie"
+  },
+  {
+    "id": "Looking_At_Ceiling",
+    "nameRu": "Взгляд в потолок (растяжка шеи)",
+    "namePl": "Spojrzenie w sufit (rozciąganie szyi)"
+  },
+  {
+    "id": "Low_Cable_Crossover",
+    "nameRu": "Кроссовер через нижний блок",
+    "namePl": "Krzyżowanie na dolnym wyciągu"
+  },
+  {
+    "id": "Low_Cable_Triceps_Extension",
+    "nameRu": "Разгибание трицепса на нижнем блоке",
+    "namePl": "Prostowanie tricepsa na dolnym wyciągu"
+  },
+  {
+    "id": "Low_Pulley_Row_To_Neck",
+    "nameRu": "Тяга нижнего блока к шее",
+    "namePl": "Wiosłowanie na dolnym wyciągu do szyi"
+  },
+  {
+    "id": "Lower_Back-SMR",
+    "nameRu": "Поясница — СМР",
+    "namePl": "Dolny odcinek kręgosłupa — SMR"
+  },
+  {
+    "id": "Lower_Back_Curl",
+    "nameRu": "Скручивание поясницы",
+    "namePl": "Zwijanie odcinka lędźwiowego"
+  },
+  {
+    "id": "Lunge_Pass_Through",
+    "nameRu": "Выпад с передачей",
+    "namePl": "Wykrok z podaniem"
+  },
+  {
+    "id": "Lunge_Sprint",
+    "nameRu": "Спринт в выпадах",
+    "namePl": "Sprint w wykrokach"
+  },
+  {
+    "id": "Lying_Bent_Leg_Groin",
+    "nameRu": "Растяжка паха лёжа с согнутыми ногами",
+    "namePl": "Rozciąganie pachwiny leżąc z ugiętymi nogami"
+  },
+  {
+    "id": "Lying_Cable_Curl",
+    "nameRu": "Сгибание рук на блоке лёжа",
+    "namePl": "Uginanie na wyciągu leżąc"
+  },
+  {
+    "id": "Lying_Cambered_Barbell_Row",
+    "nameRu": "Тяга изогнутой штанги лёжа",
+    "namePl": "Wiosłowanie wygiętą sztangą leżąc"
+  },
+  {
+    "id": "Lying_Close-Grip_Bar_Curl_On_High_Pulley",
+    "nameRu": "Сгибание рук узким хватом лёжа через верхний блок",
+    "namePl": "Uginanie wąskim chwytem leżąc na górnym wyciągu"
+  },
+  {
+    "id": "Lying_Close-Grip_Barbell_Triceps_Extension_Behind_The_Head",
+    "nameRu": "Французский жим узким хватом лёжа за голову",
+    "namePl": "Prostowanie tricepsa za głowę w leżeniu wąskim chwytem"
+  },
+  {
+    "id": "Lying_Close-Grip_Barbell_Triceps_Press_To_Chin",
+    "nameRu": "Жим узким хватом лёжа до подбородка",
+    "namePl": "Wyciskanie do brody wąskim chwytem leżąc"
+  },
+  {
+    "id": "Lying_Crossover",
+    "nameRu": "Разводка лёжа (кроссовер)",
+    "namePl": "Rozpiętki skrzyżne leżąc"
+  },
+  {
+    "id": "Lying_Dumbbell_Tricep_Extension",
+    "nameRu": "Разгибание трицепса с гантелями лёжа",
+    "namePl": "Prostowanie tricepsa z hantlami leżąc"
+  },
+  {
+    "id": "Lying_Face_Down_Plate_Neck_Resistance",
+    "nameRu": "Сопротивление шеи с диском лёжа лицом вниз",
+    "namePl": "Wzmacnianie szyi z talerzem leżąc twarzą w dół"
+  },
+  {
+    "id": "Lying_Face_Up_Plate_Neck_Resistance",
+    "nameRu": "Сопротивление шеи с диском лёжа лицом вверх",
+    "namePl": "Wzmacnianie szyi z talerzem leżąc twarzą w górę"
+  },
+  {
+    "id": "Lying_Glute",
+    "nameRu": "Растяжка ягодиц лёжа",
+    "namePl": "Rozciąganie pośladków leżąc"
+  },
+  {
+    "id": "Lying_Hamstring",
+    "nameRu": "Растяжка бицепса бедра лёжа",
+    "namePl": "Rozciąganie mięśnia dwugłowego uda leżąc"
+  },
+  {
+    "id": "Lying_High_Bench_Barbell_Curl",
+    "nameRu": "Сгибание рук со штангой на высокой скамье лёжа",
+    "namePl": "Uginanie ze sztangą na wysokiej ławce leżąc"
+  },
+  {
+    "id": "Lying_Leg_Curls",
+    "nameRu": "Сгибание ног лёжа на тренажёре",
+    "namePl": "Uginanie nóg leżąc na maszynie"
+  },
+  {
+    "id": "Lying_Machine_Squat",
+    "nameRu": "Присед на тренажёре лёжа",
+    "namePl": "Przysiad na maszynie leżąc"
+  },
+  {
+    "id": "Lying_One-Arm_Lateral_Raise",
+    "nameRu": "Подъём гантели в сторону лёжа одной рукой",
+    "namePl": "Unoszenie hantla w bok leżąc"
+  },
+  {
+    "id": "Lying_Prone_Quadriceps",
+    "nameRu": "Растяжка квадрицепса лёжа на животе",
+    "namePl": "Rozciąganie czworogłowego leżąc przodem"
+  },
+  {
+    "id": "Lying_Rear_Delt_Raise",
+    "nameRu": "Подъём на заднюю дельту лёжа",
+    "namePl": "Unoszenie na tylny bark leżąc"
+  },
+  {
+    "id": "Lying_Supine_Dumbbell_Curl",
+    "nameRu": "Сгибание рук с гантелями лёжа на спине",
+    "namePl": "Uginanie z hantlami leżąc na plecach"
+  },
+  {
+    "id": "Lying_T-Bar_Row",
+    "nameRu": "Тяга T-образного грифа лёжа",
+    "namePl": "Wiosłowanie T-drążkiem leżąc"
+  },
+  {
+    "id": "Lying_Triceps_Press",
+    "nameRu": "Французский жим лёжа",
+    "namePl": "Prostowanie tricepsa leżąc"
+  },
+  {
+    "id": "Machine_Bench_Press",
+    "nameRu": "Жим лёжа на тренажёре",
+    "namePl": "Wyciskanie leżąc na maszynie"
+  },
+  {
+    "id": "Machine_Bicep_Curl",
+    "nameRu": "Сгибание бицепса на тренажёре",
+    "namePl": "Uginanie bicepsa na maszynie"
+  },
+  {
+    "id": "Machine_Preacher_Curls",
+    "nameRu": "Сгибание рук на тренажёре (скамья Скотта)",
+    "namePl": "Uginanie na maszynie (ławka Scotta)"
+  },
+  {
+    "id": "Machine_Shoulder_Military_Press",
+    "nameRu": "Жим на плечи на тренажёре",
+    "namePl": "Wyciskanie na barki na maszynie"
+  },
+  {
+    "id": "Machine_Triceps_Extension",
+    "nameRu": "Разгибание трицепса на тренажёре",
+    "namePl": "Prostowanie tricepsa na maszynie"
+  },
+  {
+    "id": "Medicine_Ball_Chest_Pass",
+    "nameRu": "Передача медбола от груди",
+    "namePl": "Podanie piłki lekarskiej od klatki"
+  },
+  {
+    "id": "Medicine_Ball_Full_Twist",
+    "nameRu": "Поворот с медболом",
+    "namePl": "Pełny skręt z piłką lekarską"
+  },
+  {
+    "id": "Medicine_Ball_Scoop_Throw",
+    "nameRu": "Бросок медбола снизу",
+    "namePl": "Rzut piłką lekarską spodem"
+  },
+  {
+    "id": "Middle_Back_Shrug",
+    "nameRu": "Шраги для средней части спины",
+    "namePl": "Szragi środkowej partii pleców"
+  },
+  {
+    "id": "Middle_Back_Stretch",
+    "nameRu": "Растяжка средней части спины",
+    "namePl": "Rozciąganie środkowej partii pleców"
+  },
+  {
+    "id": "Mixed_Grip_Chin",
+    "nameRu": "Подтягивание разным хватом",
+    "namePl": "Podciąganie mieszanym chwytem"
+  },
+  {
+    "id": "Monster_Walk",
+    "nameRu": "Ходьба монстра (с лентой)",
+    "namePl": "Monster walk (z taśmą)"
+  },
+  {
+    "id": "Mountain_Climbers",
+    "nameRu": "Альпинист",
+    "namePl": "Wspinacz górski"
+  },
+  {
+    "id": "Moving_Claw_Series",
+    "nameRu": "Серия захватов в движении",
+    "namePl": "Seria chwytów w ruchu"
+  },
+  {
+    "id": "Muscle_Snatch",
+    "nameRu": "Мышечный рывок",
+    "namePl": "Rwanie mięśniowe"
+  },
+  {
+    "id": "Muscle_Up",
+    "nameRu": "Выход силой",
+    "namePl": "Wyjście siłą"
+  },
+  {
+    "id": "Narrow_Stance_Hack_Squats",
+    "nameRu": "Гакк-присед с узкой постановкой ног",
+    "namePl": "Przysiad hack z wąskim rozstawem nóg"
+  },
+  {
+    "id": "Narrow_Stance_Leg_Press",
+    "nameRu": "Жим ногами с узкой постановкой",
+    "namePl": "Prasa do nóg z wąskim rozstawem"
+  },
+  {
+    "id": "Narrow_Stance_Squats",
+    "nameRu": "Присед с узкой постановкой ног",
+    "namePl": "Przysiad z wąskim rozstawem nóg"
+  },
+  {
+    "id": "Natural_Glute_Ham_Raise",
+    "nameRu": "Естественный подъём ягодица-бедро",
+    "namePl": "Naturalne uginanie nóg (Nordic curl)"
+  },
+  {
+    "id": "Neck-SMR",
+    "nameRu": "Шея — СМР",
+    "namePl": "Szyja — SMR"
+  },
+  {
+    "id": "Neck_Press",
+    "nameRu": "Жим к шее",
+    "namePl": "Wyciskanie do szyi"
+  },
+  {
+    "id": "Oblique_Crunches",
+    "nameRu": "Скручивания на косые мышцы",
+    "namePl": "Brzuszki skośne"
+  },
+  {
+    "id": "Oblique_Crunches_-_On_The_Floor",
+    "nameRu": "Скручивания на косые мышцы на полу",
+    "namePl": "Brzuszki skośne na podłodze"
+  },
+  {
+    "id": "Olympic_Squat",
+    "nameRu": "Олимпийский присед",
+    "namePl": "Przysiad olimpijski"
+  },
+  {
+    "id": "On-Your-Back_Quad_Stretch",
+    "nameRu": "Растяжка квадрицепса лёжа на спине",
+    "namePl": "Rozciąganie czworogłowego leżąc na plecach"
+  },
+  {
+    "id": "On_Your_Side_Quad_Stretch",
+    "nameRu": "Растяжка квадрицепса лёжа на боку",
+    "namePl": "Rozciąganie czworogłowego leżąc na boku"
+  },
+  {
+    "id": "One-Arm_Dumbbell_Row",
+    "nameRu": "Тяга гантели одной рукой",
+    "namePl": "Wiosłowanie hantlem jedną ręką"
+  },
+  {
+    "id": "One-Arm_Flat_Bench_Dumbbell_Flye",
+    "nameRu": "Разводка одной рукой лёжа",
+    "namePl": "Rozpiętka jedną ręką leżąc"
+  },
+  {
+    "id": "One-Arm_High-Pulley_Cable_Side_Bends",
+    "nameRu": "Боковые наклоны с верхним блоком одной рукой",
+    "namePl": "Skłony boczne na górnym wyciągu jedną ręką"
+  },
+  {
+    "id": "One-Arm_Incline_Lateral_Raise",
+    "nameRu": "Подъём одной руки в сторону на наклонной скамье",
+    "namePl": "Unoszenie boczne jedną ręką na ławce skośnej"
+  },
+  {
+    "id": "One-Arm_Kettlebell_Clean",
+    "nameRu": "Подъём гири на грудь одной рукой",
+    "namePl": "Zarzut kettlebell jedną ręką"
+  },
+  {
+    "id": "One-Arm_Kettlebell_Clean_and_Jerk",
+    "nameRu": "Толчок гири одной рукой",
+    "namePl": "Podrzut kettlebell jedną ręką"
+  },
+  {
+    "id": "One-Arm_Kettlebell_Floor_Press",
+    "nameRu": "Жим гири одной рукой лёжа на полу",
+    "namePl": "Wyciskanie kettlebell jedną ręką na podłodze"
+  },
+  {
+    "id": "One-Arm_Kettlebell_Jerk",
+    "nameRu": "Толчок от груди гири одной рукой",
+    "namePl": "Wybicie kettlebell jedną ręką"
+  },
+  {
+    "id": "One-Arm_Kettlebell_Military_Press_To_The_Side",
+    "nameRu": "Жим гири в сторону одной рукой",
+    "namePl": "Wyciskanie kettlebell w bok jedną ręką"
+  },
+  {
+    "id": "One-Arm_Kettlebell_Para_Press",
+    "nameRu": "Жим гири пара одной рукой",
+    "namePl": "Wyciskanie kettlebell para jedną ręką"
+  },
+  {
+    "id": "One-Arm_Kettlebell_Push_Press",
+    "nameRu": "Жим гири с доталкиванием одной рукой",
+    "namePl": "Wyciskanie z dobiegu kettlebell jedną ręką"
+  },
+  {
+    "id": "One-Arm_Kettlebell_Row",
+    "nameRu": "Тяга гири в наклоне одной рукой",
+    "namePl": "Wiosłowanie kettlebell jedną ręką"
+  },
+  {
+    "id": "One-Arm_Kettlebell_Snatch",
+    "nameRu": "Рывок гири одной рукой",
+    "namePl": "Rwanie kettlebell jedną ręką"
+  },
+  {
+    "id": "One-Arm_Kettlebell_Split_Jerk",
+    "nameRu": "Толчок гири в расщеп одной рукой",
+    "namePl": "Wybicie kettlebell w rozkroku jedną ręką"
+  },
+  {
+    "id": "One-Arm_Kettlebell_Split_Snatch",
+    "nameRu": "Рывок гири в расщеп одной рукой",
+    "namePl": "Rwanie kettlebell w rozkroku jedną ręką"
+  },
+  {
+    "id": "One-Arm_Kettlebell_Swings",
+    "nameRu": "Махи гирей одной рукой",
+    "namePl": "Machy kettlebell jedną ręką"
+  },
+  {
+    "id": "One-Arm_Long_Bar_Row",
+    "nameRu": "Тяга длинного грифа одной рукой",
+    "namePl": "Wiosłowanie długim gryfem jedną ręką"
+  },
+  {
+    "id": "One-Arm_Medicine_Ball_Slam",
+    "nameRu": "Бросок медбола об пол одной рукой",
+    "namePl": "Rzut piłką lekarską jedną ręką"
+  },
+  {
+    "id": "One-Arm_Open_Palm_Kettlebell_Clean",
+    "nameRu": "Подъём гири на открытую ладонь одной рукой",
+    "namePl": "Zarzut kettlebell na otwartą dłoń jedną ręką"
+  },
+  {
+    "id": "One-Arm_Overhead_Kettlebell_Squats",
+    "nameRu": "Присед с гирей над головой одной рукой",
+    "namePl": "Przysiad z kettlebell nad głową jedną ręką"
+  },
+  {
+    "id": "One-Arm_Side_Deadlift",
+    "nameRu": "Становая тяга в сторону одной рукой",
+    "namePl": "Martwy ciąg boczny jedną ręką"
+  },
+  {
+    "id": "One-Arm_Side_Laterals",
+    "nameRu": "Подъём в сторону одной рукой",
+    "namePl": "Unoszenie boczne jedną ręką"
+  },
+  {
+    "id": "One-Legged_Cable_Kickback",
+    "nameRu": "Отведение ноги назад на блоке",
+    "namePl": "Odpychanie nogi w tył na wyciągu"
+  },
+  {
+    "id": "One_Arm_Against_Wall",
+    "nameRu": "Растяжка одной рукой у стены",
+    "namePl": "Rozciąganie ręki przy ścianie"
+  },
+  {
+    "id": "One_Arm_Chin-Up",
+    "nameRu": "Подтягивание одной рукой",
+    "namePl": "Podciąganie jedną ręką"
+  },
+  {
+    "id": "One_Arm_Dumbbell_Bench_Press",
+    "nameRu": "Жим гантели одной рукой лёжа",
+    "namePl": "Wyciskanie hantla jedną ręką leżąc"
+  },
+  {
+    "id": "One_Arm_Dumbbell_Preacher_Curl",
+    "nameRu": "Сгибание рук одной рукой (скамья Скотта)",
+    "namePl": "Uginanie jedną ręką na ławce Scotta"
+  },
+  {
+    "id": "One_Arm_Floor_Press",
+    "nameRu": "Жим одной рукой лёжа на полу",
+    "namePl": "Wyciskanie jedną ręką na podłodze"
+  },
+  {
+    "id": "One_Arm_Lat_Pulldown",
+    "nameRu": "Тяга верхнего блока одной рукой",
+    "namePl": "Ściąganie na wyciągu górnym jedną ręką"
+  },
+  {
+    "id": "One_Arm_Pronated_Dumbbell_Triceps_Extension",
+    "nameRu": "Разгибание трицепса одной рукой пронированным хватом",
+    "namePl": "Prostowanie tricepsa jedną ręką chwytem pronacyjnym"
+  },
+  {
+    "id": "One_Arm_Supinated_Dumbbell_Triceps_Extension",
+    "nameRu": "Разгибание трицепса одной рукой супинированным хватом",
+    "namePl": "Prostowanie tricepsa jedną ręką chwytem supinacyjnym"
+  },
+  {
+    "id": "One_Half_Locust",
+    "nameRu": "Полуакридас (поза саранчи)",
+    "namePl": "Pół szarańczy"
+  },
+  {
+    "id": "One_Handed_Hang",
+    "nameRu": "Вис на одной руке",
+    "namePl": "Zwis na jednej ręce"
+  },
+  {
+    "id": "One_Knee_To_Chest",
+    "nameRu": "Одно колено к груди",
+    "namePl": "Jedno kolano do klatki"
+  },
+  {
+    "id": "One_Leg_Barbell_Squat",
+    "nameRu": "Присед со штангой на одной ноге",
+    "namePl": "Przysiad ze sztangą na jednej nodze"
+  },
+  {
+    "id": "Open_Palm_Kettlebell_Clean",
+    "nameRu": "Подъём гири на открытую ладонь",
+    "namePl": "Zarzut kettlebell na otwartą dłoń"
+  },
+  {
+    "id": "Otis-Up",
+    "nameRu": "Отис-ап",
+    "namePl": "Otis-up"
+  },
+  {
+    "id": "Overhead_Cable_Curl",
+    "nameRu": "Сгибание рук через верхний блок",
+    "namePl": "Uginanie na górnym wyciągu nad głową"
+  },
+  {
+    "id": "Overhead_Lat",
+    "nameRu": "Растяжка широчайших над головой",
+    "namePl": "Rozciąganie najszerszego nad głową"
+  },
+  {
+    "id": "Overhead_Slam",
+    "nameRu": "Бросок медбола об пол над головой",
+    "namePl": "Rzut piłką o podłogę znad głowy"
+  },
+  {
+    "id": "Overhead_Squat",
+    "nameRu": "Присед со штангой над головой",
+    "namePl": "Przysiad z obciążeniem nad głową"
+  },
+  {
+    "id": "Overhead_Stretch",
+    "nameRu": "Растяжка над головой",
+    "namePl": "Rozciąganie nad głową"
+  },
+  {
+    "id": "Overhead_Triceps",
+    "nameRu": "Разгибание трицепса над головой",
+    "namePl": "Prostowanie tricepsa nad głową"
+  },
+  {
+    "id": "Pallof_Press",
+    "nameRu": "Жим Паллофа",
+    "namePl": "Wyciskanie Palloffa"
+  },
+  {
+    "id": "Pallof_Press_With_Rotation",
+    "nameRu": "Жим Паллофа с ротацией",
+    "namePl": "Wyciskanie Palloffa z rotacją"
+  },
+  {
+    "id": "Palms-Down_Dumbbell_Wrist_Curl_Over_A_Bench",
+    "nameRu": "Сгибание запястья с гантелью хватом сверху на скамье",
+    "namePl": "Uginanie nadgarstka z hantlem chwytem górnym na ławce"
+  },
+  {
+    "id": "Palms-Down_Wrist_Curl_Over_A_Bench",
+    "nameRu": "Сгибание запястья хватом сверху на скамье",
+    "namePl": "Uginanie nadgarstka chwytem górnym na ławce"
+  },
+  {
+    "id": "Palms-Up_Barbell_Wrist_Curl_Over_A_Bench",
+    "nameRu": "Сгибание запястья со штангой хватом снизу на скамье",
+    "namePl": "Uginanie nadgarstka ze sztangą chwytem dolnym na ławce"
+  },
+  {
+    "id": "Palms-Up_Dumbbell_Wrist_Curl_Over_A_Bench",
+    "nameRu": "Сгибание запястья с гантелью хватом снизу на скамье",
+    "namePl": "Uginanie nadgarstka z hantlem chwytem dolnym na ławce"
+  },
+  {
+    "id": "Parallel_Bar_Dip",
+    "nameRu": "Отжимание на параллельных брусьях",
+    "namePl": "Dip na poręczach"
+  },
+  {
+    "id": "Pelvic_Tilt_Into_Bridge",
+    "nameRu": "Наклон таза в мост",
+    "namePl": "Skłon miednicy w mostek"
+  },
+  {
+    "id": "Peroneals-SMR",
+    "nameRu": "Малоберцовые мышцы — СМР",
+    "namePl": "Mięśnie strzałkowe — SMR"
+  },
+  {
+    "id": "Peroneals_Stretch",
+    "nameRu": "Растяжка малоберцовых мышц",
+    "namePl": "Rozciąganie mięśni strzałkowych"
+  },
+  {
+    "id": "Physioball_Hip_Bridge",
+    "nameRu": "Ягодичный мост на фитболе",
+    "namePl": "Mostek biodrowy na piłce gimnastycznej"
+  },
+  {
+    "id": "Pin_Presses",
+    "nameRu": "Жим с упоров (пин-пресс)",
+    "namePl": "Wyciskanie z ograniczników"
+  },
+  {
+    "id": "Piriformis-SMR",
+    "nameRu": "Грушевидная мышца — СМР",
+    "namePl": "Mięsień gruszkowaty — SMR"
+  },
+  {
+    "id": "Plank",
+    "nameRu": "Планка",
+    "namePl": "Deska"
+  },
+  {
+    "id": "Plate_Pinch",
+    "nameRu": "Щипковый хват с диском",
+    "namePl": "Chwyt szczypcowy z talerzem"
+  },
+  {
+    "id": "Plate_Twist",
+    "nameRu": "Скручивание с диском",
+    "namePl": "Skręt z talerzem"
+  },
+  {
+    "id": "Platform_Hamstring_Slides",
+    "nameRu": "Скольжение ногами для бицепса бедра",
+    "namePl": "Ślizgi na ścięgno podkolanowe"
+  },
+  {
+    "id": "Plie_Dumbbell_Squat",
+    "nameRu": "Присед плие с гантелью",
+    "namePl": "Przysiad plie z hantlem"
+  },
+  {
+    "id": "Plyo_Kettlebell_Pushups",
+    "nameRu": "Плиометрические отжимания с гирей",
+    "namePl": "Plyometryczne pompki z kettlebell"
+  },
+  {
+    "id": "Plyo_Push-up",
+    "nameRu": "Плиометрическое отжимание",
+    "namePl": "Plyometryczna pompka"
+  },
+  {
+    "id": "Posterior_Tibialis_Stretch",
+    "nameRu": "Растяжка задней большеберцовой мышцы",
+    "namePl": "Rozciąganie mięśnia piszczelowego tylnego"
+  },
+  {
+    "id": "Power_Clean",
+    "nameRu": "Взятие на грудь (силовое)",
+    "namePl": "Power clean"
+  },
+  {
+    "id": "Power_Clean_from_Blocks",
+    "nameRu": "Взятие на грудь с блоков",
+    "namePl": "Power clean z bloków"
+  },
+  {
+    "id": "Power_Jerk",
+    "nameRu": "Толчок без подседа (силовой)",
+    "namePl": "Power jerk"
+  },
+  {
+    "id": "Power_Partials",
+    "nameRu": "Частичные повторения (силовые)",
+    "namePl": "Powtórzenia cząstkowe (siłowe)"
+  },
+  {
+    "id": "Power_Snatch",
+    "nameRu": "Рывок без полного подседа",
+    "namePl": "Power snatch"
+  },
+  {
+    "id": "Power_Snatch_from_Blocks",
+    "nameRu": "Рывок без подседа с блоков",
+    "namePl": "Power snatch z bloków"
+  },
+  {
+    "id": "Power_Stairs",
+    "nameRu": "Силовые ступени",
+    "namePl": "Schody siłowe"
+  },
+  {
+    "id": "Preacher_Curl",
+    "nameRu": "Сгибание на скамье Скотта",
+    "namePl": "Uginanie na ławce Scotta"
+  },
+  {
+    "id": "Preacher_Hammer_Dumbbell_Curl",
+    "nameRu": "Молотковое сгибание на скамье Скотта",
+    "namePl": "Uginanie młotkowe na ławce Scotta"
+  },
+  {
+    "id": "Press_Sit-Up",
+    "nameRu": "Скручивание с жимом",
+    "namePl": "Brzuszek z wyciskaniem"
+  },
+  {
+    "id": "Prone_Manual_Hamstring",
+    "nameRu": "Ручное сопротивление бицепсу бедра лёжа",
+    "namePl": "Ręczny opór na mięsień dwugłowy uda leżąc"
+  },
+  {
+    "id": "Prowler_Sprint",
+    "nameRu": "Толкание саней (Prowler)",
+    "namePl": "Sprint z saniami Prowler"
+  },
+  {
+    "id": "Pull_Through",
+    "nameRu": "Протяжка через блок",
+    "namePl": "Pull through"
+  },
+  {
+    "id": "Pullups",
+    "nameRu": "Подтягивания",
+    "namePl": "Podciągania"
+  },
+  {
+    "id": "Push-Up_Wide",
+    "nameRu": "Отжимание широким хватом",
+    "namePl": "Pompka szerokim chwytem"
+  },
+  {
+    "id": "Push-Ups_-_Close_Triceps_Position",
+    "nameRu": "Отжимания (позиция трицепса)",
+    "namePl": "Pompki (pozycja tricepsa)"
+  },
+  {
+    "id": "Push-Ups_With_Feet_Elevated",
+    "nameRu": "Отжимания с ногами вверху",
+    "namePl": "Pompki z uniesionymi nogami"
+  },
+  {
+    "id": "Push-Ups_With_Feet_On_An_Exercise_Ball",
+    "nameRu": "Отжимания с ногами на мяче",
+    "namePl": "Pompki z nogami na piłce"
+  },
+  {
+    "id": "Push_Press",
+    "nameRu": "Жим с доталкиванием (пуш-пресс)",
+    "namePl": "Wyciskanie z dobiegu (push press)"
+  },
+  {
+    "id": "Push_Press_-_Behind_the_Neck",
+    "nameRu": "Пуш-пресс за голову",
+    "namePl": "Wyciskanie z dobiegu za głowę"
+  },
+  {
+    "id": "Push_Up_to_Side_Plank",
+    "nameRu": "Отжимание с переходом в боковую планку",
+    "namePl": "Pompka z przejściem w boczną deskę"
+  },
+  {
+    "id": "Pushups",
+    "nameRu": "Отжимания",
+    "namePl": "Pompki"
+  },
+  {
+    "id": "Pushups_Close_and_Wide_Hand_Positions",
+    "nameRu": "Отжимания (узкий и широкий хват)",
+    "namePl": "Pompki (wąski i szeroki chwyt)"
+  },
+  {
+    "id": "Pyramid",
+    "nameRu": "Пирамида",
+    "namePl": "Piramida"
+  },
+  {
+    "id": "Quad_Stretch",
+    "nameRu": "Растяжка квадрицепса",
+    "namePl": "Rozciąganie czworogłowego"
+  },
+  {
+    "id": "Quadriceps-SMR",
+    "nameRu": "Квадрицепс — СМР",
+    "namePl": "Czworogłowy uda — SMR"
+  },
+  {
+    "id": "Quick_Leap",
+    "nameRu": "Быстрый прыжок",
+    "namePl": "Szybki skok"
+  },
+  {
+    "id": "Rack_Delivery",
+    "nameRu": "Снятие штанги со стоек",
+    "namePl": "Zdejmowanie z haków"
+  },
+  {
+    "id": "Rack_Pull_with_Bands",
+    "nameRu": "Тяга с упоров с лентами",
+    "namePl": "Ciąg z ograniczników z taśmami"
+  },
+  {
+    "id": "Rack_Pulls",
+    "nameRu": "Тяга с упоров",
+    "namePl": "Ciąg z ograniczników"
+  },
+  {
+    "id": "Rear_Leg_Raises",
+    "nameRu": "Подъём ноги назад",
+    "namePl": "Unoszenie nogi w tył"
+  },
+  {
+    "id": "Recumbent_Bike",
+    "nameRu": "Горизонтальный велотренажёр",
+    "namePl": "Rower poziomy"
+  },
+  {
+    "id": "Return_Push_from_Stance",
+    "nameRu": "Возвратный толчок из стойки",
+    "namePl": "Odwrotne pchnięcie z postawy"
+  },
+  {
+    "id": "Reverse_Band_Bench_Press",
+    "nameRu": "Жим лёжа с обратными лентами",
+    "namePl": "Wyciskanie leżąc z odwróconymi taśmami"
+  },
+  {
+    "id": "Reverse_Band_Box_Squat",
+    "nameRu": "Присед на ящик с обратными лентами",
+    "namePl": "Przysiad na skrzynię z odwróconymi taśmami"
+  },
+  {
+    "id": "Reverse_Band_Deadlift",
+    "nameRu": "Становая тяга с обратными лентами",
+    "namePl": "Martwy ciąg z odwróconymi taśmami"
+  },
+  {
+    "id": "Reverse_Band_Power_Squat",
+    "nameRu": "Силовой присед с обратными лентами",
+    "namePl": "Siłowy przysiad z odwróconymi taśmami"
+  },
+  {
+    "id": "Reverse_Band_Sumo_Deadlift",
+    "nameRu": "Сумо-тяга с обратными лентами",
+    "namePl": "Sumo martwy ciąg z odwróconymi taśmami"
+  },
+  {
+    "id": "Reverse_Barbell_Curl",
+    "nameRu": "Сгибание рук со штангой обратным хватом",
+    "namePl": "Uginanie ze sztangą chwytem odwróconym"
+  },
+  {
+    "id": "Reverse_Barbell_Preacher_Curls",
+    "nameRu": "Сгибание рук обратным хватом на скамье Скотта",
+    "namePl": "Uginanie chwytem odwróconym na ławce Scotta"
+  },
+  {
+    "id": "Reverse_Cable_Curl",
+    "nameRu": "Сгибание рук на блоке обратным хватом",
+    "namePl": "Uginanie na wyciągu chwytem odwróconym"
+  },
+  {
+    "id": "Reverse_Crunch",
+    "nameRu": "Обратное скручивание",
+    "namePl": "Odwrócony brzuszek"
+  },
+  {
+    "id": "Reverse_Flyes",
+    "nameRu": "Обратные разводки",
+    "namePl": "Odwrotne rozpiętki"
+  },
+  {
+    "id": "Reverse_Flyes_With_External_Rotation",
+    "nameRu": "Обратные разводки с внешней ротацией",
+    "namePl": "Odwrotne rozpiętki z rotacją zewnętrzną"
+  },
+  {
+    "id": "Reverse_Grip_Bent-Over_Rows",
+    "nameRu": "Тяга штанги в наклоне обратным хватом",
+    "namePl": "Wiosłowanie w pochyleniu chwytem odwróconym"
+  },
+  {
+    "id": "Reverse_Grip_Triceps_Pushdown",
+    "nameRu": "Разгибание трицепса обратным хватом",
+    "namePl": "Prostowanie tricepsa chwytem odwróconym"
+  },
+  {
+    "id": "Reverse_Hyperextension",
+    "nameRu": "Обратная гиперэкстензия",
+    "namePl": "Odwrócona hyperekstensja"
+  },
+  {
+    "id": "Reverse_Machine_Flyes",
+    "nameRu": "Обратные разводки на тренажёре",
+    "namePl": "Odwrotne rozpiętki na maszynie"
+  },
+  {
+    "id": "Reverse_Plate_Curls",
+    "nameRu": "Сгибание рук с диском обратным хватом",
+    "namePl": "Uginanie z talerzem chwytem odwróconym"
+  },
+  {
+    "id": "Reverse_Triceps_Bench_Press",
+    "nameRu": "Жим лёжа обратным хватом",
+    "namePl": "Wyciskanie leżąc chwytem odwróconym"
+  },
+  {
+    "id": "Rhomboids-SMR",
+    "nameRu": "Ромбовидные мышцы — СМР",
+    "namePl": "Mięśnie romboidalne — SMR"
+  },
+  {
+    "id": "Rickshaw_Carry",
+    "nameRu": "Переноска рикши",
+    "namePl": "Noszenie rikszy"
+  },
+  {
+    "id": "Rickshaw_Deadlift",
+    "nameRu": "Становая тяга рикши",
+    "namePl": "Martwy ciąg rikszy"
+  },
+  {
+    "id": "Ring_Dips",
+    "nameRu": "Отжимания на кольцах",
+    "namePl": "Dipy na kółkach"
+  },
+  {
+    "id": "Rocket_Jump",
+    "nameRu": "Прыжок ракета",
+    "namePl": "Skok rakieta"
+  },
+  {
+    "id": "Rocking_Standing_Calf_Raise",
+    "nameRu": "Подъём на носки с раскачкой",
+    "namePl": "Wspięcia na palce z kołysaniem"
+  },
+  {
+    "id": "Rocky_Pull-Ups_Pulldowns",
+    "nameRu": "Подтягивания / тяги Рокки",
+    "namePl": "Podciągania / ściąganie Rockiego"
+  },
+  {
+    "id": "Romanian_Deadlift",
+    "nameRu": "Румынская тяга",
+    "namePl": "Rumuński martwy ciąg"
+  },
+  {
+    "id": "Romanian_Deadlift_from_Deficit",
+    "nameRu": "Румынская тяга с дефицитом",
+    "namePl": "Rumuński martwy ciąg z deficytem"
+  },
+  {
+    "id": "Rope_Climb",
+    "nameRu": "Лазание по канату",
+    "namePl": "Wspinaczka po linie"
+  },
+  {
+    "id": "Rope_Crunch",
+    "nameRu": "Скручивание с верёвкой",
+    "namePl": "Brzuszek z liną"
+  },
+  {
+    "id": "Rope_Jumping",
+    "nameRu": "Прыжки со скакалкой",
+    "namePl": "Skakanie na skakance"
+  },
+  {
+    "id": "Rope_Straight-Arm_Pulldown",
+    "nameRu": "Тяга верёвки прямыми руками",
+    "namePl": "Ściąganie liny na wyprostowanych ramionach"
+  },
+  {
+    "id": "Round_The_World_Shoulder_Stretch",
+    "nameRu": "Круговая растяжка плечей",
+    "namePl": "Okrężne rozciąganie barków"
+  },
+  {
+    "id": "Rowing_Stationary",
+    "nameRu": "Гребля на тренажёре",
+    "namePl": "Wiosłowanie stacjonarne"
+  },
+  {
+    "id": "Runners_Stretch",
+    "nameRu": "Растяжка бегуна",
+    "namePl": "Rozciąganie biegacza"
+  },
+  {
+    "id": "Running_Treadmill",
+    "nameRu": "Бег на беговой дорожке",
+    "namePl": "Bieg na bieżni"
+  },
+  {
+    "id": "Russian_Twist",
+    "nameRu": "Русский поворот",
+    "namePl": "Rosyjski skręt"
+  },
+  {
+    "id": "Sandbag_Load",
+    "nameRu": "Загрузка мешка с песком",
+    "namePl": "Załadunek worka z piaskiem"
+  },
+  {
+    "id": "Scapular_Pull-Up",
+    "nameRu": "Лопаточное подтягивание",
+    "namePl": "Podciąganie łopatkowe"
+  },
+  {
+    "id": "Scissor_Kick",
+    "nameRu": "Ножницы ногами",
+    "namePl": "Nożyce nogami"
+  },
+  {
+    "id": "Scissors_Jump",
+    "nameRu": "Прыжковые ножницы",
+    "namePl": "Skaczące nożyce"
+  },
+  {
+    "id": "Seated_Band_Hamstring_Curl",
+    "nameRu": "Сгибание ног с лентой сидя",
+    "namePl": "Uginanie nóg z taśmą w siadzie"
+  },
+  {
+    "id": "Seated_Barbell_Military_Press",
+    "nameRu": "Военный жим со штангой сидя",
+    "namePl": "Wyciskanie wojskowe ze sztangą w siadzie"
+  },
+  {
+    "id": "Seated_Barbell_Twist",
+    "nameRu": "Повороты туловища со штангой сидя",
+    "namePl": "Skręty tułowia ze sztangą w siadzie"
+  },
+  {
+    "id": "Seated_Bent-Over_One-Arm_Dumbbell_Triceps_Extension",
+    "nameRu": "Разгибание трицепса с гантелью в наклоне сидя (одна рука)",
+    "namePl": "Prostowanie tricepsa z hantlem w pochyleniu w siadzie (jedna ręka)"
+  },
+  {
+    "id": "Seated_Bent-Over_Rear_Delt_Raise",
+    "nameRu": "Подъём на заднюю дельту в наклоне сидя",
+    "namePl": "Unoszenie na tylny bark w pochyleniu w siadzie"
+  },
+  {
+    "id": "Seated_Bent-Over_Two-Arm_Dumbbell_Triceps_Extension",
+    "nameRu": "Разгибание трицепса с гантелями в наклоне сидя (две руки)",
+    "namePl": "Prostowanie tricepsa z hantlami w pochyleniu w siadzie (obie ręce)"
+  },
+  {
+    "id": "Seated_Biceps",
+    "nameRu": "Растяжка бицепса сидя",
+    "namePl": "Rozciąganie bicepsa w siadzie"
+  },
+  {
+    "id": "Seated_Cable_Rows",
+    "nameRu": "Тяга горизонтального блока сидя",
+    "namePl": "Wiosłowanie poziome na wyciągu w siadzie"
+  },
+  {
+    "id": "Seated_Cable_Shoulder_Press",
+    "nameRu": "Жим на плечи на блоке сидя",
+    "namePl": "Wyciskanie na barki na wyciągu w siadzie"
+  },
+  {
+    "id": "Seated_Calf_Raise",
+    "nameRu": "Подъём на носки сидя",
+    "namePl": "Wspięcia na palce w siadzie"
+  },
+  {
+    "id": "Seated_Calf_Stretch",
+    "nameRu": "Растяжка икр сидя",
+    "namePl": "Rozciąganie łydki w siadzie"
+  },
+  {
+    "id": "Seated_Close-Grip_Concentration_Barbell_Curl",
+    "nameRu": "Концентрированное сгибание со штангой узким хватом сидя",
+    "namePl": "Koncentryczne uginanie ze sztangą wąskim chwytem w siadzie"
+  },
+  {
+    "id": "Seated_Dumbbell_Curl",
+    "nameRu": "Сгибание бицепса с гантелью сидя",
+    "namePl": "Uginanie bicepsa z hantlem w siadzie"
+  },
+  {
+    "id": "Seated_Dumbbell_Inner_Biceps_Curl",
+    "nameRu": "Сгибание внутренней части бицепса с гантелью сидя",
+    "namePl": "Uginanie wewnętrznej głowy bicepsa z hantlem w siadzie"
+  },
+  {
+    "id": "Seated_Dumbbell_Palms-Down_Wrist_Curl",
+    "nameRu": "Сгибание запястья с гантелью хватом сверху сидя",
+    "namePl": "Uginanie nadgarstka z hantlem chwytem górnym w siadzie"
+  },
+  {
+    "id": "Seated_Dumbbell_Palms-Up_Wrist_Curl",
+    "nameRu": "Сгибание запястья с гантелью хватом снизу сидя",
+    "namePl": "Uginanie nadgarstka z hantlem chwytem dolnym w siadzie"
+  },
+  {
+    "id": "Seated_Dumbbell_Press",
+    "nameRu": "Жим гантелей сидя",
+    "namePl": "Wyciskanie hantlami w siadzie"
+  },
+  {
+    "id": "Seated_Flat_Bench_Leg_Pull-In",
+    "nameRu": "Подтягивание ног к груди сидя на скамье",
+    "namePl": "Przyciąganie nóg do klatki w siadzie na ławce"
+  },
+  {
+    "id": "Seated_Floor_Hamstring_Stretch",
+    "nameRu": "Растяжка бицепса бедра сидя на полу",
+    "namePl": "Rozciąganie ścięgna podkolanowego w siadzie na podłodze"
+  },
+  {
+    "id": "Seated_Front_Deltoid",
+    "nameRu": "Растяжка передней дельты сидя",
+    "namePl": "Rozciąganie przedniego barku w siadzie"
+  },
+  {
+    "id": "Seated_Glute",
+    "nameRu": "Растяжка ягодиц сидя",
+    "namePl": "Rozciąganie pośladków w siadzie"
+  },
+  {
+    "id": "Seated_Good_Mornings",
+    "nameRu": "Наклон сидя (гуд морнинг)",
+    "namePl": "Dzień dobry w siadzie"
+  },
+  {
+    "id": "Seated_Hamstring",
+    "nameRu": "Растяжка бицепса бедра сидя",
+    "namePl": "Rozciąganie mięśnia dwugłowego uda w siadzie"
+  },
+  {
+    "id": "Seated_Hamstring_and_Calf_Stretch",
+    "nameRu": "Растяжка бицепса бедра и икр сидя",
+    "namePl": "Rozciąganie ścięgna i łydki w siadzie"
+  },
+  {
+    "id": "Seated_Head_Harness_Neck_Resistance",
+    "nameRu": "Сопротивление шеи с упряжью сидя",
+    "namePl": "Wzmacnianie szyi z uprzężą w siadzie"
+  },
+  {
+    "id": "Seated_Leg_Curl",
+    "nameRu": "Сгибание ног сидя на тренажёре",
+    "namePl": "Uginanie nóg na maszynie w siadzie"
+  },
+  {
+    "id": "Seated_Leg_Tucks",
+    "nameRu": "Подтягивание коленей к груди сидя",
+    "namePl": "Przyciąganie kolan do klatki w siadzie"
+  },
+  {
+    "id": "Seated_One-Arm_Dumbbell_Palms-Down_Wrist_Curl",
+    "nameRu": "Сгибание запястья одной рукой хватом сверху сидя",
+    "namePl": "Uginanie nadgarstka jedną ręką chwytem górnym w siadzie"
+  },
+  {
+    "id": "Seated_One-Arm_Dumbbell_Palms-Up_Wrist_Curl",
+    "nameRu": "Сгибание запястья одной рукой хватом снизу сидя",
+    "namePl": "Uginanie nadgarstka jedną ręką chwytem dolnym w siadzie"
+  },
+  {
+    "id": "Seated_One-arm_Cable_Pulley_Rows",
+    "nameRu": "Тяга блока одной рукой сидя",
+    "namePl": "Wiosłowanie na wyciągu jedną ręką w siadzie"
+  },
+  {
+    "id": "Seated_Overhead_Stretch",
+    "nameRu": "Растяжка над головой сидя",
+    "namePl": "Rozciąganie nad głową w siadzie"
+  },
+  {
+    "id": "Seated_Palm-Up_Barbell_Wrist_Curl",
+    "nameRu": "Сгибание запястья со штангой хватом снизу сидя",
+    "namePl": "Uginanie nadgarstka ze sztangą chwytem dolnym w siadzie"
+  },
+  {
+    "id": "Seated_Palms-Down_Barbell_Wrist_Curl",
+    "nameRu": "Сгибание запястья со штангой хватом сверху сидя",
+    "namePl": "Uginanie nadgarstka ze sztangą chwytem górnym w siadzie"
+  },
+  {
+    "id": "Seated_Side_Lateral_Raise",
+    "nameRu": "Подъём гантелей в стороны сидя",
+    "namePl": "Unoszenie boczne hantlami w siadzie"
+  },
+  {
+    "id": "Seated_Triceps_Press",
+    "nameRu": "Жим трицепса сидя",
+    "namePl": "Wyciskanie tricepsa w siadzie"
+  },
+  {
+    "id": "Seated_Two-Arm_Palms-Up_Low-Pulley_Wrist_Curl",
+    "nameRu": "Сгибание запястья двумя руками на нижнем блоке хватом снизу сидя",
+    "namePl": "Uginanie nadgarstka oburącz na dolnym wyciągu chwytem dolnym w siadzie"
+  },
+  {
+    "id": "See-Saw_Press_Alternating_Side_Press",
+    "nameRu": "Поочерёдный жим (качели)",
+    "namePl": "Wyciskanie na zmianę (huśtawka)"
+  },
+  {
+    "id": "Shotgun_Row",
+    "nameRu": "Тяга дробовика",
+    "namePl": "Wiosłowanie shotgun"
+  },
+  {
+    "id": "Shoulder_Circles",
+    "nameRu": "Вращение плечами",
+    "namePl": "Krążenia ramionami"
+  },
+  {
+    "id": "Shoulder_Press_-_With_Bands",
+    "nameRu": "Жим на плечи с лентами",
+    "namePl": "Wyciskanie na barki z taśmami"
+  },
+  {
+    "id": "Shoulder_Raise",
+    "nameRu": "Подъём плеч",
+    "namePl": "Unoszenie barków"
+  },
+  {
+    "id": "Shoulder_Stretch",
+    "nameRu": "Растяжка плечей",
+    "namePl": "Rozciąganie barków"
+  },
+  {
+    "id": "Side-Lying_Floor_Stretch",
+    "nameRu": "Растяжка лёжа на боку",
+    "namePl": "Rozciąganie na podłodze na boku"
+  },
+  {
+    "id": "Side_Bridge",
+    "nameRu": "Боковая планка",
+    "namePl": "Boczna deska"
+  },
+  {
+    "id": "Side_Hop-Sprint",
+    "nameRu": "Боковой прыжок с спринтом",
+    "namePl": "Boczny skok ze sprintem"
+  },
+  {
+    "id": "Side_Jackknife",
+    "nameRu": "Боковая складка",
+    "namePl": "Boczny nożyk"
+  },
+  {
+    "id": "Side_Lateral_Raise",
+    "nameRu": "Подъём гантелей в стороны",
+    "namePl": "Unoszenie boczne hantlami"
+  },
+  {
+    "id": "Side_Laterals_to_Front_Raise",
+    "nameRu": "Подъём в стороны с переходом вперёд",
+    "namePl": "Unoszenie boczne z przejściem do przodu"
+  },
+  {
+    "id": "Side_Leg_Raises",
+    "nameRu": "Подъём ноги в сторону",
+    "namePl": "Unoszenie nogi w bok"
+  },
+  {
+    "id": "Side_Lying_Groin_Stretch",
+    "nameRu": "Растяжка паха лёжа на боку",
+    "namePl": "Rozciąganie pachwiny leżąc na boku"
+  },
+  {
+    "id": "Side_Neck_Stretch",
+    "nameRu": "Боковая растяжка шеи",
+    "namePl": "Boczne rozciąganie szyi"
+  },
+  {
+    "id": "Side_Standing_Long_Jump",
+    "nameRu": "Боковой прыжок в длину с места",
+    "namePl": "Boczny skok w dal z miejsca"
+  },
+  {
+    "id": "Side_To_Side_Chins",
+    "nameRu": "Подтягивания из стороны в сторону",
+    "namePl": "Podciągania na boki"
+  },
+  {
+    "id": "Side_Wrist_Pull",
+    "nameRu": "Боковое растяжение запястья",
+    "namePl": "Boczne rozciąganie nadgarstka"
+  },
+  {
+    "id": "Side_to_Side_Box_Shuffle",
+    "nameRu": "Боковые перепрыгивания через ящик",
+    "namePl": "Boczne przeskoki przez skrzynię"
+  },
+  {
+    "id": "Single-Arm_Cable_Crossover",
+    "nameRu": "Кроссовер одной рукой",
+    "namePl": "Krzyżowanie na wyciągu jedną ręką"
+  },
+  {
+    "id": "Single-Arm_Linear_Jammer",
+    "nameRu": "Линейный жим одной рукой (джаммер)",
+    "namePl": "Liniowe wyciskanie jedną ręką (Jammer)"
+  },
+  {
+    "id": "Single-Arm_Push-Up",
+    "nameRu": "Отжимание на одной руке",
+    "namePl": "Pompka jedną ręką"
+  },
+  {
+    "id": "Single-Cone_Sprint_Drill",
+    "nameRu": "Спринт вокруг конуса",
+    "namePl": "Sprint ze słupkiem"
+  },
+  {
+    "id": "Single-Leg_High_Box_Squat",
+    "nameRu": "Присед на одной ноге на высоком ящике",
+    "namePl": "Przysiad jednonóż na wysokiej skrzyni"
+  },
+  {
+    "id": "Single-Leg_Hop_Progression",
+    "nameRu": "Прогрессивные прыжки на одной ноге",
+    "namePl": "Progresywne skoki jednonóż"
+  },
+  {
+    "id": "Single-Leg_Lateral_Hop",
+    "nameRu": "Боковой прыжок на одной ноге",
+    "namePl": "Boczny skok jednonóż"
+  },
+  {
+    "id": "Single-Leg_Leg_Extension",
+    "nameRu": "Разгибание ноги на тренажёре (одной ногой)",
+    "namePl": "Prostowanie nogi na maszynie (jednonóż)"
+  },
+  {
+    "id": "Single-Leg_Stride_Jump",
+    "nameRu": "Прыжок широким шагом на одной ноге",
+    "namePl": "Skok krokiem jednonóż"
+  },
+  {
+    "id": "Single_Dumbbell_Raise",
+    "nameRu": "Подъём одной гантели",
+    "namePl": "Unoszenie pojedynczego hantla"
+  },
+  {
+    "id": "Single_Leg_Butt_Kick",
+    "nameRu": "Захлёст голени одной ногой",
+    "namePl": "Kopanie pięty jedną nogą"
+  },
+  {
+    "id": "Single_Leg_Glute_Bridge",
+    "nameRu": "Ягодичный мост на одной ноге",
+    "namePl": "Mostek biodrowy jednonóż"
+  },
+  {
+    "id": "Single_Leg_Push-off",
+    "nameRu": "Отталкивание одной ногой",
+    "namePl": "Odbicie jednonóż"
+  },
+  {
+    "id": "Sit-Up",
+    "nameRu": "Подъём туловища",
+    "namePl": "Siad skłon"
+  },
+  {
+    "id": "Sit_Squats",
+    "nameRu": "Приседания на корточки",
+    "namePl": "Przysiady"
+  },
+  {
+    "id": "Skating",
+    "nameRu": "Катание на коньках",
+    "namePl": "Łyżwiarstwo"
+  },
+  {
+    "id": "Sled_Drag_-_Harness",
+    "nameRu": "Волочение саней с упряжью",
+    "namePl": "Ciągnięcie sań z uprzężą"
+  },
+  {
+    "id": "Sled_Overhead_Backward_Walk",
+    "nameRu": "Ходьба назад с санями над головой",
+    "namePl": "Marsz w tył z saniami nad głową"
+  },
+  {
+    "id": "Sled_Overhead_Triceps_Extension",
+    "nameRu": "Разгибание трицепса с санями над головой",
+    "namePl": "Prostowanie tricepsa z saniami nad głową"
+  },
+  {
+    "id": "Sled_Push",
+    "nameRu": "Толкание саней",
+    "namePl": "Pchanie sań"
+  },
+  {
+    "id": "Sled_Reverse_Flye",
+    "nameRu": "Обратные разводки с санями",
+    "namePl": "Odwrotne rozpiętki z saniami"
+  },
+  {
+    "id": "Sled_Row",
+    "nameRu": "Тяга саней",
+    "namePl": "Wiosłowanie saniami"
+  },
+  {
+    "id": "Sledgehammer_Swings",
+    "nameRu": "Удары кувалдой",
+    "namePl": "Uderzenia młotem"
+  },
+  {
+    "id": "Smith_Incline_Shoulder_Raise",
+    "nameRu": "Подъём на дельты на наклонной в Смите",
+    "namePl": "Unoszenie na barki na ławce skośnej w maszynie Smitha"
+  },
+  {
+    "id": "Smith_Machine_Behind_the_Back_Shrug",
+    "nameRu": "Шраги за спиной в Смите",
+    "namePl": "Szragi za plecami w maszynie Smitha"
+  },
+  {
+    "id": "Smith_Machine_Bench_Press",
+    "nameRu": "Жим лёжа в Смите",
+    "namePl": "Wyciskanie leżąc w maszynie Smitha"
+  },
+  {
+    "id": "Smith_Machine_Bent_Over_Row",
+    "nameRu": "Тяга в наклоне в Смите",
+    "namePl": "Wiosłowanie w pochyleniu w maszynie Smitha"
+  },
+  {
+    "id": "Smith_Machine_Calf_Raise",
+    "nameRu": "Подъём на носки в Смите",
+    "namePl": "Wspięcia na palce w maszynie Smitha"
+  },
+  {
+    "id": "Smith_Machine_Close-Grip_Bench_Press",
+    "nameRu": "Жим узким хватом в Смите",
+    "namePl": "Wyciskanie wąskim chwytem w maszynie Smitha"
+  },
+  {
+    "id": "Smith_Machine_Decline_Press",
+    "nameRu": "Жим в Смите с отрицательным углом",
+    "namePl": "Wyciskanie na ławce ujemnej w maszynie Smitha"
+  },
+  {
+    "id": "Smith_Machine_Hang_Power_Clean",
+    "nameRu": "Взятие на грудь с виса в Смите",
+    "namePl": "Power clean z podwieszenia w maszynie Smitha"
+  },
+  {
+    "id": "Smith_Machine_Hip_Raise",
+    "nameRu": "Подъём таза в Смите",
+    "namePl": "Unoszenie bioder w maszynie Smitha"
+  },
+  {
+    "id": "Smith_Machine_Incline_Bench_Press",
+    "nameRu": "Жим на наклонной скамье в Смите",
+    "namePl": "Wyciskanie na ławce skośnej w maszynie Smitha"
+  },
+  {
+    "id": "Smith_Machine_Leg_Press",
+    "nameRu": "Жим ногами в Смите",
+    "namePl": "Prasa do nóg w maszynie Smitha"
+  },
+  {
+    "id": "Smith_Machine_One-Arm_Upright_Row",
+    "nameRu": "Тяга к подбородку одной рукой в Смите",
+    "namePl": "Podciąganie do brody jedną ręką w maszynie Smitha"
+  },
+  {
+    "id": "Smith_Machine_Overhead_Shoulder_Press",
+    "nameRu": "Жим над головой в Смите",
+    "namePl": "Wyciskanie nad głowę w maszynie Smitha"
+  },
+  {
+    "id": "Smith_Machine_Pistol_Squat",
+    "nameRu": "Пистолет в Смите",
+    "namePl": "Przysiad pistoletem w maszynie Smitha"
+  },
+  {
+    "id": "Smith_Machine_Reverse_Calf_Raises",
+    "nameRu": "Обратный подъём на носки в Смите",
+    "namePl": "Odwrócone wspięcia na palce w maszynie Smitha"
+  },
+  {
+    "id": "Smith_Machine_Squat",
+    "nameRu": "Присед в Смите",
+    "namePl": "Przysiad w maszynie Smitha"
+  },
+  {
+    "id": "Smith_Machine_Stiff-Legged_Deadlift",
+    "nameRu": "Становая тяга на прямых ногах в Смите",
+    "namePl": "Martwy ciąg na wyprostowanych nogach w maszynie Smitha"
+  },
+  {
+    "id": "Smith_Machine_Upright_Row",
+    "nameRu": "Тяга к подбородку в Смите",
+    "namePl": "Podciąganie do brody w maszynie Smitha"
+  },
+  {
+    "id": "Smith_Single-Leg_Split_Squat",
+    "nameRu": "Болгарский сплит-присед в Смите",
+    "namePl": "Przysiad bułgarski jednonóż w maszynie Smitha"
+  },
+  {
+    "id": "Snatch",
+    "nameRu": "Рывок",
+    "namePl": "Rwanie"
+  },
+  {
+    "id": "Snatch_Balance",
+    "nameRu": "Баланс рывка",
+    "namePl": "Balans rwaniowy"
+  },
+  {
+    "id": "Snatch_Deadlift",
+    "nameRu": "Становая тяга рывковым хватом",
+    "namePl": "Martwy ciąg do rwania"
+  },
+  {
+    "id": "Snatch_Pull",
+    "nameRu": "Тяга рывковая",
+    "namePl": "Ciąg rwaniowy"
+  },
+  {
+    "id": "Snatch_Shrug",
+    "nameRu": "Шраг рывковый",
+    "namePl": "Szragi rwaniowe"
+  },
+  {
+    "id": "Snatch_from_Blocks",
+    "nameRu": "Рывок с блоков",
+    "namePl": "Rwanie z bloków"
+  },
+  {
+    "id": "Speed_Band_Overhead_Triceps",
+    "nameRu": "Разгибание трицепса над головой с лентой (скоростное)",
+    "namePl": "Szybkie prostowanie tricepsa nad głową z taśmą"
+  },
+  {
+    "id": "Speed_Box_Squat",
+    "nameRu": "Скоростной присед на ящик",
+    "namePl": "Szybki przysiad na skrzynię"
+  },
+  {
+    "id": "Speed_Squats",
+    "nameRu": "Скоростные приседания",
+    "namePl": "Przysiady szybkościowe"
+  },
+  {
+    "id": "Spell_Caster",
+    "nameRu": "Спелкастер",
+    "namePl": "Spell caster"
+  },
+  {
+    "id": "Spider_Crawl",
+    "nameRu": "Паучье ползание",
+    "namePl": "Pełzanie pająka"
+  },
+  {
+    "id": "Spider_Curl",
+    "nameRu": "Паучье сгибание (Spider Curl)",
+    "namePl": "Spider curl"
+  },
+  {
+    "id": "Spinal_Stretch",
+    "nameRu": "Растяжка позвоночника",
+    "namePl": "Rozciąganie kręgosłupa"
+  },
+  {
+    "id": "Split_Clean",
+    "nameRu": "Подъём на грудь в расщеп",
+    "namePl": "Zarzut w rozkroku"
+  },
+  {
+    "id": "Split_Jerk",
+    "nameRu": "Толчок в расщеп",
+    "namePl": "Wybicie w rozkroku"
+  },
+  {
+    "id": "Split_Jump",
+    "nameRu": "Прыжок с выпадом",
+    "namePl": "Skok w rozkroku"
+  },
+  {
+    "id": "Split_Snatch",
+    "nameRu": "Рывок в расщеп",
+    "namePl": "Rwanie w rozkroku"
+  },
+  {
+    "id": "Split_Squat_with_Dumbbells",
+    "nameRu": "Болгарский сплит-присед с гантелями",
+    "namePl": "Przysiad bułgarski z hantlami"
+  },
+  {
+    "id": "Split_Squats",
+    "nameRu": "Сплит-приседания",
+    "namePl": "Przysiady bułgarskie"
+  },
+  {
+    "id": "Squat_Jerk",
+    "nameRu": "Толчок в полный сед",
+    "namePl": "Wybicie w pełny podsiad"
+  },
+  {
+    "id": "Squat_with_Bands",
+    "nameRu": "Присед с лентами",
+    "namePl": "Przysiad z taśmami"
+  },
+  {
+    "id": "Squat_with_Chains",
+    "nameRu": "Присед с цепями",
+    "namePl": "Przysiad z łańcuchami"
+  },
+  {
+    "id": "Squat_with_Plate_Movers",
+    "nameRu": "Присед с переносом дисков",
+    "namePl": "Przysiad z przemieszczaniem talerzy"
+  },
+  {
+    "id": "Squats_-_With_Bands",
+    "nameRu": "Приседания с лентами",
+    "namePl": "Przysiady z taśmami"
+  },
+  {
+    "id": "Stairmaster",
+    "nameRu": "Степпер",
+    "namePl": "Stair master"
+  },
+  {
+    "id": "Standing_Alternating_Dumbbell_Press",
+    "nameRu": "Поочерёдный жим гантелей стоя",
+    "namePl": "Naprzemienne wyciskanie hantlami stojąc"
+  },
+  {
+    "id": "Standing_Barbell_Calf_Raise",
+    "nameRu": "Подъём на носки со штангой стоя",
+    "namePl": "Wspięcia na palce ze sztangą stojąc"
+  },
+  {
+    "id": "Standing_Barbell_Press_Behind_Neck",
+    "nameRu": "Жим штанги за голову стоя",
+    "namePl": "Wyciskanie ze sztangą za głowę stojąc"
+  },
+  {
+    "id": "Standing_Bent-Over_One-Arm_Dumbbell_Triceps_Extension",
+    "nameRu": "Разгибание трицепса с гантелью в наклоне стоя (одна рука)",
+    "namePl": "Prostowanie tricepsa z hantlem w pochyleniu stojąc (jedna ręka)"
+  },
+  {
+    "id": "Standing_Bent-Over_Two-Arm_Dumbbell_Triceps_Extension",
+    "nameRu": "Разгибание трицепса с гантелями в наклоне стоя (две руки)",
+    "namePl": "Prostowanie tricepsa z hantlami w pochyleniu stojąc (obie ręce)"
+  },
+  {
+    "id": "Standing_Biceps_Cable_Curl",
+    "nameRu": "Сгибание бицепса на блоке стоя",
+    "namePl": "Uginanie bicepsa na wyciągu stojąc"
+  },
+  {
+    "id": "Standing_Biceps_Stretch",
+    "nameRu": "Растяжка бицепса стоя",
+    "namePl": "Rozciąganie bicepsa stojąc"
+  },
+  {
+    "id": "Standing_Bradford_Press",
+    "nameRu": "Жим Брэдфорда стоя",
+    "namePl": "Wyciskanie Bradforda stojąc"
+  },
+  {
+    "id": "Standing_Cable_Chest_Press",
+    "nameRu": "Жим на грудь на блоке стоя",
+    "namePl": "Wyciskanie na klatkę na wyciągu stojąc"
+  },
+  {
+    "id": "Standing_Cable_Lift",
+    "nameRu": "Подъём на блоке стоя",
+    "namePl": "Unoszenie na wyciągu stojąc"
+  },
+  {
+    "id": "Standing_Cable_Wood_Chop",
+    "nameRu": "Дровосек на блоке стоя",
+    "namePl": "Rąbanie drewna na wyciągu stojąc"
+  },
+  {
+    "id": "Standing_Calf_Raises",
+    "nameRu": "Подъём на носки стоя",
+    "namePl": "Wspięcia na palce stojąc"
+  },
+  {
+    "id": "Standing_Concentration_Curl",
+    "nameRu": "Концентрированное сгибание стоя",
+    "namePl": "Koncentryczne uginanie stojąc"
+  },
+  {
+    "id": "Standing_Dumbbell_Calf_Raise",
+    "nameRu": "Подъём на носки с гантелями стоя",
+    "namePl": "Wspięcia na palce z hantlami stojąc"
+  },
+  {
+    "id": "Standing_Dumbbell_Press",
+    "nameRu": "Жим гантелей стоя",
+    "namePl": "Wyciskanie hantlami stojąc"
+  },
+  {
+    "id": "Standing_Dumbbell_Reverse_Curl",
+    "nameRu": "Сгибание рук с гантелями обратным хватом стоя",
+    "namePl": "Uginanie z hantlami chwytem odwróconym stojąc"
+  },
+  {
+    "id": "Standing_Dumbbell_Straight-Arm_Front_Delt_Raise_Above_Head",
+    "nameRu": "Подъём прямых рук с гантелями на переднюю дельту над головой",
+    "namePl": "Unoszenie hantli na przedni bark nad głową na wyprostowanych ramionach"
+  },
+  {
+    "id": "Standing_Dumbbell_Triceps_Extension",
+    "nameRu": "Разгибание трицепса с гантелью стоя",
+    "namePl": "Prostowanie tricepsa z hantlem stojąc"
+  },
+  {
+    "id": "Standing_Dumbbell_Upright_Row",
+    "nameRu": "Тяга гантелей к подбородку стоя",
+    "namePl": "Podciąganie hantlami do brody stojąc"
+  },
+  {
+    "id": "Standing_Elevated_Quad_Stretch",
+    "nameRu": "Растяжка квадрицепса с возвышения стоя",
+    "namePl": "Rozciąganie czworogłowego z podwyższenia stojąc"
+  },
+  {
+    "id": "Standing_Front_Barbell_Raise_Over_Head",
+    "nameRu": "Подъём штанги перед собой над головой",
+    "namePl": "Unoszenie sztangi przed sobą nad głowę"
+  },
+  {
+    "id": "Standing_Gastrocnemius_Calf_Stretch",
+    "nameRu": "Растяжка икроножной мышцы стоя",
+    "namePl": "Rozciąganie mięśnia brzuchatego łydki stojąc"
+  },
+  {
+    "id": "Standing_Hamstring_and_Calf_Stretch",
+    "nameRu": "Растяжка бицепса бедра и икр стоя",
+    "namePl": "Rozciąganie ścięgna i łydki stojąc"
+  },
+  {
+    "id": "Standing_Hip_Circles",
+    "nameRu": "Вращение бёдрами стоя",
+    "namePl": "Krążenia bioder stojąc"
+  },
+  {
+    "id": "Standing_Hip_Flexors",
+    "nameRu": "Растяжка сгибателей бедра стоя",
+    "namePl": "Rozciąganie zginaczy biodra stojąc"
+  },
+  {
+    "id": "Standing_Inner-Biceps_Curl",
+    "nameRu": "Сгибание внутренней части бицепса стоя",
+    "namePl": "Uginanie wewnętrznej głowy bicepsa stojąc"
+  },
+  {
+    "id": "Standing_Lateral_Stretch",
+    "nameRu": "Боковая растяжка стоя",
+    "namePl": "Boczne rozciąganie stojąc"
+  },
+  {
+    "id": "Standing_Leg_Curl",
+    "nameRu": "Сгибание ноги стоя",
+    "namePl": "Uginanie nogi stojąc"
+  },
+  {
+    "id": "Standing_Long_Jump",
+    "nameRu": "Прыжок в длину с места",
+    "namePl": "Skok w dal z miejsca"
+  },
+  {
+    "id": "Standing_Low-Pulley_Deltoid_Raise",
+    "nameRu": "Подъём на дельту через нижний блок стоя",
+    "namePl": "Unoszenie na bark na dolnym wyciągu stojąc"
+  },
+  {
+    "id": "Standing_Low-Pulley_One-Arm_Triceps_Extension",
+    "nameRu": "Разгибание трицепса одной рукой на нижнем блоке стоя",
+    "namePl": "Prostowanie tricepsa jedną ręką na dolnym wyciągu stojąc"
+  },
+  {
+    "id": "Standing_Military_Press",
+    "nameRu": "Военный жим стоя",
+    "namePl": "Wyciskanie wojskowe stojąc"
+  },
+  {
+    "id": "Standing_Olympic_Plate_Hand_Squeeze",
+    "nameRu": "Сжимание диска руками стоя",
+    "namePl": "Ściskanie talerza rękami stojąc"
+  },
+  {
+    "id": "Standing_One-Arm_Cable_Curl",
+    "nameRu": "Сгибание рук одной рукой на блоке стоя",
+    "namePl": "Uginanie jedną ręką na wyciągu stojąc"
+  },
+  {
+    "id": "Standing_One-Arm_Dumbbell_Curl_Over_Incline_Bench",
+    "nameRu": "Сгибание одной рукой с гантелью через наклонную скамью",
+    "namePl": "Uginanie jedną ręką z hantlem przez ławkę skośną stojąc"
+  },
+  {
+    "id": "Standing_One-Arm_Dumbbell_Triceps_Extension",
+    "nameRu": "Разгибание трицепса одной рукой с гантелью стоя",
+    "namePl": "Prostowanie tricepsa jedną ręką z hantlem stojąc"
+  },
+  {
+    "id": "Standing_Overhead_Barbell_Triceps_Extension",
+    "nameRu": "Разгибание трицепса со штангой над головой стоя",
+    "namePl": "Prostowanie tricepsa ze sztangą nad głową stojąc"
+  },
+  {
+    "id": "Standing_Palm-In_One-Arm_Dumbbell_Press",
+    "nameRu": "Жим гантели одной рукой (ладонь внутрь) стоя",
+    "namePl": "Wyciskanie hantla jedną ręką (dłoń do wewnątrz) stojąc"
+  },
+  {
+    "id": "Standing_Palms-In_Dumbbell_Press",
+    "nameRu": "Жим гантелей (ладони внутрь) стоя",
+    "namePl": "Wyciskanie hantlami (dłonie do wewnątrz) stojąc"
+  },
+  {
+    "id": "Standing_Palms-Up_Barbell_Behind_The_Back_Wrist_Curl",
+    "nameRu": "Сгибание запястья со штангой за спиной хватом снизу стоя",
+    "namePl": "Uginanie nadgarstka ze sztangą za plecami chwytem dolnym stojąc"
+  },
+  {
+    "id": "Standing_Pelvic_Tilt",
+    "nameRu": "Наклон таза стоя",
+    "namePl": "Skłon miednicy stojąc"
+  },
+  {
+    "id": "Standing_Rope_Crunch",
+    "nameRu": "Скручивание с верёвкой стоя",
+    "namePl": "Brzuszek z liną stojąc"
+  },
+  {
+    "id": "Standing_Soleus_And_Achilles_Stretch",
+    "nameRu": "Растяжка камбаловидной мышцы и ахиллова сухожилия",
+    "namePl": "Rozciąganie mięśnia płaszczkowatego i ścięgna Achillesa"
+  },
+  {
+    "id": "Standing_Toe_Touches",
+    "nameRu": "Касание носков стоя",
+    "namePl": "Dotykanie palców stojąc"
+  },
+  {
+    "id": "Standing_Towel_Triceps_Extension",
+    "nameRu": "Разгибание трицепса с полотенцем стоя",
+    "namePl": "Prostowanie tricepsa z ręcznikiem stojąc"
+  },
+  {
+    "id": "Standing_Two-Arm_Overhead_Throw",
+    "nameRu": "Бросок двумя руками над головой стоя",
+    "namePl": "Rzut oburącz nad głowę stojąc"
+  },
+  {
+    "id": "Star_Jump",
+    "nameRu": "Прыжок звезда",
+    "namePl": "Skok gwiazda"
+  },
+  {
+    "id": "Step-up_with_Knee_Raise",
+    "nameRu": "Запрыгивание с подъёмом колена",
+    "namePl": "Wejście na step z uniesieniem kolana"
+  },
+  {
+    "id": "Step_Mill",
+    "nameRu": "Шаговая мельница",
+    "namePl": "Step mill"
+  },
+  {
+    "id": "Stiff-Legged_Barbell_Deadlift",
+    "nameRu": "Становая тяга на прямых ногах со штангой",
+    "namePl": "Martwy ciąg ze sztangą na wyprostowanych nogach"
+  },
+  {
+    "id": "Stiff-Legged_Dumbbell_Deadlift",
+    "nameRu": "Становая тяга на прямых ногах с гантелями",
+    "namePl": "Martwy ciąg z hantlami na wyprostowanych nogach"
+  },
+  {
+    "id": "Stiff_Leg_Barbell_Good_Morning",
+    "nameRu": "Наклон со штангой на прямых ногах",
+    "namePl": "Dzień dobry ze sztangą na wyprostowanych nogach"
+  },
+  {
+    "id": "Stomach_Vacuum",
+    "nameRu": "Вакуум живота",
+    "namePl": "Wciąganie brzucha"
+  },
+  {
+    "id": "Straight-Arm_Dumbbell_Pullover",
+    "nameRu": "Пуловер с гантелью на прямых руках",
+    "namePl": "Pullover z hantlem na wyprostowanych ramionach"
+  },
+  {
+    "id": "Straight-Arm_Pulldown",
+    "nameRu": "Тяга прямыми руками на блоке",
+    "namePl": "Ściąganie na wyprostowanych ramionach"
+  },
+  {
+    "id": "Straight_Bar_Bench_Mid_Rows",
+    "nameRu": "Тяга прямого грифа к животу лёжа",
+    "namePl": "Wiosłowanie prostym gryfem do brzucha leżąc"
+  },
+  {
+    "id": "Straight_Raises_on_Incline_Bench",
+    "nameRu": "Прямые подъёмы на наклонной скамье",
+    "namePl": "Proste unoszenia na ławce skośnej"
+  },
+  {
+    "id": "Stride_Jump_Crossover",
+    "nameRu": "Прыжок широким шагом крест-накрест",
+    "namePl": "Skok krokiem skrzyżnym"
+  },
+  {
+    "id": "Sumo_Deadlift",
+    "nameRu": "Становая тяга сумо",
+    "namePl": "Sumo martwy ciąg"
+  },
+  {
+    "id": "Sumo_Deadlift_with_Bands",
+    "nameRu": "Становая тяга сумо с лентами",
+    "namePl": "Sumo martwy ciąg z taśmami"
+  },
+  {
+    "id": "Sumo_Deadlift_with_Chains",
+    "nameRu": "Становая тяга сумо с цепями",
+    "namePl": "Sumo martwy ciąg z łańcuchami"
+  },
+  {
+    "id": "Superman",
+    "nameRu": "Супермен",
+    "namePl": "Superman"
+  },
+  {
+    "id": "Supine_Chest_Throw",
+    "nameRu": "Бросок от груди лёжа",
+    "namePl": "Rzut od klatki leżąc"
+  },
+  {
+    "id": "Supine_One-Arm_Overhead_Throw",
+    "nameRu": "Бросок одной рукой над головой лёжа",
+    "namePl": "Rzut jedną ręką nad głowę leżąc"
+  },
+  {
+    "id": "Supine_Two-Arm_Overhead_Throw",
+    "nameRu": "Бросок двумя руками над головой лёжа",
+    "namePl": "Rzut oburącz nad głowę leżąc"
+  },
+  {
+    "id": "Suspended_Fallout",
+    "nameRu": "Падение в петлях (TRX)",
+    "namePl": "Upadanie w pętlach (TRX)"
+  },
+  {
+    "id": "Suspended_Push-Up",
+    "nameRu": "Отжимание в петлях (TRX)",
+    "namePl": "Pompka w pętlach (TRX)"
+  },
+  {
+    "id": "Suspended_Reverse_Crunch",
+    "nameRu": "Обратное скручивание в петлях (TRX)",
+    "namePl": "Odwrócony brzuszek w pętlach (TRX)"
+  },
+  {
+    "id": "Suspended_Row",
+    "nameRu": "Тяга в петлях (TRX)",
+    "namePl": "Wiosłowanie w pętlach (TRX)"
+  },
+  {
+    "id": "Suspended_Split_Squat",
+    "nameRu": "Сплит-присед в петлях (TRX)",
+    "namePl": "Przysiad bułgarski w pętlach (TRX)"
+  },
+  {
+    "id": "Svend_Press",
+    "nameRu": "Жим Свенда",
+    "namePl": "Wyciskanie Svenda"
+  },
+  {
+    "id": "T-Bar_Row_with_Handle",
+    "nameRu": "Тяга T-образного грифа с рукоятью",
+    "namePl": "Wiosłowanie T-drążkiem z uchwytem"
+  },
+  {
+    "id": "Tate_Press",
+    "nameRu": "Жим Тейта",
+    "namePl": "Wyciskanie Tate'a"
+  },
+  {
+    "id": "The_Straddle",
+    "nameRu": "Растяжка в широкой стойке",
+    "namePl": "Rozkrok"
+  },
+  {
+    "id": "Thigh_Abductor",
+    "nameRu": "Отведение бедра",
+    "namePl": "Odwodziciel uda"
+  },
+  {
+    "id": "Thigh_Adductor",
+    "nameRu": "Приведение бедра",
+    "namePl": "Przywodziciel uda"
+  },
+  {
+    "id": "Tire_Flip",
+    "nameRu": "Переворот шины",
+    "namePl": "Przewracanie opony"
+  },
+  {
+    "id": "Toe_Touchers",
+    "nameRu": "Касание носков",
+    "namePl": "Dotykanie palców stóp"
+  },
+  {
+    "id": "Torso_Rotation",
+    "nameRu": "Вращение туловища",
+    "namePl": "Rotacja tułowia"
+  },
+  {
+    "id": "Trail_Running_Walking",
+    "nameRu": "Бег / ходьба по пересечённой местности",
+    "namePl": "Bieganie / marsz w terenie"
+  },
+  {
+    "id": "Trap_Bar_Deadlift",
+    "nameRu": "Становая тяга с трэп-грифом",
+    "namePl": "Martwy ciąg z gryfem trapezowym"
+  },
+  {
+    "id": "Tricep_Dumbbell_Kickback",
+    "nameRu": "Разгибание трицепса с гантелью (кикбэк)",
+    "namePl": "Kickback z hantlem na triceps"
+  },
+  {
+    "id": "Tricep_Side_Stretch",
+    "nameRu": "Боковая растяжка трицепса",
+    "namePl": "Boczne rozciąganie tricepsa"
+  },
+  {
+    "id": "Triceps_Overhead_Extension_with_Rope",
+    "nameRu": "Разгибание трицепса над головой с верёвкой",
+    "namePl": "Prostowanie tricepsa nad głową z liną"
+  },
+  {
+    "id": "Triceps_Pushdown",
+    "nameRu": "Разгибание трицепса на блоке",
+    "namePl": "Prostowanie tricepsa na wyciągu"
+  },
+  {
+    "id": "Triceps_Pushdown_-_Rope_Attachment",
+    "nameRu": "Разгибание трицепса на блоке с верёвкой",
+    "namePl": "Prostowanie tricepsa na wyciągu z liną"
+  },
+  {
+    "id": "Triceps_Pushdown_-_V-Bar_Attachment",
+    "nameRu": "Разгибание трицепса на блоке с V-рукоятью",
+    "namePl": "Prostowanie tricepsa na wyciągu z uchwytem V"
+  },
+  {
+    "id": "Triceps_Stretch",
+    "nameRu": "Растяжка трицепса",
+    "namePl": "Rozciąganie tricepsa"
+  },
+  {
+    "id": "Tuck_Crunch",
+    "nameRu": "Скручивание в группировке",
+    "namePl": "Brzuszek w skuleniu"
+  },
+  {
+    "id": "Two-Arm_Dumbbell_Preacher_Curl",
+    "nameRu": "Сгибание двумя руками на скамье Скотта",
+    "namePl": "Uginanie oburącz na ławce Scotta"
+  },
+  {
+    "id": "Two-Arm_Kettlebell_Clean",
+    "nameRu": "Подъём двух гирь на грудь",
+    "namePl": "Zarzut dwóch kettlebell"
+  },
+  {
+    "id": "Two-Arm_Kettlebell_Jerk",
+    "nameRu": "Толчок двух гирь",
+    "namePl": "Podrzut dwóch kettlebell"
+  },
+  {
+    "id": "Two-Arm_Kettlebell_Military_Press",
+    "nameRu": "Военный жим двух гирь",
+    "namePl": "Wyciskanie wojskowe dwóch kettlebell"
+  },
+  {
+    "id": "Two-Arm_Kettlebell_Row",
+    "nameRu": "Тяга двух гирь в наклоне",
+    "namePl": "Wiosłowanie dwoma kettlebell"
+  },
+  {
+    "id": "Underhand_Cable_Pulldowns",
+    "nameRu": "Тяга верхнего блока обратным хватом",
+    "namePl": "Ściąganie na wyciągu górnym chwytem odwróconym"
+  },
+  {
+    "id": "Upper_Back-Leg_Grab",
+    "nameRu": "Захват ноги руками (растяжка спины)",
+    "namePl": "Chwyt nogi (rozciąganie pleców)"
+  },
+  {
+    "id": "Upper_Back_Stretch",
+    "nameRu": "Растяжка верхней части спины",
+    "namePl": "Rozciąganie górnej partii pleców"
+  },
+  {
+    "id": "Upright_Barbell_Row",
+    "nameRu": "Тяга штанги к подбородку",
+    "namePl": "Wiosłowanie sztangą stojąc do brody"
+  },
+  {
+    "id": "Upright_Cable_Row",
+    "nameRu": "Тяга блока к подбородку",
+    "namePl": "Wiosłowanie na wyciągu stojąc do brody"
+  },
+  {
+    "id": "Upright_Row_-_With_Bands",
+    "nameRu": "Тяга к подбородку с лентами",
+    "namePl": "Wiosłowanie do brody z taśmami"
+  },
+  {
+    "id": "Upward_Stretch",
+    "nameRu": "Растяжка вверх",
+    "namePl": "Rozciąganie w górę"
+  },
+  {
+    "id": "V-Bar_Pulldown",
+    "nameRu": "Тяга V-рукояти сверху",
+    "namePl": "Ściąganie uchwytem V"
+  },
+  {
+    "id": "V-Bar_Pullup",
+    "nameRu": "Подтягивание с V-рукоятью",
+    "namePl": "Podciąganie z uchwytem V"
+  },
+  {
+    "id": "Vertical_Swing",
+    "nameRu": "Вертикальный мах",
+    "namePl": "Wahadło pionowe"
+  },
+  {
+    "id": "Walking_Treadmill",
+    "nameRu": "Ходьба на беговой дорожке",
+    "namePl": "Marsz na bieżni"
+  },
+  {
+    "id": "Weighted_Ball_Hyperextension",
+    "nameRu": "Гиперэкстензия с мячом",
+    "namePl": "Hyperekstensja z piłką"
+  },
+  {
+    "id": "Weighted_Ball_Side_Bend",
+    "nameRu": "Боковой наклон с мячом",
+    "namePl": "Skłon boczny z piłką"
+  },
+  {
+    "id": "Weighted_Bench_Dip",
+    "nameRu": "Отжимание от скамьи с отягощением",
+    "namePl": "Dip na ławce z obciążeniem"
+  },
+  {
+    "id": "Weighted_Crunches",
+    "nameRu": "Скручивания с отягощением",
+    "namePl": "Brzuszki z obciążeniem"
+  },
+  {
+    "id": "Weighted_Jump_Squat",
+    "nameRu": "Прыжковый присед с отягощением",
+    "namePl": "Skoczny przysiad z obciążeniem"
+  },
+  {
+    "id": "Weighted_Pull_Ups",
+    "nameRu": "Подтягивания с отягощением",
+    "namePl": "Podciągania z obciążeniem"
+  },
+  {
+    "id": "Weighted_Sissy_Squat",
+    "nameRu": "Присед Сисси с отягощением",
+    "namePl": "Przysiad sissy z obciążeniem"
+  },
+  {
+    "id": "Weighted_Sit-Ups_-_With_Bands",
+    "nameRu": "Подъём туловища с отягощением и лентами",
+    "namePl": "Siad skłon z obciążeniem i taśmami"
+  },
+  {
+    "id": "Weighted_Squat",
+    "nameRu": "Присед с отягощением",
+    "namePl": "Przysiad z obciążeniem"
+  },
+  {
+    "id": "Wide-Grip_Barbell_Bench_Press",
+    "nameRu": "Жим штанги лёжа широким хватом",
+    "namePl": "Wyciskanie sztangi leżąc szerokim chwytem"
+  },
+  {
+    "id": "Wide-Grip_Decline_Barbell_Bench_Press",
+    "nameRu": "Жим штанги на наклонной скамье широким хватом (голова вниз)",
+    "namePl": "Wyciskanie sztangi na ławce ujemnej szerokim chwytem"
+  },
+  {
+    "id": "Wide-Grip_Decline_Barbell_Pullover",
+    "nameRu": "Пуловер широким хватом на наклонной скамье",
+    "namePl": "Pullover ze sztangą szerokim chwytem na ławce ujemnej"
+  },
+  {
+    "id": "Wide-Grip_Lat_Pulldown",
+    "nameRu": "Тяга верхнего блока широким хватом",
+    "namePl": "Ściąganie na wyciągu górnym szerokim chwytem"
+  },
+  {
+    "id": "Wide-Grip_Pulldown_Behind_The_Neck",
+    "nameRu": "Тяга верхнего блока за голову широким хватом",
+    "namePl": "Ściąganie za głowę szerokim chwytem"
+  },
+  {
+    "id": "Wide-Grip_Rear_Pull-Up",
+    "nameRu": "Подтягивание за голову широким хватом",
+    "namePl": "Podciąganie za głowę szerokim chwytem"
+  },
+  {
+    "id": "Wide-Grip_Standing_Barbell_Curl",
+    "nameRu": "Сгибание со штангой стоя широким хватом",
+    "namePl": "Uginanie ze sztangą stojąc szerokim chwytem"
+  },
+  {
+    "id": "Wide_Stance_Barbell_Squat",
+    "nameRu": "Присед со штангой в широкой стойке",
+    "namePl": "Przysiad ze sztangą w szerokim rozstawie"
+  },
+  {
+    "id": "Wide_Stance_Stiff_Legs",
+    "nameRu": "Жёсткие ноги в широкой стойке",
+    "namePl": "Wyprostowane nogi w szerokim rozkroku"
+  },
+  {
+    "id": "Wind_Sprints",
+    "nameRu": "Ветровые спринты",
+    "namePl": "Sprinty wiatrowe"
+  },
+  {
+    "id": "Windmills",
+    "nameRu": "Ветряные мельницы",
+    "namePl": "Młyny"
+  },
+  {
+    "id": "Worlds_Greatest_Stretch",
+    "nameRu": "Лучшая растяжка в мире",
+    "namePl": "Najlepsza rozciągka świata"
+  },
+  {
+    "id": "Wrist_Circles",
+    "nameRu": "Вращение запястьями",
+    "namePl": "Krążenia nadgarstków"
+  },
+  {
+    "id": "Wrist_Roller",
+    "nameRu": "Ролик для запястий",
+    "namePl": "Rolka nadgarstkowa"
+  },
+  {
+    "id": "Wrist_Rotations_with_Straight_Bar",
+    "nameRu": "Вращение запястий с прямым грифом",
+    "namePl": "Rotacje nadgarstka z prostym gryfem"
+  },
+  {
+    "id": "Yoke_Walk",
+    "nameRu": "Ходьба с коромыслом",
+    "namePl": "Marsz z jarzmem"
+  },
+  {
+    "id": "Zercher_Squats",
+    "nameRu": "Присед Зерхера",
+    "namePl": "Przysiad Zerchera"
+  },
+  {
+    "id": "Zottman_Curl",
+    "nameRu": "Сгибание по Зоттману",
+    "namePl": "Uginanie Zottmana"
+  },
+  {
+    "id": "Zottman_Preacher_Curl",
+    "nameRu": "Сгибание по Зоттману на скамье Скотта",
+    "namePl": "Uginanie Zottmana na ławce Scotta"
+  }
+]

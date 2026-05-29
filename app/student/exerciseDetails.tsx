@@ -9,7 +9,6 @@ import { PrimaryButton } from "../../components/PrimaryButton";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography, FontSizes } from "../../theme/typography";
-import { ScreenLayout } from "../../components/ScreenLayout";
 import { logger } from "@/utils/logger";
 import { toMs } from "@/utils/dateConvert";
 
@@ -98,9 +97,8 @@ export default function ExerciseDetails() {
     .join(" → ");
 
   return (
-    <ScreenLayout>
-      <View style={{ flex: 1, backgroundColor: Colors.bg }}>
-        <ScrollView contentContainerStyle={{ padding: Spacing.md }}>
+    <View style={{ flex: 1, backgroundColor: Colors.bg }}>
+      <ScrollView contentContainerStyle={{ padding: Spacing.md }}>
         <Text
           style={{
             ...Typography.title,
@@ -173,8 +171,7 @@ export default function ExerciseDetails() {
           </>
         )}
         </ScrollView>
-      </View>
-    </ScreenLayout>
+    </View>
   );
 }
 

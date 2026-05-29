@@ -5,7 +5,6 @@ import { workoutService } from "../../services/workoutService";
 import type { WorkoutLog } from "../../types/Workout";
 import { Colors } from "../../theme/colors";
 import { Spacing } from "../../theme/spacing";
-import { ScreenLayout } from "../../components/ScreenLayout";
 import { ProgressAnalyticsView } from "../../components/progress/ProgressAnalyticsView";
 
 export default function StudentProgressScreen() {
@@ -61,21 +60,17 @@ export default function StudentProgressScreen() {
 
   if (loading) {
     return (
-      <ScreenLayout>
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: Colors.bg }}>
-          <ActivityIndicator color={Colors.primary} />
-        </View>
-      </ScreenLayout>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: Colors.bg }}>
+        <ActivityIndicator color={Colors.primary} />
+      </View>
     );
   }
 
   if (error || !user || user.role !== "student") {
     return (
-      <ScreenLayout>
-        <View style={{ flex: 1, justifyContent: "center", padding: Spacing.md, backgroundColor: Colors.bg }}>
-          <Text style={{ color: Colors.danger }}>{error ?? "Student access only."}</Text>
-        </View>
-      </ScreenLayout>
+      <View style={{ flex: 1, justifyContent: "center", padding: Spacing.md, backgroundColor: Colors.bg }}>
+        <Text style={{ color: Colors.danger }}>{error ?? "Student access only."}</Text>
+      </View>
     );
   }
 

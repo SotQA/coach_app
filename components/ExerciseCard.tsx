@@ -18,6 +18,8 @@ export type ExerciseDraft = {
   tempo: string;
   rpe: number | null;
   coachNote?: string;
+  videoUrl?: string;
+  exerciseDbId?: string;
 };
 
 type Props = {
@@ -381,6 +383,29 @@ export function ExerciseCard({
                 minHeight: 70,
               }}
             />
+          </View>
+
+          <View style={{ marginTop: Spacing.sm }}>
+            <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Video link (optional)</Text>
+            <TextInput
+              value={value.videoUrl ?? ""}
+              onChangeText={(t) => update({ videoUrl: t })}
+              placeholder="https://youtube.com/..."
+              placeholderTextColor={Colors.textMuted}
+              autoCapitalize="none"
+              keyboardType="url"
+              style={{
+                borderWidth: 1,
+                borderColor: Colors.border,
+                padding: 12,
+                borderRadius: Radius.md,
+                color: Colors.text,
+                backgroundColor: Colors.surface,
+              }}
+            />
+            <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4, fontSize: 11 }}>
+              Students can watch this when viewing the exercise
+            </Text>
           </View>
         </View>
       ) : null}

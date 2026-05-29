@@ -13,7 +13,6 @@ import { useAuth } from "@/context/AuthContext";
 import { useWorkoutHistory } from "@/hooks/useWorkoutHistory";
 import { PrimaryButton } from "@/components/PrimaryButton";
 import { EmptyState } from "@/components/EmptyState";
-import { ScreenLayout } from "@/components/ScreenLayout";
 import { WorkoutHistoryFilter } from "@/components/history/WorkoutHistoryFilter";
 import { WorkoutCalendar } from "@/components/history/WorkoutCalendar";
 import { WorkoutLogList } from "@/components/history/WorkoutLogList";
@@ -71,72 +70,69 @@ export default function WorkoutHistory() {
 
   if (!h.hasAnyLogs) {
     return (
-      <ScreenLayout>
-        <ScrollView
-          contentContainerStyle={{
-            flexGrow: 1,
-            padding: Spacing.md,
-            paddingTop: insets.top + Spacing.md,
-            backgroundColor: Colors.bg,
+      <ScrollView
+        style={{ flex: 1, backgroundColor: Colors.bg }}
+        contentContainerStyle={{
+          flexGrow: 1,
+          padding: Spacing.md,
+          paddingBottom: insets.bottom + Spacing.lg,
+        }}
+      >
+        <Text
+          style={{
+            ...Typography.title,
+            fontSize: FontSizes.h2,
+            marginBottom: Spacing.xs,
           }}
         >
-          <Text
-            style={{
-              ...Typography.title,
-              fontSize: FontSizes.h2,
-              marginBottom: Spacing.xs,
-            }}
-          >
-            History
-          </Text>
-          <Text
-            style={{
-              ...Typography.secondary,
-              color: Colors.textMuted,
-              marginBottom: Spacing.lg,
-            }}
-          >
-            {h.monthLabel}
-          </Text>
-          <EmptyState
-            icon="calendar-outline"
-            title="No workouts yet"
-            subtitle="Complete a workout from your plan to see it on the calendar."
+          History
+        </Text>
+        <Text
+          style={{
+            ...Typography.secondary,
+            color: Colors.textMuted,
+            marginBottom: Spacing.lg,
+          }}
+        >
+          {h.monthLabel}
+        </Text>
+        <EmptyState
+          icon="calendar-outline"
+          title="No workouts yet"
+          subtitle="Complete a workout from your plan to see it on the calendar."
+        />
+        <View style={{ marginTop: Spacing.lg }}>
+          <PrimaryButton
+            title="View Workouts"
+            onPress={() => router.replace("/student/workouts")}
           />
-          <View style={{ marginTop: Spacing.lg }}>
-            <PrimaryButton
-              title="View Workouts"
-              onPress={() => router.replace("/student/workouts")}
-            />
-          </View>
-        </ScrollView>
-      </ScreenLayout>
+        </View>
+      </ScrollView>
     );
   }
 
   // ── Main render ───────────────────────────────────────────────────────
   return (
-    <ScreenLayout>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={h.refreshing}
-            onRefresh={h.onRefresh}
-            tintColor={Colors.primary}
-          />
-        }
-        contentContainerStyle={{
-          paddingBottom: insets.bottom + Spacing.xl,
-          backgroundColor: Colors.bg,
+    <ScrollView
+      style={{ flex: 1, backgroundColor: Colors.bg }}
+      showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl
+          refreshing={h.refreshing}
+          onRefresh={h.onRefresh}
+          tintColor={Colors.primary}
+        />
+      }
+      contentContainerStyle={{
+        paddingBottom: insets.bottom + Spacing.xl,
+      }}
+    >
+      <View
+        style={{
+          paddingHorizontal: Spacing.md,
+          paddingTop: Spacing.md,
         }}
       >
-        <View
-          style={{
-            paddingHorizontal: Spacing.md,
-            paddingTop: insets.top + Spacing.md,
-          }}
-        >
           {/* Header: title + month label + settings shortcut */}
           <View
             style={{
@@ -242,8 +238,7 @@ export default function WorkoutHistory() {
               style={{ backgroundColor: Colors.border }}
             />
           </View>
-        </View>
-      </ScrollView>
-    </ScreenLayout>
+      </View>
+    </ScrollView>
   );
 }

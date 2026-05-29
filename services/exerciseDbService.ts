@@ -8,6 +8,7 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const EXERCISEDB_BASE =
   "https://edb-with-videos-and-images-by-ascendapi.p.rapidapi.com";
@@ -114,6 +115,30 @@ export type CachedExercise = {
   instructions?: string[];
   source: "exerciseDB";
 };
+
+// ---------------------------------------------------------------------------
+// In-memory result cache (FIX 2) — 10-minute TTL
+// ---------------------------------------------------------------------------
+
+type CacheEntry = { result: ExercisePageResult; expiresAt: number };
+const resultCache = new Map<string, CacheEntry>();
+const CACHE_TTL_MS = 10 * 60 * 1000;
+
+function getCached(key: string): ExercisePageResult | null {
+  const entry = resultCache.get(key);
+  if (!entry) return null;
+  if (Date.now() > entry.expiresAt) { resultCache.delete(key); return null; }
+  return entry.result;
+}
+
+function setCached(key: string, result: ExercisePageResult): void {
+  resultCache.set(key, { result, expiresAt: Date.now() + CACHE_TTL_MS });
+}
+
+// AsyncStorage keys and TTL for list endpoints (FIX 3)
+const BODYPART_CACHE_KEY = "edb_bodypart_list";
+const EQUIPMENT_CACHE_KEY = "edb_equipment_list";
+const LIST_CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 // ---------------------------------------------------------------------------
 // Mapping helpers
@@ -383,6 +408,10 @@ export async function searchExercises(
   queryStr: string,
   cursor?: string
 ): Promise<ExercisePageResult> {
+  const cacheKey = `search:${queryStr.trim().toLowerCase()}|cur:${cursor ?? ""}`;
+  const hit = getCached(cacheKey);
+  if (hit) return hit;
+
   try {
     const trimmed = queryStr.trim();
     // Build URL manually so encodeURIComponent is not double-encoded by URLSearchParams.
@@ -401,8 +430,10 @@ export async function searchExercises(
     let meta = (jsonObj?.meta ?? {}) as Record<string, unknown>;
 
     // If no results and query is multi-word, retry with only the first word.
+    let firstWordCacheKey: string | null = null;
     if (arr.length === 0 && trimmed.includes(" ")) {
       const firstWord = trimmed.split(" ")[0];
+      firstWordCacheKey = `search:${firstWord.toLowerCase()}|cur:`;
       const fallbackUrl = `${EXERCISEDB_BASE}/api/v1/exercises/search?search=${encodeURIComponent(firstWord)}&limit=50`;
       const fallbackRes = await fetch(fallbackUrl, { headers: RAPIDAPI_HEADERS });
       if (fallbackRes.ok) {
@@ -419,14 +450,17 @@ export async function searchExercises(
 
     const hasNextPage = Boolean(meta.hasNextPage);
     const nextCursor = hasNextPage ? ((meta.nextCursor as string | null) ?? null) : null;
-    return { exercises: arr.map(buildExercise), nextCursor, hasNextPage };
+    const result: ExercisePageResult = { exercises: arr.map(buildExercise), nextCursor, hasNextPage };
+    setCached(cacheKey, result);
+    if (firstWordCacheKey) setCached(firstWordCacheKey, result);
+    return result;
   } catch (e) {
     console.warn(
       "[exerciseDbService] searchExercises API failed, using cache",
       e
     );
-    const cached = await searchGlobalCache(queryStr);
-    return { exercises: cached.map(cachedToDBExercise), nextCursor: null, hasNextPage: false };
+    const fallbackCached = await searchGlobalCache(queryStr);
+    return { exercises: fallbackCached.map(cachedToDBExercise), nextCursor: null, hasNextPage: false };
   }
 }
 
@@ -444,6 +478,10 @@ export async function getByBodyPart(
 
     // Multi-value body parts (Legs, Arms) — fire parallel requests and merge.
     if (apiBodyParts && apiBodyParts.length > 1) {
+      const multiKey = `bp:${bodyPart}|eq:${apiEquipment ?? ""}|cur:${cursor ?? ""}`;
+      const multiHit = getCached(multiKey);
+      if (multiHit) return multiHit;
+
       const batches = await Promise.all(
         apiBodyParts.map(async (part) => {
           const params = new URLSearchParams();
@@ -478,10 +516,17 @@ export async function getByBodyPart(
           }
         }
       }
-      return { exercises: flat.map(buildExercise), nextCursor: null, hasNextPage: false };
+      const multiResult: ExercisePageResult = { exercises: flat.map(buildExercise), nextCursor: null, hasNextPage: false };
+      setCached(multiKey, multiResult);
+      return multiResult;
     }
 
     // Single body part (or "All").
+    const singleBodyPart = apiBodyParts ? apiBodyParts[0] : "";
+    const singleKey = `bp:${singleBodyPart}|eq:${apiEquipment ?? ""}|cur:${cursor ?? ""}`;
+    const singleHit = getCached(singleKey);
+    if (singleHit) return singleHit;
+
     const params = new URLSearchParams();
     if (apiBodyParts) params.set("bodyParts", apiBodyParts[0]);
     if (apiEquipment) params.set("equipments", apiEquipment);
@@ -500,20 +545,34 @@ export async function getByBodyPart(
     const meta = (jsonObj?.meta ?? {}) as Record<string, unknown>;
     const hasNextPage = Boolean(meta.hasNextPage);
     const nextCursor = hasNextPage ? ((meta.nextCursor as string | null) ?? null) : null;
-    return { exercises: arr.map(buildExercise), nextCursor, hasNextPage };
+    const singleResult: ExercisePageResult = { exercises: arr.map(buildExercise), nextCursor, hasNextPage };
+    setCached(singleKey, singleResult);
+    return singleResult;
   } catch (e) {
     console.warn(
       "[exerciseDbService] getByBodyPart API failed, using cache",
       e
     );
-    const cached = await searchGlobalCache(bodyPart);
-    return { exercises: cached.map(cachedToDBExercise), nextCursor: null, hasNextPage: false };
+    const fallbackCached = await searchGlobalCache(bodyPart);
+    return { exercises: fallbackCached.map(cachedToDBExercise), nextCursor: null, hasNextPage: false };
   }
 }
 
-/** List all available body parts. Cached after first successful fetch. */
+/** List all available body parts. Cached in memory then persisted to AsyncStorage (24 h). */
 export async function getBodyPartList(): Promise<string[]> {
   if (_bodyPartListCache) return _bodyPartListCache;
+  try {
+    const stored = await AsyncStorage.getItem(BODYPART_CACHE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored) as { data: string[]; cachedAt: number };
+      if (Date.now() - parsed.cachedAt < LIST_CACHE_TTL_MS) {
+        _bodyPartListCache = parsed.data;
+        return parsed.data;
+      }
+    }
+  } catch {
+    // Fall through to API fetch if storage read fails.
+  }
   try {
     const res = await fetch(`${EXERCISEDB_BASE}/api/v1/bodyparts`, {
       headers: RAPIDAPI_HEADERS,
@@ -537,6 +596,11 @@ export async function getBodyPartList(): Promise<string[]> {
       })
       .filter(Boolean) as string[];
     _bodyPartListCache = arr;
+    try {
+      await AsyncStorage.setItem(BODYPART_CACHE_KEY, JSON.stringify({ data: arr, cachedAt: Date.now() }));
+    } catch {
+      // Ignore storage write errors.
+    }
     return arr;
   } catch (e) {
     console.warn("[exerciseDbService] getBodyPartList API failed", e);
@@ -544,9 +608,21 @@ export async function getBodyPartList(): Promise<string[]> {
   }
 }
 
-/** List all available equipment types. Cached after first successful fetch. */
+/** List all available equipment types. Cached in memory then persisted to AsyncStorage (24 h). */
 export async function getEquipmentList(): Promise<string[]> {
   if (_equipmentListCache) return _equipmentListCache;
+  try {
+    const stored = await AsyncStorage.getItem(EQUIPMENT_CACHE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored) as { data: string[]; cachedAt: number };
+      if (Date.now() - parsed.cachedAt < LIST_CACHE_TTL_MS) {
+        _equipmentListCache = parsed.data;
+        return parsed.data;
+      }
+    }
+  } catch {
+    // Fall through to API fetch if storage read fails.
+  }
   try {
     const res = await fetch(`${EXERCISEDB_BASE}/api/v1/equipments`, {
       headers: RAPIDAPI_HEADERS,
@@ -570,6 +646,11 @@ export async function getEquipmentList(): Promise<string[]> {
       })
       .filter(Boolean) as string[];
     _equipmentListCache = arr;
+    try {
+      await AsyncStorage.setItem(EQUIPMENT_CACHE_KEY, JSON.stringify({ data: arr, cachedAt: Date.now() }));
+    } catch {
+      // Ignore storage write errors.
+    }
     return arr;
   } catch (e) {
     console.warn("[exerciseDbService] getEquipmentList failed", e);

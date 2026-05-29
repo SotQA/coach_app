@@ -27,6 +27,8 @@ export interface ExerciseFirestoreDoc {
   tempo?: string;
   rpe?: number | string | null;
   coachNote?: string;
+  videoUrl?: string;
+  exerciseDbId?: string;
 }
 
 export interface WorkoutPlanFirestoreDoc {

@@ -1,7 +1,23 @@
-import { Redirect, Stack } from "expo-router";
+import { Redirect, Stack, useRouter } from "expo-router";
+import { Pressable, View } from "react-native";
 import { useAuth } from "../../context/AuthContext";
-import { BackButton } from "../../components/BackButton";
 import { Colors } from "../../theme/colors";
+import { Ionicons } from "@expo/vector-icons";
+
+function HeaderBackButton() {
+  const router = useRouter();
+  return (
+    <Pressable
+      onPress={() => router.back()}
+      style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+    >
+      <View style={{ width: 32, height: 32, alignItems: "center", justifyContent: "center" }}>
+        <Ionicons name="chevron-back" size={26} color={Colors.text} />
+      </View>
+    </Pressable>
+  );
+}
 
 export default function CoachLayout() {
   const { user } = useAuth();
@@ -22,9 +38,7 @@ export default function CoachLayout() {
         headerTintColor: Colors.text,
         headerTitleStyle: { color: Colors.text },
         headerShadowVisible: false,
-        headerLeft: () => <BackButton hideIfNoBack />,
-        // iOS back button label should never show "(tabs)".
-        headerBackTitle: "Back",
+        headerLeft: ({ canGoBack }) => canGoBack ? <HeaderBackButton /> : null,
         // Prevent white flash during iOS back-swipe / transitions.
         contentStyle: { backgroundColor: Colors.bg },
       }}

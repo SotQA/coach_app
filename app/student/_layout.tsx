@@ -1,9 +1,24 @@
-import { Redirect, Stack } from "expo-router";
-import { View } from "react-native";
+import { Redirect, Stack, useRouter } from "expo-router";
+import { Pressable, View } from "react-native";
 import { useAuth } from "../../context/AuthContext";
-import { BackButton } from "../../components/BackButton";
 import { FloatingWorkoutBar } from "../../components/FloatingWorkoutBar";
 import { Colors } from "../../theme/colors";
+import { Ionicons } from "@expo/vector-icons";
+
+function HeaderBackButton() {
+  const router = useRouter();
+  return (
+    <Pressable
+      onPress={() => router.back()}
+      style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+    >
+      <View style={{ width: 32, height: 32, alignItems: "center", justifyContent: "center" }}>
+        <Ionicons name="chevron-back" size={26} color={Colors.text} />
+      </View>
+    </Pressable>
+  );
+}
 
 export default function StudentLayout() {
   const { user } = useAuth();
@@ -25,8 +40,7 @@ export default function StudentLayout() {
           headerTintColor: Colors.text,
           headerTitleStyle: { color: Colors.text },
           headerShadowVisible: false,
-          headerLeft: () => <BackButton hideIfNoBack />,
-          headerBackTitle: "Back",
+          headerLeft: ({ canGoBack }) => canGoBack ? <HeaderBackButton /> : null,
           contentStyle: { backgroundColor: Colors.bg },
         }}
       >
@@ -36,6 +50,8 @@ export default function StudentLayout() {
         <Stack.Screen name="workoutExecution" options={{ headerShown: false }} />
         <Stack.Screen name="workoutPlanDetail" options={{ title: "Workout" }} />
         <Stack.Screen name="exerciseDetails" options={{ title: "Exercise Details" }} />
+        <Stack.Screen name="exerciseDetail" options={{ headerShown: false }} />
+        <Stack.Screen name="workoutHistory" options={{ title: "History" }} />
         <Stack.Screen name="progress" options={{ title: "Progress" }} />
       </Stack>
       {/* Floats above tab bar on all student screens except workoutExecution */}

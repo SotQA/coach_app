@@ -9,7 +9,6 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Colors } from "../theme/colors";
@@ -19,17 +18,8 @@ import {
   exerciseTemplateService,
   type ExerciseTemplate,
 } from "../services/exerciseTemplateService";
-import {
-  BODY_PART_MAP,
-  EQUIPMENT_MAP,
-  cacheExerciseToFirestore,
-  getBodyPartList,
-  getByBodyPart,
-  getEquipmentList,
-  searchExercises,
-  type ExerciseDBExercise,
-  type ExercisePageResult,
-} from "../services/exerciseDbService";
+import * as localExerciseService from "../services/localExerciseService";
+import type { LocalExercise } from "../services/localExerciseService";
 import { toMs } from "../utils/dateConvert";
 
 // ---------------------------------------------------------------------------
@@ -48,43 +38,6 @@ const LIBRARY_CATEGORIES = [
   "Mobility",
 ] as const;
 
-const BODY_PART_OPTIONS: { label: string; value: string | null }[] = [
-  { label: "All", value: null },
-  { label: "Chest", value: "Chest" },
-  { label: "Back", value: "Back" },
-  { label: "Legs", value: "Legs" },
-  { label: "Shoulders", value: "Shoulders" },
-  { label: "Arms", value: "Arms" },
-  { label: "Core", value: "Core" },
-  { label: "Cardio", value: "Cardio" },
-  { label: "Mobility", value: "Mobility" },
-];
-
-const EQUIPMENT_OPTIONS: { label: string; value: string | null }[] = [
-  { label: "All", value: null },
-  { label: "Barbell", value: "Barbell" },
-  { label: "Dumbbell", value: "Dumbbell" },
-  { label: "Cable", value: "Cable" },
-  { label: "Machine", value: "Machine" },
-  { label: "Body Weight", value: "Body Weight" },
-  { label: "Kettlebell", value: "Kettlebell" },
-  { label: "Resistance Band", value: "Resistance Band" },
-  { label: "EZ Bar", value: "EZ Bar" },
-];
-
-// Reverse maps: API UPPERCASE value → display label (built once at module level).
-const API_TO_BODY_PART: Record<string, string> = {};
-for (const [label, apiValues] of Object.entries(BODY_PART_MAP)) {
-  for (const v of apiValues) {
-    API_TO_BODY_PART[v] = label;
-  }
-}
-
-const API_TO_EQUIPMENT: Record<string, string> = {};
-for (const [label, apiValue] of Object.entries(EQUIPMENT_MAP)) {
-  API_TO_EQUIPMENT[apiValue] = label;
-}
-
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -100,35 +53,28 @@ type Props = {
     name: string;
     category?: string;
     equipment?: string;
+    exerciseDbId?: string;
   }) => void;
 };
 
 // ---------------------------------------------------------------------------
-// ExerciseDB card sub-component
+// Helpers
 // ---------------------------------------------------------------------------
 
 function toTitleCase(str: string): string {
   return str.replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-type DBCardProps = {
-  item: ExerciseDBExercise;
-  adding: boolean;
+// ---------------------------------------------------------------------------
+// Local Exercise card sub-component
+// ---------------------------------------------------------------------------
+
+type LocalCardProps = {
+  item: LocalExercise;
   onAdd: () => void;
 };
 
-function ExerciseDBCard({ item, adding, onAdd }: DBCardProps) {
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [imageError, setImageError] = useState(false);
-
-  const imageSource = item.imageUrls?.["360p"] ?? item.gifUrl ?? item.imageUrl ?? "";
-
-  // Reset flags when the image source changes (list recycling).
-  useEffect(() => {
-    setImageLoaded(false);
-    setImageError(false);
-  }, [imageSource]);
-
+function LocalExerciseCard({ item, onAdd }: LocalCardProps) {
   return (
     <View
       style={{
@@ -143,50 +89,6 @@ function ExerciseDBCard({ item, adding, onAdd }: DBCardProps) {
         gap: Spacing.sm,
       }}
     >
-      {/* Thumbnail — only rendered when a URL is available */}
-      {imageSource ? (
-        <View
-          style={{
-            width: 64,
-            height: 64,
-            borderRadius: Radius.md,
-            backgroundColor: Colors.surface,
-            overflow: "hidden",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-          }}
-        >
-          {!imageLoaded && !imageError && (
-            <ActivityIndicator size="small" color={Colors.textMuted} />
-          )}
-          {imageError ? (
-            <Ionicons name="barbell-outline" size={28} color={Colors.textMuted} />
-          ) : (
-            <Image
-              source={{ uri: imageSource }}
-              style={{
-                width: 64,
-                height: 64,
-                opacity: imageLoaded ? 1 : 0,
-                position: imageLoaded ? "relative" : "absolute",
-              }}
-              contentFit="cover"
-              onLoadEnd={() => setImageLoaded(true)}
-              onError={() => {
-                console.warn("[ExerciseDBCard] Image failed to load:", imageSource);
-                setImageError(true);
-              }}
-            />
-          )}
-          {item.videoUrl ? (
-            <View style={{ position: "absolute", top: 4, left: 4, backgroundColor: "rgba(0,0,0,0.5)", borderRadius: 4, padding: 2 }}>
-              <Text style={{ color: "#fff", fontSize: 10 }}>▶</Text>
-            </View>
-          ) : null}
-        </View>
-      ) : null}
-
       {/* Info */}
       <View style={{ flex: 1 }}>
         <Text
@@ -203,7 +105,7 @@ function ExerciseDBCard({ item, adding, onAdd }: DBCardProps) {
             marginTop: 4,
           }}
         >
-          {item.bodyPart ? (
+          {item.primaryMuscles[0] ? (
             <View
               style={{
                 paddingVertical: 2,
@@ -215,7 +117,7 @@ function ExerciseDBCard({ item, adding, onAdd }: DBCardProps) {
               }}
             >
               <Text style={{ ...Typography.secondary, color: Colors.textMuted, fontSize: 11 }}>
-                {toTitleCase(item.bodyPart)}
+                {toTitleCase(item.primaryMuscles[0])}
               </Text>
             </View>
           ) : null}
@@ -243,7 +145,6 @@ function ExerciseDBCard({ item, adding, onAdd }: DBCardProps) {
       {/* Add button */}
       <Pressable
         onPress={onAdd}
-        disabled={adding}
         style={({ pressed }) => ({
           width: 36,
           height: 36,
@@ -251,15 +152,11 @@ function ExerciseDBCard({ item, adding, onAdd }: DBCardProps) {
           backgroundColor: Colors.primary,
           alignItems: "center",
           justifyContent: "center",
-          opacity: pressed || adding ? 0.7 : 1,
+          opacity: pressed ? 0.7 : 1,
           flexShrink: 0,
         })}
       >
-        {adding ? (
-          <ActivityIndicator size="small" color={Colors.onPrimary} />
-        ) : (
-          <Ionicons name="add" size={22} color={Colors.onPrimary} />
-        )}
+        <Ionicons name="add" size={22} color={Colors.onPrimary} />
       </Pressable>
     </View>
   );
@@ -287,17 +184,7 @@ export function ExerciseLibraryModal({
   const [selectedBodyPart, setSelectedBodyPart] = useState<string | null>(null);
   const [selectedEquipment, setSelectedEquipment] = useState<string | null>(null);
   const [openPicker, setOpenPicker] = useState<Picker | null>(null);
-  const [dbResults, setDbResults] = useState<ExerciseDBExercise[]>([]);
-  const [dbLoading, setDbLoading] = useState(false);
-  const [dbLoadingMore, setDbLoadingMore] = useState(false);
-  const [nextCursor, setNextCursor] = useState<string | null>(null);
-  const [hasNextPage, setHasNextPage] = useState(false);
-  const [offlineBanner, setOfflineBanner] = useState(false);
-  const [addingId, setAddingId] = useState<string | null>(null);
-  const [successIds, setSuccessIds] = useState<Set<string>>(new Set());
-  // Dynamic filter chip lists — seeded with hardcoded fallbacks.
-  const [bodyPartOptions, setBodyPartOptions] = useState<{ label: string; value: string | null }[]>(BODY_PART_OPTIONS);
-  const [equipmentOptions, setEquipmentOptions] = useState<{ label: string; value: string | null }[]>(EQUIPMENT_OPTIONS);
+  const [displayLimit, setDisplayLimit] = useState(50);
 
   // ---- My Library tab state ----
   const librarySearchRef = useRef<TextInput | null>(null);
@@ -312,53 +199,54 @@ export function ExerciseLibraryModal({
   const [creating, setCreating] = useState(false);
 
   // ---------------------------------------------------------------------------
+  // Local exercise filter options (derived synchronously from local JSON)
+  // ---------------------------------------------------------------------------
+
+  const muscleOptions = localExerciseService.getAllMuscleOptions();
+  const equipmentOptions = localExerciseService.getAllEquipmentOptions();
+
+  const musclePickerOptions: { label: string; value: string | null }[] = useMemo(
+    () => muscleOptions.map(m =>
+      m === "all" ? { label: "All", value: null } : { label: toTitleCase(m), value: m }
+    ),
+    // muscleOptions is stable (computed from static JSON)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  const equipmentPickerOptions: { label: string; value: string | null }[] = useMemo(
+    () => equipmentOptions.map(e =>
+      e === "all" ? { label: "All", value: null } : { label: toTitleCase(e), value: e }
+    ),
+    // equipmentOptions is stable (computed from static JSON)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  // ---------------------------------------------------------------------------
+  // Filtered local exercises
+  // ---------------------------------------------------------------------------
+
+  const filteredExercises = useMemo(
+    () =>
+      localExerciseService.filterExercises({
+        query: dbDebounced,
+        muscle: selectedBodyPart,
+        equipment: selectedEquipment,
+        lang: "en",
+      }),
+    [dbDebounced, selectedBodyPart, selectedEquipment]
+  );
+
+  const displayedExercises = filteredExercises.slice(0, displayLimit);
+
+  // ---------------------------------------------------------------------------
   // Effects
   // ---------------------------------------------------------------------------
 
-  // Fetch dynamic filter options from the API on first DB tab open.
+  // Debounce DB search query (700ms).
   useEffect(() => {
-    if (!visible || activeTab !== "db") return;
-    Promise.all([getBodyPartList(), getEquipmentList()])
-      .then(([rawBodyParts, rawEquipments]) => {
-        // Body parts: map API values → display labels, deduplicate.
-        if (rawBodyParts.length > 0) {
-          const seen = new Set<string>();
-          const opts: { label: string; value: string | null }[] = [{ label: "All", value: null }];
-          for (const rawItem of rawBodyParts) {
-            // Coerce to string — guards against API returning objects instead of strings.
-            const raw = String(rawItem);
-            const label: string = API_TO_BODY_PART[raw] ?? toTitleCase(raw.toLowerCase());
-            if (!seen.has(label)) {
-              seen.add(label);
-              opts.push({ label, value: label });
-            }
-          }
-          setBodyPartOptions(opts);
-        }
-        // Equipment: map API values → display labels, deduplicate.
-        if (rawEquipments.length > 0) {
-          const seen = new Set<string>();
-          const opts: { label: string; value: string | null }[] = [{ label: "All", value: null }];
-          for (const rawItem of rawEquipments) {
-            // Coerce to string — guards against API returning objects instead of strings.
-            const raw = String(rawItem);
-            const label: string = API_TO_EQUIPMENT[raw] ?? toTitleCase(raw.toLowerCase());
-            if (!seen.has(label)) {
-              seen.add(label);
-              opts.push({ label, value: label });
-            }
-          }
-          setEquipmentOptions(opts);
-        }
-      })
-      .catch(() => {
-        // Silently fall back to hardcoded lists already in state.
-      });
-  }, [visible, activeTab]);
-
-  // Debounce DB search query (400ms).
-  useEffect(() => {
-    const t = setTimeout(() => setDbDebounced(dbQuery), 400);
+    const t = setTimeout(() => setDbDebounced(dbQuery), 700);
     return () => clearTimeout(t);
   }, [dbQuery]);
 
@@ -367,6 +255,11 @@ export function ExerciseLibraryModal({
     const t = setTimeout(() => setLibDebounced(libQuery), 150);
     return () => clearTimeout(t);
   }, [libQuery]);
+
+  // Reset displayLimit when filters change.
+  useEffect(() => {
+    setDisplayLimit(50);
+  }, [dbDebounced, selectedBodyPart, selectedEquipment]);
 
   // Reset state on open.
   useEffect(() => {
@@ -378,14 +271,7 @@ export function ExerciseLibraryModal({
     setSelectedBodyPart(null);
     setSelectedEquipment(null);
     setOpenPicker(null);
-    setDbResults([]);
-    setDbLoading(false);
-    setDbLoadingMore(false);
-    setNextCursor(null);
-    setHasNextPage(false);
-    setOfflineBanner(false);
-    setAddingId(null);
-    setSuccessIds(new Set());
+    setDisplayLimit(50);
 
     // Reset Library tab
     setLibQuery("");
@@ -413,100 +299,17 @@ export function ExerciseLibraryModal({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible, coachId]);
 
-  // Search ExerciseDB on debounced query change.
-  useEffect(() => {
-    if (!visible || activeTab !== "db") return;
-    const q = dbDebounced.trim();
-    if (!q) {
-      setDbResults([]);
-      setOfflineBanner(false);
-      setNextCursor(null);
-      setHasNextPage(false);
-      return;
-    }
-    let cancelled = false;
-    setDbLoading(true);
-    setOfflineBanner(false);
-    setNextCursor(null);
-    setHasNextPage(false);
-    searchExercises(q)
-      .then((result: ExercisePageResult) => {
-        if (cancelled) return;
-        setDbResults(result.exercises);
-        setNextCursor(result.nextCursor);
-        setHasNextPage(result.hasNextPage);
-      })
-      .catch(() => {
-        if (cancelled) return;
-        setOfflineBanner(true);
-        setDbResults([]);
-      })
-      .finally(() => {
-        if (!cancelled) setDbLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [dbDebounced, visible, activeTab]);
-
-  // Fetch by body part / equipment when filters change and no search query.
-  useEffect(() => {
-    if (!visible || activeTab !== "db") return;
-    if (dbDebounced.trim()) return; // search query takes precedence
-    // Both "All" — fetch a general list instead of showing nothing
-    let cancelled = false;
-    setDbLoading(true);
-    setOfflineBanner(false);
-    setNextCursor(null);
-    setHasNextPage(false);
-    getByBodyPart(selectedBodyPart ?? "", selectedEquipment ?? undefined)
-      .then((result: ExercisePageResult) => {
-        if (cancelled) return;
-        setDbResults(result.exercises);
-        setNextCursor(result.nextCursor);
-        setHasNextPage(result.hasNextPage);
-      })
-      .catch(() => {
-        if (cancelled) return;
-        setOfflineBanner(true);
-        setDbResults([]);
-      })
-      .finally(() => {
-        if (!cancelled) setDbLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [selectedBodyPart, selectedEquipment, dbDebounced, visible, activeTab]);
-
   // ---------------------------------------------------------------------------
-  // Pagination
+  // Handlers
   // ---------------------------------------------------------------------------
 
-  const handleLoadMore = useCallback(async () => {
-    if (!hasNextPage || dbLoadingMore || dbLoading || !nextCursor) return;
-    setDbLoadingMore(true);
-    try {
-      const q = dbDebounced.trim();
-      let result: ExercisePageResult;
-      if (q) {
-        result = await searchExercises(q, nextCursor);
-      } else {
-        result = await getByBodyPart(
-          selectedBodyPart ?? "",
-          selectedEquipment ?? undefined,
-          nextCursor
-        );
-      }
-      setDbResults((prev) => [...prev, ...result.exercises]);
-      setNextCursor(result.nextCursor);
-      setHasNextPage(result.hasNextPage);
-    } catch (e) {
-      console.warn("[ExerciseLibraryModal] loadMore error", e);
-    } finally {
-      setDbLoadingMore(false);
-    }
-  }, [hasNextPage, dbLoadingMore, dbLoading, nextCursor, dbDebounced, selectedBodyPart, selectedEquipment]);
+  const handleAddLocal = useCallback((exercise: LocalExercise) => {
+    onAddExercise({
+      name: exercise.name,
+      exerciseDbId: exercise.id,
+    });
+    onClose();
+  }, [onAddExercise, onClose]);
 
   // ---------------------------------------------------------------------------
   // Computed (Library tab)
@@ -553,83 +356,18 @@ export function ExerciseLibraryModal({
     !loading && libDebounced.trim().length > 0 && filteredTemplates.length === 0;
 
   // ---------------------------------------------------------------------------
-  // Handlers
-  // ---------------------------------------------------------------------------
-
-  const handleAddFromDB = async (exercise: ExerciseDBExercise) => {
-    if (addingId) return;
-    setAddingId(exercise.id);
-    try {
-      // 1. Cache raw exercise to Firestore global collection.
-      await cacheExerciseToFirestore(exercise);
-
-      // 2. Map to CachedExercise shape and add to coach's library.
-      const { mapBodyPartToCategory, mapEquipment } = await import(
-        "../services/exerciseDbService"
-      );
-      const cached = {
-        id: exercise.id,
-        name: toTitleCase(exercise.name),
-        category: mapBodyPartToCategory(exercise.bodyPart),
-        equipment: mapEquipment(exercise.equipment),
-        gifUrl: exercise.gifUrl,
-        imageUrls: exercise.imageUrls,
-        videoUrl: exercise.videoUrl || undefined,
-        overview: exercise.overview || undefined,
-        exerciseTips: exercise.exerciseTips.length ? exercise.exerciseTips : undefined,
-        targetMuscle: exercise.target,
-        secondaryMuscles: exercise.secondaryMuscles,
-        instructions: exercise.instructions,
-        source: "exerciseDB" as const,
-      };
-      await exerciseTemplateService.addFromExerciseDB(coachId, cached);
-
-      // 3. Record usage.
-      exerciseTemplateService
-        .recordUsage({
-          coachId,
-          name: cached.name,
-          category: cached.category,
-          equipment: cached.equipment,
-        })
-        .catch(() => {});
-
-      // 4. Add the exercise to the workout plan.
-      onAddExercise({
-        name: cached.name,
-        category: cached.category,
-        equipment: cached.equipment,
-      });
-
-      // 5. Show brief success state.
-      setSuccessIds((prev) => new Set(prev).add(exercise.id));
-      setTimeout(() => {
-        setSuccessIds((prev) => {
-          const next = new Set(prev);
-          next.delete(exercise.id);
-          return next;
-        });
-      }, 1500);
-
-      onClose();
-    } catch (e) {
-      console.warn("[ExerciseLibraryModal] handleAddFromDB error", e);
-    } finally {
-      setAddingId(null);
-    }
-  };
-
-  // ---------------------------------------------------------------------------
   // Render helpers
   // ---------------------------------------------------------------------------
 
-  const pickerOptions = openPicker === "bodyPart" ? bodyPartOptions : equipmentOptions;
+  const pickerOptions = openPicker === "bodyPart" ? musclePickerOptions : equipmentPickerOptions;
   const pickerTitle = openPicker === "bodyPart" ? "Body Part" : "Equipment";
 
   const isBodyPartActive = selectedBodyPart !== null;
   const isEquipmentActive = selectedEquipment !== null;
-  const hasActiveFilter = isBodyPartActive || isEquipmentActive;
-  const hasSearchQuery = dbDebounced.trim().length > 0;
+
+  // Display labels for current filter values
+  const bodyPartLabel = selectedBodyPart ? toTitleCase(selectedBodyPart) : "All";
+  const equipmentLabel = selectedEquipment ? toTitleCase(selectedEquipment) : "All";
 
   // ---------------------------------------------------------------------------
   // Render
@@ -733,17 +471,29 @@ export function ExerciseLibraryModal({
         {/* ---------------------------------------------------------------- */}
         {activeTab === "db" ? (
           <FlatList
-            data={dbResults}
+            data={displayedExercises}
             keyExtractor={(item) => item.id}
             keyboardShouldPersistTaps="handled"
             contentContainerStyle={{ padding: Spacing.md, paddingBottom: 40 }}
-            onEndReached={handleLoadMore}
-            onEndReachedThreshold={0.2}
             ListFooterComponent={
-              dbLoadingMore ? (
-                <View style={{ paddingVertical: Spacing.md, alignItems: "center" }}>
-                  <ActivityIndicator size="small" color={Colors.textMuted} />
-                </View>
+              displayLimit < filteredExercises.length ? (
+                <Pressable
+                  onPress={() => setDisplayLimit(n => n + 50)}
+                  style={({ pressed }) => ({
+                    margin: Spacing.md,
+                    padding: Spacing.sm,
+                    borderRadius: Radius.lg,
+                    borderWidth: 1,
+                    borderColor: Colors.border,
+                    backgroundColor: Colors.card,
+                    alignItems: "center",
+                    opacity: pressed ? 0.9 : 1,
+                  })}
+                >
+                  <Text style={{ ...Typography.body, color: Colors.textMuted }}>
+                    Load more ({filteredExercises.length - displayLimit} remaining)
+                  </Text>
+                </Pressable>
               ) : null
             }
             ListHeaderComponent={
@@ -774,7 +524,7 @@ export function ExerciseLibraryModal({
                     }}
                     value={dbQuery}
                     onChangeText={setDbQuery}
-                    placeholder="Search ExerciseDB..."
+                    placeholder="Search exercises..."
                     placeholderTextColor={Colors.textMuted}
                     autoCapitalize="none"
                     autoCorrect={false}
@@ -824,7 +574,7 @@ export function ExerciseLibraryModal({
                   >
                     <View style={{ flex: 1, marginRight: 4 }}>
                       <Text style={{ ...Typography.micro, marginBottom: 2 }}>
-                        BODY PART
+                        MUSCLE
                       </Text>
                       <Text
                         style={{
@@ -834,7 +584,7 @@ export function ExerciseLibraryModal({
                         }}
                         numberOfLines={1}
                       >
-                        {selectedBodyPart ?? "All"}
+                        {bodyPartLabel}
                       </Text>
                     </View>
                     <Ionicons
@@ -873,7 +623,7 @@ export function ExerciseLibraryModal({
                         }}
                         numberOfLines={1}
                       >
-                        {selectedEquipment ?? "All"}
+                        {equipmentLabel}
                       </Text>
                     </View>
                     <Ionicons
@@ -884,104 +634,56 @@ export function ExerciseLibraryModal({
                   </Pressable>
                 </View>
 
-                {/* Offline banner */}
-                {offlineBanner ? (
-                  <View
-                    style={{
-                      backgroundColor: Colors.surface,
-                      borderRadius: Radius.md,
-                      borderWidth: 1,
-                      borderColor: Colors.border,
-                      padding: Spacing.sm,
-                      flexDirection: "row",
-                      alignItems: "center",
-                      gap: Spacing.xs,
-                      marginBottom: Spacing.sm,
-                    }}
-                  >
-                    <Ionicons
-                      name="cloud-offline-outline"
-                      size={16}
-                      color={Colors.textMuted}
-                    />
-                    <Text
-                      style={{ ...Typography.secondary, color: Colors.textMuted }}
-                    >
-                      Using cached exercises (offline)
-                    </Text>
-                  </View>
-                ) : null}
-
-                {/* Empty state prompt */}
-                {!hasSearchQuery && !hasActiveFilter && !dbLoading ? (
-                  <View style={{ paddingVertical: Spacing.lg, alignItems: "center" }}>
-                    <Ionicons
-                      name="barbell-outline"
-                      size={32}
-                      color={Colors.textMuted}
-                    />
-                    <Text
-                      style={{
-                        ...Typography.secondary,
-                        color: Colors.textMuted,
-                        textAlign: "center",
-                        marginTop: Spacing.sm,
-                      }}
-                    >
-                      Search for exercises or use the filters above
-                    </Text>
-                  </View>
-                ) : null}
-
-                {/* Loading */}
-                {dbLoading ? (
-                  <View style={{ paddingVertical: Spacing.lg }}>
-                    <ActivityIndicator />
-                  </View>
-                ) : null}
+                {/* Count */}
+                <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: Spacing.sm }}>
+                  Showing {displayedExercises.length} of {filteredExercises.length}
+                </Text>
               </View>
             }
             renderItem={({ item }) => (
-              <ExerciseDBCard
+              <LocalExerciseCard
                 item={item}
-                adding={addingId === item.id}
-                onAdd={() => handleAddFromDB(item)}
+                onAdd={() => handleAddLocal(item)}
               />
             )}
             ListEmptyComponent={
-              !dbLoading && (hasSearchQuery || hasActiveFilter) ? (
-                <View style={{ paddingVertical: Spacing.lg }}>
-                  <Text
-                    style={{
-                      ...Typography.secondary,
-                      color: Colors.textMuted,
-                      textAlign: "center",
-                    }}
-                  >
-                    No results found
+              <View style={{ paddingVertical: Spacing.lg, alignItems: "center" }}>
+                <Ionicons
+                  name="barbell-outline"
+                  size={32}
+                  color={Colors.textMuted}
+                />
+                <Text
+                  style={{
+                    ...Typography.secondary,
+                    color: Colors.textMuted,
+                    textAlign: "center",
+                    marginTop: Spacing.sm,
+                  }}
+                >
+                  No exercises found
+                </Text>
+                <Pressable
+                  onPress={() => {
+                    setActiveTab("library");
+                    setLibQuery(dbDebounced.trim());
+                  }}
+                  style={({ pressed }) => ({
+                    marginTop: Spacing.sm,
+                    paddingVertical: 10,
+                    paddingHorizontal: 16,
+                    borderRadius: Radius.lg,
+                    borderWidth: 1,
+                    borderColor: Colors.border,
+                    alignSelf: "center",
+                    opacity: pressed ? 0.9 : 1,
+                  })}
+                >
+                  <Text style={{ ...Typography.secondary, color: Colors.text }}>
+                    Create custom exercise
                   </Text>
-                  <Pressable
-                    onPress={() => {
-                      setActiveTab("library");
-                      setLibQuery(dbDebounced.trim());
-                    }}
-                    style={({ pressed }) => ({
-                      marginTop: Spacing.sm,
-                      paddingVertical: 10,
-                      paddingHorizontal: 16,
-                      borderRadius: Radius.lg,
-                      borderWidth: 1,
-                      borderColor: Colors.border,
-                      alignSelf: "center",
-                      opacity: pressed ? 0.9 : 1,
-                    })}
-                  >
-                    <Text style={{ ...Typography.secondary, color: Colors.text }}>
-                      Create custom exercise
-                    </Text>
-                  </Pressable>
-                </View>
-              ) : null
+                </Pressable>
+              </View>
             }
           />
         ) : null}

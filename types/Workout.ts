@@ -11,6 +11,8 @@ export interface Exercise {
   rpe: number | null;
   // Optional per-exercise coach note (stored on workout plans).
   coachNote?: string;
+  videoUrl?: string;
+  exerciseDbId?: string;
 }
 
 export interface WorkoutPlan {

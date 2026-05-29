@@ -135,7 +135,7 @@ export default function CreateWorkoutPlan() {
     setExpandedKey(nextKey);
   };
 
-  const addExerciseFromLibrary = (payload: { name: string }) => {
+  const addExerciseFromLibrary = (payload: { name: string; exerciseDbId?: string }) => {
     const base = workoutService.createEmptyExercise();
     const nextKey = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
     const next: ExerciseDraft = {
@@ -143,6 +143,7 @@ export default function CreateWorkoutPlan() {
       ...base,
       name: payload.name,
       coachNote: "",
+      exerciseDbId: payload.exerciseDbId,
     };
     setExercises((prev) => [...prev, next]);
     setLastAddedKey(nextKey);
@@ -189,6 +190,8 @@ export default function CreateWorkoutPlan() {
             tempo,
             rpe: rpe === null ? null : rpe,
             coachNote: (e.coachNote ?? "").trim() || undefined,
+            videoUrl: (e.videoUrl ?? "").trim() || undefined,
+            exerciseDbId: e.exerciseDbId || undefined,
           };
         })
         .filter((e) => e.name.length > 0);
@@ -491,7 +494,7 @@ export default function CreateWorkoutPlan() {
           visible={libraryOpen}
           coachId={coachId}
           onClose={() => setLibraryOpen(false)}
-          onAddExercise={(p) => addExerciseFromLibrary({ name: p.name })}
+          onAddExercise={(p) => addExerciseFromLibrary({ name: p.name, exerciseDbId: p.exerciseDbId })}
         />
       ) : null}
     </ScreenLayout>
