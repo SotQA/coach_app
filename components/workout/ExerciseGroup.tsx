@@ -90,9 +90,9 @@ export function ExerciseGroup({
           <Text style={styles.indexBadgeText}>{exerciseIndex + 1}</Text>
         </View>
         <View style={{ flex: 1 }}>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-            <Text style={styles.exerciseName}>{exercise.name}</Text>
-            <Ionicons name="information-circle" size={16} color={Colors.primary} />
+          <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 6 }}>
+            <Text style={[styles.exerciseName, { flex: 1 }]}>{exercise.name}</Text>
+            <Ionicons name="information-circle" size={16} color={Colors.primary} style={{ marginTop: 2 }} />
           </View>
           <Text style={styles.exerciseMeta}>
             {t("target", { sets: exercise.sets, reps: exercise.reps })}

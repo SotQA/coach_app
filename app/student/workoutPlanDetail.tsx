@@ -10,14 +10,19 @@ import { PrimaryButton } from "../../components/PrimaryButton";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
+import { useUnits } from "../../context/UnitsContext";
+import { buildLastResultsMapFromLogs, normalizeExerciseName, type LastSetResult } from "../../utils/workoutMetrics";
+import { toUnit } from "../../utils/units";
 
 export default function WorkoutPlanDetail() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
+  const { unit } = useUnits();
   const params = useLocalSearchParams<{ workoutPlanId?: string }>();
   const planId = String(params.workoutPlanId ?? "").trim();
   const [plan, setPlan] = useState<WorkoutPlan | null>(null);
+  const [lastResultsByExercise, setLastResultsByExercise] = useState<Map<string, LastSetResult[]>>(new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -35,13 +40,17 @@ export default function WorkoutPlanDetail() {
           setError("You must be logged in as a student.");
           return;
         }
-        const p = await workoutService.getWorkoutPlanById(planId);
+        const [p, history] = await Promise.all([
+          workoutService.getWorkoutPlanById(planId),
+          workoutService.getWorkoutHistory(user.id).catch(() => []),
+        ]);
         if (cancelled) return;
         if (!p || p.studentId !== user.id) {
           setError("Workout not found.");
           return;
         }
         setPlan(p);
+        setLastResultsByExercise(buildLastResultsMapFromLogs(history));
       } catch (e: unknown) {
         if (!cancelled) setError(e instanceof Error ? e.message : "Failed to load.");
       } finally {
@@ -104,47 +113,62 @@ export default function WorkoutPlanDetail() {
 
         <Text style={{ ...Typography.section, marginBottom: Spacing.sm }}>Exercises</Text>
         <View style={{ gap: Spacing.sm, marginBottom: Spacing.lg }}>
-          {(plan.exercises ?? []).map((ex, i) => (
-            <TouchableOpacity
-              key={`${ex.name}-${i}`}
-              activeOpacity={0.7}
-              onPress={() =>
-                router.push({
-                  pathname: "/student/exerciseDetail",
-                  params: {
-                    exerciseName: ex.name,
-                    exerciseDbId: ex.exerciseDbId ?? "",
-                    videoUrl: ex.videoUrl ?? "",
-                    coachNote: ex.coachNote ?? "",
-                    lang: "en",
-                  },
-                })
-              }
-              style={{
-                backgroundColor: Colors.card,
-                borderRadius: Radius.lg,
-                padding: Spacing.md,
-                borderWidth: 1,
-                borderColor: Colors.border,
-              }}
-            >
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                <Text style={{ ...Typography.section, fontWeight: "800", flex: 1 }}>
-                  {ex.name}
+          {(plan.exercises ?? []).map((ex, i) => {
+            const lastResults = lastResultsByExercise.get(normalizeExerciseName(ex.name));
+            const lastLabel = lastResults && lastResults.length > 0
+              ? lastResults.map((s) => {
+                  const w = s.weight != null ? toUnit(s.weight, unit) : null;
+                  const wStr = w != null ? parseFloat(w.toFixed(2)).toString() : "BW";
+                  return `${wStr}×${s.reps}`;
+                }).join(", ")
+              : null;
+            return (
+              <TouchableOpacity
+                key={`${ex.name}-${i}`}
+                activeOpacity={0.7}
+                onPress={() =>
+                  router.push({
+                    pathname: "/student/exerciseDetail",
+                    params: {
+                      exerciseName: ex.name,
+                      exerciseDbId: ex.exerciseDbId ?? "",
+                      videoUrl: ex.videoUrl ?? "",
+                      coachNote: ex.coachNote ?? "",
+                      lang: "en",
+                    },
+                  })
+                }
+                style={{
+                  backgroundColor: Colors.card,
+                  borderRadius: Radius.lg,
+                  padding: Spacing.md,
+                  borderWidth: 1,
+                  borderColor: Colors.border,
+                }}
+              >
+                <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 6 }}>
+                  <Text style={{ ...Typography.section, fontWeight: "800", flex: 1 }}>
+                    {ex.name}
+                  </Text>
+                  <Ionicons name="information-circle" size={16} color={Colors.primary} style={{ marginTop: 2 }} />
+                </View>
+                <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4 }}>
+                  {ex.sets} sets · {ex.reps} reps
+                  {ex.weight != null ? ` · ${ex.weight} kg` : ""}
                 </Text>
-                <Ionicons name="information-circle" size={16} color={Colors.primary} />
-              </View>
-              <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4 }}>
-                {ex.sets} sets · {ex.reps} reps
-                {ex.weight != null ? ` · ${ex.weight} kg` : ""}
-              </Text>
-              {ex.coachNote ? (
-                <Text style={{ ...Typography.secondary, color: Colors.primary, marginTop: 4 }}>
-                  {ex.coachNote}
-                </Text>
-              ) : null}
-            </TouchableOpacity>
-          ))}
+                {lastLabel ? (
+                  <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4, fontStyle: "italic" }}>
+                    Last: {lastLabel}
+                  </Text>
+                ) : null}
+                {ex.coachNote ? (
+                  <Text style={{ ...Typography.secondary, color: Colors.primary, marginTop: 4 }}>
+                    {ex.coachNote}
+                  </Text>
+                ) : null}
+              </TouchableOpacity>
+            );
+          })}
         </View>
 
         <PrimaryButton

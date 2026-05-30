@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, Keyboard, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { ExerciseGroup } from "../../components/workout/ExerciseGroup";
@@ -127,6 +127,7 @@ export default function WorkoutExecution() {
 
   const [drafts, setDrafts] = useState<ExerciseDraft[]>([]);
   const [sessionNotes, setSessionNotes] = useState("");
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
 
   const planRef = useRef<WorkoutPlan | null>(null);
   const draftsRef = useRef<ExerciseDraft[]>([]);
@@ -168,6 +169,13 @@ export default function WorkoutExecution() {
   // Cleanup notes debounce on unmount.
   useEffect(() => {
     return () => { if (notesDebounceRef.current) clearTimeout(notesDebounceRef.current); };
+  }, []);
+
+  // Track keyboard visibility to show/hide the dismiss button.
+  useEffect(() => {
+    const show = Keyboard.addListener("keyboardDidShow", () => setKeyboardVisible(true));
+    const hide = Keyboard.addListener("keyboardDidHide", () => setKeyboardVisible(false));
+    return () => { show.remove(); hide.remove(); };
   }, []);
 
   // Deep-link focus: when the screen is opened from a rest notification tap,
@@ -344,6 +352,19 @@ export default function WorkoutExecution() {
         ) : null}
       </KeyboardAwareScrollView>
 
+      {/* Keyboard dismiss button — appears when a text input is focused */}
+      {keyboardVisible ? (
+        <Pressable
+          onPress={() => Keyboard.dismiss()}
+          hitSlop={8}
+          style={({ pressed }) => [S.keyboardDismissBtn, { opacity: pressed ? 0.75 : 1 }]}
+          accessibilityLabel="Dismiss keyboard"
+          accessibilityRole="button"
+        >
+          <Ionicons name="chevron-down" size={20} color={Colors.text} />
+        </Pressable>
+      ) : null}
+
       {/* Sticky footer */}
       <View style={S.footer}>
         <RestTimerBar />
@@ -379,4 +400,5 @@ const S = StyleSheet.create({
   notesLabel:            { ...Typography.secondary, color: Colors.textMuted, marginBottom: 6 },
   notesInput:            { borderWidth: 1, borderColor: Colors.border, padding: 12, borderRadius: Radius.md, color: Colors.text, backgroundColor: Colors.surface, minHeight: 72 },
   footer:                { position: "absolute", left: 0, right: 0, bottom: 0, paddingHorizontal: Spacing.md, paddingBottom: Spacing.md, paddingTop: Spacing.sm, backgroundColor: Colors.bg, borderTopWidth: 1, borderTopColor: Colors.border },
+  keyboardDismissBtn:    { position: "absolute", right: Spacing.md, bottom: 130, width: 44, height: 44, borderRadius: Radius.lg, backgroundColor: Colors.card, borderWidth: 1, borderColor: Colors.border, alignItems: "center", justifyContent: "center", zIndex: 50 },
 });
