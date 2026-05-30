@@ -156,6 +156,7 @@
   "workoutSaved": "Тренировка сохранена в историю.",
   "greatSession": "Отличная сессия!",
   "coachNoteLabel": "Тренер: %{note}",
+  "lastSession": "Прошлый раз",
 
   "restTime": "Время отдыха",
   "restPaused": "Отдых на паузе",

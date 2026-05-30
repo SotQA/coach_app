@@ -2,15 +2,17 @@ import { useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
 import { workoutService } from "../services/workoutService";
 import type { WorkoutLog, WorkoutPlan } from "../types/Workout";
-import { buildBestWeightMapFromLogs } from "../utils/workoutMetrics";
+import { buildBestWeightMapFromLogs, buildLastResultsMapFromLogs, type LastSetResult } from "../utils/workoutMetrics";
 import { logger } from "../utils/logger";
 import { useAsyncData, type AsyncDataState } from "./useAsyncData";
 
 export interface WorkoutExecutionData {
   plan: WorkoutPlan;
   priorLogs: WorkoutLog[];
-  /** Normalized exercise-name → best-lifted-kg, pre-computed from priorLogs. */
+  /** Normalized exercise-name → best-lifted-kg (all-time max), pre-computed from priorLogs. */
   bestWeightByExercise: Map<string, number>;
+  /** Normalized exercise-name → sets from the most recent session, for display on exercise cards. */
+  lastResultsByExercise: Map<string, LastSetResult[]>;
 }
 
 /**
@@ -58,8 +60,9 @@ export function useWorkoutExecutionData(
         : [];
 
     const bestWeightByExercise = buildBestWeightMapFromLogs(priorLogs);
+    const lastResultsByExercise = buildLastResultsMapFromLogs(priorLogs);
 
-    return { plan, priorLogs, bestWeightByExercise };
+    return { plan, priorLogs, bestWeightByExercise, lastResultsByExercise };
   }, [planId, user]);
 
   return useAsyncData<WorkoutExecutionData | null>(fetcher, [fetcher]);

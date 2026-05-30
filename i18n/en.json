@@ -156,6 +156,7 @@
   "workoutSaved": "Workout saved to history.",
   "greatSession": "Great session!",
   "coachNoteLabel": "Coach: %{note}",
+  "lastSession": "Last",
 
   "restTime": "Rest Time",
   "restPaused": "Rest Paused",

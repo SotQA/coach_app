@@ -24,6 +24,7 @@ import { useSetInputRefs } from "../../hooks/useSetInputRefs";
 import { useUnits } from "../../context/UnitsContext";
 import { toKg, toUnit } from "../../utils/units";
 import type { WeightUnit } from "../../context/UnitsContext";
+import { normalizeExerciseName } from "../../utils/workoutMetrics";
 
 type ExerciseDraft = { sets: SetDraft[] };
 
@@ -51,24 +52,34 @@ function weightToDisplay(kg: number | null | undefined, unit: WeightUnit): strin
   if (kg == null || !Number.isFinite(kg)) return "";
   const display = toUnit(kg, unit);
   if (display == null) return "";
-  return unit === "lb" ? display.toFixed(1) : String(Math.round(display * 10) / 10);
+  // Preserve up to 2 decimal places, strip trailing zeros (36.25 → "36.25", 36.0 → "36").
+  return parseFloat(display.toFixed(2)).toString();
 }
 
 /** Build ActiveExerciseDraft[] from a loaded WorkoutPlan (fresh session).
- *  Drafts always store kg; prescribed weight is converted for display via weightToDisplay. */
-function buildExerciseDrafts(plan: WorkoutPlan, unit: WeightUnit): ActiveExerciseDraft[] {
-  return plan.exercises.map((ex) => ({
-    name: ex.name,
-    sets: Array.from({ length: Math.max(1, Number(ex.sets) || 1) }, () => ({
-      weight: weightToDisplay(
-        ex.weight != null && Number.isFinite(Number(ex.weight)) ? Number(ex.weight) : null,
-        unit
-      ),
-      reps: "",
-      rpe: ex.rpe != null && Number.isFinite(Number(ex.rpe)) ? String(ex.rpe) : "",
-      completed: false,
-    })),
-  }));
+ *  Drafts always store kg; weight pre-fill priority:
+ *  1. Best weight from prior sessions (bestWeightByExercise)
+ *  2. Prescribed weight from the plan
+ *  3. Empty string */
+function buildExerciseDrafts(
+  plan: WorkoutPlan,
+  unit: WeightUnit,
+  bestWeightByExercise?: Map<string, number>
+): ActiveExerciseDraft[] {
+  return plan.exercises.map((ex) => {
+    const prescribedKg =
+      ex.weight != null && Number.isFinite(Number(ex.weight)) ? Number(ex.weight) : null;
+    const bestKg = bestWeightByExercise?.get(normalizeExerciseName(ex.name)) ?? null;
+    return {
+      name: ex.name,
+      sets: Array.from({ length: Math.max(1, Number(ex.sets) || 1) }, () => ({
+        weight: weightToDisplay(bestKg ?? prescribedKg, unit),
+        reps: "",
+        rpe: ex.rpe != null && Number.isFinite(Number(ex.rpe)) ? String(ex.rpe) : "",
+        completed: false,
+      })),
+    };
+  });
 }
 
 /** Convert persisted ActiveExerciseDraft[] → local ExerciseDraft[] for UI.
@@ -88,6 +99,7 @@ export default function WorkoutExecution() {
   const router = useRouter();
   const { user: authUser } = useAuth();
   const activeWorkout = useActiveWorkoutSession();
+  const { hydrated } = activeWorkout;
   const elapsedSeconds = useElapsedSeconds();
   const { t } = useI18n();
   const authUserId = authUser?.id;
@@ -108,6 +120,7 @@ export default function WorkoutExecution() {
   const { data: execData, loading, error: loadError } = useWorkoutExecutionData(workoutPlanId);
   const plan = execData?.plan ?? null;
   const bestWeightByExercise = execData?.bestWeightByExercise ?? new Map<string, number>();
+  const lastResultsByExercise = execData?.lastResultsByExercise ?? new Map();
 
   const { finishWorkout, submitting, submitError } = useFinishWorkout();
   const refs = useSetInputRefs();
@@ -130,15 +143,19 @@ export default function WorkoutExecution() {
   }, [workoutPlanId, authUserId, refs]);
 
   // Session init: restore existing session or start a fresh one.
+  // We wait for `hydrated` before acting so that a cold-launch (app killed and
+  // reopened) doesn't race between AsyncStorage hydration and plan fetch —
+  // without this guard, the plan can load first, see session===null, and
+  // overwrite the stored session with a fresh empty one.
   useEffect(() => {
-    if (!plan || sessionInitRef.current) return;
+    if (!plan || !hydrated || sessionInitRef.current) return;
     sessionInitRef.current = true;
     const existing = activeWorkout.session;
     if (existing && existing.workoutPlanId === workoutPlanId) {
       setDrafts(toLocalDrafts(existing.exercises, unit));
       setSessionNotes(existing.notes ?? "");
     } else if (!existing) {
-      const exercises = buildExerciseDrafts(plan, unit);
+      const exercises = buildExerciseDrafts(plan, unit, bestWeightByExercise);
       activeWorkout.startSession({ studentId: authUserId!, workoutPlanId: plan.id, workoutName: plan.name, groupId, exercises, notes: "" });
       setDrafts(toLocalDrafts(exercises, unit));
       setSessionNotes("");
@@ -146,7 +163,7 @@ export default function WorkoutExecution() {
       router.replace({ pathname: "/student/workoutExecution", params: { workoutPlanId: existing.workoutPlanId } });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [plan?.id]);
+  }, [plan?.id, hydrated]);
 
   // Cleanup notes debounce on unmount.
   useEffect(() => {
@@ -310,6 +327,7 @@ export default function WorkoutExecution() {
             exerciseIndex={exIdx}
             exercise={exercise}
             drafts={drafts[exIdx]?.sets ?? []}
+            lastResults={lastResultsByExercise.get(normalizeExerciseName(exercise.name))}
             disabled={submitting}
             onSetChange={(setIdx, patch) => updateSet(exIdx, setIdx, patch)}
             onMarkSetDone={(setIdx) => {
