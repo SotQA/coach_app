@@ -113,6 +113,33 @@ export function legacyExerciseToLoggedSets(ex: {
   }));
 }
 
+export interface LastSetResult {
+  weight: number | null;
+  reps: number;
+}
+
+/**
+ * Returns the sets from the MOST RECENT log for each exercise name.
+ * Assumes `logs` is sorted newest-first (as returned by getWorkoutHistory).
+ * Used to display last-session results on exercise cards.
+ */
+export function buildLastResultsMapFromLogs(
+  logs: WorkoutLog[]
+): Map<string, LastSetResult[]> {
+  const map = new Map<string, LastSetResult[]>();
+  for (const log of logs) {
+    const exercises = Array.isArray(log.exercises) && log.exercises.length > 0
+      ? log.exercises
+      : [];
+    for (const ex of exercises) {
+      const key = normalizeExerciseName(ex.name);
+      if (!key || map.has(key)) continue;
+      map.set(key, ex.sets.map((s) => ({ weight: s.weight, reps: s.reps })));
+    }
+  }
+  return map;
+}
+
 /** Max logged weight per exercise name across history (for PR detection). */
 export function buildBestWeightMapFromLogs(logs: WorkoutLog[]): Map<string, number> {
   const map = new Map<string, number>();

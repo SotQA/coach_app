@@ -85,6 +85,8 @@ interface StartSessionParams {
 
 interface ActiveWorkoutSessionContextValue {
   session: ActiveWorkoutSession | null;
+  /** True once the initial AsyncStorage hydration has completed. */
+  hydrated: boolean;
   /** Live rest seconds remaining (float). 0 when inactive. */
   restSecondsRemaining: number;
   startSession: (params: StartSessionParams) => Promise<void>;
@@ -169,6 +171,7 @@ const ActiveWorkoutSessionContext = createContext<ActiveWorkoutSessionContextVal
 export function ActiveWorkoutSessionProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [session, setSession] = useState<ActiveWorkoutSession | null>(null);
+  const [hydrated, setHydrated] = useState(false);
   const [restSecondsRemaining, setRestSecondsRemaining] = useState(0);
 
   const sessionRef = useRef<ActiveWorkoutSession | null>(null);
@@ -214,20 +217,23 @@ export function ActiveWorkoutSessionProvider({ children }: { children: ReactNode
   // ── Hydrate on mount ──────────────────────────────────────────────────────
   useEffect(() => {
     hydrate().then((loaded) => {
-      if (!loaded) return;
-      // Seed the queued ref so the first AppState/periodic flush sees the right value.
-      lastQueuedSessionRef.current = loaded;
-      setSession(loaded);
-      if (loaded.restTimer?.isActive) {
-        const rem = calcRestRemaining(loaded.restTimer);
-        setRestSecondsRemaining(rem);
-        // If the rest timer expired while the app was closed, auto-clear it.
-        if (rem <= 0) {
-          const cleared = { ...loaded, restTimer: undefined };
-          setSession(cleared);
-          persistDebounced(cleared);
+      if (loaded) {
+        // Seed the queued ref so the first AppState/periodic flush sees the right value.
+        lastQueuedSessionRef.current = loaded;
+        setSession(loaded);
+        if (loaded.restTimer?.isActive) {
+          const rem = calcRestRemaining(loaded.restTimer);
+          setRestSecondsRemaining(rem);
+          // If the rest timer expired while the app was closed, auto-clear it.
+          if (rem <= 0) {
+            const cleared = { ...loaded, restTimer: undefined };
+            setSession(cleared);
+            persistDebounced(cleared);
+          }
         }
       }
+      // Signal that hydration is done regardless of whether a session was found.
+      setHydrated(true);
     });
   }, [persistDebounced]);
 
@@ -603,6 +609,7 @@ export function ActiveWorkoutSessionProvider({ children }: { children: ReactNode
     <ActiveWorkoutSessionContext.Provider
       value={{
         session,
+        hydrated,
         restSecondsRemaining,
         startSession,
         updateSet,

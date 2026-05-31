@@ -5,6 +5,7 @@ import { useI18n } from "../../context/I18nContext";
 import { useUnits } from "../../context/UnitsContext";
 import { toUnit, unitSuffix } from "../../utils/units";
 import type { Exercise } from "../../types/Workout";
+import type { LastSetResult } from "../../utils/workoutMetrics";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
@@ -14,6 +15,8 @@ export interface ExerciseGroupProps {
   exerciseIndex: number;
   exercise: Exercise;
   drafts: SetDraft[];
+  /** Sets from the most recent session for this exercise, for reference display. */
+  lastResults?: LastSetResult[];
   disabled?: boolean;
   onSetChange: (setIndex: number, patch: Partial<SetDraft>) => void;
   onMarkSetDone: (setIndex: number) => void;
@@ -33,6 +36,7 @@ export function ExerciseGroup({
   exerciseIndex,
   exercise,
   drafts,
+  lastResults,
   disabled = false,
   onSetChange,
   onMarkSetDone,
@@ -48,9 +52,20 @@ export function ExerciseGroup({
       : null;
   const weightSuffix =
     displayWeight != null
-      ? ` @ ${unit === "lb" ? displayWeight.toFixed(1) : Math.round(displayWeight * 10) / 10}${unitSuffix(unit)}`
+      ? ` @ ${parseFloat(displayWeight.toFixed(2))}${unitSuffix(unit)}`
       : "";
   const rpeSuffix = exercise.rpe != null ? ` RPE ${exercise.rpe}` : "";
+
+  // Format last-session results as "60×8, 60×8, 60×8" (weight in active unit).
+  const lastResultsLabel = (() => {
+    if (!lastResults || lastResults.length === 0) return null;
+    const parts = lastResults.map((s) => {
+      const w = s.weight != null ? toUnit(s.weight, unit) : null;
+      const wStr = w != null ? parseFloat(w.toFixed(2)).toString() : "—";
+      return `${wStr}×${s.reps}`;
+    });
+    return parts.join(", ");
+  })();
 
   return (
     <View style={styles.container}>
@@ -75,15 +90,20 @@ export function ExerciseGroup({
           <Text style={styles.indexBadgeText}>{exerciseIndex + 1}</Text>
         </View>
         <View style={{ flex: 1 }}>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-            <Text style={styles.exerciseName}>{exercise.name}</Text>
-            <Ionicons name="information-circle" size={16} color={Colors.primary} />
+          <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 6 }}>
+            <Text style={[styles.exerciseName, { flex: 1 }]}>{exercise.name}</Text>
+            <Ionicons name="information-circle" size={16} color={Colors.primary} style={{ marginTop: 2 }} />
           </View>
           <Text style={styles.exerciseMeta}>
             {t("target", { sets: exercise.sets, reps: exercise.reps })}
             {weightSuffix}
             {rpeSuffix}
           </Text>
+          {lastResultsLabel ? (
+            <Text style={styles.lastResults}>
+              {t("lastSession")}: {lastResultsLabel}
+            </Text>
+          ) : null}
           {exercise.coachNote ? (
             <Text style={styles.coachNote}>
               {t("coachNoteLabel", { note: exercise.coachNote })}
@@ -156,6 +176,12 @@ const styles = StyleSheet.create({
     ...Typography.secondary,
     color: Colors.textMuted,
     marginTop: 2,
+  },
+  lastResults: {
+    ...Typography.secondary,
+    color: Colors.textMuted,
+    marginTop: 2,
+    fontStyle: "italic",
   },
   coachNote: {
     ...Typography.secondary,

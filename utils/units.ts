@@ -14,11 +14,11 @@ export function toKg(value: number | null | undefined, unit: WeightUnit): number
   return unit === "lb" ? value / KG_TO_LB : value;
 }
 
-/** Display: "60 kg" / "132.2 lb" / "—" for null. */
+/** Display: "60 kg" / "132.28 lb" / "—" for null. Preserves up to 2 decimal places. */
 export function formatWeight(kg: number | null | undefined, unit: WeightUnit): string {
   const v = toUnit(kg, unit);
   if (v == null) return "—";
-  return unit === "lb" ? `${v.toFixed(1)} lb` : `${Math.round(v * 10) / 10} kg`;
+  return `${parseFloat(v.toFixed(2))} ${unit}`;
 }
 
 /** Short suffix: "kg" or "lb". For inline labels next to inputs. */

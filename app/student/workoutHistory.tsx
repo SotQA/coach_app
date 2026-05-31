@@ -74,7 +74,8 @@ export default function WorkoutHistory() {
         style={{ flex: 1, backgroundColor: Colors.bg }}
         contentContainerStyle={{
           flexGrow: 1,
-          padding: Spacing.md,
+          paddingTop: insets.top + Spacing.md,
+          paddingHorizontal: Spacing.md,
           paddingBottom: insets.bottom + Spacing.lg,
         }}
       >
@@ -130,7 +131,7 @@ export default function WorkoutHistory() {
       <View
         style={{
           paddingHorizontal: Spacing.md,
-          paddingTop: Spacing.md,
+          paddingTop: insets.top + Spacing.md,
         }}
       >
           {/* Header: title + month label + settings shortcut */}

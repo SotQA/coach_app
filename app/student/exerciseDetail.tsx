@@ -14,12 +14,15 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { getExerciseById, getExerciseName } from "../../services/localExerciseService";
+import { useActiveWorkoutSession } from "../../context/ActiveWorkoutSessionContext";
+import { FLOATING_BAR_SCROLL_OFFSET } from "../../components/FloatingWorkoutBar";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 
 export default function ExerciseDetailScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { session } = useActiveWorkoutSession();
   const params = useLocalSearchParams<{
     exerciseName: string;
     exerciseDbId?: string;
@@ -59,7 +62,15 @@ export default function ExerciseDetailScreen() {
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={[styles.content, { paddingTop: insets.top + Spacing.md }]}
+      contentContainerStyle={[
+        styles.content,
+        {
+          paddingTop: insets.top + Spacing.md,
+          paddingBottom: session
+            ? insets.bottom + FLOATING_BAR_SCROLL_OFFSET + 8
+            : insets.bottom + 40,
+        },
+      ]}
     >
       {/* Header */}
       <View style={styles.headerContainer}>
@@ -261,7 +272,7 @@ function isYouTubeUrl(url: string): boolean {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.bg },
-  content: { paddingHorizontal: Spacing.md, paddingBottom: 40 },
+  content: { paddingHorizontal: Spacing.md },
   headerContainer: { marginBottom: Spacing.md },
   backBtn: { alignSelf: "flex-start", marginBottom: Spacing.xs, padding: 4, marginLeft: -4 },
   screenTitle: { fontSize: 22, fontWeight: "900", color: Colors.text, textAlign: "center" },

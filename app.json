@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "gym-coach-app",
+    "name": "Mentorix",
     "slug": "gym-coach-app",
     "version": "2.0.0",
     "orientation": "portrait",
@@ -12,7 +12,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.sergey.gymcoachapp",
-      "buildNumber": "2",
+      "buildNumber": "3",
       "backgroundColor": "#000000",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
@@ -68,7 +68,8 @@
           "color": "#D4FF44"
         }
       ],
-      "expo-web-browser"
+      "expo-web-browser",
+      "@react-native-google-signin/google-signin"
     ],
     "extra": {
       "googleWebClientId": "915193499412-nee8iipn919on2ir7eoj8e5a06mvov5p.apps.googleusercontent.com",

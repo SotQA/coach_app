@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, Keyboard, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { ExerciseGroup } from "../../components/workout/ExerciseGroup";
@@ -24,6 +24,7 @@ import { useSetInputRefs } from "../../hooks/useSetInputRefs";
 import { useUnits } from "../../context/UnitsContext";
 import { toKg, toUnit } from "../../utils/units";
 import type { WeightUnit } from "../../context/UnitsContext";
+import { normalizeExerciseName } from "../../utils/workoutMetrics";
 
 type ExerciseDraft = { sets: SetDraft[] };
 
@@ -51,24 +52,34 @@ function weightToDisplay(kg: number | null | undefined, unit: WeightUnit): strin
   if (kg == null || !Number.isFinite(kg)) return "";
   const display = toUnit(kg, unit);
   if (display == null) return "";
-  return unit === "lb" ? display.toFixed(1) : String(Math.round(display * 10) / 10);
+  // Preserve up to 2 decimal places, strip trailing zeros (36.25 → "36.25", 36.0 → "36").
+  return parseFloat(display.toFixed(2)).toString();
 }
 
 /** Build ActiveExerciseDraft[] from a loaded WorkoutPlan (fresh session).
- *  Drafts always store kg; prescribed weight is converted for display via weightToDisplay. */
-function buildExerciseDrafts(plan: WorkoutPlan, unit: WeightUnit): ActiveExerciseDraft[] {
-  return plan.exercises.map((ex) => ({
-    name: ex.name,
-    sets: Array.from({ length: Math.max(1, Number(ex.sets) || 1) }, () => ({
-      weight: weightToDisplay(
-        ex.weight != null && Number.isFinite(Number(ex.weight)) ? Number(ex.weight) : null,
-        unit
-      ),
-      reps: "",
-      rpe: ex.rpe != null && Number.isFinite(Number(ex.rpe)) ? String(ex.rpe) : "",
-      completed: false,
-    })),
-  }));
+ *  Drafts always store kg; weight pre-fill priority:
+ *  1. Best weight from prior sessions (bestWeightByExercise)
+ *  2. Prescribed weight from the plan
+ *  3. Empty string */
+function buildExerciseDrafts(
+  plan: WorkoutPlan,
+  unit: WeightUnit,
+  bestWeightByExercise?: Map<string, number>
+): ActiveExerciseDraft[] {
+  return plan.exercises.map((ex) => {
+    const prescribedKg =
+      ex.weight != null && Number.isFinite(Number(ex.weight)) ? Number(ex.weight) : null;
+    const bestKg = bestWeightByExercise?.get(normalizeExerciseName(ex.name)) ?? null;
+    return {
+      name: ex.name,
+      sets: Array.from({ length: Math.max(1, Number(ex.sets) || 1) }, () => ({
+        weight: weightToDisplay(bestKg ?? prescribedKg, unit),
+        reps: "",
+        rpe: ex.rpe != null && Number.isFinite(Number(ex.rpe)) ? String(ex.rpe) : "",
+        completed: false,
+      })),
+    };
+  });
 }
 
 /** Convert persisted ActiveExerciseDraft[] → local ExerciseDraft[] for UI.
@@ -88,6 +99,7 @@ export default function WorkoutExecution() {
   const router = useRouter();
   const { user: authUser } = useAuth();
   const activeWorkout = useActiveWorkoutSession();
+  const { hydrated } = activeWorkout;
   const elapsedSeconds = useElapsedSeconds();
   const { t } = useI18n();
   const authUserId = authUser?.id;
@@ -108,12 +120,14 @@ export default function WorkoutExecution() {
   const { data: execData, loading, error: loadError } = useWorkoutExecutionData(workoutPlanId);
   const plan = execData?.plan ?? null;
   const bestWeightByExercise = execData?.bestWeightByExercise ?? new Map<string, number>();
+  const lastResultsByExercise = execData?.lastResultsByExercise ?? new Map();
 
   const { finishWorkout, submitting, submitError } = useFinishWorkout();
   const refs = useSetInputRefs();
 
   const [drafts, setDrafts] = useState<ExerciseDraft[]>([]);
   const [sessionNotes, setSessionNotes] = useState("");
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
 
   const planRef = useRef<WorkoutPlan | null>(null);
   const draftsRef = useRef<ExerciseDraft[]>([]);
@@ -130,15 +144,19 @@ export default function WorkoutExecution() {
   }, [workoutPlanId, authUserId, refs]);
 
   // Session init: restore existing session or start a fresh one.
+  // We wait for `hydrated` before acting so that a cold-launch (app killed and
+  // reopened) doesn't race between AsyncStorage hydration and plan fetch —
+  // without this guard, the plan can load first, see session===null, and
+  // overwrite the stored session with a fresh empty one.
   useEffect(() => {
-    if (!plan || sessionInitRef.current) return;
+    if (!plan || !hydrated || sessionInitRef.current) return;
     sessionInitRef.current = true;
     const existing = activeWorkout.session;
     if (existing && existing.workoutPlanId === workoutPlanId) {
       setDrafts(toLocalDrafts(existing.exercises, unit));
       setSessionNotes(existing.notes ?? "");
     } else if (!existing) {
-      const exercises = buildExerciseDrafts(plan, unit);
+      const exercises = buildExerciseDrafts(plan, unit, bestWeightByExercise);
       activeWorkout.startSession({ studentId: authUserId!, workoutPlanId: plan.id, workoutName: plan.name, groupId, exercises, notes: "" });
       setDrafts(toLocalDrafts(exercises, unit));
       setSessionNotes("");
@@ -146,11 +164,19 @@ export default function WorkoutExecution() {
       router.replace({ pathname: "/student/workoutExecution", params: { workoutPlanId: existing.workoutPlanId } });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [plan?.id]);
+  }, [plan?.id, hydrated]);
 
   // Cleanup notes debounce on unmount.
   useEffect(() => {
     return () => { if (notesDebounceRef.current) clearTimeout(notesDebounceRef.current); };
+  }, []);
+
+  // Track keyboard height so the dismiss button sits just above the keyboard.
+  // keyboardWillShow/Hide fire before the animation on iOS → zero perceived delay.
+  useEffect(() => {
+    const show = Keyboard.addListener("keyboardWillShow", (e) => setKeyboardHeight(e.endCoordinates.height));
+    const hide = Keyboard.addListener("keyboardWillHide", () => setKeyboardHeight(0));
+    return () => { show.remove(); hide.remove(); };
   }, []);
 
   // Deep-link focus: when the screen is opened from a rest notification tap,
@@ -310,12 +336,12 @@ export default function WorkoutExecution() {
             exerciseIndex={exIdx}
             exercise={exercise}
             drafts={drafts[exIdx]?.sets ?? []}
+            lastResults={lastResultsByExercise.get(normalizeExerciseName(exercise.name))}
             disabled={submitting}
             onSetChange={(setIdx, patch) => updateSet(exIdx, setIdx, patch)}
             onMarkSetDone={(setIdx) => {
               const nextDone = !drafts[exIdx]?.sets[setIdx]?.done;
               updateSet(exIdx, setIdx, { done: nextDone });
-              if (nextDone) refs.focusNextSet(exIdx, setIdx);
             }}
             registerRef={(setIdx, field, node) => refs.registerRef(exIdx, setIdx, field, node)}
           />
@@ -325,6 +351,22 @@ export default function WorkoutExecution() {
           <Text style={S.errorText}>{submitError}</Text>
         ) : null}
       </KeyboardAwareScrollView>
+
+      {/* Keyboard dismiss button — sits just above the keyboard when open */}
+      {keyboardHeight > 0 ? (
+        <Pressable
+          onPress={() => { setKeyboardHeight(0); Keyboard.dismiss(); }}
+          hitSlop={8}
+          style={({ pressed }) => [
+            S.keyboardDismissBtn,
+            { bottom: keyboardHeight + 10, opacity: pressed ? 0.7 : 1 },
+          ]}
+          accessibilityLabel="Dismiss keyboard"
+          accessibilityRole="button"
+        >
+          <Ionicons name="keypad-outline" size={22} color={Colors.text} />
+        </Pressable>
+      ) : null}
 
       {/* Sticky footer */}
       <View style={S.footer}>
@@ -361,4 +403,5 @@ const S = StyleSheet.create({
   notesLabel:            { ...Typography.secondary, color: Colors.textMuted, marginBottom: 6 },
   notesInput:            { borderWidth: 1, borderColor: Colors.border, padding: 12, borderRadius: Radius.md, color: Colors.text, backgroundColor: Colors.surface, minHeight: 72 },
   footer:                { position: "absolute", left: 0, right: 0, bottom: 0, paddingHorizontal: Spacing.md, paddingBottom: Spacing.md, paddingTop: Spacing.sm, backgroundColor: Colors.bg, borderTopWidth: 1, borderTopColor: Colors.border },
+  keyboardDismissBtn:    { position: "absolute", right: Spacing.md, bottom: 0, width: 48, height: 48, borderRadius: Radius.lg, backgroundColor: Colors.surface, borderWidth: 1, borderColor: Colors.border, alignItems: "center", justifyContent: "center", zIndex: 100, shadowColor: "#000", shadowOpacity: 0.25, shadowRadius: 6, shadowOffset: { width: 0, height: 2 }, elevation: 6 },
 });
