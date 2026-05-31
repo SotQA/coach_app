@@ -127,7 +127,7 @@ export default function WorkoutExecution() {
 
   const [drafts, setDrafts] = useState<ExerciseDraft[]>([]);
   const [sessionNotes, setSessionNotes] = useState("");
-  const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
 
   const planRef = useRef<WorkoutPlan | null>(null);
   const draftsRef = useRef<ExerciseDraft[]>([]);
@@ -171,10 +171,10 @@ export default function WorkoutExecution() {
     return () => { if (notesDebounceRef.current) clearTimeout(notesDebounceRef.current); };
   }, []);
 
-  // Track keyboard visibility to show/hide the dismiss button.
+  // Track keyboard height so the dismiss button sits just above the keyboard.
   useEffect(() => {
-    const show = Keyboard.addListener("keyboardDidShow", () => setKeyboardVisible(true));
-    const hide = Keyboard.addListener("keyboardDidHide", () => setKeyboardVisible(false));
+    const show = Keyboard.addListener("keyboardDidShow", (e) => setKeyboardHeight(e.endCoordinates.height));
+    const hide = Keyboard.addListener("keyboardDidHide", () => setKeyboardHeight(0));
     return () => { show.remove(); hide.remove(); };
   }, []);
 
@@ -352,16 +352,19 @@ export default function WorkoutExecution() {
         ) : null}
       </KeyboardAwareScrollView>
 
-      {/* Keyboard dismiss button — appears when a text input is focused */}
-      {keyboardVisible ? (
+      {/* Keyboard dismiss button — sits just above the keyboard when open */}
+      {keyboardHeight > 0 ? (
         <Pressable
           onPress={() => Keyboard.dismiss()}
           hitSlop={8}
-          style={({ pressed }) => [S.keyboardDismissBtn, { opacity: pressed ? 0.75 : 1 }]}
+          style={({ pressed }) => [
+            S.keyboardDismissBtn,
+            { bottom: keyboardHeight + 10, opacity: pressed ? 0.7 : 1 },
+          ]}
           accessibilityLabel="Dismiss keyboard"
           accessibilityRole="button"
         >
-          <Ionicons name="chevron-down" size={20} color={Colors.text} />
+          <Ionicons name="keypad-outline" size={22} color={Colors.text} />
         </Pressable>
       ) : null}
 
@@ -400,5 +403,5 @@ const S = StyleSheet.create({
   notesLabel:            { ...Typography.secondary, color: Colors.textMuted, marginBottom: 6 },
   notesInput:            { borderWidth: 1, borderColor: Colors.border, padding: 12, borderRadius: Radius.md, color: Colors.text, backgroundColor: Colors.surface, minHeight: 72 },
   footer:                { position: "absolute", left: 0, right: 0, bottom: 0, paddingHorizontal: Spacing.md, paddingBottom: Spacing.md, paddingTop: Spacing.sm, backgroundColor: Colors.bg, borderTopWidth: 1, borderTopColor: Colors.border },
-  keyboardDismissBtn:    { position: "absolute", right: Spacing.md, bottom: 130, width: 44, height: 44, borderRadius: Radius.lg, backgroundColor: Colors.card, borderWidth: 1, borderColor: Colors.border, alignItems: "center", justifyContent: "center", zIndex: 50 },
+  keyboardDismissBtn:    { position: "absolute", right: Spacing.md, bottom: 0, width: 48, height: 48, borderRadius: Radius.lg, backgroundColor: Colors.surface, borderWidth: 1, borderColor: Colors.border, alignItems: "center", justifyContent: "center", zIndex: 100, shadowColor: "#000", shadowOpacity: 0.25, shadowRadius: 6, shadowOffset: { width: 0, height: 2 }, elevation: 6 },
 });
