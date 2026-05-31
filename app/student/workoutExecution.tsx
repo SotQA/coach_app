@@ -172,9 +172,10 @@ export default function WorkoutExecution() {
   }, []);
 
   // Track keyboard height so the dismiss button sits just above the keyboard.
+  // keyboardWillShow/Hide fire before the animation on iOS → zero perceived delay.
   useEffect(() => {
-    const show = Keyboard.addListener("keyboardDidShow", (e) => setKeyboardHeight(e.endCoordinates.height));
-    const hide = Keyboard.addListener("keyboardDidHide", () => setKeyboardHeight(0));
+    const show = Keyboard.addListener("keyboardWillShow", (e) => setKeyboardHeight(e.endCoordinates.height));
+    const hide = Keyboard.addListener("keyboardWillHide", () => setKeyboardHeight(0));
     return () => { show.remove(); hide.remove(); };
   }, []);
 
@@ -341,7 +342,6 @@ export default function WorkoutExecution() {
             onMarkSetDone={(setIdx) => {
               const nextDone = !drafts[exIdx]?.sets[setIdx]?.done;
               updateSet(exIdx, setIdx, { done: nextDone });
-              if (nextDone) refs.focusNextSet(exIdx, setIdx);
             }}
             registerRef={(setIdx, field, node) => refs.registerRef(exIdx, setIdx, field, node)}
           />
@@ -355,7 +355,7 @@ export default function WorkoutExecution() {
       {/* Keyboard dismiss button — sits just above the keyboard when open */}
       {keyboardHeight > 0 ? (
         <Pressable
-          onPress={() => Keyboard.dismiss()}
+          onPress={() => { setKeyboardHeight(0); Keyboard.dismiss(); }}
           hitSlop={8}
           style={({ pressed }) => [
             S.keyboardDismissBtn,
