@@ -46,9 +46,14 @@ export function FloatingWorkoutBar() {
     0
   );
 
-  // Sit above the tab bar (49 px) + safe-area bottom + 8 px breathing room.
+  // On tab screens the bar must clear the tab bar (49 px). On non-tab stack
+  // screens (exerciseDetail, workoutPlanDetail, etc.) there is no tab bar, so
+  // we only need the safe-area bottom + breathing room.
   const TAB_BAR_HEIGHT = 49;
-  const bottomOffset = insets.bottom + TAB_BAR_HEIGHT + 8;
+  const hasTabBar =
+    !pathname.includes("exerciseDetail") &&
+    !pathname.includes("workoutPlanDetail");
+  const bottomOffset = insets.bottom + (hasTabBar ? TAB_BAR_HEIGHT : 0) + 8;
 
   const isRestAlmostDone = restActive && !restPaused && restSecondsRemaining <= 5;
   const barColor = isRestAlmostDone ? Colors.danger : Colors.primary;

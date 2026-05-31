@@ -11,6 +11,8 @@ import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
 import { useUnits } from "../../context/UnitsContext";
+import { useActiveWorkoutSession } from "../../context/ActiveWorkoutSessionContext";
+import { FLOATING_BAR_SCROLL_OFFSET } from "../../components/FloatingWorkoutBar";
 import { buildLastResultsMapFromLogs, normalizeExerciseName, type LastSetResult } from "../../utils/workoutMetrics";
 import { toUnit } from "../../utils/units";
 
@@ -19,6 +21,7 @@ export default function WorkoutPlanDetail() {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const { unit } = useUnits();
+  const { session } = useActiveWorkoutSession();
   const params = useLocalSearchParams<{ workoutPlanId?: string }>();
   const planId = String(params.workoutPlanId ?? "").trim();
   const [plan, setPlan] = useState<WorkoutPlan | null>(null);
@@ -83,7 +86,9 @@ export default function WorkoutPlanDetail() {
       <ScrollView
         contentContainerStyle={{
           padding: Spacing.md,
-          paddingBottom: insets.bottom + Spacing.xl,
+          paddingBottom: session
+            ? insets.bottom + FLOATING_BAR_SCROLL_OFFSET + 8
+            : insets.bottom + Spacing.xl,
           backgroundColor: Colors.bg,
         }}
       >
