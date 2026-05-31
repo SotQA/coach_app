@@ -1,25 +1,16 @@
-import { Platform, View } from "react-native";
-import { Tabs, useRouter } from "expo-router";
+import { View } from "react-native";
+import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Colors } from "../../../theme/colors";
 import { FontSizes } from "../../../theme/typography";
 import { useI18n } from "../../../context/I18nContext";
 
+const FAB_SIZE = 56;
+
 export default function CoachTabsLayout() {
-  const router = useRouter();
   const insets = useSafeAreaInsets();
   const { t } = useI18n();
-
-  const fabShadow =
-    Platform.OS === "ios"
-      ? {
-          shadowColor: Colors.primary,
-          shadowOffset: { width: 0, height: 6 },
-          shadowOpacity: 0.45,
-          shadowRadius: 10,
-        }
-      : { elevation: 10 };
 
   return (
     <Tabs
@@ -63,10 +54,7 @@ export default function CoachTabsLayout() {
       <Tabs.Screen
         name="myTraining"
         options={{
-          title: t("nav_myTraining"),
-          tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons name={focused ? "barbell" : "barbell-outline"} color={color} size={size} />
-          ),
+          href: null,
         }}
       />
       <Tabs.Screen
@@ -74,27 +62,15 @@ export default function CoachTabsLayout() {
         listeners={{
           tabPress: (e) => {
             e.preventDefault();
-            router.push("/coach/createStudent");
           },
         }}
         options={{
-          title: t("nav_add"),
+          title: "",
           tabBarLabel: () => null,
           tabBarIcon: () => (
-            <View
-              style={{
-                marginTop: -22,
-                width: 56,
-                height: 56,
-                borderRadius: 28,
-                backgroundColor: Colors.primary,
-                alignItems: "center",
-                justifyContent: "center",
-                ...fabShadow,
-              }}
-            >
-              <Ionicons name="add" size={30} color={Colors.onPrimary} />
-            </View>
+            // Invisible spacer — the real FAB is rendered as an absolute overlay
+            // in app/coach/_layout.tsx via CoachSpeedDial.
+            <View style={{ width: FAB_SIZE, height: FAB_SIZE }} />
           ),
         }}
       />

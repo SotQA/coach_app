@@ -2,6 +2,7 @@ import { Redirect, Stack, useRouter } from "expo-router";
 import { Pressable, View } from "react-native";
 import { useAuth } from "../../context/AuthContext";
 import { FloatingWorkoutBar } from "../../components/FloatingWorkoutBar";
+import { CoachSpeedDial } from "../../components/CoachSpeedDial";
 import { Colors } from "../../theme/colors";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -66,6 +67,7 @@ export default function CoachLayout() {
         <Stack.Screen name="personalProgress" options={{ title: "My Progress" }} />
       </Stack>
       <FloatingWorkoutBar />
+      <CoachSpeedDial />
     </View>
   );
 }
