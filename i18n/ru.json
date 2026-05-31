@@ -7,6 +7,7 @@
   "nav_history": "История",
   "nav_profile": "Профиль",
   "nav_add": "Добавить",
+  "nav_myTraining": "Мои тренировки",
 
   "ok": "ОК",
   "cancel": "Отмена",
@@ -62,6 +63,8 @@
   "roleCoachDesc": "Управляйте учениками, создавайте планы, отслеживайте прогресс",
   "roleStudent": "Ученик",
   "roleStudentDesc": "Выполняйте тренировки, записывайте сессии, следите за рекордами",
+  "roleAthlete": "Атлет",
+  "roleAthleteDesc": "Тренируйтесь самостоятельно, создавайте планы, отслеживайте прогресс",
   "creatingAccount": "Создание аккаунта…",
   "createAccountBtn": "Создать аккаунт",
   "alreadyHaveAccount": "Уже есть аккаунт?",
@@ -74,7 +77,7 @@
   "errorFirstNameRequired": "Введите имя.",
   "errorLastNameRequired": "Введите фамилию.",
   "errorDobRequired": "Укажите дату рождения.",
-  "errorSelectRole": "Выберите Тренер или Ученик.",
+  "errorSelectRole": "Выберите роль.",
   "errorCompleteSteps": "Заполните все шаги.",
 
   "settings": "Настройки",

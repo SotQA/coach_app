@@ -7,6 +7,7 @@
   "nav_history": "History",
   "nav_profile": "Profile",
   "nav_add": "Add",
+  "nav_myTraining": "My Training",
 
   "ok": "OK",
   "cancel": "Cancel",
@@ -62,6 +63,8 @@
   "roleCoachDesc": "Manage students, build plans, track progress",
   "roleStudent": "Student",
   "roleStudentDesc": "Follow workouts, log sessions, track PRs",
+  "roleAthlete": "Athlete",
+  "roleAthleteDesc": "Train on your own, build plans, track progress",
   "creatingAccount": "Creating your account…",
   "createAccountBtn": "Create Account",
   "alreadyHaveAccount": "Already have an account?",
@@ -74,7 +77,7 @@
   "errorFirstNameRequired": "First name is required.",
   "errorLastNameRequired": "Last name is required.",
   "errorDobRequired": "Date of birth is required.",
-  "errorSelectRole": "Please select Coach or Student.",
+  "errorSelectRole": "Please select a role.",
   "errorCompleteSteps": "Please complete all steps.",
 
   "settings": "Settings",

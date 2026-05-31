@@ -217,6 +217,15 @@ export default function GoogleRoleScreen() {
           submitting={submitting}
           onSelect={(v) => { setRole(v); setError(null); }}
         />
+        <RoleCard
+          value="athlete"
+          title={t("roleAthlete")}
+          subtitle={t("roleAthleteDesc")}
+          icon="fitness-outline"
+          selected={role === "athlete"}
+          submitting={submitting}
+          onSelect={(v) => { setRole(v); setError(null); }}
+        />
 
         <PrimaryButton
           title={submitting ? "" : t("continue")}

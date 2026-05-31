@@ -20,16 +20,12 @@ function HeaderBackButton() {
   );
 }
 
-export default function CoachLayout() {
+export default function AthleteLayout() {
   const { user } = useAuth();
 
-  if (!user) {
-    return <Redirect href="/login" />;
-  }
-
-  if (user.role !== "coach") {
-    return <Redirect href="/student/workouts" />;
-  }
+  if (!user) return <Redirect href="/login" />;
+  if (user.role === "coach") return <Redirect href="/coach/dashboard" />;
+  if (user.role === "student") return <Redirect href="/student/workouts" />;
 
   return (
     <View style={{ flex: 1 }}>
@@ -41,32 +37,18 @@ export default function CoachLayout() {
           headerTitleStyle: { color: Colors.text },
           headerShadowVisible: false,
           headerLeft: ({ canGoBack }) => canGoBack ? <HeaderBackButton /> : null,
-          // Prevent white flash during iOS back-swipe / transitions.
           contentStyle: { backgroundColor: Colors.bg },
         }}
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false, title: "Back" }} />
-        <Stack.Screen name="studentDetails" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="createStudent"
-          options={{
-            title: "Create Student",
-            headerLeft: () => null,
-          }}
-        />
-        <Stack.Screen name="selectTrainingGroup" options={{ title: "Select Training Group" }} />
-        <Stack.Screen name="createTrainingGroup" options={{ title: "Create Training Group" }} />
-        <Stack.Screen name="createWorkoutPlan" options={{ title: "Create Workout Plan" }} />
-        <Stack.Screen name="workout" options={{ title: "Workout" }} />
-        <Stack.Screen name="editWorkout" options={{ title: "Edit Workout" }} />
-        <Stack.Screen name="workoutLogFeedback" options={{ title: "Workout feedback" }} />
-        <Stack.Screen name="assignedWorkouts" options={{ title: "Assigned workouts" }} />
         <Stack.Screen name="workoutExecution" options={{ headerShown: false }} />
-        <Stack.Screen name="createPersonalPlan" options={{ title: "Create Plan" }} />
-        <Stack.Screen name="personalProgress" options={{ title: "My Progress" }} />
+        <Stack.Screen name="createPlan" options={{ title: "Create Plan" }} />
+        <Stack.Screen name="workoutPlanDetail" options={{ title: "Workout" }} />
+        <Stack.Screen name="exerciseDetail" options={{ headerShown: false }} />
+        <Stack.Screen name="workoutHistory" options={{ title: "History" }} />
+        <Stack.Screen name="progress" options={{ title: "Progress" }} />
       </Stack>
       <FloatingWorkoutBar />
     </View>
   );
 }
-

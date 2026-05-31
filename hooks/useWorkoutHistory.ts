@@ -102,8 +102,8 @@ export function useWorkoutHistory(
 
   // ── Data load ─────────────────────────────────────────────────────────
   const fetcher = useCallback(async (): Promise<WorkoutLog[]> => {
-    if (!user || user.role !== "student") {
-      throw new Error("You must be logged in as a student.");
+    if (!user || !["student", "coach", "athlete"].includes(user.role)) {
+      throw new Error("You must be logged in.");
     }
     const history = await workoutService.getWorkoutHistory(user.id);
     return Array.isArray(history) ? history : [];

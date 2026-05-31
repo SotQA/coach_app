@@ -30,8 +30,8 @@ export function useWorkoutExecutionData(
 
   const fetcher = useCallback(async (): Promise<WorkoutExecutionData | null> => {
     if (!planId) return null;
-    if (!user || user.role !== "student") {
-      throw new Error("You must be logged in as a student.");
+    if (!user || !["student", "coach", "athlete"].includes(user.role)) {
+      throw new Error("You must be logged in.");
     }
 
     const [planResult, historyResult] = await Promise.allSettled([

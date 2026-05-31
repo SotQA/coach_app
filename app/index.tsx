@@ -23,8 +23,13 @@ export default function Home() {
   }
 
   if (user) {
-    const href = user.role === "coach" ? "/coach/dashboard" : "/student/workouts";
-    return <Redirect href={href} />;
+    const href =
+      user.role === "coach"
+        ? "/coach/dashboard"
+        : user.role === "athlete"
+        ? "/athlete/workouts"
+        : "/student/workouts";
+    return <Redirect href={href as any} />;
   }
 
   return <Redirect href="/login" />;

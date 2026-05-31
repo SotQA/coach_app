@@ -459,6 +459,18 @@ export default function Signup() {
                     setError(null);
                   }}
                 />
+                <SignupRoleCard
+                  value="athlete"
+                  title={t("roleAthlete")}
+                  subtitle={t("roleAthleteDesc")}
+                  icon="fitness-outline"
+                  selected={role === "athlete"}
+                  submitting={submitting}
+                  onSelect={(v) => {
+                    setRole(v);
+                    setError(null);
+                  }}
+                />
                 <PrimaryButton title={t("continue")} onPress={goNext} disabled={submitting} />
               </>
             ) : null}

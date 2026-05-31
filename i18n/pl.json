@@ -7,6 +7,7 @@
   "nav_history": "Historia",
   "nav_profile": "Profil",
   "nav_add": "Dodaj",
+  "nav_myTraining": "Mój trening",
 
   "ok": "OK",
   "cancel": "Anuluj",
@@ -62,6 +63,8 @@
   "roleCoachDesc": "Zarządzaj podopiecznymi, twórz plany, śledź postępy",
   "roleStudent": "Uczeń",
   "roleStudentDesc": "Wykonuj treningi, zapisuj sesje, śledź rekordy",
+  "roleAthlete": "Atleta",
+  "roleAthleteDesc": "Trenuj samodzielnie, twórz plany, śledź postępy",
   "creatingAccount": "Tworzenie konta…",
   "createAccountBtn": "Utwórz konto",
   "alreadyHaveAccount": "Masz już konto?",
@@ -74,7 +77,7 @@
   "errorFirstNameRequired": "Imię jest wymagane.",
   "errorLastNameRequired": "Nazwisko jest wymagane.",
   "errorDobRequired": "Data urodzenia jest wymagana.",
-  "errorSelectRole": "Wybierz Trener lub Uczeń.",
+  "errorSelectRole": "Wybierz rolę.",
   "errorCompleteSteps": "Wypełnij wszystkie kroki.",
 
   "settings": "Ustawienia",

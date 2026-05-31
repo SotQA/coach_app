@@ -61,6 +61,15 @@ export default function CoachTabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="myTraining"
+        options={{
+          title: t("nav_myTraining"),
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? "barbell" : "barbell-outline"} color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="fab"
         listeners={{
           tabPress: (e) => {
