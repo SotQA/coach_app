@@ -27,9 +27,9 @@ export default function CoachLayout() {
     return <Redirect href="/login" />;
   }
 
-  if (user.role !== "coach") {
-    return <Redirect href="/student/workouts" />;
-  }
+  if (user.role === "student") return <Redirect href="/student/workouts" />;
+  if (user.role === "athlete") return <Redirect href={"/athlete/workouts" as any} />;
+  if (user.role !== "coach") return <Redirect href="/login" />;
 
   return (
     <View style={{ flex: 1 }}>
