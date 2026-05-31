@@ -3,6 +3,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -21,6 +22,21 @@ import type { AppUser, UserRole, Sex } from "../types/User";
 import { logger } from "../utils/logger";
 import { authService } from "../services/authService";
 
+export class NeedsOnboardingError extends Error {
+  constructor() {
+    super("needs-onboarding");
+    this.name = "NeedsOnboardingError";
+  }
+}
+
+type PendingGoogleUser = {
+  uid: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  photoURL: string | null;
+};
+
 type ProfilePatch = {
   firstName?: string;
   lastName?: string;
@@ -31,8 +47,11 @@ type ProfilePatch = {
 type AuthContextValue = {
   user: AppUser | null;
   loading: boolean;
+  pendingGoogleUser: PendingGoogleUser | null;
   login: (email: string, password: string) => Promise<AppUser>;
   loginWithGoogleIdToken: (payload: { idToken: string }) => Promise<AppUser>;
+  completeGoogleSignup: (role: UserRole) => Promise<void>;
+  cancelGoogleSignup: () => Promise<void>;
   signup: (
     email: string,
     password: string,
@@ -94,6 +113,9 @@ const splitDisplayName = (displayName: string | null | undefined) => {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [pendingGoogleUser, setPendingGoogleUser] = useState<PendingGoogleUser | null>(null);
+  // Ref so the onAuthStateChanged closure can read the latest value without re-subscribing.
+  const pendingGoogleOnboardingRef = useRef(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -109,6 +131,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const snap = await getDoc(docRef);
 
         if (!snap.exists()) {
+          if (pendingGoogleOnboardingRef.current) {
+            // New Google user mid-onboarding — Firestore doc not yet created, that's expected.
+            setLoading(false);
+            return;
+          }
           await signOut(auth);
           setUser(null);
           return;
@@ -155,48 +182,90 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loginWithGoogleIdToken = async ({ idToken }: { idToken: string }): Promise<AppUser> => {
     const token = (idToken ?? "").trim();
-    if (!token) {
-      throw new Error("Missing Google ID token.");
+    if (!token) throw new Error("Missing Google ID token.");
+
+    // Flag must be set before signInWithCredential so onAuthStateChanged
+    // doesn't sign the user out when it fires and finds no Firestore doc yet.
+    pendingGoogleOnboardingRef.current = true;
+
+    try {
+      const credential = GoogleAuthProvider.credential(token);
+      const result = await signInWithCredential(auth, credential);
+      const firebaseUser = result.user;
+
+      const userRef = doc(db, USERS_COLLECTION, firebaseUser.uid);
+      const snap = await getDoc(userRef);
+
+      if (!snap.exists()) {
+        // New user — store their Google info and signal the role picker is needed.
+        const { firstName, lastName } = splitDisplayName(firebaseUser.displayName);
+        setPendingGoogleUser({
+          uid: firebaseUser.uid,
+          email: (firebaseUser.email ?? "").trim().toLowerCase(),
+          firstName,
+          lastName,
+          photoURL: firebaseUser.photoURL,
+        });
+        throw new NeedsOnboardingError();
+      }
+
+      // Existing user — clear flag and return AppUser normally.
+      pendingGoogleOnboardingRef.current = false;
+      const data = snap.data() as any;
+      const appUser = mapToAppUser(firebaseUser, data);
+      if (!appUser) {
+        await signOut(auth);
+        throw new Error("User account has an invalid role. Please contact support.");
+      }
+      return appUser;
+    } catch (e) {
+      if (!(e instanceof NeedsOnboardingError)) {
+        pendingGoogleOnboardingRef.current = false;
+        setPendingGoogleUser(null);
+        await signOut(auth).catch(() => {});
+      }
+      throw e;
     }
+  };
 
-    const credential = GoogleAuthProvider.credential(token);
-    const result = await signInWithCredential(auth, credential);
-    const firebaseUser = result.user;
+  const completeGoogleSignup = async (role: UserRole): Promise<void> => {
+    const pending = pendingGoogleUser;
+    const currentUser = auth.currentUser;
+    if (!pending || !currentUser) throw new Error("No pending Google sign-in to complete.");
 
-    const userRef = doc(db, USERS_COLLECTION, firebaseUser.uid);
-    const snap = await getDoc(userRef);
+    const createdAt = new Date().toISOString();
+    await setDoc(doc(db, USERS_COLLECTION, pending.uid), {
+      email: pending.email,
+      role,
+      firstName: pending.firstName,
+      lastName: pending.lastName,
+      dateOfBirth: "",
+      sex: "other",
+      photoURL: pending.photoURL ?? null,
+      createdAt,
+      authProvider: "google",
+    });
 
-    if (!snap.exists()) {
-      // New user: create a minimal profile doc so role-based routing works.
-      // Default role = student (can be extended later with a role-picker).
-      const normalizedEmail = (firebaseUser.email ?? "").trim().toLowerCase();
-      const { firstName, lastName } = splitDisplayName(firebaseUser.displayName);
-      const createdAt = new Date().toISOString();
+    pendingGoogleOnboardingRef.current = false;
+    setPendingGoogleUser(null);
 
-      await setDoc(userRef, {
-        email: normalizedEmail,
-        role: "student",
-        firstName,
-        lastName,
-        dateOfBirth: "",
-        sex: "other",
-        createdAt,
-        authProvider: "google",
-      });
-    }
+    const appUser = mapToAppUser(currentUser, {
+      email: pending.email,
+      role,
+      firstName: pending.firstName,
+      lastName: pending.lastName,
+      dateOfBirth: "",
+      sex: "other",
+      photoURL: pending.photoURL ?? null,
+    });
+    if (!appUser) throw new Error("Failed to create user profile.");
+    setUser(appUser);
+  };
 
-    const latest = await getDoc(userRef);
-    if (!latest.exists()) {
-      throw new Error("User profile not found after Google sign-in.");
-    }
-
-    const data = latest.data() as any;
-    const appUser = mapToAppUser(firebaseUser, data);
-    if (!appUser) {
-      await signOut(auth);
-      throw new Error("User account has an invalid role. Please contact support.");
-    }
-    return appUser;
+  const cancelGoogleSignup = async (): Promise<void> => {
+    pendingGoogleOnboardingRef.current = false;
+    setPendingGoogleUser(null);
+    await signOut(auth);
   };
 
   const signup = async (
@@ -270,7 +339,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, loginWithGoogleIdToken, signup, logout, updateProfile, refreshUser }}>
+    <AuthContext.Provider value={{ user, loading, pendingGoogleUser, login, loginWithGoogleIdToken, completeGoogleSignup, cancelGoogleSignup, signup, logout, updateProfile, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
