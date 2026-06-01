@@ -1,4 +1,4 @@
-import { useState, useEffect, type ComponentProps, type ReactNode } from "react";
+import { useState, useEffect, useRef, type ComponentProps, type ReactNode } from "react";
 import {
   View,
   Text,
@@ -79,7 +79,7 @@ function TouchScale({
 
 export default function Login() {
   const router = useRouter();
-  const { user, loading: authLoading, login, loginWithGoogleIdToken } = useAuth();
+  const { user, loading: authLoading, login, loginWithGoogleIdToken, pendingGoogleUser } = useAuth();
   const { t } = useI18n();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -101,6 +101,20 @@ export default function Login() {
   }, [googleWebClientId, googleIosClientId]);
 
   const googleButtonEnabled = Platform.OS !== "web" && !!googleWebClientId && !!GoogleSignin;
+
+  // Navigate to the role picker only after pendingGoogleUser is committed to context state.
+  // Navigating inside the catch block races the setState and can arrive before the state
+  // update is applied, causing google-role.tsx to see null and redirect back to login.
+  const didPushGoogleRole = useRef(false);
+  useEffect(() => {
+    if (pendingGoogleUser && !didPushGoogleRole.current) {
+      didPushGoogleRole.current = true;
+      router.push("/google-role");
+    }
+    if (!pendingGoogleUser) {
+      didPushGoogleRole.current = false;
+    }
+  }, [pendingGoogleUser, router]);
 
   const handleLogin = async () => {
     setError(null);
@@ -131,7 +145,7 @@ export default function Login() {
     } catch (e: any) {
       if (e.code === (statusCodes as any).SIGN_IN_CANCELLED) return;
       if (e instanceof NeedsOnboardingError) {
-        router.push("/google-role");
+        // Navigation is handled by the useEffect watching pendingGoogleUser.
         return;
       }
       console.error("[login] google sign-in error", e);

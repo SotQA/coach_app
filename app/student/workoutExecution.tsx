@@ -161,7 +161,13 @@ export default function WorkoutExecution() {
       setDrafts(toLocalDrafts(exercises, unit));
       setSessionNotes("");
     } else {
-      router.replace({ pathname: "/student/workoutExecution", params: { workoutPlanId: existing.workoutPlanId } });
+      const execPath =
+        authUser?.role === "coach"
+          ? "/coach/workoutExecution"
+          : authUser?.role === "athlete"
+          ? "/athlete/workoutExecution"
+          : "/student/workoutExecution";
+      router.replace({ pathname: execPath as any, params: { workoutPlanId: existing.workoutPlanId } });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [plan?.id, hydrated]);
