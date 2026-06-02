@@ -178,6 +178,19 @@ export default function CoachDashboard() {
     }
   }, [user?.id, user?.role]);
 
+  const mostRecentPlan = personalPlans[0] ?? null;
+  const lastMsByPlanId = useMemo(() => {
+    const map: Record<string, number> = {};
+    for (const log of personalLogs) {
+      const id = log.workoutPlanId;
+      if (!id) continue;
+      const ms = toMs(log.completedAt ?? log.date);
+      if (!ms) continue;
+      map[id] = Math.max(map[id] ?? 0, ms);
+    }
+    return map;
+  }, [personalLogs]);
+
   if (loading) {
     return (
       <ScreenLayout>
@@ -215,19 +228,6 @@ export default function CoachDashboard() {
 
   const name = coachDisplayName(user);
   const ini = initials(user);
-
-  const mostRecentPlan = personalPlans[0] ?? null;
-  const lastMsByPlanId = useMemo(() => {
-    const map: Record<string, number> = {};
-    for (const log of personalLogs) {
-      const id = log.workoutPlanId;
-      if (!id) continue;
-      const ms = toMs(log.completedAt ?? log.date);
-      if (!ms) continue;
-      map[id] = Math.max(map[id] ?? 0, ms);
-    }
-    return map;
-  }, [personalLogs]);
 
   return (
     <ScreenLayout>
