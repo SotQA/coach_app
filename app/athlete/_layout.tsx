@@ -20,16 +20,12 @@ function HeaderBackButton() {
   );
 }
 
-export default function StudentLayout() {
+export default function AthleteLayout() {
   const { user } = useAuth();
 
-  if (!user) {
-    return <Redirect href="/login" />;
-  }
-
+  if (!user) return <Redirect href="/login" />;
   if (user.role === "coach") return <Redirect href="/coach/dashboard" />;
-  if (user.role === "athlete") return <Redirect href={"/athlete/workouts" as any} />;
-  if (user.role !== "student") return <Redirect href="/login" />;
+  if (user.role === "student") return <Redirect href="/student/workouts" />;
 
   return (
     <View style={{ flex: 1 }}>
@@ -45,18 +41,14 @@ export default function StudentLayout() {
         }}
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false, title: "Back" }} />
-        <Stack.Screen name="today" options={{ title: "Today" }} />
-        <Stack.Screen name="workout" options={{ title: "Workout" }} />
         <Stack.Screen name="workoutExecution" options={{ headerShown: false }} />
+        <Stack.Screen name="createPlan" options={{ title: "Create Plan" }} />
         <Stack.Screen name="workoutPlanDetail" options={{ title: "Workout" }} />
-        <Stack.Screen name="exerciseDetails" options={{ title: "Exercise Details" }} />
         <Stack.Screen name="exerciseDetail" options={{ headerShown: false }} />
         <Stack.Screen name="workoutHistory" options={{ title: "History" }} />
         <Stack.Screen name="progress" options={{ title: "Progress" }} />
       </Stack>
-      {/* Floats above tab bar on all student screens except workoutExecution */}
       <FloatingWorkoutBar />
     </View>
   );
 }
-

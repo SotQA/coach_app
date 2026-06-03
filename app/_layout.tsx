@@ -24,7 +24,7 @@ import ErrorBoundary from "../components/ErrorBoundary";
 configureForegroundHandler();
 
 function RootNavigator() {
-  const { loading } = useAuth();
+  const { loading, user } = useAuth();
   const { session } = useActiveWorkoutSession();
   const router = useRouter();
 
@@ -66,6 +66,16 @@ function RootNavigator() {
 
     let timer: ReturnType<typeof setTimeout>;
 
+    const role = user?.role;
+    const workoutsPath =
+      role === "coach" ? "/coach/myTraining" : role === "athlete" ? "/athlete/workouts" : "/student/workouts";
+    const execPath =
+      role === "coach"
+        ? "/coach/workoutExecution"
+        : role === "athlete"
+        ? "/athlete/workoutExecution"
+        : "/student/workoutExecution";
+
     if (session.workoutPlanId !== notifPlanId) {
       // Stale notification (workout already ended) — navigating to
       // workoutExecution would start a phantom session.
@@ -74,12 +84,12 @@ function RootNavigator() {
         activePlanId: session.workoutPlanId,
       });
       timer = setTimeout(() => {
-        router.push({ pathname: "/student/workouts" });
+        router.push({ pathname: workoutsPath as any });
       }, 150);
     } else {
       timer = setTimeout(() => {
         router.push({
-          pathname: "/student/workoutExecution",
+          pathname: execPath as any,
           params: {
             workoutPlanId: notifPlanId,
             nextExerciseIndex: String(data?.nextExerciseIndex ?? -1),
@@ -98,6 +108,7 @@ function RootNavigator() {
   }, [
     lastResponse?.notification.request.identifier,
     session?.workoutPlanId,
+    user?.role,
   ]);
 
   if (loading) {
@@ -121,6 +132,7 @@ function RootNavigator() {
       <Stack.Screen name="(auth)" />
       <Stack.Screen name="coach" />
       <Stack.Screen name="student" />
+      <Stack.Screen name="athlete" />
     </Stack>
   );
 }

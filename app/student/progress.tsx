@@ -15,7 +15,7 @@ export default function StudentProgressScreen() {
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    if (!user || user.role !== "student") return;
+    if (!user || !["student", "athlete"].includes(user.role)) return;
     setError(null);
     const history = await workoutService.getWorkoutHistory(user.id);
     setLogs(Array.isArray(history) ? history : []);
@@ -26,8 +26,8 @@ export default function StudentProgressScreen() {
     (async () => {
       setLoading(true);
       try {
-        if (!user || user.role !== "student") {
-          if (!cancelled) setError("You must be logged in as a student.");
+        if (!user || !["student", "athlete"].includes(user.role)) {
+          if (!cancelled) setError("You must be logged in.");
           return;
         }
         await load();
@@ -66,7 +66,7 @@ export default function StudentProgressScreen() {
     );
   }
 
-  if (error || !user || user.role !== "student") {
+  if (error || !user || !["student", "athlete"].includes(user.role)) {
     return (
       <View style={{ flex: 1, justifyContent: "center", padding: Spacing.md, backgroundColor: Colors.bg }}>
         <Text style={{ color: Colors.danger }}>{error ?? "Student access only."}</Text>

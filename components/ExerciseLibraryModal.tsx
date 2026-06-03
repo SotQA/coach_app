@@ -72,16 +72,17 @@ function toTitleCase(str: string): string {
 type LocalCardProps = {
   item: LocalExercise;
   onAdd: () => void;
+  isSelected?: boolean;
 };
 
-function LocalExerciseCard({ item, onAdd }: LocalCardProps) {
+function LocalExerciseCard({ item, onAdd, isSelected = false }: LocalCardProps) {
   return (
     <View
       style={{
-        backgroundColor: Colors.card,
+        backgroundColor: isSelected ? Colors.primaryGlow : Colors.card,
         borderRadius: Radius.lg,
-        borderWidth: 1,
-        borderColor: Colors.border,
+        borderWidth: isSelected ? 2 : 1,
+        borderColor: isSelected ? Colors.primary : Colors.border,
         marginBottom: Spacing.sm,
         flexDirection: "row",
         alignItems: "center",
@@ -142,21 +143,21 @@ function LocalExerciseCard({ item, onAdd }: LocalCardProps) {
         </View>
       </View>
 
-      {/* Add button */}
+      {/* Add / selected toggle button */}
       <Pressable
         onPress={onAdd}
         style={({ pressed }) => ({
           width: 36,
           height: 36,
           borderRadius: 18,
-          backgroundColor: Colors.primary,
+          backgroundColor: isSelected ? Colors.success : Colors.primary,
           alignItems: "center",
           justifyContent: "center",
           opacity: pressed ? 0.7 : 1,
           flexShrink: 0,
         })}
       >
-        <Ionicons name="add" size={22} color={Colors.onPrimary} />
+        <Ionicons name={isSelected ? "checkmark" : "add"} size={22} color={Colors.onPrimary} />
       </Pressable>
     </View>
   );
@@ -197,6 +198,23 @@ export function ExerciseLibraryModal({
   const [createCategory, setCreateCategory] = useState<string>("Chest");
   const [createEquipment, setCreateEquipment] = useState("");
   const [creating, setCreating] = useState(false);
+
+  // ---- Multi-select pending state ----
+  type PendingPayload = { name: string; category?: string; equipment?: string; exerciseDbId?: string };
+  const [pendingMap, setPendingMap] = useState<Map<string, PendingPayload>>(new Map());
+
+  const togglePending = useCallback((id: string, payload: PendingPayload) => {
+    setPendingMap((prev) => {
+      const next = new Map(prev);
+      next.has(id) ? next.delete(id) : next.set(id, payload);
+      return next;
+    });
+  }, []);
+
+  const handleConfirm = useCallback(() => {
+    pendingMap.forEach((payload) => onAddExercise(payload));
+    onClose();
+  }, [pendingMap, onAddExercise, onClose]);
 
   // ---------------------------------------------------------------------------
   // Local exercise filter options (derived synchronously from local JSON)
@@ -282,6 +300,9 @@ export function ExerciseLibraryModal({
     setCreateEquipment("");
     setCreating(false);
 
+    // Reset multi-select
+    setPendingMap(new Map());
+
     setLoading(true);
     exerciseTemplateService
       .listForCoach(coachId, 600)
@@ -304,12 +325,8 @@ export function ExerciseLibraryModal({
   // ---------------------------------------------------------------------------
 
   const handleAddLocal = useCallback((exercise: LocalExercise) => {
-    onAddExercise({
-      name: exercise.name,
-      exerciseDbId: exercise.id,
-    });
-    onClose();
-  }, [onAddExercise, onClose]);
+    togglePending(exercise.id, { name: exercise.name, exerciseDbId: exercise.id });
+  }, [togglePending]);
 
   // ---------------------------------------------------------------------------
   // Computed (Library tab)
@@ -474,7 +491,7 @@ export function ExerciseLibraryModal({
             data={displayedExercises}
             keyExtractor={(item) => item.id}
             keyboardShouldPersistTaps="handled"
-            contentContainerStyle={{ padding: Spacing.md, paddingBottom: 40 }}
+            contentContainerStyle={{ padding: Spacing.md, paddingBottom: pendingMap.size > 0 ? 112 : 40 }}
             ListFooterComponent={
               displayLimit < filteredExercises.length ? (
                 <Pressable
@@ -644,6 +661,7 @@ export function ExerciseLibraryModal({
               <LocalExerciseCard
                 item={item}
                 onAdd={() => handleAddLocal(item)}
+                isSelected={pendingMap.has(item.id)}
               />
             )}
             ListEmptyComponent={
@@ -696,7 +714,7 @@ export function ExerciseLibraryModal({
             data={filteredTemplates}
             keyExtractor={(item) => item.id}
             keyboardShouldPersistTaps="handled"
-            contentContainerStyle={{ padding: Spacing.md, paddingBottom: 40 }}
+            contentContainerStyle={{ padding: Spacing.md, paddingBottom: pendingMap.size > 0 ? 112 : 40 }}
             ListHeaderComponent={
               loading ? (
                 <View style={{ paddingVertical: Spacing.lg }}>
@@ -808,27 +826,18 @@ export function ExerciseLibraryModal({
                           <Pressable
                             key={`recent-${t.id}`}
                             onPress={() => {
-                              onAddExercise({
+                              togglePending(t.id, {
                                 name: t.name,
                                 category: t.category,
                                 equipment: t.equipment,
                               });
-                              exerciseTemplateService
-                                .recordUsage({
-                                  coachId,
-                                  name: t.name,
-                                  category: t.category,
-                                  equipment: t.equipment,
-                                })
-                                .catch(() => {});
-                              onClose();
                             }}
                             style={({ pressed }) => ({
                               padding: Spacing.md,
                               borderRadius: Radius.lg,
-                              backgroundColor: Colors.card,
-                              borderWidth: 1,
-                              borderColor: Colors.border,
+                              backgroundColor: pendingMap.has(t.id) ? Colors.primaryGlow : Colors.card,
+                              borderWidth: pendingMap.has(t.id) ? 2 : 1,
+                              borderColor: pendingMap.has(t.id) ? Colors.primary : Colors.border,
                               opacity: pressed ? 0.92 : 1,
                             })}
                           >
@@ -1040,11 +1049,11 @@ export function ExerciseLibraryModal({
             renderItem={({ item }) => (
               <View
                 style={{
-                  backgroundColor: Colors.card,
+                  backgroundColor: pendingMap.has(item.id) ? Colors.primaryGlow : Colors.card,
                   borderRadius: Radius.lg,
                   padding: Spacing.md,
-                  borderWidth: 1,
-                  borderColor: Colors.border,
+                  borderWidth: pendingMap.has(item.id) ? 2 : 1,
+                  borderColor: pendingMap.has(item.id) ? Colors.primary : Colors.border,
                   marginBottom: Spacing.sm,
                 }}
               >
@@ -1072,26 +1081,17 @@ export function ExerciseLibraryModal({
                   </View>
                   <Pressable
                     onPress={() => {
-                      onAddExercise({
+                      togglePending(item.id, {
                         name: item.name,
                         category: item.category,
                         equipment: item.equipment,
                       });
-                      exerciseTemplateService
-                        .recordUsage({
-                          coachId,
-                          name: item.name,
-                          category: item.category,
-                          equipment: item.equipment,
-                        })
-                        .catch(() => {});
-                      onClose();
                     }}
                     style={({ pressed }) => ({
                       paddingVertical: 10,
                       paddingHorizontal: 14,
                       borderRadius: Radius.lg,
-                      backgroundColor: Colors.primary,
+                      backgroundColor: pendingMap.has(item.id) ? Colors.success : Colors.primary,
                       opacity: pressed ? 0.9 : 1,
                     })}
                   >
@@ -1102,7 +1102,7 @@ export function ExerciseLibraryModal({
                         color: Colors.onPrimary,
                       }}
                     >
-                      + Add
+                      {pendingMap.has(item.id) ? "✓" : "+ Add"}
                     </Text>
                   </Pressable>
                 </View>
@@ -1124,6 +1124,41 @@ export function ExerciseLibraryModal({
               )
             }
           />
+        ) : null}
+
+        {/* ---------------------------------------------------------------- */}
+        {/* Multi-select confirm bar                                          */}
+        {/* ---------------------------------------------------------------- */}
+        {pendingMap.size > 0 ? (
+          <View
+            style={{
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              paddingHorizontal: Spacing.md,
+              paddingTop: Spacing.sm,
+              paddingBottom: Math.max(insets.bottom, Spacing.md),
+              backgroundColor: Colors.bg,
+              borderTopWidth: 1,
+              borderTopColor: Colors.border,
+            }}
+          >
+            <Pressable
+              onPress={handleConfirm}
+              style={({ pressed }) => ({
+                backgroundColor: Colors.primary,
+                borderRadius: Radius.lg,
+                paddingVertical: 16,
+                alignItems: "center",
+                opacity: pressed ? 0.92 : 1,
+              })}
+            >
+              <Text style={{ ...Typography.section, fontWeight: "900", color: Colors.onPrimary }}>
+                {`Add ${pendingMap.size} exercise${pendingMap.size === 1 ? "" : "s"}`}
+              </Text>
+            </Pressable>
+          </View>
         ) : null}
 
         {/* ---------------------------------------------------------------- */}

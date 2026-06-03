@@ -76,7 +76,7 @@ const normalizeSex = (value: any): Sex => {
   return "other";
 };
 
-const VALID_ROLES = ["coach", "student"] as const;
+const VALID_ROLES = ["coach", "student", "athlete"] as const;
 
 function asValidRole(v: unknown): AppUser["role"] | null {
   return typeof v === "string" && (VALID_ROLES as readonly string[]).includes(v)

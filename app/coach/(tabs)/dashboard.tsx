@@ -6,7 +6,6 @@ import {
   ScrollView,
   Pressable,
   Platform,
-  Alert,
   RefreshControl,
 } from "react-native";
 import { useRouter } from "expo-router";
@@ -16,14 +15,32 @@ import { useI18n } from "../../../context/I18nContext";
 import { studentService } from "../../../services/studentService";
 import { workoutService } from "../../../services/workoutService";
 import type { StudentSummary } from "../../../types/StudentSummary";
+import type { WorkoutPlan, WorkoutLog } from "../../../types/Workout";
 import { Avatar } from "../../../components/Avatar";
 import { PrimaryButton } from "../../../components/PrimaryButton";
 import { Colors } from "../../../theme/colors";
 import { Radius, Spacing } from "../../../theme/spacing";
 import { Typography, FontSizes } from "../../../theme/typography";
 import { ScreenLayout } from "../../../components/ScreenLayout";
-import { formatDate } from "../../../utils/formatLocale";
+import { formatDate, formatDateShort } from "../../../utils/formatLocale";
 import { getUserInitials, getDisplayName } from "../../../utils/userDisplay";
+import { toMs } from "../../../utils/dateConvert";
+import type { SupportedLocale } from "../../../context/I18nContext";
+
+function formatRelativeDone(
+  ms: number,
+  t: (key: string, opts?: Record<string, unknown>) => string,
+  locale: SupportedLocale
+): string {
+  if (!ms) return t("never");
+  const diff = Date.now() - ms;
+  const days = Math.floor(diff / 86400000);
+  if (days < 0) return t("recently");
+  if (days === 0) return t("today");
+  if (days === 1) return t("yesterday");
+  if (days < 7) return t("daysAgo", { n: days });
+  return formatDateShort(ms, locale);
+}
 
 const coachDisplayName = (user: { firstName?: string | null; lastName?: string | null } | null) =>
   getDisplayName(user, "Coach");
@@ -37,6 +54,8 @@ export default function CoachDashboard() {
   const { t, locale } = useI18n();
   const [students, setStudents] = useState<StudentSummary[]>([]);
   const [workoutsCompletedToday, setWorkoutsCompletedToday] = useState(0);
+  const [personalPlans, setPersonalPlans] = useState<WorkoutPlan[]>([]);
+  const [personalLogs, setPersonalLogs] = useState<WorkoutLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -84,6 +103,18 @@ export default function CoachDashboard() {
             return Number.isFinite(ms) && ms >= startMs && ms < endMs;
           }).length;
         setWorkoutsCompletedToday(count);
+
+        // Personal training — non-blocking
+        try {
+          const [plans, logs] = await Promise.all([
+            workoutService.getActiveWorkoutPlansForStudent(user.id),
+            workoutService.getWorkoutHistory(user.id),
+          ]);
+          setPersonalPlans(plans.sort((a, b) => (a.order ?? 999) - (b.order ?? 999)));
+          setPersonalLogs(logs);
+        } catch {
+          // silently ignore; student data is already rendered
+        }
       } catch (e: any) {
         console.error("[coach/dashboard] load error", e);
         setError(e.message ?? t("failedToLoad"));
@@ -128,6 +159,17 @@ export default function CoachDashboard() {
           return Number.isFinite(ms) && ms >= startMs && ms < endMs;
         }).length;
       setWorkoutsCompletedToday(count);
+
+      try {
+        const [plans, logs] = await Promise.all([
+          workoutService.getActiveWorkoutPlansForStudent(user.id),
+          workoutService.getWorkoutHistory(user.id),
+        ]);
+        setPersonalPlans(plans.sort((a, b) => (a.order ?? 999) - (b.order ?? 999)));
+        setPersonalLogs(logs);
+      } catch {
+        // silently ignore
+      }
     } catch (e: any) {
       console.error("[coach/dashboard] refresh error", e);
         setError(e.message ?? t("failedToLoad"));
@@ -135,6 +177,29 @@ export default function CoachDashboard() {
       setRefreshing(false);
     }
   }, [user?.id, user?.role]);
+
+  const lastMsByPlanId = useMemo(() => {
+    const map: Record<string, number> = {};
+    for (const log of personalLogs) {
+      const id = log.workoutPlanId;
+      if (!id) continue;
+      const ms = toMs(log.completedAt ?? log.date);
+      if (!ms) continue;
+      map[id] = Math.max(map[id] ?? 0, ms);
+    }
+    return map;
+  }, [personalLogs]);
+
+  const upcomingPlan = useMemo(() => {
+    if (personalPlans.length === 0) return null;
+    let best = personalPlans[0];
+    let bestLast = lastMsByPlanId[best.id] ?? 0;
+    for (const p of personalPlans) {
+      const last = lastMsByPlanId[p.id] ?? 0;
+      if (last < bestLast) { best = p; bestLast = last; }
+    }
+    return best;
+  }, [personalPlans, lastMsByPlanId]);
 
   if (loading) {
     return (
@@ -271,15 +336,17 @@ export default function CoachDashboard() {
               marginBottom: Spacing.md,
             }}
           >
-            <View
-              style={{
+            <Pressable
+              onPress={() => router.push("/coach/students" as any)}
+              style={({ pressed }) => ({
                 flex: 1,
                 backgroundColor: Colors.card,
                 borderRadius: Radius.lg,
                 padding: Spacing.md,
                 borderWidth: 1,
                 borderColor: Colors.border,
-              }}
+                opacity: pressed ? 0.85 : 1,
+              })}
             >
               <View
                 style={{
@@ -297,10 +364,10 @@ export default function CoachDashboard() {
               <Text style={{ fontSize: 32, fontWeight: "800", color: Colors.text, lineHeight: 36 }}>
                 {students.length}
               </Text>
-                <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 2 }}>
+              <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 2 }}>
                 {t("totalStudents")}
               </Text>
-            </View>
+            </Pressable>
 
             <View
               style={{
@@ -346,9 +413,7 @@ export default function CoachDashboard() {
             }}
           >
             <Pressable
-              onPress={() =>
-                Alert.alert(t("comingSoon"), t("startLogComing"))
-              }
+              onPress={() => router.push("/coach/myTraining" as any)}
               style={({ pressed }) => ({
                 flex: 1,
                 flexDirection: "row",
@@ -370,9 +435,9 @@ export default function CoachDashboard() {
                   : { elevation: 8 }),
               })}
             >
-              <Ionicons name="play" size={18} color={Colors.onPrimary} />
+              <Ionicons name="barbell-outline" size={18} color={Colors.onPrimary} />
               <Text style={{ ...Typography.section, fontWeight: "800", color: Colors.onPrimary }}>
-                {t("startLog")}
+                {t("nav_myTraining")}
               </Text>
             </Pressable>
             <Pressable
@@ -399,7 +464,65 @@ export default function CoachDashboard() {
             </Pressable>
           </View>
 
-          {/* Students list removed (available in Students tab). */}
+          {/* My Training preview */}
+          <View
+            style={{
+              backgroundColor: Colors.card,
+              borderRadius: Radius.lg,
+              padding: Spacing.md,
+              borderWidth: 1,
+              borderColor: Colors.border,
+              marginBottom: Spacing.lg,
+            }}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: Spacing.sm }}>
+              <Text style={{ ...Typography.section, fontWeight: "800" }}>{t("nav_myTraining")}</Text>
+              <Pressable
+                onPress={() => router.push("/coach/myTraining" as any)}
+                hitSlop={10}
+                style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+              >
+                <Text style={{ ...Typography.secondary, color: Colors.primary, fontWeight: "700" }}>{t("viewAll")}</Text>
+              </Pressable>
+            </View>
+
+            {upcomingPlan ? (
+              <View>
+                <Text style={{ ...Typography.secondary, color: Colors.primary, fontWeight: "800", marginBottom: 4 }}>
+                  {t("nextUp")}
+                </Text>
+                <Text style={{ ...Typography.section, fontSize: FontSizes.subheading, fontWeight: "800", marginBottom: 2 }}>
+                  {upcomingPlan.name}
+                </Text>
+                <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: Spacing.sm }}>
+                  {t("lastWhen", { when: formatRelativeDone(lastMsByPlanId[upcomingPlan.id] ?? 0, t, locale) })}
+                </Text>
+                <PrimaryButton
+                  title={t("start")}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/coach/workoutExecution" as any,
+                      params: { workoutPlanId: upcomingPlan.id, workoutName: upcomingPlan.name },
+                    })
+                  }
+                />
+              </View>
+            ) : (
+              <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.sm }}>
+                <Ionicons name="barbell-outline" size={20} color={Colors.textMuted} />
+                <Text style={{ ...Typography.secondary, color: Colors.textMuted, flex: 1 }}>
+                  {t("myTrainingEmptyDash")}
+                </Text>
+                <Pressable
+                  onPress={() => router.push("/coach/createPersonalPlan" as any)}
+                  style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+                >
+                  <Text style={{ ...Typography.secondary, color: Colors.primary, fontWeight: "700" }}>{t("start")}</Text>
+                </Pressable>
+              </View>
+            )}
+          </View>
+
         </ScrollView>
       </View>
     </ScreenLayout>

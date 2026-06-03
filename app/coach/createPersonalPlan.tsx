@@ -1,5 +1,5 @@
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -16,150 +16,60 @@ import { PrimaryButton } from "../../components/PrimaryButton";
 import { ScreenLayout } from "../../components/ScreenLayout";
 import { useAuth } from "../../context/AuthContext";
 import { exerciseTemplateService } from "../../services/exerciseTemplateService";
-import { trainingGroupService } from "../../services/trainingGroupService";
 import { workoutService } from "../../services/workoutService";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
-import { Typography, FontSizes } from "../../theme/typography";
-import type { TrainingGroup } from "../../types/TrainingGroup";
+import { Typography } from "../../theme/typography";
 import type { Exercise } from "../../types/Workout";
 
-// Screen for coaches to build a workout plan for a specific student.
-export default function CreateWorkoutPlan() {
+export default function CreatePersonalPlan() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
-  const params = useLocalSearchParams<{
-    studentId?: string;
-    studentName?: string;
-    groupId?: string;
-  }>();
 
-  const [studentName] = useState(params.studentName ?? "Student");
-  const [studentId] = useState(params.studentId ?? "");
-  const [selectedGroup, setSelectedGroup] = useState<TrainingGroup | null>(null);
   const [planName, setPlanName] = useState("");
   const [note, setNote] = useState("");
   const [estimatedMinutes, setEstimatedMinutes] = useState("");
   const [exercises, setExercises] = useState<ExerciseDraft[]>([]);
-  // Keep everything collapsed on initial open (avoid auto-focus/keyboard pop).
   const [expandedKey, setExpandedKey] = useState<string | null>(null);
   const [lastAddedKey, setLastAddedKey] = useState<string | null>(null);
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [initializingUser, setInitializingUser] = useState(true);
-  const [coachId, setCoachId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [order, setOrder] = useState<number>(0);
+  const [order, setOrder] = useState(0);
 
   useEffect(() => {
-    const init = async () => {
-      try {
-        if (!user || user.role !== "coach") {
-          setError("You must be logged in as a coach.");
-          return;
-        }
-        setCoachId(user.id);
-
-        if (!studentId) {
-          setError("Missing student context.");
-          return;
-        }
-
-        const groupId = String(params.groupId ?? "").trim();
-        if (!groupId) {
-          // Redirect into the focused group selection flow.
-          router.replace({
-            pathname: "/coach/selectTrainingGroup",
-            params: { studentId, studentName },
-          });
-          return;
-        }
-
-        const group = await trainingGroupService.getTrainingGroupById(groupId);
-        if (!group || group.coachId !== user.id || group.studentId !== studentId) {
-          router.replace({
-            pathname: "/coach/selectTrainingGroup",
-            params: { studentId, studentName },
-          });
-          return;
-        }
-        setSelectedGroup(group);
-
-        // Best-effort default ordering: append to the end.
-        const existing = await workoutService.getWorkoutPlansForStudentAsCoach(user.id, studentId);
-        const maxOrder = existing.reduce((max, p) => {
-          const n = typeof p.order === "number" && Number.isFinite(p.order) ? p.order : -1;
-          return Math.max(max, n);
-        }, -1);
-        setOrder(maxOrder + 1);
-      } catch (e: any) {
-        setError(e.message ?? "Failed to load user.");
-      } finally {
-        setInitializingUser(false);
-      }
-    };
-
-    init();
-  }, [user?.id, user?.role, studentId, params.groupId, studentName, router]);
-
-  const resolvedGroupName = useMemo(() => {
-    if (!selectedGroup) return null;
-    return selectedGroup.name?.trim() || null;
-  }, [selectedGroup]);
+    if (!user) return;
+    workoutService.getActiveWorkoutPlansForStudent(user.id).then((existing) => {
+      const maxOrder = existing.reduce((max, p) => {
+        const n = typeof p.order === "number" && Number.isFinite(p.order) ? p.order : -1;
+        return Math.max(max, n);
+      }, -1);
+      setOrder(maxOrder + 1);
+    }).catch(() => {});
+  }, [user?.id]);
 
   const updateExercise = (key: string, patch: Partial<ExerciseDraft>) => {
-    setExercises((prev) => {
-      const next = prev.map((e) => (e._key === key ? { ...e, ...patch } : e));
-      return next;
-    });
-  };
-
-  const addExercise = () => {
-    const base = workoutService.createEmptyExercise();
-    const nextKey = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-    const next: ExerciseDraft = {
-      _key: nextKey,
-      ...base,
-      coachNote: "",
-    };
-    setExercises((prev) => [...prev, next]);
-    setLastAddedKey(nextKey);
-    setExpandedKey(nextKey);
+    setExercises((prev) => prev.map((e) => (e._key === key ? { ...e, ...patch } : e)));
   };
 
   const addExerciseFromLibrary = (payload: { name: string; exerciseDbId?: string }) => {
     const base = workoutService.createEmptyExercise();
     const nextKey = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-    const next: ExerciseDraft = {
-      _key: nextKey,
-      ...base,
-      name: payload.name,
-      coachNote: "",
-      exerciseDbId: payload.exerciseDbId,
-    };
-    setExercises((prev) => [...prev, next]);
+    setExercises((prev) => [...prev, { _key: nextKey, ...base, name: payload.name, coachNote: "", exerciseDbId: payload.exerciseDbId }]);
     setLastAddedKey(nextKey);
     setExpandedKey(nextKey);
   };
 
-  const handleSavePlan = async () => {
-    if (!coachId || !studentId) {
-      setError("Missing coach or student information.");
-      return;
-    }
-    if (!selectedGroup) {
-      setError("Select or create a training group first.");
-      return;
-    }
-
+  const handleSave = async () => {
+    if (!user) return;
     setError(null);
     setLoading(true);
     try {
       const name = planName.trim();
       if (!name) throw new Error("Workout name is required.");
       if (name.length > 50) throw new Error("Workout name must be at most 50 characters.");
-      if (note.trim().length > 500) throw new Error("Coach notes must be at most 500 characters.");
+      if (note.trim().length > 500) throw new Error("Notes must be at most 500 characters.");
 
       const durationTrim = estimatedMinutes.trim();
       const durationNum =
@@ -169,61 +79,34 @@ export default function CreateWorkoutPlan() {
       }
 
       const sanitizedExercises: Exercise[] = exercises
-        .map((e) => {
-          const rest = (e.rest ?? "").trim();
-          const tempo = (e.tempo ?? "").trim();
-          const rpe = e.rpe === null || e.rpe === undefined ? null : e.rpe;
-
-          return {
-            name: (e.name ?? "").trim(),
-            sets: Number(e.sets ?? 0),
-            reps: (e.reps ?? "").trim(),
-            weight: e.weight,
-            rest,
-            tempo,
-            rpe: rpe === null ? null : rpe,
-            coachNote: (e.coachNote ?? "").trim() || undefined,
-            videoUrl: (e.videoUrl ?? "").trim() || undefined,
-            exerciseDbId: e.exerciseDbId || undefined,
-          };
-        })
+        .map((e) => ({
+          name: (e.name ?? "").trim(),
+          sets: Number(e.sets ?? 0),
+          reps: (e.reps ?? "").trim(),
+          weight: e.weight,
+          rest: (e.rest ?? "").trim(),
+          tempo: (e.tempo ?? "").trim(),
+          rpe: e.rpe === null || e.rpe === undefined ? null : e.rpe,
+          coachNote: (e.coachNote ?? "").trim() || undefined,
+          videoUrl: (e.videoUrl ?? "").trim() || undefined,
+          exerciseDbId: e.exerciseDbId || undefined,
+        }))
         .filter((e) => e.name.length > 0);
 
-      if (sanitizedExercises.length === 0) {
-        throw new Error("Add at least one exercise.");
-      }
+      if (sanitizedExercises.length === 0) throw new Error("Add at least one exercise.");
 
       for (const ex of sanitizedExercises) {
-        if (!Number.isFinite(ex.sets) || ex.sets <= 0) {
-          throw new Error(`Sets for "${ex.name}" must be > 0.`);
-        }
-        if (ex.rest !== "") {
-          const n = Number(ex.rest);
-          if (!Number.isFinite(n) || n < 0) {
-            throw new Error(`Rest for "${ex.name}" must be a number >= 0.`);
-          }
-        }
-        if (ex.tempo.length > 20) {
-          throw new Error(`Tempo for "${ex.name}" must be at most 20 characters.`);
-        }
-        if (ex.rpe !== null) {
-          if (!Number.isFinite(ex.rpe) || ex.rpe < 1 || ex.rpe > 10) {
-            throw new Error(`RPE for "${ex.name}" must be between 1 and 10.`);
-          }
-        }
-        if (ex.weight != null) {
-          const w = Number(ex.weight);
-          if (!Number.isFinite(w) || w < 0) {
-            throw new Error(`Weight for "${ex.name}" must be a number >= 0.`);
-          }
+        if (!Number.isFinite(ex.sets) || ex.sets <= 0) throw new Error(`Sets for "${ex.name}" must be > 0.`);
+        if (ex.rpe !== null && (!Number.isFinite(ex.rpe) || ex.rpe < 1 || ex.rpe > 10)) {
+          throw new Error(`RPE for "${ex.name}" must be between 1 and 10.`);
         }
       }
 
       await workoutService.createWorkoutPlan({
-        coachId,
-        studentId,
-        groupId: selectedGroup.id,
-        groupName: selectedGroup.name?.trim() || "Legacy Plan",
+        coachId: user.id,
+        studentId: user.id,
+        groupId: "personal",
+        groupName: "Personal",
         name,
         exercises: sanitizedExercises,
         createdAt: new Date(),
@@ -233,35 +116,15 @@ export default function CreateWorkoutPlan() {
         note: note.trim() || undefined,
         estimatedDurationMinutes: durationNum,
       });
-      // Mark group as recently used.
-      trainingGroupService.touchUpdatedAt(selectedGroup.id).catch(() => {});
-      await Promise.all(
-        sanitizedExercises.map((e) => exerciseTemplateService.upsertNameIfNeeded(e.name))
-      );
-      router.replace("/coach/dashboard");
+
+      await Promise.all(sanitizedExercises.map((e) => exerciseTemplateService.upsertNameIfNeeded(e.name)));
+      router.replace("/coach/myTraining" as any);
     } catch (e: any) {
       setError(e.message ?? "Failed to save workout plan.");
     } finally {
       setLoading(false);
     }
   };
-
-  if (initializingUser) {
-    return (
-      <ScreenLayout>
-        <View
-          style={{
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-            backgroundColor: Colors.bg,
-          }}
-        >
-          <ActivityIndicator />
-        </View>
-      </ScreenLayout>
-    );
-  }
 
   return (
     <ScreenLayout>
@@ -276,23 +139,14 @@ export default function CreateWorkoutPlan() {
           activationDistance={12}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}
-          // Ensures the list shifts for the keyboard so inputs don't get covered.
           automaticallyAdjustKeyboardInsets
           contentContainerStyle={{ padding: Spacing.md, paddingBottom: 140 }}
           ListHeaderComponent={
             <>
-              {/* Header */}
               <View style={{ marginBottom: Spacing.md }}>
-                <Text style={{ ...Typography.title, fontSize: FontSizes.h2, marginBottom: 6 }}>
-                  Create Workout Plan
-                </Text>
-                <Text style={{ ...Typography.section, fontWeight: "900" }}>{studentName}</Text>
-                <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4 }}>
-                  {resolvedGroupName ?? "Legacy Plan"}
-                </Text>
+                <Text style={{ ...Typography.title, marginBottom: 4 }}>New Personal Plan</Text>
               </View>
 
-              {/* Workout info card */}
               <View
                 style={{
                   backgroundColor: Colors.card,
@@ -324,18 +178,12 @@ export default function CreateWorkoutPlan() {
                   <View style={{ flex: 1 }}>
                     <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Order</Text>
                     <TextInput
-                      placeholder="e.g. 1"
+                      placeholder="0"
                       placeholderTextColor={Colors.textMuted}
                       value={String(order)}
                       onChangeText={(t) => {
-                        const cleaned = t.trim().replace(/[^0-9-]/g, "");
-                        const n = Number(cleaned);
-                        if (cleaned === "") {
-                          setOrder(0);
-                          return;
-                        }
-                        if (!Number.isFinite(n)) return;
-                        setOrder(Math.max(0, Math.floor(n)));
+                        const n = Number(t.trim().replace(/[^0-9]/g, ""));
+                        setOrder(Number.isFinite(n) ? Math.max(0, n) : 0);
                       }}
                       keyboardType="number-pad"
                       style={{
@@ -349,11 +197,9 @@ export default function CreateWorkoutPlan() {
                     />
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={{ ...Typography.secondary, marginBottom: 6 }}>
-                      Est. minutes
-                    </Text>
+                    <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Est. minutes</Text>
                     <TextInput
-                      placeholder="e.g. 60"
+                      placeholder="60"
                       placeholderTextColor={Colors.textMuted}
                       value={estimatedMinutes}
                       onChangeText={setEstimatedMinutes}
@@ -370,9 +216,9 @@ export default function CreateWorkoutPlan() {
                   </View>
                 </View>
 
-                <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Coach notes (optional)</Text>
+                <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Notes (optional)</Text>
                 <TextInput
-                  placeholder="Key cues, intent, constraints…"
+                  placeholder="Goals, cues, constraints…"
                   placeholderTextColor={Colors.textMuted}
                   value={note}
                   onChangeText={(t) => setNote(t.slice(0, 500))}
@@ -382,15 +228,13 @@ export default function CreateWorkoutPlan() {
                     borderColor: Colors.border,
                     padding: 12,
                     borderRadius: Radius.md,
-                    marginBottom: Spacing.sm,
                     color: Colors.text,
                     backgroundColor: Colors.surface,
-                    minHeight: 84,
+                    minHeight: 80,
                   }}
                 />
               </View>
 
-              {/* Exercises */}
               <View
                 style={{
                   flexDirection: "row",
@@ -431,7 +275,6 @@ export default function CreateWorkoutPlan() {
                   onToggleExpanded={() =>
                     setExpandedKey((prev) => {
                       const next = prev === item._key ? null : item._key;
-                      // Only auto-focus on freshly added exercises, never on manual expand.
                       if (next !== item._key) setLastAddedKey(null);
                       return next;
                     })
@@ -465,7 +308,6 @@ export default function CreateWorkoutPlan() {
         />
       </KeyboardAvoidingView>
 
-      {/* Sticky footer CTA */}
       <View
         style={{
           position: "absolute",
@@ -479,13 +321,13 @@ export default function CreateWorkoutPlan() {
           borderTopColor: Colors.border,
         }}
       >
-        {loading ? <ActivityIndicator /> : <PrimaryButton title="Save Workout Plan" onPress={handleSavePlan} />}
+        {loading ? <ActivityIndicator /> : <PrimaryButton title="Save Plan" onPress={handleSave} />}
       </View>
 
-      {coachId ? (
+      {user ? (
         <ExerciseLibraryModal
           visible={libraryOpen}
-          coachId={coachId}
+          coachId={user.id}
           onClose={() => setLibraryOpen(false)}
           onAddExercise={(p) => addExerciseFromLibrary({ name: p.name, exerciseDbId: p.exerciseDbId })}
         />
@@ -493,6 +335,3 @@ export default function CreateWorkoutPlan() {
     </ScreenLayout>
   );
 }
-
-
-

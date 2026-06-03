@@ -51,8 +51,8 @@ export function useFinishWorkout(): UseFinishWorkout {
     setSubmitError(null);
 
     try {
-      if (!authUser || authUser.role !== "student") {
-        setSubmitError("You must be logged in as a student.");
+      if (!authUser || !["student", "coach", "athlete"].includes(authUser.role)) {
+        setSubmitError("You must be logged in.");
         return;
       }
 
@@ -135,7 +135,13 @@ export function useFinishWorkout(): UseFinishWorkout {
         Alert.alert(t("greatSession"), `🔥 New PR on: ${prNames.join(", ")}`);
       }
 
-      router.replace("/student/workoutHistory");
+      const dest =
+        authUser.role === "coach"
+          ? "/coach/myTraining"
+          : authUser.role === "athlete"
+          ? "/athlete/workouts"
+          : "/student/workoutHistory";
+      router.replace(dest as any);
     } catch (e: any) {
       setSubmitError(e.message ?? "Failed to save workout.");
     } finally {

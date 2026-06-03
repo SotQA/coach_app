@@ -29,6 +29,8 @@ export default function WorkoutPlanDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const rolePrefix = user?.role === "athlete" ? "/athlete" : user?.role === "coach" ? "/coach" : "/student";
+
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -39,8 +41,8 @@ export default function WorkoutPlanDetail() {
           setError("Missing workout.");
           return;
         }
-        if (!user || user.role !== "student") {
-          setError("You must be logged in as a student.");
+        if (!user || (user.role !== "student" && user.role !== "athlete" && user.role !== "coach")) {
+          setError("You must be logged in to view this workout.");
           return;
         }
         const [p, history] = await Promise.all([
@@ -48,7 +50,7 @@ export default function WorkoutPlanDetail() {
           workoutService.getWorkoutHistory(user.id).catch(() => []),
         ]);
         if (cancelled) return;
-        if (!p || p.studentId !== user.id) {
+        if (!p || (p.studentId !== user.id && p.coachId !== user.id)) {
           setError("Workout not found.");
           return;
         }
@@ -133,7 +135,7 @@ export default function WorkoutPlanDetail() {
                 activeOpacity={0.7}
                 onPress={() =>
                   router.push({
-                    pathname: "/student/exerciseDetail",
+                    pathname: `${rolePrefix}/exerciseDetail` as any,
                     params: {
                       exerciseName: ex.name,
                       exerciseDbId: ex.exerciseDbId ?? "",
@@ -180,7 +182,7 @@ export default function WorkoutPlanDetail() {
           title="Start Workout"
           onPress={() =>
             router.push({
-              pathname: "/student/workoutExecution",
+              pathname: `${rolePrefix}/workoutExecution` as any,
               params: {
                 workoutPlanId: plan.id,
                 groupId: plan.groupId ?? "",

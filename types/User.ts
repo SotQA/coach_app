@@ -1,4 +1,4 @@
-export type UserRole = "coach" | "student";
+export type UserRole = "coach" | "student" | "athlete";
 
 export type Sex = "male" | "female" | "other";
 

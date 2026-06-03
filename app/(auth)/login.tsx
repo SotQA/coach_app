@@ -1,4 +1,4 @@
-import { useState, useEffect, type ComponentProps, type ReactNode } from "react";
+import { useState, useEffect, useRef, type ComponentProps, type ReactNode } from "react";
 import {
   View,
   Text,
@@ -10,7 +10,18 @@ import {
 } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { useRouter } from "expo-router";
-import { GoogleSignin, statusCodes } from "@react-native-google-signin/google-signin";
+// Lazy-load the native Google Sign-In module. TurboModuleRegistry.getEnforcing()
+// is called at require() time and throws if the native binary was built without
+// the module (e.g. an OTA update on top of an older build). Wrapping in try/catch
+// lets the app run and show a graceful error instead of crashing.
+let _googleSigninModule: typeof import("@react-native-google-signin/google-signin") | null = null;
+try {
+  _googleSigninModule = require("@react-native-google-signin/google-signin");
+} catch {
+  _googleSigninModule = null;
+}
+const GoogleSignin = _googleSigninModule?.GoogleSignin ?? null;
+const statusCodes = _googleSigninModule?.statusCodes ?? {};
 import Constants from "expo-constants";
 import { NeedsOnboardingError } from "../../context/AuthContext";
 import { PrimaryButton } from "../../components/PrimaryButton";
@@ -68,7 +79,7 @@ function TouchScale({
 
 export default function Login() {
   const router = useRouter();
-  const { user, loading: authLoading, login, loginWithGoogleIdToken } = useAuth();
+  const { user, loading: authLoading, login, loginWithGoogleIdToken, pendingGoogleUser } = useAuth();
   const { t } = useI18n();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -81,7 +92,7 @@ export default function Login() {
   const googleIosClientId = String(extra.googleIosClientId ?? "").trim();
 
   useEffect(() => {
-    if (Platform.OS !== "web" && googleWebClientId) {
+    if (Platform.OS !== "web" && googleWebClientId && GoogleSignin) {
       GoogleSignin.configure({
         webClientId: googleWebClientId,
         iosClientId: Platform.OS === "ios" && googleIosClientId ? googleIosClientId : undefined,
@@ -89,7 +100,21 @@ export default function Login() {
     }
   }, [googleWebClientId, googleIosClientId]);
 
-  const googleButtonEnabled = Platform.OS !== "web" && !!googleWebClientId;
+  const googleButtonEnabled = Platform.OS !== "web" && !!googleWebClientId && !!GoogleSignin;
+
+  // Navigate to the role picker only after pendingGoogleUser is committed to context state.
+  // Navigating inside the catch block races the setState and can arrive before the state
+  // update is applied, causing google-role.tsx to see null and redirect back to login.
+  const didPushGoogleRole = useRef(false);
+  useEffect(() => {
+    if (pendingGoogleUser && !didPushGoogleRole.current) {
+      didPushGoogleRole.current = true;
+      router.push("/google-role");
+    }
+    if (!pendingGoogleUser) {
+      didPushGoogleRole.current = false;
+    }
+  }, [pendingGoogleUser, router]);
 
   const handleLogin = async () => {
     setError(null);
@@ -107,6 +132,9 @@ export default function Login() {
     setError(null);
     setGoogleSubmitting(true);
     try {
+      if (!GoogleSignin) {
+        throw new Error("Google Sign-In is not available in this build. Please update the app.");
+      }
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
       const response = await GoogleSignin.signIn();
       const idToken = response.data?.idToken;
@@ -115,9 +143,9 @@ export default function Login() {
       }
       await loginWithGoogleIdToken({ idToken });
     } catch (e: any) {
-      if (e.code === statusCodes.SIGN_IN_CANCELLED) return;
+      if (e.code === (statusCodes as any).SIGN_IN_CANCELLED) return;
       if (e instanceof NeedsOnboardingError) {
-        router.push("/google-role");
+        // Navigation is handled by the useEffect watching pendingGoogleUser.
         return;
       }
       console.error("[login] google sign-in error", e);

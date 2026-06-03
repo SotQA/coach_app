@@ -162,7 +162,13 @@ export default function StudentProfile() {
           <SettingsProfileCard
             fullName={fullName}
             email={user.email ?? ""}
-            roleLabel={t("roleStudent")}
+            roleLabel={
+              user.role === "coach"
+                ? t("roleCoach")
+                : user.role === "athlete"
+                ? t("roleAthlete")
+                : t("roleStudent")
+            }
             initials={initials}
             statsLoading={statsLoading}
             metaLine={metaLine}

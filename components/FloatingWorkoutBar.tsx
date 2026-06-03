@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useActiveWorkoutSession } from "../context/ActiveWorkoutSessionContext";
 import { useElapsedSeconds } from "../context/ElapsedTimeContext";
 import { useI18n } from "../context/I18nContext";
+import { useAuth } from "../context/AuthContext";
 import { formatElapsedForTimer } from "../utils/workoutDuration";
 import { Colors } from "../theme/colors";
 import { Radius } from "../theme/spacing";
@@ -31,6 +32,7 @@ export function FloatingWorkoutBar() {
   const router = useRouter();
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
+  const { user } = useAuth();
 
   if (!session) return null;
 
@@ -58,9 +60,16 @@ export function FloatingWorkoutBar() {
   const isRestAlmostDone = restActive && !restPaused && restSecondsRemaining <= 5;
   const barColor = isRestAlmostDone ? Colors.danger : Colors.primary;
 
+  const execPath =
+    user?.role === "coach"
+      ? "/coach/workoutExecution"
+      : user?.role === "athlete"
+      ? "/athlete/workoutExecution"
+      : "/student/workoutExecution";
+
   const handlePress = () => {
     router.push({
-      pathname: "/student/workoutExecution",
+      pathname: execPath as any,
       params: { workoutPlanId: session.workoutPlanId },
     });
   };

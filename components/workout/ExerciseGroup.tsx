@@ -1,6 +1,7 @@
 import { TouchableOpacity, StyleSheet, Text, TextInput, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { useAuth } from "../../context/AuthContext";
 import { useI18n } from "../../context/I18nContext";
 import { useUnits } from "../../context/UnitsContext";
 import { toUnit, unitSuffix } from "../../utils/units";
@@ -45,6 +46,13 @@ export function ExerciseGroup({
   const { t } = useI18n();
   const { unit } = useUnits();
   const router = useRouter();
+  const { user } = useAuth();
+  const exerciseDetailPath =
+    user?.role === "coach"
+      ? "/coach/exerciseDetail"
+      : user?.role === "athlete"
+      ? "/athlete/exerciseDetail"
+      : "/student/exerciseDetail";
 
   const displayWeight =
     exercise.weight != null && Number.isFinite(Number(exercise.weight))
@@ -74,7 +82,7 @@ export function ExerciseGroup({
         activeOpacity={0.7}
         onPress={() =>
           router.push({
-            pathname: "/student/exerciseDetail",
+            pathname: exerciseDetailPath as any,
             params: {
               exerciseName: exercise.name,
               exerciseDbId: exercise.exerciseDbId ?? "",

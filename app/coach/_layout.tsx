@@ -1,6 +1,8 @@
 import { Redirect, Stack, useRouter } from "expo-router";
 import { Pressable, View } from "react-native";
 import { useAuth } from "../../context/AuthContext";
+import { FloatingWorkoutBar } from "../../components/FloatingWorkoutBar";
+import { CoachSpeedDial } from "../../components/CoachSpeedDial";
 import { Colors } from "../../theme/colors";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -26,40 +28,49 @@ export default function CoachLayout() {
     return <Redirect href="/login" />;
   }
 
-  if (user.role !== "coach") {
-    return <Redirect href="/student/workouts" />;
-  }
+  if (user.role === "student") return <Redirect href="/student/workouts" />;
+  if (user.role === "athlete") return <Redirect href={"/athlete/workouts" as any} />;
+  if (user.role !== "coach") return <Redirect href="/login" />;
 
   return (
-    <Stack
-      screenOptions={{
-        headerTitleAlign: "center",
-        headerStyle: { backgroundColor: Colors.bg },
-        headerTintColor: Colors.text,
-        headerTitleStyle: { color: Colors.text },
-        headerShadowVisible: false,
-        headerLeft: ({ canGoBack }) => canGoBack ? <HeaderBackButton /> : null,
-        // Prevent white flash during iOS back-swipe / transitions.
-        contentStyle: { backgroundColor: Colors.bg },
-      }}
-    >
-      <Stack.Screen name="(tabs)" options={{ headerShown: false, title: "Back" }} />
-      <Stack.Screen name="studentDetails" options={{ headerShown: false }} />
-      <Stack.Screen
-        name="createStudent"
-        options={{
-          title: "Create Student",
-          headerLeft: () => null,
+    <View style={{ flex: 1 }}>
+      <Stack
+        screenOptions={{
+          headerTitleAlign: "center",
+          headerStyle: { backgroundColor: Colors.bg },
+          headerTintColor: Colors.text,
+          headerTitleStyle: { color: Colors.text },
+          headerShadowVisible: false,
+          headerLeft: ({ canGoBack }) => canGoBack ? <HeaderBackButton /> : null,
+          // Prevent white flash during iOS back-swipe / transitions.
+          contentStyle: { backgroundColor: Colors.bg },
         }}
-      />
-      <Stack.Screen name="selectTrainingGroup" options={{ title: "Select Training Group" }} />
-      <Stack.Screen name="createTrainingGroup" options={{ title: "Create Training Group" }} />
-      <Stack.Screen name="createWorkoutPlan" options={{ title: "Create Workout Plan" }} />
-      <Stack.Screen name="workout" options={{ title: "Workout" }} />
-      <Stack.Screen name="editWorkout" options={{ title: "Edit Workout" }} />
-      <Stack.Screen name="workoutLogFeedback" options={{ title: "Workout feedback" }} />
-      <Stack.Screen name="assignedWorkouts" options={{ title: "Assigned workouts" }} />
-    </Stack>
+      >
+        <Stack.Screen name="(tabs)" options={{ headerShown: false, title: "Back" }} />
+        <Stack.Screen name="studentDetails" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="createStudent"
+          options={{
+            title: "Create Student",
+            headerLeft: () => null,
+          }}
+        />
+        <Stack.Screen name="selectTrainingGroup" options={{ title: "Select Training Group" }} />
+        <Stack.Screen name="createTrainingGroup" options={{ title: "Create Training Group" }} />
+        <Stack.Screen name="createWorkoutPlan" options={{ title: "Create Workout Plan" }} />
+        <Stack.Screen name="workout" options={{ title: "Workout" }} />
+        <Stack.Screen name="editWorkout" options={{ title: "Edit Workout" }} />
+        <Stack.Screen name="workoutLogFeedback" options={{ title: "Workout feedback" }} />
+        <Stack.Screen name="assignedWorkouts" options={{ title: "Assigned workouts" }} />
+        <Stack.Screen name="workoutExecution" options={{ headerShown: false }} />
+        <Stack.Screen name="exerciseDetail" options={{ headerShown: false }} />
+        <Stack.Screen name="createPersonalPlan" options={{ title: "Create Plan" }} />
+        <Stack.Screen name="workoutPlanDetail" options={{ title: "Workout" }} />
+        <Stack.Screen name="personalProgress" options={{ title: "My Progress" }} />
+      </Stack>
+      <FloatingWorkoutBar />
+      <CoachSpeedDial />
+    </View>
   );
 }
 

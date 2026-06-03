@@ -28,6 +28,7 @@ function RoleCard({
   selected,
   submitting,
   onSelect,
+  features,
 }: {
   value: UserRole;
   title: string;
@@ -36,6 +37,7 @@ function RoleCard({
   selected: boolean;
   submitting: boolean;
   onSelect: (v: UserRole) => void;
+  features?: string[];
 }) {
   const selectScale = useSharedValue(1);
   const pressScale = useSharedValue(1);
@@ -93,6 +95,15 @@ function RoleCard({
           <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4, lineHeight: 20 }}>
             {subtitle}
           </Text>
+          {features && features.length > 0 ? (
+            <View style={{ marginTop: 6 }}>
+              {features.map((f, i) => (
+                <Text key={i} style={{ ...Typography.secondary, color: Colors.textMuted, fontSize: 12, lineHeight: 18, marginTop: 2 }}>
+                  {`• ${f}`}
+                </Text>
+              ))}
+            </View>
+          ) : null}
         </View>
         {selected ? <Ionicons name="checkmark-circle" size={26} color={Colors.primary} /> : null}
       </Animated.View>
@@ -206,6 +217,7 @@ export default function GoogleRoleScreen() {
           icon="school-outline"
           selected={role === "coach"}
           submitting={submitting}
+          features={[t("roleCoachF1"), t("roleCoachF2"), t("roleCoachF3")]}
           onSelect={(v) => { setRole(v); setError(null); }}
         />
         <RoleCard
@@ -215,6 +227,17 @@ export default function GoogleRoleScreen() {
           icon="barbell-outline"
           selected={role === "student"}
           submitting={submitting}
+          features={[t("roleStudentF1"), t("roleStudentF2"), t("roleStudentF3")]}
+          onSelect={(v) => { setRole(v); setError(null); }}
+        />
+        <RoleCard
+          value="athlete"
+          title={t("roleAthlete")}
+          subtitle={t("roleAthleteDesc")}
+          icon="fitness-outline"
+          selected={role === "athlete"}
+          submitting={submitting}
+          features={[t("roleAthleteF1"), t("roleAthleteF2"), t("roleAthleteF3")]}
           onSelect={(v) => { setRole(v); setError(null); }}
         />
 
