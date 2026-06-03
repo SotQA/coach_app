@@ -132,8 +132,8 @@ export function ExerciseCard({
         </Pressable>
 
         <View style={{ flex: 1 }}>
-          <Text style={{ ...Typography.section, fontWeight: "900" }}>
-            {expanded ? "Exercise" : summary}
+          <Text style={{ ...Typography.section, fontWeight: "900" }} numberOfLines={1}>
+            {expanded ? ((value.name ?? "").trim() || "New Exercise") : summary}
           </Text>
           {expanded ? (
             <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 2 }}>

@@ -56,8 +56,8 @@ export const StudentCard: FC<StudentCardProps> = ({
           size={44}
           backgroundColor={Colors.surface}
           textColor={Colors.text}
-          borderColor={Colors.border}
-          borderWidth={1}
+          borderColor={Colors.primary}
+          borderWidth={2}
         />
         <View style={{ flex: 1 }}>
           <Text style={{ ...Typography.section, fontSize: 16, fontWeight: "800" }}>{header}</Text>

@@ -65,6 +65,7 @@ export default function CoachLayout() {
         <Stack.Screen name="workoutExecution" options={{ headerShown: false }} />
         <Stack.Screen name="exerciseDetail" options={{ headerShown: false }} />
         <Stack.Screen name="createPersonalPlan" options={{ title: "Create Plan" }} />
+        <Stack.Screen name="workoutPlanDetail" options={{ title: "Workout" }} />
         <Stack.Screen name="personalProgress" options={{ title: "My Progress" }} />
       </Stack>
       <FloatingWorkoutBar />

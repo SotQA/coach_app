@@ -178,7 +178,6 @@ export default function CoachDashboard() {
     }
   }, [user?.id, user?.role]);
 
-  const mostRecentPlan = personalPlans[0] ?? null;
   const lastMsByPlanId = useMemo(() => {
     const map: Record<string, number> = {};
     for (const log of personalLogs) {
@@ -190,6 +189,17 @@ export default function CoachDashboard() {
     }
     return map;
   }, [personalLogs]);
+
+  const upcomingPlan = useMemo(() => {
+    if (personalPlans.length === 0) return null;
+    let best = personalPlans[0];
+    let bestLast = lastMsByPlanId[best.id] ?? 0;
+    for (const p of personalPlans) {
+      const last = lastMsByPlanId[p.id] ?? 0;
+      if (last < bestLast) { best = p; bestLast = last; }
+    }
+    return best;
+  }, [personalPlans, lastMsByPlanId]);
 
   if (loading) {
     return (
@@ -326,15 +336,17 @@ export default function CoachDashboard() {
               marginBottom: Spacing.md,
             }}
           >
-            <View
-              style={{
+            <Pressable
+              onPress={() => router.push("/coach/students" as any)}
+              style={({ pressed }) => ({
                 flex: 1,
                 backgroundColor: Colors.card,
                 borderRadius: Radius.lg,
                 padding: Spacing.md,
                 borderWidth: 1,
                 borderColor: Colors.border,
-              }}
+                opacity: pressed ? 0.85 : 1,
+              })}
             >
               <View
                 style={{
@@ -352,10 +364,10 @@ export default function CoachDashboard() {
               <Text style={{ fontSize: 32, fontWeight: "800", color: Colors.text, lineHeight: 36 }}>
                 {students.length}
               </Text>
-                <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 2 }}>
+              <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 2 }}>
                 {t("totalStudents")}
               </Text>
-            </View>
+            </Pressable>
 
             <View
               style={{
@@ -474,20 +486,23 @@ export default function CoachDashboard() {
               </Pressable>
             </View>
 
-            {mostRecentPlan ? (
+            {upcomingPlan ? (
               <View>
+                <Text style={{ ...Typography.secondary, color: Colors.primary, fontWeight: "800", marginBottom: 4 }}>
+                  {t("nextUp")}
+                </Text>
                 <Text style={{ ...Typography.section, fontSize: FontSizes.subheading, fontWeight: "800", marginBottom: 2 }}>
-                  {mostRecentPlan.name}
+                  {upcomingPlan.name}
                 </Text>
                 <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: Spacing.sm }}>
-                  {t("lastWhen", { when: formatRelativeDone(lastMsByPlanId[mostRecentPlan.id] ?? 0, t, locale) })}
+                  {t("lastWhen", { when: formatRelativeDone(lastMsByPlanId[upcomingPlan.id] ?? 0, t, locale) })}
                 </Text>
                 <PrimaryButton
                   title={t("start")}
                   onPress={() =>
                     router.push({
                       pathname: "/coach/workoutExecution" as any,
-                      params: { workoutPlanId: mostRecentPlan.id, workoutName: mostRecentPlan.name },
+                      params: { workoutPlanId: upcomingPlan.id, workoutName: upcomingPlan.name },
                     })
                   }
                 />
@@ -508,7 +523,6 @@ export default function CoachDashboard() {
             )}
           </View>
 
-          {/* Students list removed (available in Students tab). */}
         </ScrollView>
       </View>
     </ScreenLayout>

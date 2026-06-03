@@ -8,6 +8,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import DraggableFlatList, { type RenderItemParams } from "react-native-draggable-flatlist";
 import { ExerciseCard, type ExerciseDraft } from "../../components/ExerciseCard";
 import { ExerciseLibraryModal } from "../../components/ExerciseLibraryModal";
@@ -23,15 +24,13 @@ import type { Exercise } from "../../types/Workout";
 
 export default function AthletCreatePlan() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { user } = useAuth();
 
   const [planName, setPlanName] = useState("");
   const [note, setNote] = useState("");
   const [estimatedMinutes, setEstimatedMinutes] = useState("");
-  const [exercises, setExercises] = useState<ExerciseDraft[]>(() => {
-    const base = workoutService.createEmptyExercise();
-    return [{ _key: String(Date.now()), ...base, coachNote: "" }];
-  });
+  const [exercises, setExercises] = useState<ExerciseDraft[]>([]);
   const [expandedKey, setExpandedKey] = useState<string | null>(null);
   const [lastAddedKey, setLastAddedKey] = useState<string | null>(null);
   const [libraryOpen, setLibraryOpen] = useState(false);
@@ -253,7 +252,7 @@ export default function AthletCreatePlan() {
         />
       </KeyboardAvoidingView>
 
-      <View style={{ position: "absolute", left: 0, right: 0, bottom: 0, padding: Spacing.md, backgroundColor: Colors.bg, borderTopWidth: 1, borderTopColor: Colors.border }}>
+      <View style={{ position: "absolute", left: 0, right: 0, bottom: 0, padding: Spacing.md, paddingBottom: Math.max(insets.bottom, Spacing.md), backgroundColor: Colors.bg, borderTopWidth: 1, borderTopColor: Colors.border }}>
         {loading ? <ActivityIndicator /> : <PrimaryButton title="Save Plan" onPress={handleSave} />}
       </View>
 

@@ -9,6 +9,7 @@ const FAB_SIZE = 56;
 const ALLOWED_PATHS = [
   "/coach/dashboard",
   "/coach/students",
+  "/coach/myTraining",
   "/coach/progress",
   "/coach/profile",
 ];
@@ -28,19 +29,19 @@ export function CoachSpeedDial() {
   const insets = useSafeAreaInsets();
   const pathname = usePathname();
 
-  if (!ALLOWED_PATHS.some((p) => pathname === p)) return null;
-
+  const visible = ALLOWED_PATHS.some((p) => pathname === p);
   const bottomOffset = Math.max(insets.bottom, 8) - 22 + FAB_SIZE / 2;
 
   return (
     <View
+      pointerEvents={visible ? "box-none" : "none"}
       style={{
         position: "absolute",
         bottom: bottomOffset,
         alignSelf: "center",
         zIndex: 1000,
+        opacity: visible ? 1 : 0,
       }}
-      pointerEvents="box-none"
     >
       <Pressable
         onPress={() => router.push("/coach/createStudent")}

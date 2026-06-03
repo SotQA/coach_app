@@ -1,6 +1,7 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ActivityIndicator, Keyboard, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, Alert, Keyboard, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { ExerciseGroup } from "../../components/workout/ExerciseGroup";
@@ -97,6 +98,7 @@ function toLocalDrafts(exercises: ActiveExerciseDraft[], unit: WeightUnit): Exer
 
 export default function WorkoutExecution() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { user: authUser } = useAuth();
   const activeWorkout = useActiveWorkoutSession();
   const { hydrated } = activeWorkout;
@@ -257,6 +259,24 @@ export default function WorkoutExecution() {
     notesDebounceRef.current = setTimeout(() => { activeWorkout.updateNotes(text); }, 400);
   };
 
+  const handleDiscardWorkout = () => {
+    Alert.alert(
+      "Discard Workout?",
+      "This session will not be saved and will not count as completed.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Discard Workout",
+          style: "destructive",
+          onPress: async () => {
+            await activeWorkout.finishSession();
+            router.back();
+          },
+        },
+      ]
+    );
+  };
+
   // ── Render ─────────────────────────────────────────────────────────────────
 
   if (loading) {
@@ -375,15 +395,27 @@ export default function WorkoutExecution() {
       ) : null}
 
       {/* Sticky footer */}
-      <View style={S.footer}>
+      <View style={[S.footer, { paddingBottom: Math.max(insets.bottom, Spacing.md) }]}>
         <RestTimerBar />
         {submitting ? (
           <ActivityIndicator color={Colors.primary} />
         ) : (
-          <PrimaryButton
-            title={t("finishSession")}
-            onPress={() => plan && finishWorkout({ plan, drafts, notes: sessionNotes, bestWeightByExercise })}
-          />
+          <View style={{ flexDirection: "row", gap: Spacing.sm }}>
+            <View style={{ flex: 1 }}>
+              <PrimaryButton
+                title="Discard"
+                onPress={handleDiscardWorkout}
+                style={{ backgroundColor: Colors.danger }}
+                textStyle={{ color: "white" }}
+              />
+            </View>
+            <View style={{ flex: 1 }}>
+              <PrimaryButton
+                title={t("finishSession")}
+                onPress={() => plan && finishWorkout({ plan, drafts, notes: sessionNotes, bestWeightByExercise })}
+              />
+            </View>
+          </View>
         )}
       </View>
     </ScreenLayout>
