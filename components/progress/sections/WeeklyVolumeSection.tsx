@@ -7,7 +7,7 @@ import { Typography } from "../../../theme/typography";
 import { useI18n } from "../../../context/I18nContext";
 
 interface WeeklyVolumeSectionProps {
-  bars: Array<{ label: string; value: number }>;
+  bars: { label: string; value: number }[];
 }
 
 function WeeklyVolumeSectionInner({ bars }: WeeklyVolumeSectionProps) {

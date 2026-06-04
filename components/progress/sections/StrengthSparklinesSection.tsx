@@ -15,29 +15,14 @@ interface StrengthSparklinesSectionProps {
   onSelectExercise?: (exerciseName: string) => void;
 }
 
-function StrengthSparklinesSectionInner({
-  rows,
-  hasMore,
-  allRows,
-  onSelectExercise,
-}: StrengthSparklinesSectionProps) {
+function StrengthSparklinesSectionInner({ rows, hasMore, allRows, onSelectExercise }: StrengthSparklinesSectionProps) {
   const { t } = useI18n();
   const [showAll, setShowAll] = useState(false);
 
   if (rows.length === 0) {
     return (
-      <View
-        style={{
-          backgroundColor: Colors.card,
-          borderRadius: Radius.md,
-          padding: Spacing.md,
-          marginBottom: Spacing.lg,
-          alignItems: "center",
-        }}
-      >
-        <Text style={{ ...Typography.section, textAlign: "center", marginBottom: 6 }}>
-          {t("no_strength_data")}
-        </Text>
+      <View style={{ backgroundColor: Colors.card, borderRadius: Radius.md, padding: Spacing.md, marginBottom: Spacing.lg, alignItems: "center" }}>
+        <Text style={{ ...Typography.section, textAlign: "center", marginBottom: 6 }}>{t("no_strength_data")}</Text>
         <Text style={{ ...Typography.secondary, color: Colors.textMuted, textAlign: "center", maxWidth: 280 }}>
           {t("strength_unlocks_at_two_sessions")}
         </Text>
@@ -47,13 +32,7 @@ function StrengthSparklinesSectionInner({
 
   return (
     <View style={{ marginBottom: Spacing.lg }}>
-      <View
-        style={{
-          backgroundColor: Colors.card,
-          borderRadius: Radius.md,
-          overflow: "hidden",
-        }}
-      >
+      <View style={{ backgroundColor: Colors.card, borderRadius: Radius.md, overflow: "hidden" }}>
         {rows.map((row) => (
           <StrengthSparkRow
             key={row.exerciseName}
@@ -64,17 +43,12 @@ function StrengthSparklinesSectionInner({
             onPress={onSelectExercise ? () => onSelectExercise(row.exerciseName) : undefined}
           />
         ))}
-
         {hasMore && (
           <Pressable
             onPress={() => setShowAll(true)}
             style={({ pressed }) => ({
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
-              paddingHorizontal: Spacing.md,
-              paddingVertical: Spacing.sm,
-              opacity: pressed ? 0.7 : 1,
+              flexDirection: "row", alignItems: "center", justifyContent: "space-between",
+              paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm, opacity: pressed ? 0.7 : 1,
             })}
           >
             <Text style={{ fontSize: FontSizes.caption, color: Colors.primary, fontWeight: "700" }}>
@@ -87,16 +61,7 @@ function StrengthSparklinesSectionInner({
 
       <Modal visible={showAll} animationType="slide" presentationStyle="pageSheet">
         <View style={{ flex: 1, backgroundColor: Colors.bg }}>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
-              padding: Spacing.md,
-              borderBottomWidth: 1,
-              borderBottomColor: Colors.hairline,
-            }}
-          >
+          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: Spacing.md, borderBottomWidth: 1, borderBottomColor: Colors.hairline }}>
             <Text style={{ ...Typography.section }}>{t("show_all_exercises", { count: allRows.length })}</Text>
             <Pressable onPress={() => setShowAll(false)}>
               <Ionicons name="close" size={24} color={Colors.text} />
@@ -110,14 +75,7 @@ function StrengthSparklinesSectionInner({
                 currentE1RM={row.currentE1RM}
                 deltaKg={row.deltaKg}
                 points={row.points}
-                onPress={
-                  onSelectExercise
-                    ? () => {
-                        setShowAll(false);
-                        onSelectExercise(row.exerciseName);
-                      }
-                    : undefined
-                }
+                onPress={onSelectExercise ? () => { setShowAll(false); onSelectExercise(row.exerciseName); } : undefined}
               />
             ))}
           </ScrollView>
