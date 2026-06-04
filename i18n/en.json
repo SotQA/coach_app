@@ -229,5 +229,10 @@
   "photoPermissionDenied": "Photo library access denied. Enable it in Settings.",
   "cameraPermissionDenied": "Camera access denied. Enable it in Settings.",
   "photoUploadFailed": "Could not save photo. Try again.",
-  "photoSaved": "Photo saved"
+  "photoSaved": "Photo saved",
+
+  "status_ahead": "Ahead",
+  "status_ontrack": "On track",
+  "status_slipping": "Slipping",
+  "status_lagging": "Lagging"
 }

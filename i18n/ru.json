@@ -229,5 +229,10 @@
   "photoPermissionDenied": "Доступ к галерее запрещён. Включите его в настройках.",
   "cameraPermissionDenied": "Доступ к камере запрещён. Включите его в настройках.",
   "photoUploadFailed": "Не удалось сохранить фото. Попробуйте ещё раз.",
-  "photoSaved": "Фото сохранено"
+  "photoSaved": "Фото сохранено",
+
+  "status_ahead": "Опережает",
+  "status_ontrack": "В графике",
+  "status_slipping": "Отстаёт",
+  "status_lagging": "Сильно отстаёт"
 }

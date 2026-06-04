@@ -31,4 +31,8 @@ export const Colors = {
   hairline:        "rgba(255,255,255,0.06)",
   hairlineStrong:  "rgba(255,255,255,0.12)",
   primaryGlow:     "rgba(212,255,68,0.35)",
+
+  // Warning / amber (Phase A — StatusPill)
+  warning:         "#F59E0B",
+  warningTint:     "rgba(245,158,11,0.20)",
 } as const;

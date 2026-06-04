@@ -53,6 +53,7 @@ export default function CoachPersonalProgressScreen() {
       wpw={0}
       refreshing={refreshing}
       onRefresh={onRefresh}
+      screenLayoutEdges={["left", "right"]}
     />
   );
 }
