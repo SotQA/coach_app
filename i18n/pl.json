@@ -229,5 +229,10 @@
   "photoPermissionDenied": "Brak dostępu do biblioteki zdjęć. Włącz go w Ustawieniach.",
   "cameraPermissionDenied": "Brak dostępu do aparatu. Włącz go w Ustawieniach.",
   "photoUploadFailed": "Nie udało się zapisać zdjęcia. Spróbuj ponownie.",
-  "photoSaved": "Zdjęcie zapisane"
+  "photoSaved": "Zdjęcie zapisane",
+
+  "status_ahead": "Z wyprzedzeniem",
+  "status_ontrack": "Na dobrej drodze",
+  "status_slipping": "Spada",
+  "status_lagging": "Z tyłu"
 }
