@@ -1,11 +1,11 @@
 import type { ReactNode } from "react";
 import { View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, type Edge } from "react-native-safe-area-context";
 import { Colors } from "../theme/colors";
 
-export function ScreenLayout({ children }: { children: ReactNode }) {
+export function ScreenLayout({ children, edges }: { children: ReactNode; edges?: Edge[] }) {
   return (
-    <SafeAreaView edges={["top", "left", "right"]} style={{ flex: 1, backgroundColor: Colors.bg }}>
+    <SafeAreaView edges={edges ?? ["top", "left", "right"]} style={{ flex: 1, backgroundColor: Colors.bg }}>
       <View style={{ flex: 1 }}>{children}</View>
     </SafeAreaView>
   );
