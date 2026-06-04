@@ -1,7 +1,7 @@
 import React from "react";
 import { Pressable, Text, View } from "react-native";
 import { Colors } from "../../theme/colors";
-import { FontSizes, Typography } from "../../theme/typography";
+import { Typography } from "../../theme/typography";
 import { dayKeyFromDate, dayKeyFromMs, startOfWeekMonday } from "../../utils/dateRanges";
 
 interface ConsistencyHeatmapProps {
