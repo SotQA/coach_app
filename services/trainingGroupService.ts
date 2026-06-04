@@ -188,5 +188,25 @@ export const trainingGroupService = {
       return items[0] ?? null;
     }
   },
+
+  /** Student-side query: fetch the most recent group by studentId alone (no coachId needed). */
+  async getLatestGroupForStudentId(studentId: string): Promise<TrainingGroup | null> {
+    assertNonEmpty(studentId, "studentId");
+    try {
+      const items = await listTrainingGroups([
+        where("studentId", "==", studentId),
+        orderBy("updatedAt", "desc"),
+        limit(1),
+      ]);
+      return items[0] ?? null;
+    } catch {
+      const items = await listTrainingGroups([where("studentId", "==", studentId)]);
+      return items.sort((a: any, b: any) => {
+        const aMs = new Date(a.updatedAt ?? a.createdAt ?? 0).getTime();
+        const bMs = new Date(b.updatedAt ?? b.createdAt ?? 0).getTime();
+        return bMs - aMs;
+      })[0] ?? null;
+    }
+  },
 };
 
