@@ -234,5 +234,40 @@
   "status_ahead": "Опережает",
   "status_ontrack": "В графике",
   "status_slipping": "Отстаёт",
-  "status_lagging": "Сильно отстаёт"
+  "status_lagging": "Сильно отстаёт",
+
+  "progress": "Прогресс",
+  "streak": "Серия",
+  "weeks_one": "%{count} неделя",
+  "weeks_other": "%{count} недель",
+  "sessions_this_week": "На этой неделе",
+  "volume_in_range": "Объём",
+  "no_change": "без изменений",
+
+  "consistency": "Стабильность",
+  "no_recent_sessions": "Нет тренировок за последние 12 недель",
+
+  "weekly_volume": "Объём по неделям",
+  "no_volume_data": "Недостаточно данных для графика объёма",
+
+  "no_strength_data": "Пока нет данных о силе",
+  "strength_unlocks_at_two_sessions": "Запишите минимум две тренировки одного упражнения, чтобы увидеть тренд 1ПМ.",
+  "show_all_exercises": "Показать все (%{count})",
+
+  "recent_prs": "Недавние рекорды",
+  "no_prs_yet": "Нет рекордов за этот период",
+
+  "insights": "Подсказки",
+  "no_insights_yet": "Пока нет подсказок — продолжайте тренироваться.",
+
+  "no_progress_data_yet": "Прогресс открывается после первой тренировки",
+  "start_first_workout_to_unlock": "Запишите первую тренировку, чтобы отслеживать силу, объём и рекорды.",
+  "start_a_workout": "Начать тренировку",
+
+  "almost_there": "Почти готово",
+  "log_one_more_to_unlock_charts": "Графики откроются после двух тренировок в выбранном периоде.",
+  "log_a_workout": "Записать тренировку",
+
+  "not_enough_in_range": "Недостаточно данных за этот период",
+  "try_a_longer_range_or_log_more": "Выберите более длинный период или сделайте больше тренировок."
 }

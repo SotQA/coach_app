@@ -234,5 +234,40 @@
   "status_ahead": "Z wyprzedzeniem",
   "status_ontrack": "Na dobrej drodze",
   "status_slipping": "Spada",
-  "status_lagging": "Z tyłu"
+  "status_lagging": "Z tyłu",
+
+  "progress": "Postępy",
+  "streak": "Seria",
+  "weeks_one": "%{count} tydzień",
+  "weeks_other": "%{count} tygodni",
+  "sessions_this_week": "W tym tygodniu",
+  "volume_in_range": "Objętość",
+  "no_change": "bez zmian",
+
+  "consistency": "Regularność",
+  "no_recent_sessions": "Brak sesji w ostatnich 12 tygodniach",
+
+  "weekly_volume": "Tygodniowa objętość",
+  "no_volume_data": "Za mało danych dla wykresu objętości",
+
+  "no_strength_data": "Brak danych siłowych",
+  "strength_unlocks_at_two_sessions": "Wykonaj co najmniej dwie sesje danego ćwiczenia, aby zobaczyć trend 1RM.",
+  "show_all_exercises": "Pokaż wszystkie %{count} ćwiczeń",
+
+  "recent_prs": "Ostatnie rekordy",
+  "no_prs_yet": "Brak rekordów w tym zakresie",
+
+  "insights": "Wskazówki",
+  "no_insights_yet": "Brak wskazówek — trenuj dalej.",
+
+  "no_progress_data_yet": "Postępy odblokowują się po pierwszym treningu",
+  "start_first_workout_to_unlock": "Zarejestruj swoją pierwszą sesję, aby śledzić siłę, objętość i rekordy.",
+  "start_a_workout": "Zacznij trening",
+
+  "almost_there": "Już prawie",
+  "log_one_more_to_unlock_charts": "Wykresy odblokowują się po dwóch sesjach w wybranym zakresie.",
+  "log_a_workout": "Zarejestruj trening",
+
+  "not_enough_in_range": "Za mało danych w tym zakresie",
+  "try_a_longer_range_or_log_more": "Wybierz dłuższy zakres lub wykonaj więcej sesji."
 }

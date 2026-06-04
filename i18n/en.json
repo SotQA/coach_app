@@ -234,5 +234,40 @@
   "status_ahead": "Ahead",
   "status_ontrack": "On track",
   "status_slipping": "Slipping",
-  "status_lagging": "Lagging"
+  "status_lagging": "Lagging",
+
+  "progress": "Progress",
+  "streak": "Streak",
+  "weeks_one": "%{count} week",
+  "weeks_other": "%{count} weeks",
+  "sessions_this_week": "This week",
+  "volume_in_range": "Volume",
+  "no_change": "no change",
+
+  "consistency": "Consistency",
+  "no_recent_sessions": "No sessions in the last 12 weeks",
+
+  "weekly_volume": "Weekly volume",
+  "no_volume_data": "Not enough data for the volume chart",
+
+  "no_strength_data": "No strength data yet",
+  "strength_unlocks_at_two_sessions": "Log at least two sessions of an exercise to see your 1RM trend.",
+  "show_all_exercises": "Show all %{count} exercises",
+
+  "recent_prs": "Recent PRs",
+  "no_prs_yet": "No PRs in this range",
+
+  "insights": "Insights",
+  "no_insights_yet": "No insights yet — keep training.",
+
+  "no_progress_data_yet": "Progress unlocks after your first workout",
+  "start_first_workout_to_unlock": "Log your first session to start tracking strength, volume, and PRs.",
+  "start_a_workout": "Start a workout",
+
+  "almost_there": "Almost there",
+  "log_one_more_to_unlock_charts": "Charts unlock after two logged sessions in your selected range.",
+  "log_a_workout": "Log a workout",
+
+  "not_enough_in_range": "Not enough data in this range",
+  "try_a_longer_range_or_log_more": "Try a longer range or log more sessions."
 }
