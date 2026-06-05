@@ -269,5 +269,23 @@
   "log_a_workout": "Zarejestruj trening",
 
   "not_enough_in_range": "Za mało danych w tym zakresie",
-  "try_a_longer_range_or_log_more": "Wybierz dłuższy zakres lub wykonaj więcej sesji."
+  "try_a_longer_range_or_log_more": "Wybierz dłuższy zakres lub wykonaj więcej sesji.",
+
+  "needs_attention": "Wymaga uwagi",
+  "awaiting_feedback": "Czeka na opinię",
+  "leaderboard": "Tablica wyników",
+  "most_consistent": "Najbardziej regularni",
+  "most_prs": "Najwięcej rekordów",
+  "most_sessions": "Najwięcej sesji",
+
+  "active_last_14d": "w ostatnich 14 dniach",
+  "of_roster_this_week": "kadry w tym tygodniu",
+  "prs_last_28d": "w ostatnich 28 dniach",
+
+  "no_roster_yet": "Brak podopiecznych",
+  "add_student_to_see_progress": "Dodaj pierwszego ucznia, aby zobaczyć postępy kadry.",
+  "add_student": "Dodaj ucznia",
+
+  "all_caught_up": "Wszystko zrobione — brak treningów do oceny.",
+  "roster_too_new_to_rank": "Za mało danych do rankingu — zarejestruj więcej sesji."
 }
