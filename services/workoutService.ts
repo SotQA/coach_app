@@ -4,6 +4,7 @@ import {
   doc,
   getDoc,
   getDocs,
+  limit as limitFn,
   query,
   where,
   orderBy,
@@ -194,6 +195,7 @@ const mapLogDoc = (snap: QueryDocumentSnapshot): WorkoutLog => {
         : undefined,
     feedbackCreatedAt:
       data.feedbackCreatedAt != null ? String(data.feedbackCreatedAt) : undefined,
+    coachFeedbackPending: data.coachFeedbackPending === true,
     durationSeconds:
       data.durationSeconds != null && Number.isFinite(Number(data.durationSeconds))
         ? Math.max(0, Math.floor(Number(data.durationSeconds)))
@@ -489,6 +491,7 @@ export const workoutService = {
       sanitizeForFirestore({
         coachFeedback: text,
         feedbackCreatedAt: new Date().toISOString(),
+        coachFeedbackPending: false,
       }) as any
     );
   },
@@ -503,6 +506,7 @@ export const workoutService = {
     totalVolume?: number;
     durationSeconds?: number;
     sessionNotes?: string;
+    coachId?: string;
   }): Promise<WorkoutLog> {
     assertNonEmpty(payload.studentId, "studentId (Firebase Auth UID)");
     assertNonEmpty(payload.workoutPlanId, "workoutPlanId");
@@ -530,6 +534,11 @@ export const workoutService = {
         ? String(payload.sessionNotes).trim()
         : undefined;
 
+    const coachId =
+      payload.coachId != null && payload.coachId.trim() !== ""
+        ? payload.coachId.trim()
+        : undefined;
+
     const dataToWrite = sanitizeForFirestore({
       studentId: payload.studentId,
       workoutPlanId: payload.workoutPlanId,
@@ -539,6 +548,8 @@ export const workoutService = {
       totalVolume,
       sessionNotes,
       ...(durationSeconds !== undefined ? { durationSeconds } : {}),
+      ...(coachId !== undefined ? { coachId } : {}),
+      coachFeedbackPending: coachId ? true : false,
     });
 
     const ref = await addDoc(collection(db, WORKOUT_LOGS_COLLECTION), dataToWrite);
@@ -564,6 +575,31 @@ export const workoutService = {
       const aMs = toMs((a as any).completedAt ?? (a as any).date);
       return bMs - aMs;
     });
+  },
+
+  async getLogsForCoachRecent(
+    coachId: string,
+    sinceMs: number,
+    limit?: number,
+  ): Promise<WorkoutLog[]> {
+    assertNonEmpty(coachId, "coachId");
+    const constraints: QueryConstraint[] = [
+      where("coachId", "==", coachId),
+      where("completedAt", ">", new Date(sinceMs)),
+      orderBy("completedAt", "desc"),
+    ];
+    if (limit != null) constraints.push(limitFn(limit));
+    return listWorkoutLogs(constraints);
+  },
+
+  async getLogsAwaitingFeedback(coachId: string, limit = 20): Promise<WorkoutLog[]> {
+    assertNonEmpty(coachId, "coachId");
+    return listWorkoutLogs([
+      where("coachId", "==", coachId),
+      where("coachFeedbackPending", "==", true),
+      orderBy("completedAt", "desc"),
+      limitFn(limit),
+    ]);
   },
 
   // Helper used by coach screens when building workout plans interactively.

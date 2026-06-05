@@ -78,6 +78,7 @@ export interface WorkoutLogFirestoreDoc {
   durationSeconds?: number;
   coachFeedback?: string;
   feedbackCreatedAt?: string;
+  coachFeedbackPending?: boolean;
 }
 
 export interface TrainingGroupFirestoreDoc {

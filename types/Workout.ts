@@ -64,6 +64,8 @@ export interface WorkoutLog {
   /** Coach feedback on a completed workout. */
   coachFeedback?: string;
   feedbackCreatedAt?: string;
+  /** True until the coach submits feedback; false after feedback is saved. */
+  coachFeedbackPending?: boolean;
   /** Wall-clock workout length (execution screen → complete), seconds. */
   durationSeconds?: number;
   // Legacy fields (for backward compatibility with older workout logs).

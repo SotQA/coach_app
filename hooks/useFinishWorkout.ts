@@ -126,6 +126,7 @@ export function useFinishWorkout(): UseFinishWorkout {
         totalVolume,
         durationSeconds,
         sessionNotes: notes.trim() || undefined,
+        coachId: authUser.role === "student" ? plan.coachId : undefined,
       });
 
       // Clear the active session from context + AsyncStorage.
