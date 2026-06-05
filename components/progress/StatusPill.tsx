@@ -59,6 +59,7 @@ function StatusPillInner({ status, size = "sm", label }: StatusPillProps) {
   return (
     <View
       accessible
+      accessibilityRole="text"
       accessibilityLabel={t(STATUS_A11Y_KEY[status])}
       style={{
         backgroundColor: style.bg,

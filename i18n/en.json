@@ -287,5 +287,20 @@
   "add_student": "Add student",
 
   "all_caught_up": "All caught up — no workouts waiting for feedback.",
-  "roster_too_new_to_rank": "Roster too new to rank — log a few more sessions."
+  "roster_too_new_to_rank": "Roster too new to rank — log a few more sessions.",
+
+  "leave_feedback_on_last_workout": "Leave feedback on last workout",
+
+  "last_active_today": "Active today",
+  "last_active_days_ago_one": "Active %{count} day ago",
+  "last_active_days_ago_other": "Active %{count} days ago",
+
+  "status_a11y_ahead": "Status: ahead of weekly target",
+  "status_a11y_ontrack": "Status: on track",
+  "status_a11y_slipping": "Status: slipping below target",
+  "status_a11y_lagging": "Status: lagging behind target",
+
+  "a11y_sparkline_summary": "%{exerciseName} one-rep max trend, currently %{latest}, change %{delta}",
+  "a11y_weekly_volume_summary": "Weekly volume bars over %{weeks} weeks, peak %{peak}",
+  "a11y_heatmap_summary": "Consistency heatmap, %{sessions} sessions across %{weeks} weeks"
 }
