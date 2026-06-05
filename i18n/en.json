@@ -269,5 +269,23 @@
   "log_a_workout": "Log a workout",
 
   "not_enough_in_range": "Not enough data in this range",
-  "try_a_longer_range_or_log_more": "Try a longer range or log more sessions."
+  "try_a_longer_range_or_log_more": "Try a longer range or log more sessions.",
+
+  "needs_attention": "Needs attention",
+  "awaiting_feedback": "Awaiting feedback",
+  "leaderboard": "Leaderboard",
+  "most_consistent": "Most consistent",
+  "most_prs": "Most PRs",
+  "most_sessions": "Most sessions",
+
+  "active_last_14d": "in last 14 days",
+  "of_roster_this_week": "of roster this week",
+  "prs_last_28d": "in last 28 days",
+
+  "no_roster_yet": "No students yet",
+  "add_student_to_see_progress": "Add your first student to see roster progress.",
+  "add_student": "Add student",
+
+  "all_caught_up": "All caught up — no workouts waiting for feedback.",
+  "roster_too_new_to_rank": "Roster too new to rank — log a few more sessions."
 }
