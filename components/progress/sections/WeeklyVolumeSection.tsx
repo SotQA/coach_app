@@ -33,10 +33,17 @@ function WeeklyVolumeSectionInner({ bars }: WeeklyVolumeSectionProps) {
     );
   }
 
+  const peak = bars.reduce((m, b) => Math.max(m, b.value), 0);
+
   return (
     <View style={{ marginBottom: Spacing.lg }}>
       <Text style={{ ...Typography.section, marginBottom: Spacing.sm }}>{t("weekly_volume")}</Text>
-      <View style={{ backgroundColor: Colors.card, borderRadius: Radius.md, padding: Spacing.sm }}>
+      <View
+        accessible
+        accessibilityRole="image"
+        accessibilityLabel={t("a11y_weekly_volume_summary", { weeks: bars.length, peak: Math.round(peak) })}
+        style={{ backgroundColor: Colors.card, borderRadius: Radius.md, padding: Spacing.sm }}
+      >
         <WeekBars bars={bars} width={chartWidth} height={140} averageLine />
       </View>
     </View>

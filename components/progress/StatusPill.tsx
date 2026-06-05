@@ -39,6 +39,13 @@ const STATUS_STYLES: Record<
   },
 };
 
+const STATUS_A11Y_KEY: Record<RosterStatus, string> = {
+  ahead: "status_a11y_ahead",
+  ontrack: "status_a11y_ontrack",
+  slipping: "status_a11y_slipping",
+  lagging: "status_a11y_lagging",
+};
+
 function StatusPillInner({ status, size = "sm", label }: StatusPillProps) {
   const { t } = useI18n();
   const style = STATUS_STYLES[status];
@@ -51,6 +58,8 @@ function StatusPillInner({ status, size = "sm", label }: StatusPillProps) {
 
   return (
     <View
+      accessible
+      accessibilityLabel={t(STATUS_A11Y_KEY[status])}
       style={{
         backgroundColor: style.bg,
         borderRadius: Radius.pill,
