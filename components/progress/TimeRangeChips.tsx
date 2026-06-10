@@ -31,6 +31,8 @@ function TimeRangeChipsInner({ value, onChange }: TimeRangeChipsProps) {
           <Pressable
             key={p.key}
             onPress={() => onChange(p.key)}
+            accessibilityRole="button"
+            accessibilityLabel={`${p.label}${selected ? ", selected" : ""}`}
             style={({ pressed }) => ({
               backgroundColor: selected ? Colors.primary : Colors.surface,
               borderRadius: Radius.pill,

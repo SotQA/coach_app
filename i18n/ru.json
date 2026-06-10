@@ -287,5 +287,20 @@
   "add_student": "Добавить ученика",
 
   "all_caught_up": "Всё проверено — нет тренировок, ожидающих отзыва.",
-  "roster_too_new_to_rank": "Слишком мало данных для рейтинга — нужно больше тренировок."
+  "roster_too_new_to_rank": "Слишком мало данных для рейтинга — нужно больше тренировок.",
+
+  "leave_feedback_on_last_workout": "Оставить отзыв к последней тренировке",
+
+  "last_active_today": "Активен сегодня",
+  "last_active_days_ago_one": "Активен %{count} день назад",
+  "last_active_days_ago_other": "Активен %{count} дней назад",
+
+  "status_a11y_ahead": "Статус: впереди недельной цели",
+  "status_a11y_ontrack": "Статус: в графике",
+  "status_a11y_slipping": "Статус: ниже цели",
+  "status_a11y_lagging": "Статус: значительно отстаёт",
+
+  "a11y_sparkline_summary": "Тренд 1ПМ %{exerciseName}, текущий %{latest}, изменение %{delta}",
+  "a11y_weekly_volume_summary": "Объём по неделям за %{weeks} недель, пик %{peak}",
+  "a11y_heatmap_summary": "Тепловая карта регулярности: %{sessions} тренировок за %{weeks} недель"
 }

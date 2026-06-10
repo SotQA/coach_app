@@ -17,13 +17,19 @@ function ConsistencyHeatmapSectionInner({ countsByDay }: ConsistencyHeatmapSecti
   return (
     <View style={{ marginBottom: Spacing.lg }}>
       <Text style={{ ...Typography.section, marginBottom: Spacing.sm }}>{t("consistency")}</Text>
-      <ConsistencyHeatmap
-        countsByDay={countsByDay}
-        endDate={new Date()}
-        weeks={12}
-        cellSize={12}
-        gap={3}
-      />
+      <View
+        accessible
+        accessibilityRole="image"
+        accessibilityLabel={t("a11y_heatmap_summary", { sessions: totalSessions, weeks: 12 })}
+      >
+        <ConsistencyHeatmap
+          countsByDay={countsByDay}
+          endDate={new Date()}
+          weeks={12}
+          cellSize={12}
+          gap={3}
+        />
+      </View>
       {totalSessions === 0 && (
         <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: Spacing.sm }}>
           {t("no_recent_sessions")}

@@ -46,6 +46,8 @@ function StrengthSparklinesSectionInner({ rows, hasMore, allRows, onSelectExerci
         {hasMore && (
           <Pressable
             onPress={() => setShowAll(true)}
+            accessibilityRole="button"
+            accessibilityLabel={t("show_all_exercises", { count: allRows.length })}
             style={({ pressed }) => ({
               flexDirection: "row", alignItems: "center", justifyContent: "space-between",
               paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm, opacity: pressed ? 0.7 : 1,
@@ -63,7 +65,11 @@ function StrengthSparklinesSectionInner({ rows, hasMore, allRows, onSelectExerci
         <View style={{ flex: 1, backgroundColor: Colors.bg }}>
           <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: Spacing.md, borderBottomWidth: 1, borderBottomColor: Colors.hairline }}>
             <Text style={{ ...Typography.section }}>{t("show_all_exercises", { count: allRows.length })}</Text>
-            <Pressable onPress={() => setShowAll(false)}>
+            <Pressable
+              onPress={() => setShowAll(false)}
+              accessibilityRole="button"
+              accessibilityLabel="Close"
+            >
               <Ionicons name="close" size={24} color={Colors.text} />
             </Pressable>
           </View>

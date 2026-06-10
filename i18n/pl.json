@@ -287,5 +287,20 @@
   "add_student": "Dodaj ucznia",
 
   "all_caught_up": "Wszystko zrobione — brak treningów do oceny.",
-  "roster_too_new_to_rank": "Za mało danych do rankingu — zarejestruj więcej sesji."
+  "roster_too_new_to_rank": "Za mało danych do rankingu — zarejestruj więcej sesji.",
+
+  "leave_feedback_on_last_workout": "Zostaw opinię do ostatniego treningu",
+
+  "last_active_today": "Aktywny dzisiaj",
+  "last_active_days_ago_one": "Aktywność %{count} dzień temu",
+  "last_active_days_ago_other": "Aktywność %{count} dni temu",
+
+  "status_a11y_ahead": "Status: powyżej celu tygodniowego",
+  "status_a11y_ontrack": "Status: zgodnie z planem",
+  "status_a11y_slipping": "Status: poniżej celu",
+  "status_a11y_lagging": "Status: znacząco poniżej celu",
+
+  "a11y_sparkline_summary": "Trend 1RM %{exerciseName}, aktualnie %{latest}, zmiana %{delta}",
+  "a11y_weekly_volume_summary": "Tygodniowa objętość przez %{weeks} tygodni, szczyt %{peak}",
+  "a11y_heatmap_summary": "Heatmapa regularności, %{sessions} sesji w %{weeks} tygodniach"
 }

@@ -48,6 +48,7 @@ export interface UseStudentProgressResult {
   weeklyTarget: number | null;
   streakWeeks: number;
   sessionsThisWeek: number;
+  sessionsLastWeek: number;
   totalVolumeInRange: number;
   totalVolumeDeltaPct: number | null;
   countsByDay: Record<string, number>;
@@ -57,6 +58,8 @@ export interface UseStudentProgressResult {
   weeklyVolumeBars: { label: string; value: number }[];
   recentPRs: PRRecord[];
   coachingSignals: CoachingSignal[];
+  lastSessionMs: number | null;
+  lastLogId: string | null;
 }
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
@@ -138,6 +141,11 @@ export function useStudentProgress(
   const sessionsThisWeek = useMemo(() => {
     const start = startOfWeekMondayMs(Date.now());
     return normalizedLogs.filter((x) => x._ms >= start).length;
+  }, [normalizedLogs]);
+
+  const sessionsLastWeek = useMemo(() => {
+    const thisWeekStart = startOfWeekMondayMs(Date.now());
+    return normalizedLogs.filter((x) => x._ms >= thisWeekStart - WEEK_MS && x._ms < thisWeekStart).length;
   }, [normalizedLogs]);
 
   const totalVolumeInRange = useMemo(
@@ -235,13 +243,17 @@ export function useStudentProgress(
     return [...signals, ...plateauSignals].slice(0, 8);
   }, [logsInRange, normalizedLogs, strengthRows, weeklyTarget, sessionsThisWeek, rangeStartMs, rangeEndMs]);
 
+  const lastSessionMs = normalizedLogs.length > 0 ? normalizedLogs[0]._ms : null;
+  const lastLogId = normalizedLogs.length > 0 ? normalizedLogs[0].log.id : null;
+
   return {
     loading, error, refreshing, onRefresh,
     hasAnyLogs, hasMinimumData,
     timePreset, setTimePreset, rangeStartMs, rangeEndMs, weeklyTarget,
-    streakWeeks, sessionsThisWeek, totalVolumeInRange, totalVolumeDeltaPct,
+    streakWeeks, sessionsThisWeek, sessionsLastWeek, totalVolumeInRange, totalVolumeDeltaPct,
     countsByDay,
     strengthRows, hasMoreStrengthRows, allStrengthRows,
     weeklyVolumeBars, recentPRs, coachingSignals,
+    lastSessionMs, lastLogId,
   };
 }

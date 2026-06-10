@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import { View } from "react-native";
 import Svg, { Circle } from "react-native-svg";
+import Animated, { FadeInDown, useReducedMotion } from "react-native-reanimated";
 import { HeroKpiCard } from "../HeroKpiCard";
 import { Colors } from "../../../theme/colors";
 import { Spacing } from "../../../theme/spacing";
@@ -46,6 +47,10 @@ function HeroKpiBandInner({
 }: HeroKpiBandProps) {
   const { t } = useI18n();
   const { formatWeight } = useUnits();
+  const reducedMotion = useReducedMotion();
+
+  const fadeFor = (delay: number) =>
+    reducedMotion ? undefined : FadeInDown.duration(280).delay(delay);
 
   const streakCard = useMemo(() => ({
     label: t("streak"),
@@ -80,13 +85,19 @@ function HeroKpiBandInner({
 
   return (
     <View style={{ flexDirection: "row", gap: Spacing.xs, marginBottom: Spacing.lg }}>
-      <HeroKpiCard label={streakCard.label} value={streakCard.value} subtitle={streakCard.subtitle} />
-      <HeroKpiCard
-        label={sessionsCard.label}
-        value={sessionsCard.value}
-        rightSlot={sessionsCard.rightSlot}
-      />
-      <HeroKpiCard label={volumeCard.label} value={volumeCard.value} delta={volumeCard.delta} />
+      <Animated.View entering={fadeFor(0)} style={{ flex: 1 }}>
+        <HeroKpiCard label={streakCard.label} value={streakCard.value} subtitle={streakCard.subtitle} />
+      </Animated.View>
+      <Animated.View entering={fadeFor(80)} style={{ flex: 1 }}>
+        <HeroKpiCard
+          label={sessionsCard.label}
+          value={sessionsCard.value}
+          rightSlot={sessionsCard.rightSlot}
+        />
+      </Animated.View>
+      <Animated.View entering={fadeFor(160)} style={{ flex: 1 }}>
+        <HeroKpiCard label={volumeCard.label} value={volumeCard.value} delta={volumeCard.delta} />
+      </Animated.View>
     </View>
   );
 }

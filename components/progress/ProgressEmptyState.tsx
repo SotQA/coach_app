@@ -102,6 +102,8 @@ function ProgressEmptyStateInner({
       {handleCta && ctaLabel && (
         <Pressable
           onPress={handleCta}
+          accessibilityRole="button"
+          accessibilityLabel={ctaLabel}
           style={({ pressed }) => ({
             backgroundColor: Colors.primary,
             borderRadius: Radius.pill,

@@ -31,9 +31,20 @@ function HeroKpiCardInner({
   const deltaGlyph =
     delta?.direction === "up" ? "↑" : delta?.direction === "down" ? "↓" : "—";
 
+  const a11yLabel = [
+    label,
+    value,
+    subtitle ?? undefined,
+    delta ? `${delta.direction === "up" ? "up" : delta.direction === "down" ? "down" : ""} ${delta.value}`.trim() : undefined,
+  ]
+    .filter(Boolean)
+    .join(", ");
+
   return (
     <Pressable
       onPress={onPress}
+      accessibilityRole={onPress ? "button" : "text"}
+      accessibilityLabel={a11yLabel}
       style={({ pressed }) => ({
         flex: 1,
         minWidth: 0,

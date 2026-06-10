@@ -4,6 +4,7 @@ import { Colors } from "../../theme/colors";
 import { Spacing } from "../../theme/spacing";
 import { FontSizes, Typography } from "../../theme/typography";
 import { useUnits } from "../../context/UnitsContext";
+import { useI18n } from "../../context/I18nContext";
 import { Sparkline } from "./Sparkline";
 
 interface StrengthSparkRowProps {
@@ -22,15 +23,27 @@ function StrengthSparkRowInner({
   onPress,
 }: StrengthSparkRowProps) {
   const { formatWeight } = useUnits();
+  const { t } = useI18n();
 
   const hasDelta = deltaKg != null && deltaKg !== 0;
   const deltaUp = deltaKg != null && deltaKg > 0;
   const deltaColor = deltaUp ? Colors.primary : Colors.danger;
   const deltaGlyph = deltaUp ? "↑" : "↓";
 
+  const deltaLabel = deltaKg != null && deltaKg !== 0
+    ? `, ${deltaKg > 0 ? "up" : "down"} ${formatWeight(Math.abs(deltaKg))}`
+    : "";
+  const sparklineLabel = t("a11y_sparkline_summary", {
+    exerciseName,
+    latest: currentE1RM != null ? formatWeight(currentE1RM) : "—",
+    delta: deltaLabel || "no change",
+  });
+
   return (
     <Pressable
       onPress={onPress}
+      accessibilityRole={onPress ? "button" : "text"}
+      accessibilityLabel={`${exerciseName}, ${currentE1RM != null ? formatWeight(currentE1RM) : "—"}${deltaLabel}`}
       style={({ pressed }) => ({
         flexDirection: "row",
         alignItems: "center",
@@ -72,13 +85,15 @@ function StrengthSparkRowInner({
         </View>
       </View>
 
-      <Sparkline
-        points={points}
-        width={120}
-        height={40}
-        color={Colors.primary}
-        highlightLast
-      />
+      <View accessible accessibilityRole="image" accessibilityLabel={sparklineLabel} importantForAccessibility="yes">
+        <Sparkline
+          points={points}
+          width={120}
+          height={40}
+          color={Colors.primary}
+          highlightLast
+        />
+      </View>
     </Pressable>
   );
 }
