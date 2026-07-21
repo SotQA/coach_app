@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Board</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        h1 { font-size: 24px; font-weight: 500; color: #1a1a1a; }
+        .sync-btn { padding: 10px 16px; background: #1976d2; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; }
+        .sync-btn:hover { background: #1565c0; }
+        .info { background: white; padding: 12px 16px; border-radius: 6px; margin-bottom: 20px; font-size: 13px; color: #666; border-left: 4px solid #1976d2; }
+        .board { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px; }
+        .column { background: white; border-radius: 8px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; flex-direction: column; min-height: 500px; }
+        .column-header { font-size: 15px; font-weight: 500; color: #1a1a1a; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+        .column-count { background: #f5f5f5; padding: 2px 8px; border-radius: 4px; font-size: 12px; color: #666; }
+        .tasks { flex: 1; display: flex; flex-direction: column; gap: 12px; }
+        .task { padding: 12px; background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 6px; cursor: grab; border-left: 3px solid; transition: all 0.2s ease; }
+        .task:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .task-title { font-size: 14px; font-weight: 500; color: #1a1a1a; margin-bottom: 4px; }
+        .task-meta { display: flex; gap: 8px; font-size: 11px; color: #666; }
+        .task-priority { padding: 2px 6px; border-radius: 3px; font-size: 11px; font-weight: 500; }
+        .priority-high { background: #ffebee; color: #c62828; border-left-color: #f44336; }
+        .priority-medium { background: #fff3e0; color: #e65100; border-left-color: #ff9800; }
+        .priority-low { background: #e8f5e9; color: #2e7d32; border-left-color: #4caf50; }
+        .task-delete { background: none; border: none; color: #999; cursor: pointer; padding: 4px; }
+        .task-delete:hover { color: #f44336; }
+        .add-task-input { width: 100%; padding: 10px; border: 1px solid #1976d2; border-radius: 4px; font-size: 14px; margin-bottom: 8px; }
+        .add-task-btn { width: 100%; padding: 10px; background: #f0f0f0; border: none; border-radius: 4px; color: #666; cursor: pointer; font-size: 14px; margin-top: auto; }
+        .add-task-btn:hover { background: #e0e0e0; }
+        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
+        .modal.active { display: flex; }
+        .modal-content { background: white; padding: 30px; border-radius: 8px; max-width: 500px; }
+        .modal-content h2 { margin-bottom: 12px; }
+        .modal-content textarea { width: 100%; height: 200px; padding: 10px; font-family: monospace; font-size: 12px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 12px; }
+        .modal-buttons { display: flex; gap: 8px; }
+        .modal-buttons button { flex: 1; padding: 10px; border: none; border-radius: 4px; cursor: pointer; font-weight: 500; }
+        .copy-btn { background: #1976d2; color: white; }
+        .close-btn { background: #f0f0f0; color: #1a1a1a; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const KanbanBoard = () => {
+            const [board, setBoard] = React.useState({
+                todo: { title: 'To Do', tasks: [] },
+                'in-progress': { title: 'In Progress', tasks: [] },
+                done: { title: 'Done', tasks: [] }
+            });
+
+            const [draggedTask, setDraggedTask] = React.useState(null);
+            const [newTaskColumn, setNewTaskColumn] = React.useState(null);
+            const [newTaskTitle, setNewTaskTitle] = React.useState('');
+            const [showModal, setShowModal] = React.useState(false);
+
+            React.useEffect(() => {
+                const saved = localStorage.getItem('kanban-board');
+                if (saved) {
+                    try {
+                        setBoard(JSON.parse(saved));
+                    } catch (e) {
+                        console.error('Failed to load board:', e);
+                    }
+                }
+            }, []);
+
+            React.useEffect(() => {
+                localStorage.setItem('kanban-board', JSON.stringify(board));
+            }, [board]);
+
+            const addTask = (columnId) => {
+                if (!newTaskTitle.trim()) return;
+
+                const newTask = {
+                    id: Date.now(),
+                    title: newTaskTitle,
+                    priority: 'medium',
+                    created: new Date().toISOString().split('T')[0]
+                };
+
+                setBoard(prev => ({
+                    ...prev,
+                    [columnId]: {
+                        ...prev[columnId],
+                        tasks: [...prev[columnId].tasks, newTask]
+                    }
+                }));
+
+                setNewTaskTitle('');
+                setNewTaskColumn(null);
+            };
+
+            const deleteTask = (columnId, taskId) => {
+                setBoard(prev => ({
+                    ...prev,
+                    [columnId]: {
+                        ...prev[columnId],
+                        tasks: prev[columnId].tasks.filter(t => t.id !== taskId)
+                    }
+                }));
+            };
+
+            const moveTask = (fromColumn, toColumn, taskId) => {
+                const task = board[fromColumn].tasks.find(t => t.id === taskId);
+                if (!task) return;
+
+                setBoard(prev => ({
+                    ...prev,
+                    [fromColumn]: {
+                        ...prev[fromColumn],
+                        tasks: prev[fromColumn].tasks.filter(t => t.id !== taskId)
+                    },
+                    [toColumn]: {
+                        ...prev[toColumn],
+                        tasks: [...prev[toColumn].tasks, task]
+                    }
+                }));
+            };
+
+            const handleDragStart = (e, columnId, taskId) => {
+                setDraggedTask({ columnId, taskId });
+                e.dataTransfer.effectAllowed = 'move';
+            };
+
+            const handleDragOver = (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+            };
+
+            const handleDrop = (e, toColumnId) => {
+                e.preventDefault();
+                if (draggedTask) {
+                    moveTask(draggedTask.columnId, toColumnId, draggedTask.taskId);
+                    setDraggedTask(null);
+                }
+            };
+
+            const exportBoard = () => {
+                const dataStr = JSON.stringify({ board }, null, 2);
+                const textarea = document.querySelector('.modal-content textarea');
+                if (textarea) {
+                    textarea.value = dataStr;
+                }
+                setShowModal(true);
+            };
+
+            const copyToClipboard = () => {
+                const textarea = document.querySelector('.modal-content textarea');
+                if (textarea) {
+                    textarea.select();
+                    document.execCommand('copy');
+                    alert('Copied! Paste this into a message to Claude to update board.json');
+                }
+            };
+
+            const columns = ['todo', 'in-progress', 'done'];
+
+            return (
+                <>
+                    <div className="container">
+                        <header>
+                            <h1>📋 Project Board</h1>
+                            <button className="sync-btn" onClick={exportBoard}>⬇️ Sync to Git</button>
+                        </header>
+
+                        <div className="info">
+                            💡 <strong>How it works:</strong> Drag tasks between columns. Changes auto-save locally. Click "Sync to Git" when ready to persist to board.json across all devices.
+                        </div>
+
+                        <div className="board">
+                            {columns.map(columnId => (
+                                <div key={columnId} className="column" onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, columnId)}>
+                                    <div className="column-header">
+                                        {board[columnId].title}
+                                        <span className="column-count">{board[columnId].tasks.length}</span>
+                                    </div>
+
+                                    <div className="tasks">
+                                        {board[columnId].tasks.map(task => (
+                                            <div key={task.id} className={`task priority-${task.priority}`} draggable onDragStart={(e) => handleDragStart(e, columnId, task.id)}>
+                                                <div className="task-title">{task.title}</div>
+                                                <div className="task-meta">
+                                                    <span className={`task-priority priority-${task.priority}`}>{task.priority}</span>
+                                                    <span>{task.created}</span>
+                                                    <button className="task-delete" onClick={() => deleteTask(columnId, task.id)}>🗑️</button>
+                                                </div>
+                                            </div>
+                                        ))}
+
+                                        {newTaskColumn === columnId ? (
+                                            <div>
+                                                <input
+                                                    autoFocus
+                                                    type="text"
+                                                    className="add-task-input"
+                                                    placeholder="Task title..."
+                                                    value={newTaskTitle}
+                                                    onChange={(e) => setNewTaskTitle(e.target.value)}
+                                                    onKeyPress={(e) => e.key === 'Enter' && addTask(columnId)}
+                                                    onBlur={() => newTaskTitle.trim() ? addTask(columnId) : setNewTaskColumn(null)}
+                                                />
+                                            </div>
+                                        ) : (
+                                            <button className="add-task-btn" onClick={() => setNewTaskColumn(columnId)}>+ Add task</button>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className={`modal ${showModal ? 'active' : ''}`}>
+                        <div className="modal-content">
+                            <h2>Sync to Git</h2>
+                            <p>Copy this JSON and tell Claude: "Update board.json with this data"</p>
+                            <textarea readOnly></textarea>
+                            <div className="modal-buttons">
+                                <button className="copy-btn" onClick={copyToClipboard}>📋 Copy</button>
+                                <button className="close-btn" onClick={() => setShowModal(false)}>Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </>
+            );
+        };
+
+        ReactDOM.render(<KanbanBoard />, document.getElementById('root'));
+    </script>
+</body>
+</html>

@@ -41,3 +41,18 @@ app-example
 # generated native folders
 /ios
 /android
+
+# Claude development notes
+# Session logs are local; archive them but don't commit
+.claude-dev/session-log.md
+.claude-dev/session-log-archive-*.md
+.claude-dev/archive/
+
+# But DO commit the other docs for team context
+!.claude-dev/README.md
+!.claude-dev/state.md
+!.claude-dev/roadmap.md
+!.claude-dev/architecture.md
+
+# Claude skills folder (version control the skills)
+# .claude/skills/ is committed for team reference
