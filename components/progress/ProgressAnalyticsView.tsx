@@ -6,7 +6,6 @@ import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography, FontSizes } from "../../theme/typography";
 import { ScreenLayout } from "../ScreenLayout";
-import type { Edge } from "react-native-safe-area-context";
 import { normalizeExerciseName } from "../../utils/workoutMetrics";
 import {
   type TimeRangePreset,
@@ -41,10 +40,8 @@ export type ProgressAnalyticsViewProps = {
   refreshing: boolean;
   onRefresh: () => void;
   coachContext?: ProgressAnalyticsCoachContext;
-  /** When set (e.g. from student profile "View Progress"), applies filters; `forStudentId` bumps identity when the target student changes. */
+  /** When set (e.g. from student profile “View Progress”), applies filters; `forStudentId` bumps identity when the target student changes. */
   coachProgressDefaults?: { timePreset: TimeRangePreset; exerciseAll: true; forStudentId?: string } | null;
-  /** Override SafeAreaView edges passed to ScreenLayout. Use ["left","right"] inside stack screens with a visible header. */
-  screenLayoutEdges?: Edge[];
 };
 
 const studentLabel = (s: StudentSummary) =>
@@ -58,7 +55,6 @@ export function ProgressAnalyticsView({
   onRefresh,
   coachContext,
   coachProgressDefaults = null,
-  screenLayoutEdges,
 }: ProgressAnalyticsViewProps) {
   const { width: windowWidth } = useWindowDimensions();
   const chartWidth = Math.max(200, windowWidth - Spacing.md * 4);
@@ -176,7 +172,7 @@ export function ProgressAnalyticsView({
   const setStudentId = coachContext?.onSelectStudent;
 
   return (
-    <ScreenLayout edges={screenLayoutEdges}>
+    <ScreenLayout>
       <View style={{ flex: 1, backgroundColor: Colors.bg }}>
         <View
           style={{
