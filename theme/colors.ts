@@ -35,4 +35,8 @@ export const Colors = {
   // Warning / amber (Phase A — StatusPill)
   warning:         "#F59E0B",
   warningTint:     "rgba(245,158,11,0.20)",
+
+  // Chart series (Progress analytics — weight vs reps detail chart)
+  chartBlue:   "#4A9EFF",
+  chartOrange: "#FF9E64",
 } as const;

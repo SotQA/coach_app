@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { useAuth } from "../../context/AuthContext";
 import { workoutService } from "../../services/workoutService";
+import { trainingGroupService } from "../../services/trainingGroupService";
 import type { WorkoutLog } from "../../types/Workout";
 import { Colors } from "../../theme/colors";
 import { ProgressAnalyticsView } from "../../components/progress/ProgressAnalyticsView";
@@ -9,13 +10,18 @@ import { ProgressAnalyticsView } from "../../components/progress/ProgressAnalyti
 export default function CoachPersonalProgressScreen() {
   const { user } = useAuth();
   const [logs, setLogs] = useState<WorkoutLog[]>([]);
+  const [wpw, setWpw] = useState(0);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   const load = useCallback(async () => {
     if (!user) return;
-    const history = await workoutService.getWorkoutHistory(user.id);
+    const [history, group] = await Promise.all([
+      workoutService.getWorkoutHistory(user.id),
+      trainingGroupService.getLatestGroupForStudentId(user.id).catch(() => null),
+    ]);
     setLogs(Array.isArray(history) ? history : []);
+    setWpw(group?.workoutsPerWeek && group.workoutsPerWeek > 0 ? group.workoutsPerWeek : 0);
   }, [user]);
 
   useEffect(() => {
@@ -50,7 +56,7 @@ export default function CoachPersonalProgressScreen() {
     <ProgressAnalyticsView
       variant="student"
       logs={logs}
-      wpw={0}
+      wpw={wpw}
       refreshing={refreshing}
       onRefresh={onRefresh}
     />

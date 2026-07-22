@@ -20,7 +20,7 @@ export default function CoachProgressTab() {
   const coachProgressDefaults = useMemo(() => {
     if (params.focusProgress !== "1") return null;
     return {
-      timePreset: "4w" as const,
+      timePreset: "1m" as const,
       exerciseAll: true as const,
       forStudentId: paramStudentId,
     };

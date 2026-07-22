@@ -5,13 +5,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography, FontSizes } from "../../theme/typography";
-import type { TimeRangePreset, WeeklyPoint, WeeklyVolLoad } from "../../utils/coachProgressAnalytics";
+import type { TimeRangePreset, WeeklyPoint, WeeklyWeightReps } from "../../utils/coachProgressAnalytics";
 
 export const TIME_PRESETS: { key: TimeRangePreset; label: string }[] = [
-  { key: "4w", label: "4 weeks" },
-  { key: "8w", label: "8 weeks" },
-  { key: "3m", label: "3 months" },
-  { key: "6m", label: "6 months" },
+  { key: "2w", label: "Last 2 weeks" },
+  { key: "1m", label: "Last month" },
+  { key: "3m", label: "Last 3 months" },
   { key: "all", label: "All time" },
 ];
 
@@ -98,46 +97,93 @@ export function MiniLineChart({
   );
 }
 
-export function DualLineChart({ data, width }: { data: WeeklyVolLoad[]; width: number }) {
+export function WeightRepsChart({ data, width }: { data: WeeklyWeightReps[]; width: number }) {
   const W = width;
-  const H = 140;
+  const H = 160;
   const padX = 8;
   const padY = 10;
+
+  const [selected, setSelected] = useState<number | null>(null);
+
+  useEffect(() => {
+    setSelected(null);
+  }, [data]);
+
   if (data.length === 0) {
     return <Text style={{ ...Typography.secondary, color: Colors.textMuted }}>Not enough data</Text>;
   }
-  const vols = data.map((d) => d.volume);
-  const loads = data.map((d) => d.avgLoad);
-  const maxVol = Math.max(...vols, 1);
-  const maxLoad = Math.max(...loads, 1);
 
-  const vCoords = data.map((row, i) => {
-    const x = padX + (data.length <= 1 ? W / 2 - padX : (i / (data.length - 1)) * (W - 2 * padX));
-    const y = padY + (1 - row.volume / maxVol) * (H - 2 * padY);
-    return `${x},${y}`;
-  });
-  const lCoords = data.map((row, i) => {
-    const x = padX + (data.length <= 1 ? W / 2 - padX : (i / (data.length - 1)) * (W - 2 * padX));
-    const y = padY + (1 - row.avgLoad / maxLoad) * (H - 2 * padY);
-    return `${x},${y}`;
-  });
+  const weights = data.map((d) => d.weight);
+  const reps = data.map((d) => d.reps);
+  const minW = Math.min(...weights);
+  const maxW = Math.max(...weights);
+  const spanW = maxW - minW || 1;
+  const minR = Math.min(...reps);
+  const maxR = Math.max(...reps);
+  const spanR = maxR - minR || 1;
+
+  const xFor = (i: number) => padX + (data.length <= 1 ? W / 2 - padX : (i / (data.length - 1)) * (W - 2 * padX));
+  const weightCoords = data.map((row, i) => ({ x: xFor(i), y: padY + (1 - (row.weight - minW) / spanW) * (H - 2 * padY) }));
+  const repsCoords = data.map((row, i) => ({ x: xFor(i), y: padY + (1 - (row.reps - minR) / spanR) * (H - 2 * padY) }));
 
   return (
-    <Svg width={W} height={H}>
-      {[0, 0.5, 1].map((t) => (
-        <Line
-          key={t}
-          x1={0}
-          x2={W}
-          y1={padY + t * (H - 2 * padY)}
-          y2={padY + t * (H - 2 * padY)}
-          stroke={Colors.surfaceSubtle}
-          strokeWidth={1}
+    <View style={{ height: H + 28 }}>
+      <Svg width={W} height={H}>
+        {[0, 0.25, 0.5, 0.75, 1].map((t) => (
+          <Line
+            key={t}
+            x1={0}
+            x2={W}
+            y1={padY + t * (H - 2 * padY)}
+            y2={padY + t * (H - 2 * padY)}
+            stroke={Colors.surfaceSubtle}
+            strokeWidth={1}
+          />
+        ))}
+        <Polyline
+          points={weightCoords.map((c) => `${c.x},${c.y}`).join(" ")}
+          fill="none"
+          stroke={Colors.chartBlue}
+          strokeWidth={2}
+          strokeLinejoin="round"
         />
+        <Polyline
+          points={repsCoords.map((c) => `${c.x},${c.y}`).join(" ")}
+          fill="none"
+          stroke={Colors.chartOrange}
+          strokeWidth={2}
+          strokeLinejoin="round"
+        />
+        {weightCoords.map((c, i) => (
+          <Circle key={`w${i}`} cx={c.x} cy={c.y} r={4} fill={Colors.chartBlue} stroke={Colors.bg} strokeWidth={2} onPress={() => setSelected(i)} />
+        ))}
+        {repsCoords.map((c, i) => (
+          <Circle key={`r${i}`} cx={c.x} cy={c.y} r={4} fill={Colors.chartOrange} stroke={Colors.bg} strokeWidth={2} onPress={() => setSelected(i)} />
+        ))}
+      </Svg>
+      {selected != null && data[selected] ? (
+        <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4, textAlign: "center" }}>
+          {data[selected].label}: {data[selected].weight} kg × {data[selected].reps} reps
+        </Text>
+      ) : (
+        <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4, textAlign: "center" }}>
+          Tap a point for details
+        </Text>
+      )}
+    </View>
+  );
+}
+
+export function ChartLegend({ items }: { items: { color: string; label: string }[] }) {
+  return (
+    <View style={{ flexDirection: "row", gap: Spacing.md, marginTop: Spacing.sm }}>
+      {items.map((it) => (
+        <View key={it.label} style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+          <View style={{ width: 12, height: 2, backgroundColor: it.color }} />
+          <Text style={{ ...Typography.secondary, fontSize: FontSizes.caption, color: Colors.textSecondary }}>{it.label}</Text>
+        </View>
       ))}
-      <Polyline points={vCoords.join(" ")} fill="none" stroke="#64D2FF" strokeWidth={2} strokeLinejoin="round" />
-      <Polyline points={lCoords.join(" ")} fill="none" stroke={Colors.primary} strokeWidth={2} strokeDasharray="4 4" />
-    </Svg>
+    </View>
   );
 }
 

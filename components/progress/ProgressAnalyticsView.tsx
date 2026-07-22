@@ -6,6 +6,7 @@ import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography, FontSizes } from "../../theme/typography";
 import { ScreenLayout } from "../ScreenLayout";
+import { Dropdown } from "../Dropdown";
 import { normalizeExerciseName } from "../../utils/workoutMetrics";
 import {
   type TimeRangePreset,
@@ -13,6 +14,7 @@ import {
   logCompletedMs,
   buildWeekly1RMSeries,
   buildWeeklyVolumeVsLoad,
+  buildWeeklyWeightRepsSeries,
   collectExerciseNames,
   totalVolumeFromLogs,
   peakE1RMFromLogs,
@@ -25,7 +27,7 @@ import {
   sessionsInRollingWindow,
   complianceDelta,
 } from "../../utils/coachProgressAnalytics";
-import { DualLineChart, KpiCard, MiniLineChart, TIME_PRESETS } from "./ProgressCharts";
+import { ChartLegend, KpiCard, MiniLineChart, TIME_PRESETS, WeightRepsChart } from "./ProgressCharts";
 
 export type ProgressAnalyticsCoachContext = {
   students: StudentSummary[];
@@ -44,8 +46,63 @@ export type ProgressAnalyticsViewProps = {
   coachProgressDefaults?: { timePreset: TimeRangePreset; exerciseAll: true; forStudentId?: string } | null;
 };
 
+const ALL_EXERCISES = "__all__";
+
 const studentLabel = (s: StudentSummary) =>
   [s.firstName, s.lastName].filter(Boolean).join(" ").trim() || s.email || "Student";
+
+function ChartInfo({ text }: { text: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <View>
+      <Pressable
+        onPress={() => setOpen((v) => !v)}
+        hitSlop={8}
+        style={{
+          width: 20,
+          height: 20,
+          borderRadius: 10,
+          backgroundColor: Colors.primary,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Text style={{ color: Colors.onPrimary, fontSize: 12, fontWeight: "700" }}>?</Text>
+      </Pressable>
+      {open ? (
+        <View
+          style={{
+            marginTop: 8,
+            backgroundColor: Colors.surface,
+            borderWidth: 1,
+            borderColor: Colors.hairlineStrong,
+            borderRadius: Radius.sm,
+            padding: Spacing.sm,
+          }}
+        >
+          <Text style={{ ...Typography.secondary, color: Colors.textSecondary, fontSize: FontSizes.caption }}>{text}</Text>
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
+function Card({ children }: { children: React.ReactNode }) {
+  return (
+    <View
+      style={{
+        backgroundColor: Colors.card,
+        borderRadius: Radius.lg,
+        padding: Spacing.md,
+        borderWidth: 1,
+        borderColor: Colors.border,
+        marginBottom: Spacing.md,
+      }}
+    >
+      {children}
+    </View>
+  );
+}
 
 export function ProgressAnalyticsView({
   variant,
@@ -61,7 +118,7 @@ export function ProgressAnalyticsView({
 
   const [exerciseAll, setExerciseAll] = useState(true);
   const [exerciseName, setExerciseName] = useState("");
-  const [timePreset, setTimePreset] = useState<TimeRangePreset>("8w");
+  const [timePreset, setTimePreset] = useState<TimeRangePreset>("3m");
 
   useEffect(() => {
     if (!coachProgressDefaults) return;
@@ -103,6 +160,12 @@ export function ProgressAnalyticsView({
     [logsInRange, exerciseNorm, timePreset, rangeStartMs, nowMs]
   );
 
+  const weightReps = useMemo(
+    () => buildWeeklyWeightRepsSeries(logsInRange, exerciseNorm, timePreset === "all" ? null : rangeStartMs, nowMs),
+    [logsInRange, exerciseNorm, timePreset, rangeStartMs, nowMs]
+  );
+
+  // Kept for the coaching-signals heuristic (volume-stable-but-intensity-rising check); not charted directly anymore.
   const volLoad = useMemo(
     () => buildWeeklyVolumeVsLoad(logsInRange, exerciseNorm, timePreset === "all" ? null : rangeStartMs, nowMs),
     [logsInRange, exerciseNorm, timePreset, rangeStartMs, nowMs]
@@ -144,8 +207,6 @@ export function ProgressAnalyticsView({
   const thisWeekCount = sessionsInRollingWindow(logs, nowMs - 7 * 24 * 60 * 60 * 1000, nowMs);
   const compDelta = wpw > 0 ? complianceDelta(prevWeekCount, thisWeekCount, wpw) : null;
 
-  const sessionCountDelta = curLogs.length - prevLogs.length;
-
   const insights = useMemo(
     () =>
       exerciseNorm ? buildExerciseInsights(logsInRange, exerciseNorm, timePreset === "all" ? null : rangeStartMs, nowMs) : null,
@@ -171,6 +232,16 @@ export function ProgressAnalyticsView({
   const studentId = coachContext?.selectedStudentId ?? "";
   const setStudentId = coachContext?.onSelectStudent;
 
+  const studentOptions = useMemo(
+    () => [...students].sort((a, b) => studentLabel(a).localeCompare(studentLabel(b), undefined, { sensitivity: "base" })).map((s) => ({ value: s.id, label: studentLabel(s) })),
+    [students]
+  );
+  const exerciseOptions = useMemo(
+    () => [{ value: ALL_EXERCISES, label: "All exercises" }, ...exerciseNames.map((n) => ({ value: n, label: n }))],
+    [exerciseNames]
+  );
+  const rangeOptions = useMemo(() => TIME_PRESETS.map((p) => ({ value: p.key, label: p.label })), []);
+
   return (
     <ScreenLayout>
       <View style={{ flex: 1, backgroundColor: Colors.bg }}>
@@ -178,7 +249,7 @@ export function ProgressAnalyticsView({
           style={{
             paddingHorizontal: Spacing.md,
             paddingTop: Spacing.lg,
-            paddingBottom: Spacing.sm,
+            paddingBottom: Spacing.xs,
             borderBottomWidth: 1,
             borderBottomColor: Colors.border,
             backgroundColor: Colors.bg,
@@ -192,107 +263,36 @@ export function ProgressAnalyticsView({
           ) : null}
 
           {showStudentPicker ? (
-            <>
-              <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: 6 }}>Student</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingBottom: Spacing.sm }}>
-                {students.length === 0 ? (
-                  <Text style={{ ...Typography.secondary, color: Colors.textMuted }}>No students</Text>
-                ) : (
-                  students.map((s) => {
-                    const sel = s.id === studentId;
-                    return (
-                      <Pressable
-                        key={s.id}
-                        onPress={() => setStudentId?.(s.id)}
-                        style={{
-                          paddingVertical: 8,
-                          paddingHorizontal: 12,
-                          borderRadius: Radius.sm,
-                          backgroundColor: sel ? Colors.surface : Colors.card,
-                          borderWidth: 1,
-                          borderColor: sel ? Colors.primary : Colors.border,
-                        }}
-                      >
-                        <Text style={{ ...Typography.section, fontSize: FontSizes.note, fontWeight: sel ? "800" : "600" }}>
-                          {studentLabel(s)}
-                        </Text>
-                      </Pressable>
-                    );
-                  })
-                )}
-              </ScrollView>
-            </>
+            <Dropdown
+              label="Student"
+              value={studentId}
+              options={studentOptions}
+              onChange={(v) => setStudentId?.(v)}
+              placeholder="Select student…"
+            />
           ) : null}
 
-          <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: 6, marginTop: showStudentPicker ? Spacing.xs : 0 }}>
-            Exercise
-          </Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingBottom: Spacing.sm }}>
-            <Pressable
-              onPress={() => {
+          <Dropdown
+            label="Exercise"
+            value={exerciseAll ? ALL_EXERCISES : exerciseName}
+            options={exerciseOptions}
+            onChange={(v) => {
+              if (v === ALL_EXERCISES) {
                 setExerciseAll(true);
                 setExerciseName("");
-              }}
-              style={{
-                paddingVertical: 8,
-                paddingHorizontal: 12,
-                borderRadius: Radius.sm,
-                backgroundColor: exerciseAll ? Colors.surface : Colors.card,
-                borderWidth: 1,
-                borderColor: exerciseAll ? Colors.primary : Colors.border,
-              }}
-            >
-              <Text style={{ fontWeight: exerciseAll ? "800" : "600", color: Colors.text, fontSize: FontSizes.note }}>All exercises</Text>
-            </Pressable>
-            {exerciseNames.map((name) => {
-              const sel = !exerciseAll && exerciseName === name;
-              return (
-                <Pressable
-                  key={name}
-                  onPress={() => {
-                    setExerciseAll(false);
-                    setExerciseName(name);
-                  }}
-                  style={{
-                    paddingVertical: 8,
-                    paddingHorizontal: 12,
-                    borderRadius: Radius.sm,
-                    backgroundColor: sel ? Colors.surface : Colors.card,
-                    borderWidth: 1,
-                    borderColor: sel ? Colors.primary : Colors.border,
-                    maxWidth: 200,
-                  }}
-                >
-                  <Text numberOfLines={1} style={{ fontWeight: sel ? "800" : "600", color: Colors.text, fontSize: FontSizes.note }}>
-                    {name}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </ScrollView>
+              } else {
+                setExerciseAll(false);
+                setExerciseName(v);
+              }
+            }}
+          />
 
-          <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: 6, marginTop: Spacing.xs }}>Range</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
-            {TIME_PRESETS.map((p) => {
-              const sel = timePreset === p.key;
-              return (
-                <Pressable
-                  key={p.key}
-                  onPress={() => setTimePreset(p.key)}
-                  style={{
-                    paddingVertical: 8,
-                    paddingHorizontal: 12,
-                    borderRadius: Radius.sm,
-                    backgroundColor: sel ? Colors.surface : Colors.card,
-                    borderWidth: 1,
-                    borderColor: sel ? Colors.primary : Colors.border,
-                  }}
-                >
-                  <Text style={{ fontWeight: sel ? "800" : "600", color: Colors.text, fontSize: FontSizes.note }}>{p.label}</Text>
-                </Pressable>
-              );
-            })}
-          </ScrollView>
+          <Dropdown
+            label="Range"
+            value={timePreset}
+            options={rangeOptions}
+            onChange={(v) => setTimePreset(v as TimeRangePreset)}
+          />
         </View>
 
         <ScrollView
@@ -338,21 +338,12 @@ export function ProgressAnalyticsView({
                   />
                 </View>
                 <View style={{ width: "48%", flexGrow: 1 }}>
-                  {variant === "coach" ? (
-                    <KpiCard
-                      label="Compliance"
-                      value={compliance != null ? `${compliance}%` : "—"}
-                      delta={compDelta}
-                      deltaPct={null}
-                    />
-                  ) : (
-                    <KpiCard
-                      label="Sessions"
-                      value={String(curLogs.length)}
-                      delta={sessionCountDelta}
-                      deltaPct={null}
-                    />
-                  )}
+                  <KpiCard
+                    label="Compliance"
+                    value={compliance != null ? `${compliance}%` : "—"}
+                    delta={compDelta}
+                    deltaPct={null}
+                  />
                 </View>
                 <View style={{ width: "48%", flexGrow: 1 }}>
                   <KpiCard
@@ -368,17 +359,11 @@ export function ProgressAnalyticsView({
                 </View>
               </View>
 
-              <View
-                style={{
-                  backgroundColor: Colors.card,
-                  borderRadius: Radius.lg,
-                  padding: Spacing.md,
-                  borderWidth: 1,
-                  borderColor: Colors.border,
-                  marginBottom: Spacing.md,
-                }}
-              >
-                <Text style={{ ...Typography.section, marginBottom: Spacing.sm }}>1RM progression</Text>
+              <Card>
+                <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 8, marginBottom: Spacing.sm }}>
+                  <Text style={{ ...Typography.section }}>1RM progression</Text>
+                  <ChartInfo text="Estimated 1RM = Weight × (1 + Reps/30). Shows strength independent of reps." />
+                </View>
                 <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: Spacing.sm, fontSize: FontSizes.caption }}>
                   Weekly best estimated 1RM{exerciseNorm ? "" : " (best lift each week)"}. PR points highlighted.
                 </Text>
@@ -387,36 +372,33 @@ export function ProgressAnalyticsView({
                 ) : (
                   <MiniLineChart points={weekly1RM} color={Colors.primary} height={160} highlightPr width={chartWidth} />
                 )}
-              </View>
+              </Card>
 
-              <View
-                style={{
-                  backgroundColor: Colors.card,
-                  borderRadius: Radius.lg,
-                  padding: Spacing.md,
-                  borderWidth: 1,
-                  borderColor: Colors.border,
-                  marginBottom: Spacing.md,
-                }}
-              >
-                <Text style={{ ...Typography.section, marginBottom: Spacing.sm }}>Volume vs intensity</Text>
+              <Card>
+                <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 8, marginBottom: Spacing.sm }}>
+                  <Text style={{ ...Typography.section }}>Workout detail</Text>
+                  <ChartInfo text="Blue = weight lifted | Orange = reps completed. Both drive 1RM improvement." />
+                </View>
                 <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: Spacing.sm, fontSize: FontSizes.caption }}>
-                  Cyan = weekly volume · Lime dashed = avg load (kg)
+                  Shows actual lifts each week. Both weight and reps drive 1RM improvement.
                 </Text>
-                <DualLineChart data={volLoad} width={chartWidth} />
-              </View>
+                {weightReps.length === 0 ? (
+                  <Text style={{ color: Colors.textMuted }}>No strength data in range.</Text>
+                ) : (
+                  <>
+                    <WeightRepsChart data={weightReps} width={chartWidth} />
+                    <ChartLegend
+                      items={[
+                        { color: Colors.chartBlue, label: "Weight lifted (kg)" },
+                        { color: Colors.chartOrange, label: "Reps completed" },
+                      ]}
+                    />
+                  </>
+                )}
+              </Card>
 
               {insights ? (
-                <View
-                  style={{
-                    backgroundColor: Colors.card,
-                    borderRadius: Radius.lg,
-                    padding: Spacing.md,
-                    borderWidth: 1,
-                    borderColor: Colors.border,
-                    marginBottom: Spacing.md,
-                  }}
-                >
+                <Card>
                   <Text style={{ ...Typography.section, marginBottom: Spacing.sm }}>Exercise insights</Text>
                   <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: 6 }}>
                     Best set: {insights.bestSetEver}
@@ -433,35 +415,17 @@ export function ProgressAnalyticsView({
                   <Text style={{ ...Typography.secondary, color: Colors.textMuted }}>
                     Avg weekly frequency: {insights.avgWeeklyFrequency != null ? String(insights.avgWeeklyFrequency) : "—"}
                   </Text>
-                </View>
+                </Card>
               ) : (
-                <View
-                  style={{
-                    backgroundColor: Colors.card,
-                    borderRadius: Radius.lg,
-                    padding: Spacing.md,
-                    borderWidth: 1,
-                    borderColor: Colors.border,
-                    marginBottom: Spacing.md,
-                  }}
-                >
+                <Card>
                   <Text style={{ ...Typography.secondary, color: Colors.textMuted }}>
                     Select a specific exercise to see detailed exercise insights.
                   </Text>
-                </View>
+                </Card>
               )}
 
-              {variant === "coach" ? (
-                <View
-                  style={{
-                    backgroundColor: Colors.card,
-                    borderRadius: Radius.lg,
-                    padding: Spacing.md,
-                    borderWidth: 1,
-                    borderColor: Colors.border,
-                  }}
-                >
-                  <Text style={{ ...Typography.section, marginBottom: Spacing.sm }}>Coaching signals</Text>
+              {variant === "coach" && signals.length > 0 ? (
+                <Card>
                   {signals.map((s, i) => (
                     <View
                       key={i}
@@ -469,7 +433,7 @@ export function ProgressAnalyticsView({
                         flexDirection: "row",
                         alignItems: "center",
                         gap: Spacing.sm,
-                        marginBottom: Spacing.sm,
+                        marginBottom: i === signals.length - 1 ? 0 : Spacing.sm,
                       }}
                     >
                       <View
@@ -493,14 +457,41 @@ export function ProgressAnalyticsView({
                               s.status === "green" ? Colors.success : s.status === "red" ? Colors.danger : "#FFD60A",
                           }}
                         >
-                          {s.status === "green" ? "ON TRACK" : s.status === "red" ? "ATTENTION" : "WATCH"}
+                          {s.status === "green" ? "INSIGHT" : s.status === "red" ? "ATTENTION" : "WATCH"}
                         </Text>
                       </View>
                       <Text style={{ ...Typography.secondary, color: Colors.text, flex: 1 }}>{s.text}</Text>
                     </View>
                   ))}
-                </View>
+                </Card>
               ) : null}
+
+              <Card>
+                <View
+                  style={{
+                    alignSelf: "flex-start",
+                    paddingHorizontal: 8,
+                    paddingVertical: 2,
+                    borderRadius: 4,
+                    backgroundColor: Colors.primary,
+                    marginBottom: Spacing.sm,
+                  }}
+                >
+                  <Text style={{ fontSize: FontSizes.tiny, fontWeight: "800", color: Colors.onPrimary }}>HOW TO READ</Text>
+                </View>
+                <Text style={{ ...Typography.secondary, color: Colors.textSecondary, marginBottom: 6, fontSize: FontSizes.note }}>
+                  <Text style={{ fontWeight: "700", color: Colors.text }}>1RM chart:</Text> one clean line = consistent
+                  strength metric. Tap a point to see exact values and dates.
+                </Text>
+                <Text style={{ ...Typography.secondary, color: Colors.textSecondary, marginBottom: 6, fontSize: FontSizes.note }}>
+                  <Text style={{ fontWeight: "700", color: Colors.text }}>Workout detail chart:</Text> blue = weight,
+                  orange = reps. Weight up, reps down = normal periodized training.
+                </Text>
+                <Text style={{ ...Typography.secondary, color: Colors.textSecondary, fontSize: FontSizes.note }}>
+                  <Text style={{ fontWeight: "700", color: Colors.text }}>Both improving?</Text> Rare and excellent —
+                  {variant === "coach" ? " your student is" : " you're"} in a peak strength phase.
+                </Text>
+              </Card>
             </>
           )}
         </ScrollView>
@@ -508,5 +499,3 @@ export function ProgressAnalyticsView({
     </ScreenLayout>
   );
 }
-
-

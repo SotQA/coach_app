@@ -1,15 +1,14 @@
 import type { WorkoutLog, WorkoutLogExercise } from "../types/Workout";
 import { computeExerciseVolumeFromLoggedSets, normalizeExerciseName } from "./workoutMetrics";
 
-export type TimeRangePreset = "4w" | "8w" | "3m" | "6m" | "all";
+export type TimeRangePreset = "2w" | "1m" | "3m" | "all";
 
 export function presetToStartMs(preset: TimeRangePreset, nowMs: number): number | null {
   if (preset === "all") return null;
   const d = new Date(nowMs);
-  if (preset === "4w") d.setDate(d.getDate() - 28);
-  else if (preset === "8w") d.setDate(d.getDate() - 56);
+  if (preset === "2w") d.setDate(d.getDate() - 14);
+  else if (preset === "1m") d.setMonth(d.getMonth() - 1);
   else if (preset === "3m") d.setMonth(d.getMonth() - 3);
-  else if (preset === "6m") d.setMonth(d.getMonth() - 6);
   d.setHours(0, 0, 0, 0);
   return d.getTime();
 }
@@ -185,6 +184,55 @@ export function buildWeeklyVolumeVsLoad(
       volume: Math.round(a.vol),
       avgLoad,
     };
+  });
+}
+
+export type WeeklyWeightReps = {
+  weekStartMs: number;
+  label: string;
+  weight: number;
+  reps: number;
+};
+
+/**
+ * Weekly weight × reps detail: the set that produced that week's best e1RM
+ * (or best across all exercises if exerciseNorm is null) — the same
+ * "week's best lift" the 1RM chart tracks, split back into its raw weight/reps.
+ */
+export function buildWeeklyWeightRepsSeries(
+  logs: WorkoutLog[],
+  exerciseNorm: string | null,
+  rangeStartMs: number | null,
+  nowMs: number
+): WeeklyWeightReps[] {
+  const filtered = logs
+    .map((l) => ({ l, ms: logCompletedMs(l) }))
+    .filter(({ ms }) => ms > 0 && ms <= nowMs)
+    .filter(({ ms }) => (rangeStartMs == null ? true : ms >= rangeStartMs));
+
+  const byWeek = new Map<number, { bestE1RM: number; weight: number; reps: number }>();
+
+  for (const { l, ms } of filtered) {
+    const wk = startOfWeekMondayMs(ms);
+    for (const ex of l.exercises ?? []) {
+      const key = normalizeExerciseName(ex.name);
+      if (exerciseNorm && key !== exerciseNorm) continue;
+      for (const s of ex.sets ?? []) {
+        if (s.weight == null || !Number.isFinite(s.weight) || s.weight <= 0) continue;
+        if (!Number.isFinite(s.reps) || s.reps <= 0) continue;
+        const e1 = estimateEpley1RM(s.weight, s.reps);
+        const cur = byWeek.get(wk);
+        if (!cur || e1 > cur.bestE1RM) {
+          byWeek.set(wk, { bestE1RM: e1, weight: s.weight, reps: s.reps });
+        }
+      }
+    }
+  }
+
+  const weeks = Array.from(byWeek.keys()).sort((a, b) => a - b);
+  return weeks.map((wk) => {
+    const v = byWeek.get(wk)!;
+    return { weekStartMs: wk, label: weekLabel(wk), weight: v.weight, reps: v.reps };
   });
 }
 

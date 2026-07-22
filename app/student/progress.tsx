@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 import { useAuth } from "../../context/AuthContext";
 import { workoutService } from "../../services/workoutService";
+import { trainingGroupService } from "../../services/trainingGroupService";
 import type { WorkoutLog } from "../../types/Workout";
 import { Colors } from "../../theme/colors";
 import { Spacing } from "../../theme/spacing";
@@ -10,6 +11,7 @@ import { ProgressAnalyticsView } from "../../components/progress/ProgressAnalyti
 export default function StudentProgressScreen() {
   const { user } = useAuth();
   const [logs, setLogs] = useState<WorkoutLog[]>([]);
+  const [wpw, setWpw] = useState(0);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -17,8 +19,12 @@ export default function StudentProgressScreen() {
   const load = useCallback(async () => {
     if (!user || !["student", "athlete"].includes(user.role)) return;
     setError(null);
-    const history = await workoutService.getWorkoutHistory(user.id);
+    const [history, group] = await Promise.all([
+      workoutService.getWorkoutHistory(user.id),
+      trainingGroupService.getLatestGroupForStudentId(user.id).catch(() => null),
+    ]);
     setLogs(Array.isArray(history) ? history : []);
+    setWpw(group?.workoutsPerWeek && group.workoutsPerWeek > 0 ? group.workoutsPerWeek : 0);
   }, [user]);
 
   useEffect(() => {
@@ -75,6 +81,6 @@ export default function StudentProgressScreen() {
   }
 
   return (
-    <ProgressAnalyticsView variant="student" logs={logs} wpw={0} refreshing={refreshing} onRefresh={onRefresh} />
+    <ProgressAnalyticsView variant="student" logs={logs} wpw={wpw} refreshing={refreshing} onRefresh={onRefresh} />
   );
 }
