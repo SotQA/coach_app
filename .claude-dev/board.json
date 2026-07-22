@@ -74,6 +74,12 @@
           "title": "Refactor editing and deleting assigned workouts for students as a couch from student profile screen",
           "priority": "medium",
           "created": "2026-07-21"
+        },
+        {
+          "id": 1784668626745,
+          "title": "Let students find their coach profile (thing of where to put the button and how the profile would look like)",
+          "priority": "medium",
+          "created": "2026-07-21"
         }
       ]
     },
