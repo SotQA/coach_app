@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { View, Text } from "react-native";
-import Svg, { Polyline, Circle, Line } from "react-native-svg";
+import Svg, { Polyline, Circle, Line, Text as SvgText } from "react-native-svg";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
@@ -13,6 +13,59 @@ export const TIME_PRESETS: { key: TimeRangePreset; label: string }[] = [
   { key: "3m", label: "Last 3 months" },
   { key: "all", label: "All time" },
 ];
+
+// Reserved gutter for a vertical-axis number column (e.g. "140") and the gap before the plot area.
+const AXIS_GUTTER = 28;
+const AXIS_GAP = 6;
+const AXIS_FONT_SIZE = 10;
+
+// Expands a data range a bit beyond its min/max so the line doesn't touch the chart edges
+// and axis ticks read as a sensible scale rather than exactly bounding the data.
+function paddedRange(min: number, max: number) {
+  const span = max - min || 1;
+  const pad = Math.max(span * 0.15, 1);
+  return { lo: min - pad, hi: max + pad };
+}
+
+// t=0 is the top gridline (value = hi), t=1 is the bottom gridline (value = lo) — matching
+// the y = padY + (1 - (value-lo)/span) * plotHeight convention used for data points below.
+function buildTicks(lo: number, hi: number, count: number) {
+  return Array.from({ length: count }, (_, i) => {
+    const t = count <= 1 ? 0 : i / (count - 1);
+    return { t, value: Math.round(hi - t * (hi - lo)) };
+  });
+}
+
+function WeekAxisLabels({ coords, plotWidth }: { coords: { x: number }[]; plotWidth: number }) {
+  const labelWidth = 32;
+  const maxLabels = Math.max(1, Math.floor(plotWidth / labelWidth));
+  const step = Math.max(1, Math.ceil(coords.length / maxLabels));
+  return (
+    <View style={{ height: 16, marginTop: 4 }}>
+      {coords.map((c, i) => {
+        const isLast = i === coords.length - 1;
+        if (!isLast && i % step !== 0) return null;
+        return (
+          <Text
+            key={i}
+            numberOfLines={1}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: c.x - labelWidth / 2,
+              width: labelWidth,
+              textAlign: "center",
+              fontSize: FontSizes.tiny,
+              color: Colors.textMuted,
+            }}
+          >
+            {`W${i + 1}`}
+          </Text>
+        );
+      })}
+    </View>
+  );
+}
 
 export function MiniLineChart({
   points,
@@ -29,16 +82,19 @@ export function MiniLineChart({
 }) {
   const W = width;
   const H = height;
-  const padX = 8;
   const padY = 10;
+  const plotLeft = AXIS_GUTTER + AXIS_GAP;
+  const plotRight = W - 8;
+  const plotWidth = plotRight - plotLeft;
 
   const vals = points.map((p) => p.value);
-  const minV = vals.length ? Math.min(...vals) : 0;
-  const maxV = vals.length ? Math.max(...vals) : 1;
-  const span = maxV - minV || 1;
+  const rawMin = vals.length ? Math.min(...vals) : 0;
+  const rawMax = vals.length ? Math.max(...vals) : 1;
+  const { lo: minV, hi: maxV } = paddedRange(rawMin, rawMax);
+  const span = maxV - minV;
 
   const coords = points.map((p, i) => {
-    const x = padX + (points.length <= 1 ? W / 2 - padX : (i / (points.length - 1)) * (W - 2 * padX));
+    const x = plotLeft + (points.length <= 1 ? plotWidth / 2 : (i / (points.length - 1)) * plotWidth);
     const y = padY + (1 - (p.value - minV) / span) * (H - 2 * padY);
     return { x, y, p };
   });
@@ -51,19 +107,24 @@ export function MiniLineChart({
     setSelected(null);
   }, [points]);
 
+  const yTicks = buildTicks(minV, maxV, 6);
+
   return (
-    <View style={{ height: H + 28 }}>
+    <View>
       <Svg width={W} height={H}>
-        {[0, 0.25, 0.5, 0.75, 1].map((t) => (
-          <Line
-            key={t}
-            x1={0}
-            x2={W}
-            y1={padY + t * (H - 2 * padY)}
-            y2={padY + t * (H - 2 * padY)}
-            stroke={Colors.surfaceSubtle}
-            strokeWidth={1}
-          />
+        {yTicks.map((tick, i) => {
+          const y = padY + tick.t * (H - 2 * padY);
+          return (
+            <Fragment key={`h${i}`}>
+              <Line x1={plotLeft} x2={plotRight} y1={y} y2={y} stroke={Colors.surfaceSubtle} strokeWidth={1} />
+              <SvgText x={plotLeft - AXIS_GAP} y={y + 3} fill={Colors.textMuted} fontSize={AXIS_FONT_SIZE} textAnchor="end">
+                {tick.value}
+              </SvgText>
+            </Fragment>
+          );
+        })}
+        {coords.map((c, i) => (
+          <Line key={`v${i}`} x1={c.x} x2={c.x} y1={padY} y2={H - padY} stroke={Colors.surfaceSubtle} strokeWidth={1} />
         ))}
         {coords.length > 1 ? (
           <Polyline points={d} fill="none" stroke={color} strokeWidth={2.5} strokeLinejoin="round" strokeLinecap="round" />
@@ -83,6 +144,7 @@ export function MiniLineChart({
           />
         ))}
       </Svg>
+      <WeekAxisLabels coords={coords} plotWidth={plotWidth} />
       {selected != null && points[selected] ? (
         <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4, textAlign: "center" }}>
           {points[selected].label}: {points[selected].value} kg e1RM
@@ -100,8 +162,10 @@ export function MiniLineChart({
 export function WeightRepsChart({ data, width }: { data: WeeklyWeightReps[]; width: number }) {
   const W = width;
   const H = 160;
-  const padX = 8;
   const padY = 10;
+  const plotLeft = AXIS_GUTTER + AXIS_GAP;
+  const plotRight = W - AXIS_GUTTER - AXIS_GAP;
+  const plotWidth = plotRight - plotLeft;
 
   const [selected, setSelected] = useState<number | null>(null);
 
@@ -115,30 +179,37 @@ export function WeightRepsChart({ data, width }: { data: WeeklyWeightReps[]; wid
 
   const weights = data.map((d) => d.weight);
   const reps = data.map((d) => d.reps);
-  const minW = Math.min(...weights);
-  const maxW = Math.max(...weights);
-  const spanW = maxW - minW || 1;
-  const minR = Math.min(...reps);
-  const maxR = Math.max(...reps);
-  const spanR = maxR - minR || 1;
+  const { lo: minW, hi: maxW } = paddedRange(Math.min(...weights), Math.max(...weights));
+  const spanW = maxW - minW;
+  const { lo: minR, hi: maxR } = paddedRange(Math.min(...reps), Math.max(...reps));
+  const spanR = maxR - minR;
 
-  const xFor = (i: number) => padX + (data.length <= 1 ? W / 2 - padX : (i / (data.length - 1)) * (W - 2 * padX));
+  const xFor = (i: number) => plotLeft + (data.length <= 1 ? plotWidth / 2 : (i / (data.length - 1)) * plotWidth);
   const weightCoords = data.map((row, i) => ({ x: xFor(i), y: padY + (1 - (row.weight - minW) / spanW) * (H - 2 * padY) }));
   const repsCoords = data.map((row, i) => ({ x: xFor(i), y: padY + (1 - (row.reps - minR) / spanR) * (H - 2 * padY) }));
 
+  const weightTicks = buildTicks(minW, maxW, 8);
+  const repsTicks = buildTicks(minR, maxR, 8);
+
   return (
-    <View style={{ height: H + 28 }}>
+    <View>
       <Svg width={W} height={H}>
-        {[0, 0.25, 0.5, 0.75, 1].map((t) => (
-          <Line
-            key={t}
-            x1={0}
-            x2={W}
-            y1={padY + t * (H - 2 * padY)}
-            y2={padY + t * (H - 2 * padY)}
-            stroke={Colors.surfaceSubtle}
-            strokeWidth={1}
-          />
+        {weightTicks.map((tick, i) => {
+          const y = padY + tick.t * (H - 2 * padY);
+          return (
+            <Fragment key={`h${i}`}>
+              <Line x1={plotLeft} x2={plotRight} y1={y} y2={y} stroke={Colors.surfaceSubtle} strokeWidth={1} />
+              <SvgText x={plotLeft - AXIS_GAP} y={y + 3} fill={Colors.chartBlue} fontSize={AXIS_FONT_SIZE} textAnchor="end">
+                {tick.value}
+              </SvgText>
+              <SvgText x={plotRight + AXIS_GAP} y={y + 3} fill={Colors.chartOrange} fontSize={AXIS_FONT_SIZE} textAnchor="start">
+                {repsTicks[i].value}
+              </SvgText>
+            </Fragment>
+          );
+        })}
+        {weightCoords.map((c, i) => (
+          <Line key={`v${i}`} x1={c.x} x2={c.x} y1={padY} y2={H - padY} stroke={Colors.surfaceSubtle} strokeWidth={1} />
         ))}
         <Polyline
           points={weightCoords.map((c) => `${c.x},${c.y}`).join(" ")}
@@ -161,6 +232,7 @@ export function WeightRepsChart({ data, width }: { data: WeeklyWeightReps[]; wid
           <Circle key={`r${i}`} cx={c.x} cy={c.y} r={4} fill={Colors.chartOrange} stroke={Colors.bg} strokeWidth={2} onPress={() => setSelected(i)} />
         ))}
       </Svg>
+      <WeekAxisLabels coords={weightCoords} plotWidth={plotWidth} />
       {selected != null && data[selected] ? (
         <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4, textAlign: "center" }}>
           {data[selected].label}: {data[selected].weight} kg × {data[selected].reps} reps

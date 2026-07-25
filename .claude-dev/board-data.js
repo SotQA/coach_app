@@ -1,0 +1,97 @@
+// Auto-generated fallback copy of board.json, used when board.html is opened
+// directly as a file:// URL (fetch('board.json') is blocked by CORS in that mode).
+// Regenerate this whenever board.json changes.
+window.BOARD_DATA = {
+  "todo": {
+    "title": "To Do",
+    "tasks": [
+      {
+        "id": 1784665360323,
+        "title": "Notifications",
+        "priority": "medium",
+        "created": "2026-07-21"
+      },
+      {
+        "id": 1784665371293,
+        "title": "Make + button stop blinking for coaches",
+        "priority": "medium",
+        "created": "2026-07-21"
+      },
+      {
+        "id": 1784665401372,
+        "title": "Make \"Plan workout\" and \"View Profile\". buttons looks the same in terms of shape",
+        "priority": "medium",
+        "created": "2026-07-21"
+      },
+      {
+        "id": 1784665468046,
+        "title": "Adding telegram & whatsapp tags so it directly sends to the chatting with students for coaches",
+        "priority": "medium",
+        "created": "2026-07-21"
+      },
+      {
+        "id": 1784665718871,
+        "title": "Add email authorisation",
+        "priority": "medium",
+        "created": "2026-07-21"
+      },
+      {
+        "id": 1784665732639,
+        "title": "Add apple id login",
+        "priority": "medium",
+        "created": "2026-07-21"
+      },
+      {
+        "id": 1784665788439,
+        "title": "Add adding a photo when registering",
+        "priority": "medium",
+        "created": "2026-07-21"
+      },
+      {
+        "id": 1784665830122,
+        "title": "Refactor process of registering for users that open the app for the 1st time (guiding them through)",
+        "priority": "medium",
+        "created": "2026-07-21"
+      },
+      {
+        "id": 1784666313484,
+        "title": "Login screen refactoring",
+        "priority": "medium",
+        "created": "2026-07-21"
+      },
+      {
+        "id": 1784668009299,
+        "title": "Add option to see password when logging in and registering",
+        "priority": "medium",
+        "created": "2026-07-21"
+      },
+      {
+        "id": 1784668090485,
+        "title": "Refactor editing and deleting assigned workouts for students as a couch from student profile screen",
+        "priority": "medium",
+        "created": "2026-07-21"
+      },
+      {
+        "id": 1784668626745,
+        "title": "Let students find their coach profile (thing of where to put the button and how the profile would look like)",
+        "priority": "medium",
+        "created": "2026-07-21"
+      }
+    ]
+  },
+  "in-progress": {
+    "title": "In Progress",
+    "tasks": [
+      {
+        "id": 1784666076761,
+        "title": "Progress tab exercise and students lists refactoring",
+        "priority": "medium",
+        "created": "2026-07-21"
+      }
+    ]
+  },
+  "done": {
+    "title": "Done",
+    "tasks": []
+  }
+};

@@ -51,38 +51,40 @@ const ALL_EXERCISES = "__all__";
 const studentLabel = (s: StudentSummary) =>
   [s.firstName, s.lastName].filter(Boolean).join(" ").trim() || s.email || "Student";
 
-function ChartInfo({ text }: { text: string }) {
-  const [open, setOpen] = useState(false);
+function ChartInfoButton({ open, onToggle }: { open: boolean; onToggle: () => void }) {
   return (
-    <View>
-      <Pressable
-        onPress={() => setOpen((v) => !v)}
-        hitSlop={8}
-        style={{
-          width: 20,
-          height: 20,
-          borderRadius: 10,
-          backgroundColor: Colors.primary,
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Text style={{ color: Colors.onPrimary, fontSize: 12, fontWeight: "700" }}>?</Text>
-      </Pressable>
-      {open ? (
-        <View
-          style={{
-            marginTop: 8,
-            backgroundColor: Colors.surface,
-            borderWidth: 1,
-            borderColor: Colors.hairlineStrong,
-            borderRadius: Radius.sm,
-            padding: Spacing.sm,
-          }}
-        >
-          <Text style={{ ...Typography.secondary, color: Colors.textSecondary, fontSize: FontSizes.caption }}>{text}</Text>
-        </View>
-      ) : null}
+    <Pressable
+      onPress={onToggle}
+      hitSlop={8}
+      style={{
+        width: 20,
+        height: 20,
+        borderRadius: 10,
+        backgroundColor: Colors.primary,
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <Text style={{ color: Colors.onPrimary, fontSize: 12, fontWeight: "700" }}>{open ? "×" : "?"}</Text>
+    </Pressable>
+  );
+}
+
+// Renders full-width, in normal flow (not an anchored popover) so it can never clip off
+// the edge of the screen and always pushes the content below it down instead of overlapping.
+function ChartInfoPanel({ text }: { text: string }) {
+  return (
+    <View
+      style={{
+        marginBottom: Spacing.sm,
+        backgroundColor: Colors.surface,
+        borderWidth: 1,
+        borderColor: Colors.hairlineStrong,
+        borderRadius: Radius.sm,
+        padding: Spacing.sm,
+      }}
+    >
+      <Text style={{ ...Typography.secondary, color: Colors.textSecondary, fontSize: FontSizes.caption }}>{text}</Text>
     </View>
   );
 }
@@ -119,6 +121,8 @@ export function ProgressAnalyticsView({
   const [exerciseAll, setExerciseAll] = useState(true);
   const [exerciseName, setExerciseName] = useState("");
   const [timePreset, setTimePreset] = useState<TimeRangePreset>("3m");
+  const [e1rmInfoOpen, setE1rmInfoOpen] = useState(false);
+  const [detailInfoOpen, setDetailInfoOpen] = useState(false);
 
   useEffect(() => {
     if (!coachProgressDefaults) return;
@@ -360,10 +364,13 @@ export function ProgressAnalyticsView({
               </View>
 
               <Card>
-                <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 8, marginBottom: Spacing.sm }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: Spacing.sm }}>
                   <Text style={{ ...Typography.section }}>1RM progression</Text>
-                  <ChartInfo text="Estimated 1RM = Weight × (1 + Reps/30). Shows strength independent of reps." />
+                  <ChartInfoButton open={e1rmInfoOpen} onToggle={() => setE1rmInfoOpen((v) => !v)} />
                 </View>
+                {e1rmInfoOpen ? (
+                  <ChartInfoPanel text="Estimated 1RM = Weight × (1 + Reps/30). Shows strength independent of reps." />
+                ) : null}
                 <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: Spacing.sm, fontSize: FontSizes.caption }}>
                   Weekly best estimated 1RM{exerciseNorm ? "" : " (best lift each week)"}. PR points highlighted.
                 </Text>
@@ -375,10 +382,13 @@ export function ProgressAnalyticsView({
               </Card>
 
               <Card>
-                <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 8, marginBottom: Spacing.sm }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: Spacing.sm }}>
                   <Text style={{ ...Typography.section }}>Workout detail</Text>
-                  <ChartInfo text="Blue = weight lifted | Orange = reps completed. Both drive 1RM improvement." />
+                  <ChartInfoButton open={detailInfoOpen} onToggle={() => setDetailInfoOpen((v) => !v)} />
                 </View>
+                {detailInfoOpen ? (
+                  <ChartInfoPanel text="Blue = weight lifted | Orange = reps completed. Both drive 1RM improvement." />
+                ) : null}
                 <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: Spacing.sm, fontSize: FontSizes.caption }}>
                   Shows actual lifts each week. Both weight and reps drive 1RM improvement.
                 </Text>

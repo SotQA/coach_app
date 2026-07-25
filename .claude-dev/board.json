@@ -52,12 +52,6 @@
           "created": "2026-07-21"
         },
         {
-          "id": 1784666076761,
-          "title": "Progress tab exercise and students lists refactoring",
-          "priority": "medium",
-          "created": "2026-07-21"
-        },
-        {
           "id": 1784666313484,
           "title": "Login screen refactoring",
           "priority": "medium",
@@ -85,7 +79,14 @@
     },
     "in-progress": {
       "title": "In Progress",
-      "tasks": []
+      "tasks": [
+        {
+          "id": 1784666076761,
+          "title": "Progress tab exercise and students lists refactoring",
+          "priority": "medium",
+          "created": "2026-07-21"
+        }
+      ]
     },
     "done": {
       "title": "Done",
