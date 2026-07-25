@@ -1,0 +1,261 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
+<div style="background: #0a0a0a; color: white; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; padding: 16px;">
+  <!-- Status Bar -->
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; font-size: 14px;">
+    <span>16:35</span>
+    <span>●●●</span>
+  </div>
+
+  <!-- Title -->
+  <h1 style="font-size: 32px; font-weight: 700; margin: 0 0 24px 0;">Progress analytics</h1>
+
+  <!-- FILTERS WITH DROPDOWNS -->
+  <div style="margin-bottom: 24px;">
+    <!-- Student Dropdown -->
+    <div style="margin-bottom: 16px;">
+      <div style="color: #888; font-size: 12px; margin-bottom: 8px; text-transform: uppercase; font-weight: 600;">Student</div>
+      <select style="width: 100%; background: #1a1a1a; border: 1px solid #333; color: white; padding: 10px 12px; border-radius: 8px; font-size: 14px; cursor: pointer; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2216%22 height=%2216%22 viewBox=%220 0 16 16%22><path fill=%22%23888%22 d=%22M3 5l5 5 5-5%22/></svg>'); background-repeat: no-repeat; background-position: right 8px center; padding-right: 32px;">
+        <option value="">Select student...</option>
+        <option selected>Alex Johnson</option>
+        <option>Emma Davis</option>
+        <option>James Wilson</option>
+        <option>Marta Sierpatowska</option>
+        <option>Sarah Miller</option>
+      </select>
+    </div>
+
+    <!-- Exercise Dropdown -->
+    <div style="margin-bottom: 16px;">
+      <div style="color: #888; font-size: 12px; margin-bottom: 8px; text-transform: uppercase; font-weight: 600;">Exercise</div>
+      <select style="width: 100%; background: #1a1a1a; border: 1px solid #333; color: white; padding: 10px 12px; border-radius: 8px; font-size: 14px; cursor: pointer; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2216%22 height=%2216%22 viewBox=%220 0 16 16%22><path fill=%22%23888%22 d=%22M3 5l5 5 5-5%22/></svg>'); background-repeat: no-repeat; background-position: right 8px center; padding-right: 32px;">
+        <option selected>All exercises</option>
+        <option>Barbell Row</option>
+        <option>Bench Press</option>
+        <option>Deadlift</option>
+        <option>Leg Press</option>
+        <option>Pull-ups</option>
+        <option>Squat</option>
+      </select>
+    </div>
+
+    <!-- Time Range Dropdown (UPDATED) -->
+    <div>
+      <div style="color: #888; font-size: 12px; margin-bottom: 8px; text-transform: uppercase; font-weight: 600;">Range</div>
+      <select style="width: 100%; background: #1a1a1a; border: 1px solid #333; color: white; padding: 10px 12px; border-radius: 8px; font-size: 14px; cursor: pointer; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2216%22 height=%2216%22 viewBox=%220 0 16 16%22><path fill=%22%23888%22 d=%22M3 5l5 5 5-5%22/></svg>'); background-repeat: no-repeat; background-position: right 8px center; padding-right: 32px;">
+        <option>Last 2 weeks</option>
+        <option>Last month</option>
+        <option selected>Last 3 months</option>
+        <option>All time</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Metrics Cards Grid -->
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+    <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; padding: 16px;">
+      <div style="color: #888; font-size: 12px; margin-bottom: 8px;">Est. 1RM</div>
+      <div style="font-size: 28px; font-weight: 700; margin-bottom: 4px;">140 kg</div>
+      <div style="color: #ccff00; font-size: 13px;">↑ +8 kg (+6.1%)</div>
+    </div>
+    <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; padding: 16px;">
+      <div style="color: #888; font-size: 12px; margin-bottom: 8px;">Total volume</div>
+      <div style="font-size: 28px; font-weight: 700; margin-bottom: 4px;">12.4k kg</div>
+      <div style="color: #ccff00; font-size: 13px;">↑ +1.2k kg (+10.7%)</div>
+    </div>
+    <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; padding: 16px;">
+      <div style="color: #888; font-size: 12px; margin-bottom: 8px;">Compliance</div>
+      <div style="font-size: 28px; font-weight: 700; margin-bottom: 4px;">87%</div>
+      <div style="color: #ccff00; font-size: 13px;">↑ +12% (7/8 sessions)</div>
+    </div>
+    <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; padding: 16px;">
+      <div style="color: #888; font-size: 12px; margin-bottom: 8px;">Avg RPE</div>
+      <div style="font-size: 28px; font-weight: 700; margin-bottom: 4px;">7.2</div>
+      <div style="color: #888; font-size: 13px;">Moderate intensity</div>
+    </div>
+  </div>
+
+  <!-- 1RM Progression Chart with Tooltip -->
+  <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; padding: 16px; margin-bottom: 16px;">
+    <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 12px;">
+      <h3 style="font-size: 16px; font-weight: 600; margin: 0;">1RM progression</h3>
+      <div style="position: relative; display: inline-block;">
+        <div style="cursor: help; width: 20px; height: 20px; background: #ccff00; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #000; font-size: 12px; font-weight: 700; flex-shrink: 0;">?</div>
+        <div style="position: absolute; top: 28px; left: 50%; transform: translateX(-50%); background: #2a2a2a; border: 1px solid #444; color: #ccc; padding: 10px 12px; border-radius: 8px; font-size: 12px; white-space: nowrap; z-index: 10; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+          Estimated 1RM = Weight × (1 + Reps/30)<br/>Shows strength independent of reps
+        </div>
+      </div>
+    </div>
+    <p style="color: #888; font-size: 12px; margin: 0 0 12px 0;">Weekly best estimated 1RM. PR (personal record) highlighted.</p>
+    <canvas id="orm1RMChart" style="max-height: 240px;"></canvas>
+  </div>
+
+  <!-- Weight × Reps Detail with Tooltip -->
+  <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; padding: 16px; margin-bottom: 16px;">
+    <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 12px;">
+      <h3 style="font-size: 16px; font-weight: 600; margin: 0;">Workout detail</h3>
+      <div style="position: relative; display: inline-block;">
+        <div style="cursor: help; width: 20px; height: 20px; background: #ccff00; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #000; font-size: 12px; font-weight: 700; flex-shrink: 0;">?</div>
+        <div style="position: absolute; top: 28px; left: 50%; transform: translateX(-50%); background: #2a2a2a; border: 1px solid #444; color: #ccc; padding: 10px 12px; border-radius: 8px; font-size: 12px; white-space: nowrap; z-index: 10; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+          Blue = weight lifted | Orange = reps completed<br/>Both drive 1RM improvement
+        </div>
+      </div>
+    </div>
+    <p style="color: #888; font-size: 12px; margin: 0 0 12px 0;">Shows actual lifts each week. Both weight and reps drive 1RM improvement.</p>
+    
+    <!-- LEGEND -->
+    <div style="display: flex; gap: 16px; margin-bottom: 12px;">
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <div style="width: 12px; height: 2px; background: #4a9eff;"></div>
+        <span style="font-size: 12px; color: #ccc;">Weight lifted (kg)</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <div style="width: 12px; height: 2px; background: #ff9e64;"></div>
+        <span style="font-size: 12px; color: #ccc;">Reps completed</span>
+      </div>
+    </div>
+
+    <canvas id="detailChart" style="max-height: 240px;"></canvas>
+  </div>
+
+  <!-- Coaching Signals -->
+  <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; padding: 16px; margin-bottom: 16px;">
+    <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
+      <span style="background: #ccff00; color: #000; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700;">INSIGHT</span>
+      <span style="font-weight: 600;">Progressing well</span>
+    </div>
+    <p style="color: #ccc; font-size: 13px; margin: 0;">Weight increased 8kg while maintaining volume. Recommend gradually increasing intensity next cycle.</p>
+  </div>
+
+  <!-- How to Read Section -->
+  <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; padding: 16px; margin-bottom: 16px;">
+    <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+      <span style="background: #ccff00; color: #000; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700;">HOW TO READ</span>
+    </div>
+    <ul style="color: #ccc; font-size: 13px; margin: 8px 0 0 20px; line-height: 1.6;">
+      <li><strong>1RM chart:</strong> One clean line = consistent strength metric. Tap/hover to see exact values and dates.</li>
+      <li><strong>Weight × Reps chart:</strong> Blue = weight, Orange = reps. Weight up, reps down = normal periodized training.</li>
+      <li><strong>Both improving?</strong> Rare and excellent. Student is in a peak strength phase.</li>
+    </ul>
+  </div>
+
+  <!-- Bottom spacing -->
+  <div style="height: 80px;"></div>
+</div>
+
+<script>
+const gridColor = '#2a2a2a';
+const accentColor = '#ccff00';
+
+const chartDefaults = {
+  responsive: true,
+  maintainAspectRatio: true,
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      backgroundColor: '#1a1a1a',
+      borderColor: accentColor,
+      borderWidth: 1,
+      titleColor: accentColor,
+      bodyColor: '#ccc',
+      padding: 12,
+      titleFont: { size: 13, weight: 'bold' },
+      bodyFont: { size: 12 }
+    }
+  },
+  scales: {
+    x: {
+      grid: { color: gridColor, drawBorder: false },
+      ticks: { color: '#888' }
+    },
+    y: {
+      grid: { color: gridColor, drawBorder: false },
+      ticks: { color: '#888' }
+    }
+  }
+};
+
+// Chart 1: 1RM Progression
+const week1RMs = [125, 128, 130, 132, 135, 138, 140];
+new Chart(document.getElementById('orm1RMChart'), {
+  type: 'line',
+  data: {
+    labels: ['W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W8'],
+    datasets: [{
+      label: 'Estimated 1RM (kg)',
+      data: week1RMs,
+      borderColor: accentColor,
+      backgroundColor: 'rgba(204, 255, 0, 0.1)',
+      borderWidth: 3,
+      fill: true,
+      tension: 0.4,
+      pointRadius: 6,
+      pointBackgroundColor: accentColor,
+      pointBorderColor: accentColor,
+      pointBorderWidth: 0
+    }]
+  },
+  options: {
+    ...chartDefaults,
+    scales: {
+      ...chartDefaults.scales,
+      y: {
+        ...chartDefaults.scales.y,
+        min: 120,
+        max: 145
+      }
+    }
+  }
+});
+
+// Chart 2: Weight × Reps Detail
+new Chart(document.getElementById('detailChart'), {
+  type: 'line',
+  data: {
+    labels: ['W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W8'],
+    datasets: [
+      {
+        label: 'Weight (kg)',
+        data: [100, 102, 105, 108, 115, 120, 130],
+        borderColor: '#4a9eff',
+        backgroundColor: 'rgba(74, 158, 255, 0.05)',
+        borderWidth: 2,
+        yAxisID: 'y',
+        tension: 0.4,
+        pointRadius: 4,
+        pointBackgroundColor: '#4a9eff'
+      },
+      {
+        label: 'Reps',
+        data: [6, 6, 5, 5, 4, 3, 2],
+        borderColor: '#ff9e64',
+        backgroundColor: 'rgba(255, 158, 100, 0.05)',
+        borderWidth: 2,
+        yAxisID: 'y1',
+        tension: 0.4,
+        pointRadius: 4,
+        pointBackgroundColor: '#ff9e64'
+      }
+    ]
+  },
+  options: {
+    ...chartDefaults,
+    scales: {
+      y: {
+        position: 'left',
+        ...chartDefaults.scales.y,
+        min: 95,
+        max: 135,
+        ticks: { color: '#888' }
+      },
+      y1: {
+        position: 'right',
+        grid: { drawOnChartArea: false },
+        min: 1,
+        max: 8,
+        ticks: { color: '#888' }
+      }
+    }
+  }
+});
+</script>
