@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { View, Text, ScrollView, Pressable, RefreshControl, useWindowDimensions } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import type { StudentSummary } from "../../types/StudentSummary";
 import type { WorkoutLog } from "../../types/Workout";
 import { Colors } from "../../theme/colors";
@@ -65,7 +66,11 @@ function ChartInfoButton({ open, onToggle }: { open: boolean; onToggle: () => vo
         justifyContent: "center",
       }}
     >
-      <Text style={{ color: Colors.onPrimary, fontSize: 12, fontWeight: "700" }}>{open ? "×" : "?"}</Text>
+      {open ? (
+        <Ionicons name="close" size={13} color={Colors.onPrimary} />
+      ) : (
+        <Text style={{ color: Colors.onPrimary, fontSize: 12, fontWeight: "700" }}>?</Text>
+      )}
     </Pressable>
   );
 }
@@ -377,7 +382,7 @@ export function ProgressAnalyticsView({
                 {weekly1RM.length === 0 ? (
                   <Text style={{ color: Colors.textMuted }}>No strength data in range.</Text>
                 ) : (
-                  <MiniLineChart points={weekly1RM} color={Colors.primary} height={160} highlightPr width={chartWidth} />
+                  <MiniLineChart points={weekly1RM} color={Colors.primary} height={190} highlightPr width={chartWidth} />
                 )}
               </Card>
 

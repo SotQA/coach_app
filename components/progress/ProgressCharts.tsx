@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useState } from "react";
-import { View, Text } from "react-native";
-import Svg, { Polyline, Circle, Line, Text as SvgText } from "react-native-svg";
+import { View, Text, Pressable } from "react-native";
+import Svg, { Polyline, Polygon, Circle, Line, Text as SvgText } from "react-native-svg";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
@@ -34,6 +34,36 @@ function buildTicks(lo: number, hi: number, count: number) {
     const t = count <= 1 ? 0 : i / (count - 1);
     return { t, value: Math.round(hi - t * (hi - lo)) };
   });
+}
+
+// Full-height invisible tap columns, one per data point, so the tappable area is a
+// generous vertical strip rather than the small painted dot itself (dots are hard to
+// hit precisely on a phone screen).
+function TapColumns({
+  coords,
+  width,
+  height,
+  onSelect,
+}: {
+  coords: { x: number }[];
+  width: number;
+  height: number;
+  onSelect: (i: number) => void;
+}) {
+  const n = coords.length;
+  const spacing = n > 1 ? coords[1].x - coords[0].x : width;
+  const colWidth = Math.max(16, Math.min(40, spacing || 40));
+  return (
+    <View style={{ position: "absolute", top: 0, left: 0, width, height }}>
+      {coords.map((c, i) => (
+        <Pressable
+          key={i}
+          onPress={() => onSelect(i)}
+          style={{ position: "absolute", left: c.x - colWidth / 2, top: 0, width: colWidth, height }}
+        />
+      ))}
+    </View>
+  );
 }
 
 function WeekAxisLabels({ coords, plotWidth }: { coords: { x: number }[]; plotWidth: number }) {
@@ -108,18 +138,23 @@ export function MiniLineChart({
   }, [points]);
 
   const yTicks = buildTicks(minV, maxV, 6);
+  let lastYLabel: number | null = null;
 
   return (
     <View>
       <Svg width={W} height={H}>
         {yTicks.map((tick, i) => {
           const y = padY + tick.t * (H - 2 * padY);
+          const showLabel = tick.value !== lastYLabel;
+          if (showLabel) lastYLabel = tick.value;
           return (
             <Fragment key={`h${i}`}>
               <Line x1={plotLeft} x2={plotRight} y1={y} y2={y} stroke={Colors.surfaceSubtle} strokeWidth={1} />
-              <SvgText x={plotLeft - AXIS_GAP} y={y + 3} fill={Colors.textMuted} fontSize={AXIS_FONT_SIZE} textAnchor="end">
-                {tick.value}
-              </SvgText>
+              {showLabel ? (
+                <SvgText x={plotLeft - AXIS_GAP} y={y + 3} fill={Colors.textMuted} fontSize={AXIS_FONT_SIZE} textAnchor="end">
+                  {tick.value}
+                </SvgText>
+              ) : null}
             </Fragment>
           );
         })}
@@ -127,23 +162,31 @@ export function MiniLineChart({
           <Line key={`v${i}`} x1={c.x} x2={c.x} y1={padY} y2={H - padY} stroke={Colors.surfaceSubtle} strokeWidth={1} />
         ))}
         {coords.length > 1 ? (
+          <Polygon
+            points={`${d} ${coords[coords.length - 1].x},${H - padY} ${coords[0].x},${H - padY}`}
+            fill={color}
+            fillOpacity={0.12}
+            stroke="none"
+          />
+        ) : null}
+        {coords.length > 1 ? (
           <Polyline points={d} fill="none" stroke={color} strokeWidth={2.5} strokeLinejoin="round" strokeLinecap="round" />
         ) : coords.length === 1 ? (
-          <Circle cx={coords[0].x} cy={coords[0].y} r={4} fill={color} />
+          <Circle cx={coords[0].x} cy={coords[0].y} r={5} fill={color} />
         ) : null}
         {coords.map((c, i) => (
           <Circle
             key={i}
             cx={c.x}
             cy={c.y}
-            r={highlightPr && c.p.isPr ? 6 : 4}
+            r={5}
             fill={highlightPr && c.p.isPr ? Colors.primary : color}
             stroke={Colors.bg}
             strokeWidth={2}
-            onPress={() => setSelected(i)}
           />
         ))}
       </Svg>
+      <TapColumns coords={coords} width={W} height={H} onSelect={setSelected} />
       <WeekAxisLabels coords={coords} plotWidth={plotWidth} />
       {selected != null && points[selected] ? (
         <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4, textAlign: "center" }}>
@@ -161,7 +204,7 @@ export function MiniLineChart({
 
 export function WeightRepsChart({ data, width }: { data: WeeklyWeightReps[]; width: number }) {
   const W = width;
-  const H = 160;
+  const H = 190;
   const padY = 10;
   const plotLeft = AXIS_GUTTER + AXIS_GAP;
   const plotRight = W - AXIS_GUTTER - AXIS_GAP;
@@ -190,21 +233,32 @@ export function WeightRepsChart({ data, width }: { data: WeeklyWeightReps[]; wid
 
   const weightTicks = buildTicks(minW, maxW, 8);
   const repsTicks = buildTicks(minR, maxR, 8);
+  let lastWeightLabel: number | null = null;
+  let lastRepsLabel: number | null = null;
 
   return (
     <View>
       <Svg width={W} height={H}>
         {weightTicks.map((tick, i) => {
           const y = padY + tick.t * (H - 2 * padY);
+          const repsVal = repsTicks[i].value;
+          const showWeightLabel = tick.value !== lastWeightLabel;
+          if (showWeightLabel) lastWeightLabel = tick.value;
+          const showRepsLabel = repsVal !== lastRepsLabel;
+          if (showRepsLabel) lastRepsLabel = repsVal;
           return (
             <Fragment key={`h${i}`}>
               <Line x1={plotLeft} x2={plotRight} y1={y} y2={y} stroke={Colors.surfaceSubtle} strokeWidth={1} />
-              <SvgText x={plotLeft - AXIS_GAP} y={y + 3} fill={Colors.chartBlue} fontSize={AXIS_FONT_SIZE} textAnchor="end">
-                {tick.value}
-              </SvgText>
-              <SvgText x={plotRight + AXIS_GAP} y={y + 3} fill={Colors.chartOrange} fontSize={AXIS_FONT_SIZE} textAnchor="start">
-                {repsTicks[i].value}
-              </SvgText>
+              {showWeightLabel ? (
+                <SvgText x={plotLeft - AXIS_GAP} y={y + 3} fill={Colors.chartBlue} fontSize={AXIS_FONT_SIZE} textAnchor="end">
+                  {tick.value}
+                </SvgText>
+              ) : null}
+              {showRepsLabel ? (
+                <SvgText x={plotRight + AXIS_GAP} y={y + 3} fill={Colors.chartOrange} fontSize={AXIS_FONT_SIZE} textAnchor="start">
+                  {repsVal}
+                </SvgText>
+              ) : null}
             </Fragment>
           );
         })}
@@ -226,12 +280,13 @@ export function WeightRepsChart({ data, width }: { data: WeeklyWeightReps[]; wid
           strokeLinejoin="round"
         />
         {weightCoords.map((c, i) => (
-          <Circle key={`w${i}`} cx={c.x} cy={c.y} r={4} fill={Colors.chartBlue} stroke={Colors.bg} strokeWidth={2} onPress={() => setSelected(i)} />
+          <Circle key={`w${i}`} cx={c.x} cy={c.y} r={5} fill={Colors.chartBlue} stroke={Colors.bg} strokeWidth={2} />
         ))}
         {repsCoords.map((c, i) => (
-          <Circle key={`r${i}`} cx={c.x} cy={c.y} r={4} fill={Colors.chartOrange} stroke={Colors.bg} strokeWidth={2} onPress={() => setSelected(i)} />
+          <Circle key={`r${i}`} cx={c.x} cy={c.y} r={5} fill={Colors.chartOrange} stroke={Colors.bg} strokeWidth={2} />
         ))}
       </Svg>
+      <TapColumns coords={weightCoords} width={W} height={H} onSelect={setSelected} />
       <WeekAxisLabels coords={weightCoords} plotWidth={plotWidth} />
       {selected != null && data[selected] ? (
         <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4, textAlign: "center" }}>
