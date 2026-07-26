@@ -69,7 +69,15 @@
         }
       ],
       "expo-web-browser",
-      "@react-native-google-signin/google-signin"
+      "@react-native-google-signin/google-signin",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useModularHeaders": true
+          }
+        }
+      ]
     ],
     "extra": {
       "googleWebClientId": "915193499412-nee8iipn919on2ir7eoj8e5a06mvov5p.apps.googleusercontent.com",
