@@ -9,6 +9,7 @@ import {
   RefreshControl,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../../context/AuthContext";
 import { useI18n } from "../../../context/I18nContext";
@@ -59,6 +60,25 @@ export default function CoachDashboard() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!user || user.role !== "coach") return;
+      let cancelled = false;
+      workoutService
+        .getUnreadNotificationCount(user.id)
+        .then((count) => {
+          if (!cancelled) setUnreadCount(count);
+        })
+        .catch(() => {
+          // Non-fatal: badge just stays at its last known value.
+        });
+      return () => {
+        cancelled = true;
+      };
+    }, [user?.id, user?.role])
+  );
 
   const todayLine = useMemo(() => {
     const dateStr = formatDate(Date.now(), locale, { month: "short", day: "numeric", year: "numeric" });
@@ -296,8 +316,9 @@ export default function CoachDashboard() {
             </View>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Notifications"
-              style={{
+              accessibilityLabel={t("notifications")}
+              onPress={() => router.push("/coach/notifications" as any)}
+              style={({ pressed }) => ({
                 width: 44,
                 height: 44,
                 borderRadius: Radius.xl,
@@ -306,20 +327,30 @@ export default function CoachDashboard() {
                 borderColor: Colors.border,
                 alignItems: "center",
                 justifyContent: "center",
-              }}
+                opacity: pressed ? 0.85 : 1,
+              })}
             >
               <Ionicons name="notifications-outline" size={22} color={Colors.text} />
-              <View
-                style={{
-                  position: "absolute",
-                  top: 8,
-                  right: 10,
-                  width: 8,
-                  height: 8,
-                  borderRadius: 4,
-                  backgroundColor: Colors.danger,
-                }}
-              />
+              {unreadCount > 0 ? (
+                <View
+                  style={{
+                    position: "absolute",
+                    top: 1,
+                    right: 1,
+                    minWidth: 16,
+                    height: 16,
+                    borderRadius: 8,
+                    paddingHorizontal: 3,
+                    backgroundColor: Colors.danger,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Text style={{ color: "#fff", fontSize: 10, fontWeight: "700", lineHeight: 12 }}>
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </Text>
+                </View>
+              ) : null}
             </Pressable>
           </View>
 

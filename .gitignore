@@ -30,6 +30,10 @@ yarn-error.*
 .DS_Store
 *.pem
 
+# Firebase local emulator logs
+firestore-debug.log
+*-debug.log
+
 # local env files
 .env*.local
 

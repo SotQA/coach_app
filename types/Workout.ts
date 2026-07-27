@@ -68,6 +68,12 @@ export interface WorkoutLog {
   coachFeedbackPending?: boolean;
   /** Wall-clock workout length (execution screen → complete), seconds. */
   durationSeconds?: number;
+  /**
+   * Whether the coach has seen the "student completed a workout" notification for this log.
+   * Missing (older logs, or logs without a coachId) is treated as read — only logs written
+   * with this explicitly `false` should ever surface as unread.
+   */
+  notificationRead?: boolean;
   // Legacy fields (for backward compatibility with older workout logs).
   exercise?: string;
   sets?: number;

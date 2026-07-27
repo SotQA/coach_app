@@ -79,6 +79,7 @@ export interface WorkoutLogFirestoreDoc {
   coachFeedback?: string;
   feedbackCreatedAt?: string;
   coachFeedbackPending?: boolean;
+  notificationRead?: boolean;
 }
 
 export interface TrainingGroupFirestoreDoc {

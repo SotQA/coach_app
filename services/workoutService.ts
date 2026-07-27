@@ -4,11 +4,13 @@ import {
   doc,
   getDoc,
   getDocs,
+  getCountFromServer,
   limit as limitFn,
   query,
   where,
   orderBy,
   updateDoc,
+  writeBatch,
   type QueryConstraint,
   type QueryDocumentSnapshot,
 } from "firebase/firestore";
@@ -196,6 +198,8 @@ const mapLogDoc = (snap: QueryDocumentSnapshot): WorkoutLog => {
     feedbackCreatedAt:
       data.feedbackCreatedAt != null ? String(data.feedbackCreatedAt) : undefined,
     coachFeedbackPending: data.coachFeedbackPending === true,
+    // Missing field (older logs, or logs without a coach) is treated as read.
+    notificationRead: data.notificationRead !== false,
     durationSeconds:
       data.durationSeconds != null && Number.isFinite(Number(data.durationSeconds))
         ? Math.max(0, Math.floor(Number(data.durationSeconds)))
@@ -550,6 +554,7 @@ export const workoutService = {
       ...(durationSeconds !== undefined ? { durationSeconds } : {}),
       ...(coachId !== undefined ? { coachId } : {}),
       coachFeedbackPending: coachId ? true : false,
+      ...(coachId ? { notificationRead: false } : {}),
     });
 
     const ref = await addDoc(collection(db, WORKOUT_LOGS_COLLECTION), dataToWrite);
@@ -600,6 +605,50 @@ export const workoutService = {
       orderBy("completedAt", "desc"),
       limitFn(limit),
     ]);
+  },
+
+  /** Logs behind the coach's "student completed a workout" notification feed, most recent first. */
+  async getNotificationLogsForCoach(coachId: string, limit = 100): Promise<WorkoutLog[]> {
+    assertNonEmpty(coachId, "coachId");
+    return listWorkoutLogs([
+      where("coachId", "==", coachId),
+      orderBy("completedAt", "desc"),
+      limitFn(limit),
+    ]);
+  },
+
+  /** Number of unread notifications for a coach — cheap count-only query for a badge. */
+  async getUnreadNotificationCount(coachId: string): Promise<number> {
+    assertNonEmpty(coachId, "coachId");
+    const q = query(
+      collection(db, WORKOUT_LOGS_COLLECTION),
+      where("coachId", "==", coachId),
+      where("notificationRead", "==", false)
+    );
+    const snap = await getCountFromServer(q);
+    return snap.data().count;
+  },
+
+  async markNotificationRead(logId: string): Promise<void> {
+    assertNonEmpty(logId, "workoutLogId");
+    await updateDoc(doc(db, WORKOUT_LOGS_COLLECTION, logId), { notificationRead: true });
+  },
+
+  /** Marks every unread notification for this coach as read (the "Mark all read" action). */
+  async markAllNotificationsRead(coachId: string): Promise<void> {
+    assertNonEmpty(coachId, "coachId");
+    const q = query(
+      collection(db, WORKOUT_LOGS_COLLECTION),
+      where("coachId", "==", coachId),
+      where("notificationRead", "==", false)
+    );
+    const snap = await getDocs(q);
+    if (snap.empty) return;
+    const batch = writeBatch(db);
+    for (const d of snap.docs) {
+      batch.update(d.ref, { notificationRead: true });
+    }
+    await batch.commit();
   },
 
   // Helper used by coach screens when building workout plans interactively.
