@@ -19,6 +19,7 @@ import {
   setupNotificationChannel,
 } from "../services/notificationService";
 import { authService } from "../services/authService";
+import { workoutService } from "../services/workoutService";
 import ErrorBoundary from "../components/ErrorBoundary";
 
 // Configure how notifications appear when the app is in the foreground.
@@ -137,6 +138,8 @@ function RootNavigator() {
       | undefined;
     if (data?.type !== "coach-workout-notification") return;
     if (!data.logId || user?.role !== "coach") return;
+
+    workoutService.markNotificationRead(data.logId).catch(() => {});
 
     const timer = setTimeout(() => {
       router.push({ pathname: "/coach/workoutComparison" as any, params: { logId: data.logId } });
