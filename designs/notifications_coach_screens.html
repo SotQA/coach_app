@@ -1,0 +1,298 @@
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif; }
+  .phone { width: 320px; background: #000; border-radius: 40px; border: 2px solid #2a2a2a; overflow: hidden; margin: 0 auto 32px; }
+  .screen { background: #000; min-height: 580px; display: flex; flex-direction: column; }
+  .status-bar { padding: 14px 20px 6px; display: flex; justify-content: space-between; align-items: center; }
+  .status-time { color: #fff; font-size: 13px; font-weight: 600; }
+  .status-icons { display: flex; align-items: center; gap: 5px; }
+  .status-icons span { color: #fff; font-size: 11px; }
+  .label { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; color: #C8FF00; text-transform: uppercase; padding: 0 20px; margin-bottom: 4px; }
+  .screen-title { font-size: 12px; font-weight: 600; color: #888; text-align: center; padding: 8px 0 4px; letter-spacing: 0.04em; text-transform: uppercase; border-bottom: 0.5px solid #1e1e1e; margin-bottom: 8px; }
+  .card { background: #1c1c1e; border-radius: 14px; margin: 0 16px 10px; padding: 14px 16px; }
+  .notif-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px 8px; }
+  .notif-title { color: #fff; font-size: 20px; font-weight: 700; }
+  .mark-all { color: #C8FF00; font-size: 13px; font-weight: 500; }
+  .filter-row { display: flex; gap: 8px; padding: 0 16px 12px; }
+  .filter-pill { padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 500; cursor: pointer; }
+  .filter-pill.active { background: #C8FF00; color: #000; }
+  .filter-pill.inactive { background: #1c1c1e; color: #888; }
+  .notif-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; border-bottom: 0.5px solid #1e1e1e; position: relative; }
+  .notif-item.unread { background: #111; }
+  .notif-item.unread::before { content: ''; position: absolute; left: 6px; top: 50%; transform: translateY(-50%); width: 6px; height: 6px; border-radius: 50%; background: #C8FF00; }
+  .avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; flex-shrink: 0; }
+  .av-ms { background: #2a3a1a; color: #C8FF00; }
+  .av-jk { background: #1a2a3a; color: #5ac8fa; }
+  .av-pk { background: #3a1a2a; color: #ff6b9d; }
+  .notif-body { flex: 1; min-width: 0; }
+  .notif-name { color: #fff; font-size: 13px; font-weight: 600; }
+  .notif-text { color: #888; font-size: 12px; margin-top: 2px; line-height: 1.4; }
+  .notif-time { color: #555; font-size: 11px; margin-top: 4px; }
+  .notif-workout { color: #C8FF00; font-weight: 600; }
+  .chevron { color: #444; font-size: 16px; align-self: center; flex-shrink: 0; }
+  .section-sep { padding: 8px 16px 4px; color: #444; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+  .detail-top { padding: 14px 20px 12px; border-bottom: 0.5px solid #1e1e1e; }
+  .back-row { display: flex; align-items: center; gap: 6px; color: #C8FF00; font-size: 13px; margin-bottom: 12px; }
+  .student-hero { display: flex; align-items: center; gap: 12px; }
+  .hero-avatar { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600; background: #2a3a1a; color: #C8FF00; flex-shrink: 0; }
+  .hero-name { color: #fff; font-size: 17px; font-weight: 700; }
+  .hero-sub { color: #888; font-size: 12px; margin-top: 2px; }
+  .hero-time { color: #C8FF00; font-size: 11px; margin-top: 4px; font-weight: 500; }
+  .compare-header { display: flex; gap: 8px; padding: 12px 16px 6px; }
+  .col-label { flex: 1; text-align: center; font-size: 11px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.05em; }
+  .col-label.current { color: #C8FF00; }
+  .exercise-row { padding: 10px 16px; border-bottom: 0.5px solid #1a1a1a; }
+  .ex-name { color: #fff; font-size: 12px; font-weight: 600; margin-bottom: 6px; }
+  .sets-row { display: flex; gap: 8px; }
+  .col-data { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+  .set-item { font-size: 11px; color: #aaa; background: #1c1c1e; border-radius: 6px; padding: 3px 7px; text-align: center; }
+  .set-item.improved { color: #C8FF00; background: #1a2200; }
+  .set-item.prev { color: #555; }
+  .bell-wrap { position: relative; display: inline-flex; width: 36px; height: 36px; background: #1c1c1e; border-radius: 50%; align-items: center; justify-content: center; }
+  .bell-icon { font-size: 17px; }
+  .badge { position: absolute; top: 1px; right: 1px; background: #ff3b30; color: #fff; font-size: 9px; font-weight: 700; border-radius: 8px; padding: 1px 4px; min-width: 16px; text-align: center; line-height: 14px; height: 14px; }
+  .nav-bar { background: #111; border-top: 0.5px solid #2a2a2a; padding: 10px 0 16px; display: flex; justify-content: space-around; }
+  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .nav-icon { font-size: 20px; color: #555; }
+  .nav-icon.active { color: #C8FF00; }
+  .nav-lbl { font-size: 9px; color: #555; }
+  .nav-lbl.active { color: #C8FF00; }
+  .fab { width: 44px; height: 44px; border-radius: 50%; background: #C8FF00; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #000; font-weight: 300; margin-top: -8px; }
+  .top-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px 12px; }
+  .title-lg { color: #fff; font-size: 22px; font-weight: 700; }
+</style>
+
+<h2 class="sr-only">Three coach notification screen mockups: notification list with filters, bell icon with badge, and workout comparison detail view.</h2>
+
+<div style="background: #0a0a0a; padding: 24px 16px 8px; border-radius: 16px;">
+
+  <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+
+    <div>
+      <div class="screen-title">Screen 1 — Notification tab</div>
+      <div class="phone">
+        <div class="screen">
+          <div class="status-bar">
+            <span class="status-time">16:35</span>
+            <div class="status-icons"><span>▪▪</span><span>WiFi</span><span>91%</span></div>
+          </div>
+          <div class="notif-header">
+            <span class="notif-title">Notifications</span>
+            <span class="mark-all">Mark all read</span>
+          </div>
+          <div class="filter-row">
+            <div class="filter-pill active">All</div>
+            <div class="filter-pill inactive">Unread</div>
+            <div class="filter-pill inactive">Read</div>
+          </div>
+
+          <div class="section-sep">Today</div>
+
+          <div class="notif-item unread">
+            <div class="avatar av-ms">MS</div>
+            <div class="notif-body">
+              <div class="notif-name">Marta Sierpatowska</div>
+              <div class="notif-text">Completed <span class="notif-workout">Upper Body A</span></div>
+              <div class="notif-time">2 min ago</div>
+            </div>
+            <div class="chevron">›</div>
+          </div>
+
+          <div class="notif-item unread">
+            <div class="avatar av-jk">JK</div>
+            <div class="notif-body">
+              <div class="notif-name">Jan Kowalski</div>
+              <div class="notif-text">Completed <span class="notif-workout">Leg Day B</span></div>
+              <div class="notif-time">47 min ago</div>
+            </div>
+            <div class="chevron">›</div>
+          </div>
+
+          <div class="notif-item">
+            <div class="avatar av-pk">PK</div>
+            <div class="notif-body">
+              <div class="notif-name">Piotr Krawczyk</div>
+              <div class="notif-text">Completed <span class="notif-workout">Push Day</span></div>
+              <div class="notif-time">3 hr ago</div>
+            </div>
+            <div class="chevron">›</div>
+          </div>
+
+          <div class="section-sep">Yesterday</div>
+
+          <div class="notif-item">
+            <div class="avatar av-ms">MS</div>
+            <div class="notif-body">
+              <div class="notif-name">Marta Sierpatowska</div>
+              <div class="notif-text">Completed <span class="notif-workout">Lower Body A</span></div>
+              <div class="notif-time">Jul 26</div>
+            </div>
+            <div class="chevron">›</div>
+          </div>
+
+          <div style="flex: 1;"></div>
+          <div class="nav-bar">
+            <div class="nav-item"><div class="nav-icon">⌂</div><div class="nav-lbl">Dashboard</div></div>
+            <div class="nav-item"><div class="nav-icon">👥</div><div class="nav-lbl">Students</div></div>
+            <div class="nav-item"><div class="fab">+</div></div>
+            <div class="nav-item"><div class="nav-icon">▪▪▪</div><div class="nav-lbl">Progress</div></div>
+            <div class="nav-item"><div class="nav-icon">⚙</div><div class="nav-lbl">Settings</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="screen-title">Screen 2 — Bell + badge</div>
+      <div class="phone" style="min-height: auto;">
+        <div class="screen" style="min-height: 200px; justify-content: center; padding: 24px 20px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+            <div>
+              <div style="color: #fff; font-size: 16px; font-weight: 700;">Sergey Sierpatowski</div>
+              <div style="color: #C8FF00; font-size: 12px; margin-top: 2px;">Active Now</div>
+            </div>
+            <div class="bell-wrap">
+              <span class="bell-icon">🔔</span>
+              <span class="badge">3</span>
+            </div>
+          </div>
+          <div style="color: #555; font-size: 11px; text-align: center;">Red dot = unread count · tapping opens notification tab</div>
+        </div>
+      </div>
+
+      <div class="screen-title" style="margin-top: 16px;">Unread filter view</div>
+      <div class="phone" style="min-height: auto;">
+        <div class="screen" style="min-height: 320px;">
+          <div class="status-bar">
+            <span class="status-time">16:35</span>
+            <div class="status-icons"><span>▪▪</span><span>WiFi</span><span>91%</span></div>
+          </div>
+          <div class="notif-header">
+            <span class="notif-title">Notifications</span>
+            <span class="mark-all">Mark all read</span>
+          </div>
+          <div class="filter-row">
+            <div class="filter-pill inactive">All</div>
+            <div class="filter-pill active">Unread</div>
+            <div class="filter-pill inactive">Read</div>
+          </div>
+          <div class="notif-item unread">
+            <div class="avatar av-ms">MS</div>
+            <div class="notif-body">
+              <div class="notif-name">Marta Sierpatowska</div>
+              <div class="notif-text">Completed <span class="notif-workout">Upper Body A</span></div>
+              <div class="notif-time">2 min ago</div>
+            </div>
+            <div class="chevron">›</div>
+          </div>
+          <div class="notif-item unread">
+            <div class="avatar av-jk">JK</div>
+            <div class="notif-body">
+              <div class="notif-name">Jan Kowalski</div>
+              <div class="notif-text">Completed <span class="notif-workout">Leg Day B</span></div>
+              <div class="notif-time">47 min ago</div>
+            </div>
+            <div class="chevron">›</div>
+          </div>
+          <div style="flex:1;"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="margin-top: 12px;">
+    <div class="screen-title">Screen 3 — Workout comparison (opened from notification)</div>
+    <div class="phone" style="width: 320px; margin: 0 auto;">
+      <div class="screen">
+        <div class="status-bar">
+          <span class="status-time">16:35</span>
+          <div class="status-icons"><span>▪▪</span><span>WiFi</span><span>91%</span></div>
+        </div>
+        <div class="detail-top">
+          <div class="back-row">‹ &nbsp;Notifications</div>
+          <div class="student-hero">
+            <div class="hero-avatar">MS</div>
+            <div>
+              <div class="hero-name">Marta Sierpatowska</div>
+              <div class="hero-sub">Upper Body A</div>
+              <div class="hero-time">Completed today · 16:33</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="compare-header">
+          <div style="width: 90px; font-size: 11px; color: #555;"></div>
+          <div class="col-label current">Latest · Jul 27</div>
+          <div class="col-label">Previous · Jul 20</div>
+        </div>
+
+        <div class="exercise-row">
+          <div class="ex-name">Bench Press</div>
+          <div class="sets-row">
+            <div style="width: 90px; font-size: 11px; color: #555; align-self: center;">Sets / Reps / kg</div>
+            <div class="col-data">
+              <div class="set-item improved">4 × 8 · 75 kg</div>
+              <div class="set-item improved">4 × 8 · 75 kg</div>
+              <div class="set-item improved">4 × 6 · 80 kg</div>
+            </div>
+            <div class="col-data">
+              <div class="set-item prev">4 × 8 · 70 kg</div>
+              <div class="set-item prev">4 × 8 · 70 kg</div>
+              <div class="set-item prev">4 × 6 · 75 kg</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="exercise-row">
+          <div class="ex-name">Overhead Press</div>
+          <div class="sets-row">
+            <div style="width: 90px; font-size: 11px; color: #555; align-self: center;"></div>
+            <div class="col-data">
+              <div class="set-item improved">3 × 10 · 45 kg</div>
+              <div class="set-item improved">3 × 10 · 45 kg</div>
+              <div class="set-item">3 × 8 · 45 kg</div>
+            </div>
+            <div class="col-data">
+              <div class="set-item prev">3 × 10 · 42 kg</div>
+              <div class="set-item prev">3 × 10 · 42 kg</div>
+              <div class="set-item prev">3 × 8 · 42 kg</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="exercise-row">
+          <div class="ex-name">Lat Pulldown</div>
+          <div class="sets-row">
+            <div style="width: 90px; font-size: 11px; color: #555; align-self: center;"></div>
+            <div class="col-data">
+              <div class="set-item">4 × 10 · 55 kg</div>
+              <div class="set-item">4 × 10 · 55 kg</div>
+              <div class="set-item">4 × 8 · 60 kg</div>
+            </div>
+            <div class="col-data">
+              <div class="set-item prev">4 × 10 · 55 kg</div>
+              <div class="set-item prev">4 × 10 · 55 kg</div>
+              <div class="set-item prev">4 × 8 · 60 kg</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="padding: 10px 16px; display: flex; align-items: center; gap: 8px;">
+          <div style="width: 10px; height: 10px; border-radius: 50%; background: #C8FF00; flex-shrink: 0;"></div>
+          <span style="font-size: 11px; color: #888;">Lime = improved vs previous session</span>
+        </div>
+
+        <div style="flex:1;"></div>
+        <div class="nav-bar">
+          <div class="nav-item"><div class="nav-icon">⌂</div><div class="nav-lbl">Dashboard</div></div>
+          <div class="nav-item"><div class="nav-icon">👥</div><div class="nav-lbl">Students</div></div>
+          <div class="nav-item"><div class="fab">+</div></div>
+          <div class="nav-item"><div class="nav-icon">▪▪▪</div><div class="nav-lbl">Progress</div></div>
+          <div class="nav-item"><div class="nav-icon">⚙</div><div class="nav-lbl">Settings</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

@@ -17,6 +17,7 @@ import { workoutService } from "../../../services/workoutService";
 import type { StudentSummary } from "../../../types/StudentSummary";
 import type { WorkoutPlan, WorkoutLog } from "../../../types/Workout";
 import { Avatar } from "../../../components/Avatar";
+import { NotificationBellButton } from "../../../components/NotificationBellButton";
 import { PrimaryButton } from "../../../components/PrimaryButton";
 import { Colors } from "../../../theme/colors";
 import { Radius, Spacing } from "../../../theme/spacing";
@@ -294,33 +295,7 @@ export default function CoachDashboard() {
                 </Text>
               </View>
             </View>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Notifications"
-              style={{
-                width: 44,
-                height: 44,
-                borderRadius: Radius.xl,
-                backgroundColor: Colors.card,
-                borderWidth: 1,
-                borderColor: Colors.border,
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Ionicons name="notifications-outline" size={22} color={Colors.text} />
-              <View
-                style={{
-                  position: "absolute",
-                  top: 8,
-                  right: 10,
-                  width: 8,
-                  height: 8,
-                  borderRadius: 4,
-                  backgroundColor: Colors.danger,
-                }}
-              />
-            </Pressable>
+            <NotificationBellButton />
           </View>
 
           <Text style={{ ...Typography.title, fontSize: FontSizes.h2, marginBottom: 4 }}>{t("overview")}</Text>
@@ -369,15 +344,17 @@ export default function CoachDashboard() {
               </Text>
             </Pressable>
 
-            <View
-              style={{
+            <Pressable
+              onPress={() => router.push({ pathname: "/coach/notifications" as any, params: { scope: "today" } })}
+              style={({ pressed }) => ({
                 flex: 1,
                 backgroundColor: Colors.card,
                 borderRadius: Radius.lg,
                 padding: Spacing.md,
                 borderWidth: 1,
                 borderColor: Colors.border,
-              }}
+                opacity: pressed ? 0.85 : 1,
+              })}
             >
               <View
                 style={{
@@ -401,7 +378,7 @@ export default function CoachDashboard() {
               <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 2 }}>
                 {t("todayLabel")}
               </Text>
-            </View>
+            </Pressable>
           </View>
 
           <View

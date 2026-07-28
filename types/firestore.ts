@@ -16,6 +16,7 @@ export interface UserFirestoreDoc {
   sex?: string;
   createdAt?: Timestamp | string;
   photoURL?: string;
+  expoPushToken?: string | null;
 }
 
 export interface ExerciseFirestoreDoc {
@@ -79,6 +80,7 @@ export interface WorkoutLogFirestoreDoc {
   coachFeedback?: string;
   feedbackCreatedAt?: string;
   coachFeedbackPending?: boolean;
+  notificationRead?: boolean;
 }
 
 export interface TrainingGroupFirestoreDoc {

@@ -101,6 +101,19 @@ export const authService = {
   },
 
   /**
+   * Persists (or clears, when `token` is null) the device's Expo push token
+   * on the user's Firestore doc so server-side pushes (e.g. the coach
+   * "student completed a workout" notification) know where to send.
+   */
+  async updatePushToken(uid: string, token: string | null): Promise<void> {
+    try {
+      await updateDoc(doc(db, USERS_COLLECTION, uid), { expoPushToken: token });
+    } catch (e) {
+      logger.error("[authService] updatePushToken failed", e);
+    }
+  },
+
+  /**
    * Non-React helpers only: reads `auth.currentUser` + Firestore profile.
    * UI should use `useAuth()` from AuthContext (single source of truth).
    */

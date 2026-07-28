@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { Alert, Pressable, ScrollView, Text, View } from "react-native";
 import { useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { NotificationBellButton } from "../../../components/NotificationBellButton";
 import { ScreenLayout } from "../../../components/ScreenLayout";
 import { Colors } from "../../../theme/colors";
-import { Radius, Spacing } from "../../../theme/spacing";
+import { Spacing } from "../../../theme/spacing";
 import { Typography, FontSizes } from "../../../theme/typography";
 import { useAuth } from "../../../context/AuthContext";
 import {
@@ -127,28 +127,7 @@ export default function CoachProfile() {
             }}
           >
             <Text style={{ ...Typography.title, fontSize: FontSizes.h3 }}>{t("settings")}</Text>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t("notifications")}
-              onPress={() =>
-                Alert.alert(t("notifications"), t("notificationPrefsComing"), [
-                  { text: t("ok"), style: "default" },
-                ])
-              }
-              style={({ pressed }) => ({
-                width: 44,
-                height: 44,
-                borderRadius: Radius.xl,
-                backgroundColor: Colors.card,
-                borderWidth: 1,
-                borderColor: Colors.border,
-                alignItems: "center",
-                justifyContent: "center",
-                opacity: pressed ? 0.85 : 1,
-              })}
-            >
-              <Ionicons name="notifications-outline" size={22} color={Colors.primary} />
-            </Pressable>
+            <NotificationBellButton />
           </View>
 
           {/* Profile card */}

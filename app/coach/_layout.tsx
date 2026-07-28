@@ -48,6 +48,8 @@ export default function CoachLayout() {
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false, title: "Back" }} />
         <Stack.Screen name="studentDetails" options={{ headerShown: false }} />
+        <Stack.Screen name="notifications" options={{ headerShown: false }} />
+        <Stack.Screen name="workoutComparison" options={{ headerShown: false }} />
         <Stack.Screen
           name="createStudent"
           options={{

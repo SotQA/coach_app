@@ -6,6 +6,7 @@ import type { WorkoutLog } from "../../types/Workout";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography, FontSizes } from "../../theme/typography";
+import { NotificationBellButton } from "../NotificationBellButton";
 import { ScreenLayout } from "../ScreenLayout";
 import { Dropdown } from "../Dropdown";
 import { normalizeExerciseName } from "../../utils/workoutMetrics";
@@ -264,7 +265,10 @@ export function ProgressAnalyticsView({
             backgroundColor: Colors.bg,
           }}
         >
-          <Text style={{ ...Typography.title, fontSize: FontSizes.h3, marginBottom: Spacing.sm }}>{screenTitle}</Text>
+          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: Spacing.sm }}>
+            <Text style={{ ...Typography.title, fontSize: FontSizes.h3 }}>{screenTitle}</Text>
+            {variant === "coach" ? <NotificationBellButton /> : null}
+          </View>
           {variant === "student" ? (
             <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: Spacing.sm }}>
               Your volume, strength trends, and exercise insights.

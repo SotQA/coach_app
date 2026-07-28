@@ -14,9 +14,11 @@ import { Colors } from "../theme/colors";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import {
   configureForegroundHandler,
+  registerForPushNotificationsAsync,
   requestNotificationPermissions,
   setupNotificationChannel,
 } from "../services/notificationService";
+import { authService } from "../services/authService";
 import ErrorBoundary from "../components/ErrorBoundary";
 
 // Configure how notifications appear when the app is in the foreground.
@@ -35,6 +37,21 @@ function RootNavigator() {
     setupNotificationChannel();
     requestNotificationPermissions();
   }, []);
+
+  // ── Push token registration ───────────────────────────────────────────────
+  // Runs once the user is known (permission request above may still be in
+  // flight on first mount, so this waits until it resolves via the check
+  // inside registerForPushNotificationsAsync).
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    registerForPushNotificationsAsync().then((token) => {
+      if (!cancelled && token) authService.updatePushToken(user.id, token);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id]);
 
   // ── Notification tap handler ──────────────────────────────────────────────
   // `useLastNotificationResponse` returns the most recent tapped notification.
@@ -110,6 +127,22 @@ function RootNavigator() {
     session?.workoutPlanId,
     user?.role,
   ]);
+
+  // Coach tapped a "student completed a workout" push — jump straight to the
+  // same workoutComparison screen tapping the row in-app would open.
+  useEffect(() => {
+    if (!lastResponse) return;
+    const data = lastResponse.notification.request.content.data as
+      | { type?: string; logId?: string }
+      | undefined;
+    if (data?.type !== "coach-workout-notification") return;
+    if (!data.logId || user?.role !== "coach") return;
+
+    const timer = setTimeout(() => {
+      router.push({ pathname: "/coach/workoutComparison" as any, params: { logId: data.logId } });
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [lastResponse?.notification.request.identifier, user?.role]);
 
   if (loading) {
     return (

@@ -15,6 +15,7 @@ import { studentService } from "../../../services/studentService";
 import { trainingGroupService } from "../../../services/trainingGroupService";
 import type { StudentSummary } from "../../../types/StudentSummary";
 import { Avatar } from "../../../components/Avatar";
+import { NotificationBellButton } from "../../../components/NotificationBellButton";
 import { StudentCard } from "../../../components/StudentCard";
 import { PrimaryButton } from "../../../components/PrimaryButton";
 import { Colors } from "../../../theme/colors";
@@ -160,6 +161,7 @@ export default function CoachStudents() {
                 </Text>
               </View>
             </View>
+            <NotificationBellButton />
           </View>
 
           <View

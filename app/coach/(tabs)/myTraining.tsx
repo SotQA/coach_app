@@ -19,6 +19,7 @@ import type { WorkoutLog, WorkoutPlan } from "../../../types/Workout";
 import { Colors } from "../../../theme/colors";
 import { Radius, Spacing } from "../../../theme/spacing";
 import { Typography, FontSizes } from "../../../theme/typography";
+import { NotificationBellButton } from "../../../components/NotificationBellButton";
 import { PrimaryButton } from "../../../components/PrimaryButton";
 import { ScreenLayout } from "../../../components/ScreenLayout";
 import { formatElapsedForTimer } from "../../../utils/workoutDuration";
@@ -251,13 +252,16 @@ export default function MyTrainingTab() {
           {/* Header */}
           <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: Spacing.md }}>
             <Text style={{ ...Typography.title, fontSize: FontSizes.h3 }}>{t("nav_myTraining")}</Text>
-            <Pressable
-              onPress={() => router.push("/coach/personalProgress" as any)}
-              hitSlop={12}
-              style={({ pressed }) => ({ padding: Spacing.sm, borderRadius: Radius.md, opacity: pressed ? 0.7 : 1 })}
-            >
-              <Ionicons name="stats-chart-outline" size={24} color={Colors.primary} />
-            </Pressable>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.sm }}>
+              <Pressable
+                onPress={() => router.push("/coach/personalProgress" as any)}
+                hitSlop={12}
+                style={({ pressed }) => ({ padding: Spacing.sm, borderRadius: Radius.md, opacity: pressed ? 0.7 : 1 })}
+              >
+                <Ionicons name="stats-chart-outline" size={24} color={Colors.primary} />
+              </Pressable>
+              <NotificationBellButton />
+            </View>
           </View>
 
           {/* Active session resume banner */}

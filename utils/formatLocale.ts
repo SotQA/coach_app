@@ -42,6 +42,27 @@ export function formatWeekday(locale: SupportedLocale): string {
   }
 }
 
+/**
+ * Fine-grained relative time for recent timestamps: "Just now" / "%{n} min ago" /
+ * "%{n} hr ago" for the last 24h, falling back to a short date beyond that.
+ * Pass the same `t` from useI18n() used elsewhere for locale strings.
+ */
+export function formatRelativeTime(
+  ms: number,
+  t: (key: string, opts?: Record<string, unknown>) => string,
+  locale: SupportedLocale
+): string {
+  if (!ms) return t("never");
+  const diffMs = Date.now() - ms;
+  if (diffMs < 0) return t("recently");
+  const minutes = Math.floor(diffMs / 60000);
+  if (minutes < 1) return t("justNow");
+  if (minutes < 60) return t("minAgo", { n: minutes });
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return t("hrAgo", { n: hours });
+  return formatDateShort(ms, locale);
+}
+
 // ─── Number / weight formatting ───────────────────────────────────────────────
 
 /**

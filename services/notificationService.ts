@@ -1,4 +1,5 @@
 import * as Notifications from "expo-notifications";
+import Constants from "expo-constants";
 import { Platform } from "react-native";
 import { logger } from "../utils/logger";
 
@@ -66,6 +67,33 @@ export async function requestNotificationPermissions(): Promise<boolean> {
   } catch (e) {
     console.warn("[Notifications] Permission request failed:", e);
     return false;
+  }
+}
+
+// ─── Push token registration ─────────────────────────────────────────────────
+
+/**
+ * Fetches this device's Expo push token (for server-triggered remote pushes,
+ * e.g. the coach "student completed a workout" notification).
+ * Requires notification permission to already be granted.
+ * Returns `null` on any failure (missing permission, no projectId, network, etc).
+ */
+export async function registerForPushNotificationsAsync(): Promise<string | null> {
+  try {
+    const { status } = await Notifications.getPermissionsAsync();
+    if (status !== "granted") return null;
+
+    const projectId = Constants.expoConfig?.extra?.eas?.projectId as string | undefined;
+    if (!projectId) {
+      logger.warn("[notifications] skipping push token registration — missing EAS projectId");
+      return null;
+    }
+
+    const { data: token } = await Notifications.getExpoPushTokenAsync({ projectId });
+    return token;
+  } catch (e) {
+    console.warn("[Notifications] Failed to get push token:", e);
+    return null;
   }
 }
 
