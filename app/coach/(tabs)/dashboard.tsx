@@ -9,7 +9,6 @@ import {
   RefreshControl,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../../context/AuthContext";
 import { useI18n } from "../../../context/I18nContext";
@@ -18,6 +17,7 @@ import { workoutService } from "../../../services/workoutService";
 import type { StudentSummary } from "../../../types/StudentSummary";
 import type { WorkoutPlan, WorkoutLog } from "../../../types/Workout";
 import { Avatar } from "../../../components/Avatar";
+import { NotificationBellButton } from "../../../components/NotificationBellButton";
 import { PrimaryButton } from "../../../components/PrimaryButton";
 import { Colors } from "../../../theme/colors";
 import { Radius, Spacing } from "../../../theme/spacing";
@@ -60,25 +60,6 @@ export default function CoachDashboard() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [unreadCount, setUnreadCount] = useState(0);
-
-  useFocusEffect(
-    useCallback(() => {
-      if (!user || user.role !== "coach") return;
-      let cancelled = false;
-      workoutService
-        .getUnreadNotificationCount(user.id)
-        .then((count) => {
-          if (!cancelled) setUnreadCount(count);
-        })
-        .catch(() => {
-          // Non-fatal: badge just stays at its last known value.
-        });
-      return () => {
-        cancelled = true;
-      };
-    }, [user?.id, user?.role])
-  );
 
   const todayLine = useMemo(() => {
     const dateStr = formatDate(Date.now(), locale, { month: "short", day: "numeric", year: "numeric" });
@@ -314,44 +295,7 @@ export default function CoachDashboard() {
                 </Text>
               </View>
             </View>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t("notifications")}
-              onPress={() => router.push("/coach/notifications" as any)}
-              style={({ pressed }) => ({
-                width: 44,
-                height: 44,
-                borderRadius: Radius.xl,
-                backgroundColor: Colors.card,
-                borderWidth: 1,
-                borderColor: Colors.border,
-                alignItems: "center",
-                justifyContent: "center",
-                opacity: pressed ? 0.85 : 1,
-              })}
-            >
-              <Ionicons name="notifications-outline" size={22} color={Colors.text} />
-              {unreadCount > 0 ? (
-                <View
-                  style={{
-                    position: "absolute",
-                    top: 1,
-                    right: 1,
-                    minWidth: 16,
-                    height: 16,
-                    borderRadius: 8,
-                    paddingHorizontal: 3,
-                    backgroundColor: Colors.danger,
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Text style={{ color: "#fff", fontSize: 10, fontWeight: "700", lineHeight: 12 }}>
-                    {unreadCount > 99 ? "99+" : unreadCount}
-                  </Text>
-                </View>
-              ) : null}
-            </Pressable>
+            <NotificationBellButton />
           </View>
 
           <Text style={{ ...Typography.title, fontSize: FontSizes.h2, marginBottom: 4 }}>{t("overview")}</Text>
@@ -400,15 +344,17 @@ export default function CoachDashboard() {
               </Text>
             </Pressable>
 
-            <View
-              style={{
+            <Pressable
+              onPress={() => router.push({ pathname: "/coach/notifications" as any, params: { scope: "today" } })}
+              style={({ pressed }) => ({
                 flex: 1,
                 backgroundColor: Colors.card,
                 borderRadius: Radius.lg,
                 padding: Spacing.md,
                 borderWidth: 1,
                 borderColor: Colors.border,
-              }}
+                opacity: pressed ? 0.85 : 1,
+              })}
             >
               <View
                 style={{
@@ -432,7 +378,7 @@ export default function CoachDashboard() {
               <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 2 }}>
                 {t("todayLabel")}
               </Text>
-            </View>
+            </Pressable>
           </View>
 
           <View

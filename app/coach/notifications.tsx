@@ -1,6 +1,6 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { View, Text, Pressable, SectionList, RefreshControl, ActivityIndicator } from "react-native";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../context/AuthContext";
@@ -19,22 +19,6 @@ import { getUserInitials, getDisplayName } from "../../utils/userDisplay";
 import { toMs } from "../../utils/dateConvert";
 
 type FilterKey = "all" | "unread" | "read";
-
-// Small deterministic per-student palette so avatars read as visually distinct
-// at a glance in a list of many students (mirrors the design mockup's colored avatars).
-const AVATAR_PALETTE: { background: string; text: string }[] = [
-  { background: "#2a3a1a", text: Colors.primary },
-  { background: "#1a2a3a", text: "#5ac8fa" },
-  { background: "#3a1a2a", text: "#ff6b9d" },
-  { background: "#2a1a3a", text: "#c39bff" },
-  { background: "#1a3a2e", text: "#4de6a8" },
-];
-
-function avatarColorFor(studentId: string) {
-  let hash = 0;
-  for (let i = 0; i < studentId.length; i++) hash = (hash * 31 + studentId.charCodeAt(i)) >>> 0;
-  return AVATAR_PALETTE[hash % AVATAR_PALETTE.length];
-}
 
 /**
  * Splits the localized "Completed X" string around the literal workout name so it can be
@@ -73,7 +57,6 @@ function NotificationRow({
   const isUnread = log.notificationRead === false;
   const initials = getUserInitials(student, "?");
   const name = getDisplayName(student, "Student");
-  const colors = avatarColorFor(log.studentId);
   const ms = toMs(log.completedAt);
 
   return (
@@ -103,11 +86,13 @@ function NotificationRow({
         />
       ) : null}
       <Avatar
+        photoURL={student?.photoURL}
         initials={initials}
         size={40}
-        backgroundColor={colors.background}
-        textColor={colors.text}
-        borderWidth={0}
+        backgroundColor={Colors.surface}
+        textColor={Colors.text}
+        borderColor={Colors.primary}
+        borderWidth={2}
       />
       <View style={{ flex: 1, minWidth: 0 }}>
         <Text style={{ ...Typography.section, fontSize: FontSizes.note, fontWeight: "700" }}>{name}</Text>
@@ -125,6 +110,8 @@ export default function CoachNotifications() {
   const router = useRouter();
   const { user } = useAuth();
   const { t, locale } = useI18n();
+  const params = useLocalSearchParams<{ scope?: string }>();
+  const todayOnly = params.scope === "today";
 
   const [students, setStudents] = useState<StudentSummary[]>([]);
   const [logs, setLogs] = useState<WorkoutLog[]>([]);
@@ -132,6 +119,7 @@ export default function CoachNotifications() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const hasLoadedOnce = useRef(false);
 
   const load = useCallback(async () => {
     if (!user || user.role !== "coach") return;
@@ -148,10 +136,16 @@ export default function CoachNotifications() {
     }
   }, [user?.id, user?.role, t]);
 
+  // Only show the full-screen spinner on first mount — refetching silently on
+  // every return-to-focus (e.g. back from workoutComparison) avoids a jarring
+  // flash of the whole list being replaced by a spinner each time.
   useFocusEffect(
     useCallback(() => {
-      setLoading(true);
-      load().finally(() => setLoading(false));
+      if (!hasLoadedOnce.current) setLoading(true);
+      load().finally(() => {
+        setLoading(false);
+        hasLoadedOnce.current = true;
+      });
     }, [load])
   );
 
@@ -187,11 +181,19 @@ export default function CoachNotifications() {
     router.push({ pathname: "/coach/workoutComparison" as any, params: { logId: log.id } });
   };
 
+  const scopedLogs = useMemo(() => {
+    if (!todayOnly) return logs;
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const todayMs = todayStart.getTime();
+    return logs.filter((l) => toMs(l.completedAt) >= todayMs);
+  }, [logs, todayOnly]);
+
   const filteredLogs = useMemo(() => {
-    if (filter === "unread") return logs.filter((l) => l.notificationRead === false);
-    if (filter === "read") return logs.filter((l) => l.notificationRead !== false);
-    return logs;
-  }, [logs, filter]);
+    if (filter === "unread") return scopedLogs.filter((l) => l.notificationRead === false);
+    if (filter === "read") return scopedLogs.filter((l) => l.notificationRead !== false);
+    return scopedLogs;
+  }, [scopedLogs, filter]);
 
   const sections = useMemo(() => {
     const now = new Date();
@@ -227,6 +229,7 @@ export default function CoachNotifications() {
       <View style={{ flex: 1, backgroundColor: Colors.bg }}>
         <View
           style={{
+            position: "relative",
             flexDirection: "row",
             alignItems: "center",
             justifyContent: "space-between",
@@ -235,11 +238,23 @@ export default function CoachNotifications() {
             paddingBottom: Spacing.xs,
           }}
         >
-          <Pressable onPress={() => router.back()} hitSlop={10}>
+          <Pressable onPress={() => router.back()} hitSlop={10} style={{ zIndex: 1 }}>
             <Ionicons name="chevron-back" size={26} color={Colors.text} />
           </Pressable>
-          <Text style={{ ...Typography.title, fontSize: FontSizes.h3 }}>{t("notifications")}</Text>
-          <Pressable onPress={handleMarkAllRead} disabled={unreadCount === 0} hitSlop={10}>
+          <Text
+            style={{
+              ...Typography.title,
+              fontSize: FontSizes.h3,
+              position: "absolute",
+              left: 0,
+              right: 0,
+              textAlign: "center",
+            }}
+            pointerEvents="none"
+          >
+            {t("notifications")}
+          </Text>
+          <Pressable onPress={handleMarkAllRead} disabled={unreadCount === 0} hitSlop={10} style={{ zIndex: 1 }}>
             <Text
               style={{
                 ...Typography.secondary,
@@ -252,27 +267,50 @@ export default function CoachNotifications() {
           </Pressable>
         </View>
 
-        <View style={{ flexDirection: "row", gap: Spacing.xs, paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm }}>
+        <View style={{ flexDirection: "row", gap: Spacing.sm, paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm }}>
           {filterOptions.map((opt) => (
             <Pressable
               key={opt.key}
               onPress={() => setFilter(opt.key)}
               style={{
-                paddingHorizontal: 14,
-                paddingVertical: 6,
+                position: "relative",
+                paddingHorizontal: 18,
+                paddingVertical: 10,
                 borderRadius: Radius.pill,
                 backgroundColor: filter === opt.key ? Colors.primary : Colors.card,
               }}
             >
               <Text
                 style={{
-                  fontSize: FontSizes.caption,
+                  fontSize: FontSizes.note,
                   fontWeight: "700",
                   color: filter === opt.key ? Colors.onPrimary : Colors.textMuted,
                 }}
               >
                 {t(opt.labelKey)}
               </Text>
+              {opt.key === "unread" && unreadCount > 0 ? (
+                <View
+                  style={{
+                    position: "absolute",
+                    top: -6,
+                    right: -6,
+                    minWidth: 18,
+                    height: 18,
+                    borderRadius: 9,
+                    paddingHorizontal: 4,
+                    backgroundColor: Colors.danger,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderWidth: 2,
+                    borderColor: Colors.bg,
+                  }}
+                >
+                  <Text style={{ color: "#fff", fontSize: 10, fontWeight: "700", lineHeight: 12 }}>
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </Text>
+                </View>
+              ) : null}
             </Pressable>
           ))}
         </View>

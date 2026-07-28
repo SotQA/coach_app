@@ -1,0 +1,23 @@
+{
+  "name": "functions",
+  "description": "Cloud Functions for the gym-coach-app Firebase project",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "22"
+  },
+  "main": "lib/index.js",
+  "dependencies": {
+    "firebase-admin": "^13.9.0",
+    "firebase-functions": "^7.3.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  },
+  "private": true
+}

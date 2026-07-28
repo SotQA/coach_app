@@ -34,6 +34,9 @@ yarn-error.*
 firestore-debug.log
 *-debug.log
 
+# Cloud Functions build output
+functions/lib/
+
 # local env files
 .env*.local
 

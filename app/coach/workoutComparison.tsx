@@ -19,20 +19,6 @@ import { toMs } from "../../utils/dateConvert";
 import { normalizeExerciseName } from "../../utils/workoutMetrics";
 import type { SupportedLocale } from "../../context/I18nContext";
 
-const AVATAR_PALETTE: { background: string; text: string }[] = [
-  { background: "#2a3a1a", text: Colors.primary },
-  { background: "#1a2a3a", text: "#5ac8fa" },
-  { background: "#3a1a2a", text: "#ff6b9d" },
-  { background: "#2a1a3a", text: "#c39bff" },
-  { background: "#1a3a2e", text: "#4de6a8" },
-];
-
-function avatarColorFor(studentId: string) {
-  let hash = 0;
-  for (let i = 0; i < studentId.length; i++) hash = (hash * 31 + studentId.charCodeAt(i)) >>> 0;
-  return AVATAR_PALETTE[hash % AVATAR_PALETTE.length];
-}
-
 function findPreviousLog(history: WorkoutLog[], anchor: WorkoutLog): WorkoutLog | null {
   const targetName = normalizeExerciseName(anchor.workoutName);
   const anchorMs = toMs(anchor.completedAt);
@@ -218,7 +204,6 @@ export default function WorkoutComparison() {
     );
   }
 
-  const colors = avatarColorFor(log.studentId);
   const latestMs = toMs(log.completedAt);
   const prevMs = previous ? toMs(previous.completedAt) : 0;
 
@@ -241,11 +226,13 @@ export default function WorkoutComparison() {
 
           <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.sm }}>
             <Avatar
+              photoURL={student?.photoURL}
               initials={getUserInitials(student, "?")}
               size={48}
-              backgroundColor={colors.background}
-              textColor={colors.text}
-              borderWidth={0}
+              backgroundColor={Colors.surface}
+              textColor={Colors.text}
+              borderColor={Colors.primary}
+              borderWidth={2}
             />
             <View style={{ flex: 1 }}>
               <Text style={{ ...Typography.title, fontSize: FontSizes.subheading }}>

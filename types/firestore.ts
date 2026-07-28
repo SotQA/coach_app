@@ -16,6 +16,7 @@ export interface UserFirestoreDoc {
   sex?: string;
   createdAt?: Timestamp | string;
   photoURL?: string;
+  expoPushToken?: string | null;
 }
 
 export interface ExerciseFirestoreDoc {
