@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import {
   View,
   Text,
@@ -12,6 +13,7 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../../context/AuthContext";
 import { useI18n } from "../../../context/I18nContext";
+import { useCoachFabVisibility } from "../../../context/CoachFabVisibilityContext";
 import { studentService } from "../../../services/studentService";
 import { workoutService } from "../../../services/workoutService";
 import type { StudentSummary } from "../../../types/StudentSummary";
@@ -53,6 +55,13 @@ export default function CoachDashboard() {
   const router = useRouter();
   const { user } = useAuth();
   const { t, locale } = useI18n();
+  const { setVisible: setFabVisible } = useCoachFabVisibility();
+  useFocusEffect(
+    useCallback(() => {
+      setFabVisible(true);
+      return () => setFabVisible(false);
+    }, [setFabVisible])
+  );
   const [students, setStudents] = useState<StudentSummary[]>([]);
   const [workoutsCompletedToday, setWorkoutsCompletedToday] = useState(0);
   const [personalPlans, setPersonalPlans] = useState<WorkoutPlan[]>([]);

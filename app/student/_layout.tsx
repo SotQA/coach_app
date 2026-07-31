@@ -1,7 +1,6 @@
 import { Redirect, Stack, useRouter } from "expo-router";
 import { Pressable, View } from "react-native";
 import { useAuth } from "../../context/AuthContext";
-import { FloatingWorkoutBar } from "../../components/FloatingWorkoutBar";
 import { Colors } from "../../theme/colors";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -54,8 +53,6 @@ export default function StudentLayout() {
         <Stack.Screen name="workoutHistory" options={{ title: "History" }} />
         <Stack.Screen name="progress" options={{ title: "Progress" }} />
       </Stack>
-      {/* Floats above tab bar on all student screens except workoutExecution */}
-      <FloatingWorkoutBar />
     </View>
   );
 }

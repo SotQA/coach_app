@@ -116,24 +116,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [pendingGoogleUser, setPendingGoogleUser] = useState<PendingGoogleUser | null>(null);
   // Ref so the onAuthStateChanged closure can read the latest value without re-subscribing.
   const pendingGoogleOnboardingRef = useRef(false);
+  // Firebase's RN auth persistence layer re-fires onAuthStateChanged on token
+  // refresh/app-resume even when the user never signed out. Only the very
+  // first resolution should block the whole app behind the loading spinner —
+  // otherwise app/_layout.tsx tears down and remounts the entire navigator
+  // (losing any in-progress screen state) on every silent token refresh.
+  const hasResolvedOnceRef = useRef(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       try {
         if (!firebaseUser) {
           setUser(null);
-          setLoading(false);
           return;
         }
 
-        setLoading(true);
+        if (!hasResolvedOnceRef.current) setLoading(true);
         const docRef = doc(db, USERS_COLLECTION, firebaseUser.uid);
         const snap = await getDoc(docRef);
 
         if (!snap.exists()) {
           if (pendingGoogleOnboardingRef.current) {
             // New Google user mid-onboarding — Firestore doc not yet created, that's expected.
-            setLoading(false);
             return;
           }
           await signOut(auth);
@@ -153,6 +157,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.error("[AuthProvider] Failed to resolve user role", e);
         setUser(null);
       } finally {
+        hasResolvedOnceRef.current = true;
         setLoading(false);
       }
     });
@@ -306,6 +311,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
+    // Push tokens are per-device, not per-login — clear this device's token
+    // from the outgoing user's doc so they don't keep receiving pushes for
+    // whoever logs in next on the same device.
+    const outgoingUid = user?.id;
+    if (outgoingUid) {
+      await authService.updatePushToken(outgoingUid, null);
+    }
     await signOut(auth);
   };
 

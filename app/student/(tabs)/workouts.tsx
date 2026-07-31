@@ -24,7 +24,7 @@ import { Typography, FontSizes } from "../../../theme/typography";
 import { PrimaryButton } from "../../../components/PrimaryButton";
 import { ScreenLayout } from "../../../components/ScreenLayout";
 import { formatElapsedForTimer } from "../../../utils/workoutDuration";
-import { FLOATING_BAR_SCROLL_OFFSET } from "../../../components/FloatingWorkoutBar";
+import { useStartWorkout } from "../../../hooks/useStartWorkout";
 import { formatDateShort } from "../../../utils/formatLocale";
 import type { SupportedLocale } from "../../../context/I18nContext";
 import { toMs } from "../../../utils/dateConvert";
@@ -106,6 +106,7 @@ export default function StudentWorkouts() {
   const { user } = useAuth();
   const { t, locale } = useI18n();
   const { session } = useActiveWorkoutSession();
+  const startWorkout = useStartWorkout();
   const activePlanId = session?.workoutPlanId ?? null;
   const elapsedSeconds = useElapsedSeconds();
   const [plans, setPlans] = useState<WorkoutPlan[]>([]);
@@ -268,24 +269,13 @@ export default function StudentWorkouts() {
 
   const openExecution = useCallback(
     (plan: WorkoutPlan) => {
-      // If another session is already active, redirect to it instead of starting a new one.
-      if (session) {
-        router.push({
-          pathname: "/student/workoutExecution",
-          params: { workoutPlanId: session.workoutPlanId },
-        });
-        return;
-      }
-      router.push({
-        pathname: "/student/workoutExecution",
-        params: {
-          workoutPlanId: plan.id,
-          groupId: plan.groupId ?? activeGroup?.id ?? "",
-          workoutName: plan.name,
-        },
+      startWorkout({
+        workoutPlanId: plan.id,
+        groupId: plan.groupId ?? activeGroup?.id ?? "",
+        workoutName: plan.name,
       });
     },
-    [router, activeGroup?.id, session]
+    [startWorkout, activeGroup?.id]
   );
 
   const openDetail = useCallback(
@@ -331,8 +321,7 @@ export default function StudentWorkouts() {
         <ScrollView
           contentContainerStyle={{
             padding: Spacing.md,
-            // Extra bottom padding when floating bar is visible so content isn't hidden under it.
-            paddingBottom: session ? FLOATING_BAR_SCROLL_OFFSET + Spacing.xl : Spacing.xl * 2,
+            paddingBottom: Spacing.xl * 2,
           }}
           showsVerticalScrollIndicator={false}
         >

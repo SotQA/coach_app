@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 import { useLocalSearchParams } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
 import { useAuth } from "../../../context/AuthContext";
+import { useCoachFabVisibility } from "../../../context/CoachFabVisibilityContext";
 import { studentService } from "../../../services/studentService";
 import { workoutService } from "../../../services/workoutService";
 import { trainingGroupService } from "../../../services/trainingGroupService";
@@ -14,6 +16,13 @@ import { ProgressAnalyticsView } from "../../../components/progress/ProgressAnal
 
 export default function CoachProgressTab() {
   const { user } = useAuth();
+  const { setVisible: setFabVisible } = useCoachFabVisibility();
+  useFocusEffect(
+    useCallback(() => {
+      setFabVisible(true);
+      return () => setFabVisible(false);
+    }, [setFabVisible])
+  );
   const params = useLocalSearchParams<{ studentId?: string; focusProgress?: string }>();
   const paramStudentId = useMemo(() => String(params.studentId ?? "").trim(), [params.studentId]);
 

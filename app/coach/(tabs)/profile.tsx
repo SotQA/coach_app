@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert, Pressable, ScrollView, Text, View } from "react-native";
 import { useRouter } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { NotificationBellButton } from "../../../components/NotificationBellButton";
 import { ScreenLayout } from "../../../components/ScreenLayout";
@@ -8,6 +9,7 @@ import { Colors } from "../../../theme/colors";
 import { Spacing } from "../../../theme/spacing";
 import { Typography, FontSizes } from "../../../theme/typography";
 import { useAuth } from "../../../context/AuthContext";
+import { useCoachFabVisibility } from "../../../context/CoachFabVisibilityContext";
 import {
   useI18n,
   SUPPORTED_LOCALES,
@@ -25,6 +27,13 @@ import { getUserInitials } from "../../../utils/userDisplay";
 export default function CoachProfile() {
   const router = useRouter();
   const { user, logout } = useAuth();
+  const { setVisible: setFabVisible } = useCoachFabVisibility();
+  useFocusEffect(
+    useCallback(() => {
+      setFabVisible(true);
+      return () => setFabVisible(false);
+    }, [setFabVisible])
+  );
   const { t, locale, setLocale } = useI18n();
   const { unit, setUnit } = useUnits();
   const insets = useSafeAreaInsets();

@@ -15,7 +15,7 @@ function formatRest(seconds: number): string {
 }
 
 /**
- * Self-contained rest timer card.
+ * Self-contained rest timer pill.
  *
  * Reads directly from ActiveWorkoutContext so it can be dropped anywhere
  * without prop drilling. Renders nothing when no rest timer is active.
@@ -33,145 +33,81 @@ export function RestTimerBar() {
   const rt = session?.restTimer;
   if (!rt?.isActive) return null;
 
-  const progress =
-    rt.durationSeconds > 0
-      ? Math.max(0, Math.min(1, restSecondsRemaining / rt.durationSeconds))
-      : 0;
-
   const isPaused = rt.isPaused;
   const isAlmostDone = !isPaused && restSecondsRemaining <= 5;
 
   return (
     <View
       style={{
+        flexDirection: "row",
+        alignItems: "center",
+        alignSelf: "center",
+        gap: Spacing.sm,
         backgroundColor: Colors.card,
-        borderRadius: Radius.lg,
+        borderRadius: Radius.pill,
         borderWidth: 1,
         borderColor: isAlmostDone ? Colors.primary : Colors.border,
-        padding: Spacing.md,
+        paddingVertical: 6,
+        paddingHorizontal: 8,
         marginBottom: Spacing.sm,
       }}
     >
-      {/* Header row */}
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: Spacing.sm,
-        }}
-      >
-        {/* Label + countdown */}
-        <View>
-          <Text
-            style={{
-              ...Typography.secondary,
-              color: Colors.textMuted,
-              fontSize: FontSizes.tiny,
-              textTransform: "uppercase",
-              letterSpacing: 0.8,
-              marginBottom: 2,
-            }}
-          >
-            {isPaused ? t("restPaused") : t("restTime")}
-          </Text>
-          <Text
-            style={{
-              ...Typography.title,
-              fontSize: 36,
-              fontVariant: ["tabular-nums"],
-              color: isAlmostDone ? Colors.primary : Colors.text,
-              lineHeight: 40,
-            }}
-          >
-            {formatRest(restSecondsRemaining)}
-          </Text>
-        </View>
-
-        {/* Action buttons */}
-        <View style={{ flexDirection: "row", gap: Spacing.sm, alignItems: "center" }}>
-          {/* Pause / Resume */}
-          <Pressable
-            onPress={isPaused ? resumeRestTimer : pauseRestTimer}
-            style={({ pressed }) => ({
-              width: 44,
-              height: 44,
-              borderRadius: Radius.xl,
-              borderWidth: 1,
-              borderColor: Colors.border,
-              backgroundColor: Colors.surface,
-              alignItems: "center",
-              justifyContent: "center",
-              opacity: pressed ? 0.75 : 1,
-            })}
-            accessibilityLabel={isPaused ? t("resumeTimer") : t("pauseTimer")}
-          >
-            <Ionicons
-              name={isPaused ? "play" : "pause"}
-              size={18}
-              color={Colors.text}
-            />
-          </Pressable>
-
-          {/* Skip */}
-          <Pressable
-            onPress={skipRestTimer}
-            style={({ pressed }) => ({
-              paddingHorizontal: 16,
-              paddingVertical: 10,
-              borderRadius: Radius.pill,
-              backgroundColor: Colors.primary,
-              alignItems: "center",
-              justifyContent: "center",
-              opacity: pressed ? 0.85 : 1,
-            })}
-            accessibilityLabel={t("skip")}
-          >
-            <Text
-              style={{
-                ...Typography.secondary,
-                color: Colors.onPrimary,
-                fontWeight: "700",
-                fontSize: FontSizes.note,
-              }}
-            >
-              {t("skip")}
-            </Text>
-          </Pressable>
-        </View>
-      </View>
-
-      {/* Progress bar — drains left-to-right */}
-      <View
-        style={{
-          height: 5,
+      {/* Pause / Resume */}
+      <Pressable
+        onPress={isPaused ? resumeRestTimer : pauseRestTimer}
+        style={({ pressed }) => ({
+          width: 32,
+          height: 32,
+          borderRadius: 16,
+          borderWidth: 1,
+          borderColor: Colors.border,
           backgroundColor: Colors.surface,
-          borderRadius: Radius.pill,
-          overflow: "hidden",
-        }}
+          alignItems: "center",
+          justifyContent: "center",
+          opacity: pressed ? 0.75 : 1,
+        })}
+        accessibilityLabel={isPaused ? t("resumeTimer") : t("pauseTimer")}
       >
-        <View
-          style={{
-            width: `${Math.round(progress * 100)}%`,
-            height: "100%",
-            backgroundColor: isAlmostDone ? Colors.danger : Colors.primary,
-            borderRadius: Radius.pill,
-          }}
-        />
-      </View>
+        <Ionicons name={isPaused ? "play" : "pause"} size={14} color={Colors.text} />
+      </Pressable>
 
-      {/* Sub-label: planned duration */}
+      {/* Countdown */}
       <Text
         style={{
-          ...Typography.secondary,
-          color: Colors.textMuted,
-          fontSize: FontSizes.tiny,
-          marginTop: 6,
-          textAlign: "right",
+          ...Typography.title,
+          fontSize: 18,
+          fontVariant: ["tabular-nums"],
+          color: isAlmostDone ? Colors.primary : Colors.text,
         }}
       >
-        {t("sPlanned", { n: rt.durationSeconds })}
+        {formatRest(restSecondsRemaining)}
       </Text>
+
+      {/* Skip */}
+      <Pressable
+        onPress={skipRestTimer}
+        style={({ pressed }) => ({
+          paddingHorizontal: 12,
+          paddingVertical: 6,
+          borderRadius: Radius.pill,
+          backgroundColor: Colors.primary,
+          alignItems: "center",
+          justifyContent: "center",
+          opacity: pressed ? 0.85 : 1,
+        })}
+        accessibilityLabel={t("skip")}
+      >
+        <Text
+          style={{
+            ...Typography.secondary,
+            color: Colors.onPrimary,
+            fontWeight: "700",
+            fontSize: FontSizes.tiny,
+          }}
+        >
+          {t("skip")}
+        </Text>
+      </Pressable>
     </View>
   );
 }

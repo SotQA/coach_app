@@ -22,7 +22,7 @@ import { Typography, FontSizes } from "../../../theme/typography";
 import { PrimaryButton } from "../../../components/PrimaryButton";
 import { ScreenLayout } from "../../../components/ScreenLayout";
 import { formatElapsedForTimer } from "../../../utils/workoutDuration";
-import { FLOATING_BAR_SCROLL_OFFSET } from "../../../components/FloatingWorkoutBar";
+import { useStartWorkout } from "../../../hooks/useStartWorkout";
 import { formatDateShort } from "../../../utils/formatLocale";
 import type { SupportedLocale } from "../../../context/I18nContext";
 import { toMs } from "../../../utils/dateConvert";
@@ -86,6 +86,7 @@ export default function AthleteWorkoutsTab() {
   const { user } = useAuth();
   const { t, locale } = useI18n();
   const { session } = useActiveWorkoutSession();
+  const startWorkout = useStartWorkout();
   const activePlanId = session?.workoutPlanId ?? null;
   const elapsedSeconds = useElapsedSeconds();
   const [plans, setPlans] = useState<WorkoutPlan[]>([]);
@@ -198,13 +199,9 @@ export default function AthleteWorkoutsTab() {
 
   const openExecution = useCallback(
     (plan: WorkoutPlan) => {
-      if (session) {
-        router.push({ pathname: "/athlete/workoutExecution" as any, params: { workoutPlanId: session.workoutPlanId } });
-        return;
-      }
-      router.push({ pathname: "/athlete/workoutExecution" as any, params: { workoutPlanId: plan.id, workoutName: plan.name } });
+      startWorkout({ workoutPlanId: plan.id, workoutName: plan.name });
     },
-    [router, session]
+    [startWorkout]
   );
 
   if (loading) {
@@ -236,7 +233,7 @@ export default function AthleteWorkoutsTab() {
         <ScrollView
           contentContainerStyle={{
             padding: Spacing.md,
-            paddingBottom: session ? FLOATING_BAR_SCROLL_OFFSET + Spacing.xl : Spacing.xl * 2,
+            paddingBottom: Spacing.xl * 2,
           }}
           showsVerticalScrollIndicator={false}
         >

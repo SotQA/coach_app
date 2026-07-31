@@ -1,5 +1,5 @@
-import { Stack, useRouter } from "expo-router";
-import { useEffect } from "react";
+import { Stack, useRouter, usePathname } from "expo-router";
+import { useEffect, useRef } from "react";
 import { ActivityIndicator, View } from "react-native";
 import * as Notifications from "expo-notifications";
 import { AuthProvider, useAuth } from "../context/AuthContext";
@@ -30,6 +30,7 @@ function RootNavigator() {
   const { loading, user } = useAuth();
   const { session } = useActiveWorkoutSession();
   const router = useRouter();
+  const pathname = usePathname();
 
   // ── One-time setup on mount ───────────────────────────────────────────────
   useEffect(() => {
@@ -59,9 +60,16 @@ function RootNavigator() {
   // It persists across renders until the app handles it, so it correctly
   // fires even when the app was launched cold from a notification tap.
   const lastResponse = Notifications.useLastNotificationResponse();
+  // `useLastNotificationResponse` never clears itself once a notification is
+  // tapped, and this effect's deps re-fire on session hydration — without a
+  // guard, the same tap gets reprocessed and pushes a duplicate
+  // workoutExecution screen onto the stack.
+  const handledNotifIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!lastResponse) return;
+    const notifId = lastResponse.notification.request.identifier;
+    if (handledNotifIdRef.current === notifId) return;
 
     const data = lastResponse.notification.request.content.data as
       | {
@@ -78,9 +86,12 @@ function RootNavigator() {
     if (!notifPlanId) return;
 
     // During cold launch, session is null until AsyncStorage hydration completes.
-    // Returning here causes the effect to re-run once session?.workoutPlanId
-    // populates (it's in the deps), so the check runs after hydration.
+    // Returning here (without marking handled) causes the effect to re-run
+    // once session?.workoutPlanId populates (it's in the deps), so the check
+    // runs after hydration.
     if (session === null) return;
+
+    handledNotifIdRef.current = notifId;
 
     let timer: ReturnType<typeof setTimeout>;
 
@@ -104,6 +115,13 @@ function RootNavigator() {
       timer = setTimeout(() => {
         router.push({ pathname: workoutsPath as any });
       }, 150);
+    } else if (pathname.includes("workoutExecution")) {
+      // Already on the ongoing workout screen — just re-target the focused
+      // set instead of pushing a duplicate instance onto the stack.
+      router.setParams({
+        nextExerciseIndex: String(data?.nextExerciseIndex ?? -1),
+        nextSetIndex: String(data?.nextSetIndex ?? -1),
+      });
     } else {
       timer = setTimeout(() => {
         router.push({
@@ -118,15 +136,16 @@ function RootNavigator() {
     }
 
     return () => clearTimeout(timer);
-  // Re-run when the response identifier changes (new tap) or when the
-  // session hydrates (cold-launch: session goes null → planId).
-  // `session` itself is intentionally excluded — we only care about the
-  // null→non-null and planId transitions, not every set-level update.
+  // Re-run when the response identifier changes (new tap), the session
+  // hydrates (cold-launch: session goes null → planId), or pathname changes
+  // (so a tap while navigating settles on the right push-vs-setParams
+  // branch). `handledNotifIdRef` guards against reprocessing the same tap.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     lastResponse?.notification.request.identifier,
     session?.workoutPlanId,
     user?.role,
+    pathname,
   ]);
 
   // Coach tapped a "student completed a workout" push — jump straight to the

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -9,8 +9,10 @@ import {
   Pressable,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../../context/AuthContext";
+import { useCoachFabVisibility } from "../../../context/CoachFabVisibilityContext";
 import { studentService } from "../../../services/studentService";
 import { trainingGroupService } from "../../../services/trainingGroupService";
 import type { StudentSummary } from "../../../types/StudentSummary";
@@ -27,6 +29,13 @@ import { logger } from "@/utils/logger";
 export default function CoachStudents() {
   const router = useRouter();
   const { user } = useAuth();
+  const { setVisible: setFabVisible } = useCoachFabVisibility();
+  useFocusEffect(
+    useCallback(() => {
+      setFabVisible(true);
+      return () => setFabVisible(false);
+    }, [setFabVisible])
+  );
   const [students, setStudents] = useState<StudentSummary[]>([]);
   const [query, setQuery] = useState("");
   const [latestGroupByStudentId, setLatestGroupByStudentId] = useState<Record<string, string | null>>({});

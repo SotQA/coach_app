@@ -130,6 +130,7 @@ export default function WorkoutExecution() {
   const [drafts, setDrafts] = useState<ExerciseDraft[]>([]);
   const [sessionNotes, setSessionNotes] = useState("");
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [notesHeight, setNotesHeight] = useState(72);
 
   const planRef = useRef<WorkoutPlan | null>(null);
   const draftsRef = useRef<ExerciseDraft[]>([]);
@@ -350,8 +351,10 @@ export default function WorkoutExecution() {
             placeholder={t("addSessionNotes")}
             placeholderTextColor={Colors.textMuted}
             multiline
+            maxLength={1000}
             editable={!submitting}
-            style={S.notesInput}
+            onContentSizeChange={(e) => setNotesHeight(Math.max(72, e.nativeEvent.contentSize.height))}
+            style={[S.notesInput, { height: notesHeight }]}
           />
         </View>
 
@@ -405,14 +408,16 @@ export default function WorkoutExecution() {
               <PrimaryButton
                 title="Discard"
                 onPress={handleDiscardWorkout}
-                style={{ backgroundColor: Colors.danger }}
-                textStyle={{ color: "white" }}
+                style={{ backgroundColor: Colors.danger, paddingVertical: 11, minHeight: 40 }}
+                textStyle={{ color: "white", fontSize: FontSizes.note }}
               />
             </View>
             <View style={{ flex: 1 }}>
               <PrimaryButton
                 title={t("finishSession")}
                 onPress={() => plan && finishWorkout({ plan, drafts, notes: sessionNotes, bestWeightByExercise })}
+                style={{ paddingVertical: 11, minHeight: 40 }}
+                textStyle={{ fontSize: FontSizes.note }}
               />
             </View>
           </View>
@@ -428,7 +433,7 @@ const S = StyleSheet.create({
   errorText:             { color: Colors.danger, marginBottom: Spacing.sm },
   scroll:                { flex: 1, backgroundColor: Colors.bg },
   scrollContent:         { padding: Spacing.md, paddingBottom: 120 },
-  scrollContentRestActive: { paddingBottom: 220 },
+  scrollContentRestActive: { paddingBottom: 140 },
   headerBlock:           { marginBottom: Spacing.sm },
   headerRow:             { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   backBtn:               { width: 40, height: 40, borderRadius: Radius.lg, alignItems: "center", justifyContent: "center", backgroundColor: Colors.card, borderWidth: 1, borderColor: Colors.border },

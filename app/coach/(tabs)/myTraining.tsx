@@ -12,6 +12,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../../context/AuthContext";
 import { useActiveWorkoutSession } from "../../../context/ActiveWorkoutSessionContext";
+import { useCoachFabVisibility } from "../../../context/CoachFabVisibilityContext";
 import { useElapsedSeconds } from "../../../context/ElapsedTimeContext";
 import { useI18n } from "../../../context/I18nContext";
 import { workoutService } from "../../../services/workoutService";
@@ -23,7 +24,7 @@ import { NotificationBellButton } from "../../../components/NotificationBellButt
 import { PrimaryButton } from "../../../components/PrimaryButton";
 import { ScreenLayout } from "../../../components/ScreenLayout";
 import { formatElapsedForTimer } from "../../../utils/workoutDuration";
-import { FLOATING_BAR_SCROLL_OFFSET } from "../../../components/FloatingWorkoutBar";
+import { useStartWorkout } from "../../../hooks/useStartWorkout";
 import { formatDateShort } from "../../../utils/formatLocale";
 import type { SupportedLocale } from "../../../context/I18nContext";
 import { toMs } from "../../../utils/dateConvert";
@@ -95,6 +96,7 @@ export default function MyTrainingTab() {
   const { user } = useAuth();
   const { t, locale } = useI18n();
   const { session } = useActiveWorkoutSession();
+  const startWorkout = useStartWorkout();
   const activePlanId = session?.workoutPlanId ?? null;
   const elapsedSeconds = useElapsedSeconds();
   const [plans, setPlans] = useState<WorkoutPlan[]>([]);
@@ -102,6 +104,14 @@ export default function MyTrainingTab() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const hasLoadedOnceRef = useRef(false);
+
+  const { setVisible: setFabVisible } = useCoachFabVisibility();
+  useFocusEffect(
+    useCallback(() => {
+      setFabVisible(true);
+      return () => setFabVisible(false);
+    }, [setFabVisible])
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -207,13 +217,9 @@ export default function MyTrainingTab() {
 
   const openExecution = useCallback(
     (plan: WorkoutPlan) => {
-      if (session) {
-        router.push({ pathname: "/coach/workoutExecution" as any, params: { workoutPlanId: session.workoutPlanId } });
-        return;
-      }
-      router.push({ pathname: "/coach/workoutExecution" as any, params: { workoutPlanId: plan.id, workoutName: plan.name } });
+      startWorkout({ workoutPlanId: plan.id, workoutName: plan.name });
     },
-    [router, session]
+    [startWorkout]
   );
 
   if (loading) {
@@ -245,7 +251,7 @@ export default function MyTrainingTab() {
         <ScrollView
           contentContainerStyle={{
             padding: Spacing.md,
-            paddingBottom: session ? FLOATING_BAR_SCROLL_OFFSET + Spacing.xl : Spacing.xl * 2,
+            paddingBottom: Spacing.xl * 2,
           }}
           showsVerticalScrollIndicator={false}
         >

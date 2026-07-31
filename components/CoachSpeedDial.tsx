@@ -1,18 +1,11 @@
 import { Platform, Pressable, View } from "react-native";
-import { useRouter, usePathname } from "expo-router";
+import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "../theme/colors";
+import { useCoachFabVisibility } from "../context/CoachFabVisibilityContext";
 
 const FAB_SIZE = 56;
-
-const ALLOWED_PATHS = [
-  "/coach/dashboard",
-  "/coach/students",
-  "/coach/myTraining",
-  "/coach/progress",
-  "/coach/profile",
-];
 
 const fabShadow =
   Platform.OS === "ios"
@@ -27,9 +20,8 @@ const fabShadow =
 export function CoachSpeedDial() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const pathname = usePathname();
+  const { visible } = useCoachFabVisibility();
 
-  const visible = ALLOWED_PATHS.some((p) => pathname === p);
   const bottomOffset = Math.max(insets.bottom, 8) - 22 + FAB_SIZE / 2;
 
   return (

@@ -14,15 +14,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { getExerciseById, getExerciseName } from "../../services/localExerciseService";
-import { useActiveWorkoutSession } from "../../context/ActiveWorkoutSessionContext";
-import { FLOATING_BAR_SCROLL_OFFSET } from "../../components/FloatingWorkoutBar";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 
 export default function ExerciseDetailScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { session } = useActiveWorkoutSession();
   const params = useLocalSearchParams<{
     exerciseName: string;
     exerciseDbId?: string;
@@ -66,9 +63,7 @@ export default function ExerciseDetailScreen() {
         styles.content,
         {
           paddingTop: insets.top + Spacing.md,
-          paddingBottom: session
-            ? insets.bottom + FLOATING_BAR_SCROLL_OFFSET + 8
-            : insets.bottom + 40,
+          paddingBottom: insets.bottom + 40,
         },
       ]}
     >
