@@ -12,7 +12,6 @@ import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../../context/AuthContext";
 import { useActiveWorkoutSession } from "../../../context/ActiveWorkoutSessionContext";
-import { useCoachFabVisibility } from "../../../context/CoachFabVisibilityContext";
 import { useElapsedSeconds } from "../../../context/ElapsedTimeContext";
 import { useI18n } from "../../../context/I18nContext";
 import { workoutService } from "../../../services/workoutService";
@@ -104,14 +103,6 @@ export default function MyTrainingTab() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const hasLoadedOnceRef = useRef(false);
-
-  const { setVisible: setFabVisible } = useCoachFabVisibility();
-  useFocusEffect(
-    useCallback(() => {
-      setFabVisible(true);
-      return () => setFabVisible(false);
-    }, [setFabVisible])
-  );
 
   useFocusEffect(
     useCallback(() => {

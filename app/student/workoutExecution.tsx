@@ -1,9 +1,10 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ActivityIndicator, Alert, Keyboard, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, Keyboard, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { PrimaryButton } from "../../components/PrimaryButton";
+import { HoldToConfirmButton } from "../../components/HoldToConfirmButton";
 import { ExerciseGroup } from "../../components/workout/ExerciseGroup";
 import { type SetDraft } from "../../components/workout/SetInputRow";
 import { useAuth } from "../../context/AuthContext";
@@ -260,22 +261,9 @@ export default function WorkoutExecution() {
     notesDebounceRef.current = setTimeout(() => { activeWorkout.updateNotes(text); }, 400);
   };
 
-  const handleDiscardWorkout = () => {
-    Alert.alert(
-      "Discard Workout?",
-      "This session will not be saved and will not count as completed.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Discard Workout",
-          style: "destructive",
-          onPress: async () => {
-            await activeWorkout.finishSession();
-            router.back();
-          },
-        },
-      ]
-    );
+  const handleDiscardWorkout = async () => {
+    await activeWorkout.finishSession();
+    router.back();
   };
 
   // ── Render ─────────────────────────────────────────────────────────────────
@@ -405,19 +393,12 @@ export default function WorkoutExecution() {
         ) : (
           <View style={{ flexDirection: "row", gap: Spacing.sm }}>
             <View style={{ flex: 1 }}>
-              <PrimaryButton
-                title="Discard"
-                onPress={handleDiscardWorkout}
-                style={{ backgroundColor: Colors.danger, paddingVertical: 11, minHeight: 40 }}
-                textStyle={{ color: "white", fontSize: FontSizes.note }}
-              />
+              <HoldToConfirmButton title="Discard" onConfirm={handleDiscardWorkout} />
             </View>
             <View style={{ flex: 1 }}>
               <PrimaryButton
                 title={t("finishSession")}
                 onPress={() => plan && finishWorkout({ plan, drafts, notes: sessionNotes, bestWeightByExercise })}
-                style={{ paddingVertical: 11, minHeight: 40 }}
-                textStyle={{ fontSize: FontSizes.note }}
               />
             </View>
           </View>

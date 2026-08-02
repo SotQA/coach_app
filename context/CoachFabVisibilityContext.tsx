@@ -8,7 +8,7 @@ type CoachFabVisibilityValue = {
 const CoachFabVisibilityContext = createContext<CoachFabVisibilityValue | undefined>(undefined);
 
 export function CoachFabVisibilityProvider({ children }: { children: ReactNode }) {
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(true);
   return (
     <CoachFabVisibilityContext.Provider value={{ visible, setVisible }}>
       {children}
