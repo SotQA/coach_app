@@ -83,6 +83,18 @@ export interface WorkoutLogFirestoreDoc {
   notificationRead?: boolean;
 }
 
+export interface InviteFirestoreDoc {
+  coachId?: string;
+  studentId?: string;
+  studentEmail?: string;
+  status?: "pending" | "accepted" | "declined";
+  createdAt?: Timestamp | string;
+  respondedAt?: Timestamp | string;
+  expiresAt?: Timestamp | string;
+  coachNotificationRead?: boolean;
+  studentNotificationRead?: boolean;
+}
+
 export interface TrainingGroupFirestoreDoc {
   studentId?: string;
   coachId?: string;

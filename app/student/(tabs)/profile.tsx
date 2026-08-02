@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-import { Alert, Pressable, ScrollView, Text, View } from "react-native";
+import { Alert, ScrollView, Text, View } from "react-native";
 import { useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScreenLayout } from "../../../components/ScreenLayout";
 import { SettingsProfileCard } from "../../../components/settings/SettingsProfileCard";
 import { SettingsSection } from "../../../components/settings/SettingsSection";
 import { SettingsRow } from "../../../components/settings/SettingsRow";
+import { NotificationBellButton } from "../../../components/NotificationBellButton";
 import { useAuth } from "../../../context/AuthContext";
 import {
   useI18n,
@@ -18,7 +18,7 @@ import { useUnits } from "../../../context/UnitsContext";
 import { workoutService } from "../../../services/workoutService";
 import type { WorkoutLog } from "../../../types/Workout";
 import { Colors } from "../../../theme/colors";
-import { Radius, Spacing } from "../../../theme/spacing";
+import { Spacing } from "../../../theme/spacing";
 import { Typography, FontSizes } from "../../../theme/typography";
 import { formatDateFull } from "../../../utils/formatLocale";
 import { toMs } from "../../../utils/dateConvert";
@@ -134,28 +134,7 @@ export default function StudentProfile() {
             }}
           >
             <Text style={{ ...Typography.title, fontSize: FontSizes.h3 }}>{t("settings")}</Text>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t("notifications")}
-              onPress={() =>
-                Alert.alert(t("notifications"), t("notificationPrefsComing"), [
-                  { text: t("ok"), style: "default" },
-                ])
-              }
-              style={({ pressed }) => ({
-                width: 44,
-                height: 44,
-                borderRadius: Radius.xl,
-                backgroundColor: Colors.card,
-                borderWidth: 1,
-                borderColor: Colors.border,
-                alignItems: "center",
-                justifyContent: "center",
-                opacity: pressed ? 0.85 : 1,
-              })}
-            >
-              <Ionicons name="notifications-outline" size={22} color={Colors.primary} />
-            </Pressable>
+            <NotificationBellButton />
           </View>
 
           {/* Profile card */}
@@ -200,11 +179,7 @@ export default function StudentProfile() {
               title={t("notifications")}
               subtitle={t("notificationsSubtitleStudent")}
               showDivider={false}
-              onPress={() =>
-                Alert.alert(t("notifications"), t("notificationPrefsComing"), [
-                  { text: t("ok"), style: "default" },
-                ])
-              }
+              onPress={() => router.push("/student/notifications" as any)}
             />
           </SettingsSection>
 

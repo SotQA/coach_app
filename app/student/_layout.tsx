@@ -44,6 +44,7 @@ export default function StudentLayout() {
         }}
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false, title: "Back" }} />
+        <Stack.Screen name="notifications" options={{ headerShown: false }} />
         <Stack.Screen name="today" options={{ title: "Today" }} />
         <Stack.Screen name="workout" options={{ title: "Workout" }} />
         <Stack.Screen name="workoutExecution" options={{ headerShown: false }} />

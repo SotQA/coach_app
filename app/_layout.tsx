@@ -20,6 +20,7 @@ import {
 } from "../services/notificationService";
 import { authService } from "../services/authService";
 import { workoutService } from "../services/workoutService";
+import { inviteService } from "../services/inviteService";
 import ErrorBoundary from "../components/ErrorBoundary";
 
 // Configure how notifications appear when the app is in the foreground.
@@ -162,6 +163,42 @@ function RootNavigator() {
 
     const timer = setTimeout(() => {
       router.push({ pathname: "/coach/workoutComparison" as any, params: { logId: data.logId } });
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [lastResponse?.notification.request.identifier, user?.role]);
+
+  // Student tapped a "coach wants to add you" invite push — jump to their
+  // notifications tab where they can accept/decline inline.
+  useEffect(() => {
+    if (!lastResponse) return;
+    const data = lastResponse.notification.request.content.data as
+      | { type?: string; inviteId?: string }
+      | undefined;
+    if (data?.type !== "invite-created") return;
+    if (!data.inviteId || user?.role !== "student") return;
+
+    inviteService.markInviteNotificationRead(data.inviteId, "student").catch(() => {});
+
+    const timer = setTimeout(() => {
+      router.push({ pathname: "/student/notifications" as any });
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [lastResponse?.notification.request.identifier, user?.role]);
+
+  // Coach tapped an "invite accepted/declined" push — jump to their
+  // notifications tab where the resolved invite is shown.
+  useEffect(() => {
+    if (!lastResponse) return;
+    const data = lastResponse.notification.request.content.data as
+      | { type?: string; inviteId?: string }
+      | undefined;
+    if (data?.type !== "invite-responded") return;
+    if (!data.inviteId || user?.role !== "coach") return;
+
+    inviteService.markInviteNotificationRead(data.inviteId, "coach").catch(() => {});
+
+    const timer = setTimeout(() => {
+      router.push({ pathname: "/coach/notifications" as any });
     }, 150);
     return () => clearTimeout(timer);
   }, [lastResponse?.notification.request.identifier, user?.role]);

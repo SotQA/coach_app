@@ -6,12 +6,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../context/AuthContext";
 import { useI18n } from "../context/I18nContext";
 import { workoutService } from "../services/workoutService";
+import { inviteService } from "../services/inviteService";
 import { Colors } from "../theme/colors";
 import { Radius } from "../theme/spacing";
 
 /**
- * Bell icon + unread-count badge used across every coach tab. Fetches its own
- * unread count so screens can drop it in without prop drilling.
+ * Bell icon + unread-count badge used across every coach and student tab.
+ * Fetches its own unread count so screens can drop it in without prop drilling.
  */
 export function NotificationBellButton() {
   const router = useRouter();
@@ -21,11 +22,20 @@ export function NotificationBellButton() {
 
   useFocusEffect(
     useCallback(() => {
-      if (!user || user.role !== "coach") return;
+      if (!user) return;
       let cancelled = false;
-      workoutService
-        .getUnreadNotificationCount(user.id)
-        .then((count) => {
+
+      const load = user.role === "coach"
+        ? Promise.all([
+            workoutService.getUnreadNotificationCount(user.id),
+            inviteService.getUnreadInviteCountForCoach(user.id),
+          ]).then(([workouts, invites]) => workouts + invites)
+        : user.role === "student"
+        ? inviteService.getUnreadInviteCountForStudent(user.id)
+        : null;
+
+      load
+        ?.then((count) => {
           if (!cancelled) setUnreadCount(count);
         })
         .catch(() => {
@@ -37,11 +47,13 @@ export function NotificationBellButton() {
     }, [user?.id, user?.role])
   );
 
+  const route = user?.role === "student" ? "/student/notifications" : "/coach/notifications";
+
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={t("notifications")}
-      onPress={() => router.push("/coach/notifications" as any)}
+      onPress={() => router.push(route as any)}
       style={({ pressed }) => ({
         width: 44,
         height: 44,

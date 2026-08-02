@@ -1,0 +1,213 @@
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif; }
+  .wrap { background: #0a0a0a; padding: 20px 12px 24px; border-radius: 16px; }
+  .row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; }
+  .phone { width: 175px; background: #000; border-radius: 28px; border: 1.5px solid #2a2a2a; overflow: hidden; }
+  .screen { background: #000; display: flex; flex-direction: column; min-height: 360px; }
+  .sbar { padding: 10px 14px 4px; display: flex; justify-content: space-between; }
+  .sbar-t { color: #fff; font-size: 10px; font-weight: 600; }
+  .sbar-r { color: #fff; font-size: 9px; }
+  .screen-lbl { font-size: 9px; font-weight: 600; color: #C8FF00; text-transform: uppercase; letter-spacing: 0.08em; text-align: center; padding: 4px 0 8px; }
+  .top-nav { display: flex; align-items: center; padding: 6px 14px 8px; gap: 6px; }
+  .back-btn { background: #1c1c1e; border-radius: 12px; padding: 4px 10px; color: #fff; font-size: 10px; display: flex; align-items: center; gap: 3px; }
+  .nav-title { color: #fff; font-size: 13px; font-weight: 600; }
+  .card { background: #1c1c1e; border-radius: 14px; margin: 0 10px 8px; padding: 12px; }
+  .card-title { color: #fff; font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .card-sub { color: #888; font-size: 10px; line-height: 1.4; margin-bottom: 10px; }
+  .field-lbl { color: #888; font-size: 10px; margin-bottom: 4px; }
+  .field { background: #2a2a2c; border-radius: 8px; padding: 8px 10px; color: #555; font-size: 10px; margin-bottom: 4px; }
+  .field.error { border: 1px solid #ff3b30; }
+  .field-hint { font-size: 9px; color: #666; margin-bottom: 10px; }
+  .field-error { font-size: 9px; color: #ff3b30; margin-bottom: 10px; display: flex; align-items: center; gap: 4px; }
+  .field-ok { font-size: 9px; color: #C8FF00; margin-bottom: 10px; display: flex; align-items: center; gap: 4px; }
+  .btn-lime { background: #C8FF00; border-radius: 20px; padding: 9px; text-align: center; color: #000; font-size: 11px; font-weight: 700; margin-bottom: 6px; }
+  .btn-dark { background: #2a2a2c; border-radius: 20px; padding: 9px; text-align: center; color: #fff; font-size: 11px; }
+  .notif-item { display: flex; align-items: flex-start; gap: 8px; padding: 10px 12px; border-bottom: 0.5px solid #1e1e1e; position: relative; }
+  .notif-item.unread::before { content:''; position: absolute; left: 4px; top: 50%; transform: translateY(-50%); width: 5px; height: 5px; border-radius: 50%; background: #C8FF00; }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; flex-shrink: 0; }
+  .av-coach { background: #1a2a3a; color: #5ac8fa; }
+  .av-ms { background: #2a3a1a; color: #C8FF00; }
+  .nb { flex: 1; min-width: 0; }
+  .nb-name { color: #fff; font-size: 11px; font-weight: 600; }
+  .nb-text { color: #888; font-size: 10px; margin-top: 1px; line-height: 1.3; }
+  .nb-time { color: #555; font-size: 9px; margin-top: 3px; }
+  .nb-accent { color: #C8FF00; font-weight: 600; }
+  .action-row { display: flex; gap: 6px; margin-top: 7px; }
+  .act-accept { background: #C8FF00; border-radius: 8px; padding: 5px 10px; color: #000; font-size: 10px; font-weight: 700; }
+  .act-decline { background: #2a2a2c; border-radius: 8px; padding: 5px 10px; color: #aaa; font-size: 10px; }
+  .pending-badge { background: #2a2200; color: #C8FF00; font-size: 9px; padding: 2px 7px; border-radius: 8px; display: inline-block; margin-top: 4px; }
+  .accepted-badge { background: #1a2200; color: #C8FF00; font-size: 9px; padding: 2px 7px; border-radius: 8px; display: inline-block; margin-top: 4px; }
+  .declined-badge { background: #2a0a0a; color: #ff6b6b; font-size: 9px; padding: 2px 7px; border-radius: 8px; display: inline-block; margin-top: 4px; }
+  .arrow-col { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 4px; }
+  .arrow { color: #C8FF00; font-size: 18px; margin: 4px 0; }
+  .arrow-lbl { color: #444; font-size: 9px; text-align: center; }
+  .step-lbl { color: #555; font-size: 9px; text-align: center; padding: 4px 0 6px; }
+  .divider { border-top: 0.5px solid #1e1e1e; margin: 4px 0; }
+</style>
+
+<div class="wrap">
+<h2 style="display:none">Student-coach invite flow design: email validation states, student notification with accept/decline, and coach confirmation</h2>
+
+<div style="color: #C8FF00; font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; text-align: center; margin-bottom: 12px;">Complete invite flow</div>
+
+<div class="row" style="align-items: flex-start;">
+
+  <div>
+    <div class="screen-lbl">1 · Coach — email not found</div>
+    <div class="phone">
+      <div class="screen">
+        <div class="sbar"><span class="sbar-t">19:06</span><span class="sbar-r">▪▪ WiFi 68%</span></div>
+        <div class="top-nav">
+          <div class="back-btn">‹ Back</div>
+          <div class="nav-title">Create Student</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Create Student</div>
+          <div class="card-sub">Link an existing student account to your roster.</div>
+          <div class="field-lbl">Student Email</div>
+          <div class="field error">unknown@mail.com</div>
+          <div class="field-error">✕ No account found with this email</div>
+          <div class="btn-lime" style="opacity:0.4;">Link Student</div>
+          <div class="btn-dark">Cancel</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow-col" style="padding-top: 120px;">
+    <div class="arrow">›</div>
+    <div class="arrow-lbl">fix<br>email</div>
+  </div>
+
+  <div>
+    <div class="screen-lbl">2 · Coach — email verified</div>
+    <div class="phone">
+      <div class="screen">
+        <div class="sbar"><span class="sbar-t">19:06</span><span class="sbar-r">▪▪ WiFi 68%</span></div>
+        <div class="top-nav">
+          <div class="back-btn">‹ Back</div>
+          <div class="nav-title">Create Student</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Create Student</div>
+          <div class="card-sub">Link an existing student account to your roster.</div>
+          <div class="field-lbl">Student Email</div>
+          <div class="field" style="color:#fff;">marta@mail.com</div>
+          <div class="field-ok">✓ Marta Sierpatowska found</div>
+          <div class="btn-lime">Send Invite</div>
+          <div class="btn-dark">Cancel</div>
+        </div>
+        <div style="padding: 8px 10px 0;">
+          <div style="background: #1a2200; border-radius: 10px; padding: 8px 10px; display: flex; gap: 8px; align-items: center;">
+            <span style="font-size: 16px;">📨</span>
+            <div>
+              <div style="color: #C8FF00; font-size: 10px; font-weight: 600;">Invite pending</div>
+              <div style="color: #888; font-size: 9px; margin-top: 2px;">Student will be added once they accept</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div style="display: flex; justify-content: center; margin: 4px 0 8px;">
+  <div style="color: #C8FF00; font-size: 16px;">↓</div>
+</div>
+
+<div class="row" style="align-items: flex-start;">
+
+  <div>
+    <div class="screen-lbl">3 · Student — invite received</div>
+    <div class="phone">
+      <div class="screen">
+        <div class="sbar"><span class="sbar-t">19:08</span><span class="sbar-r">▪▪ WiFi 68%</span></div>
+        <div style="padding: 8px 14px 6px; display: flex; justify-content: space-between; align-items: center;">
+          <div style="color:#fff; font-size: 15px; font-weight: 700;">Notifications</div>
+        </div>
+        <div class="divider"></div>
+        <div class="notif-item unread">
+          <div class="avatar av-coach">SS</div>
+          <div class="nb">
+            <div class="nb-name">Coach invite</div>
+            <div class="nb-text"><span class="nb-accent">Sergey Sierpatowski</span> wants to add you as their student</div>
+            <div class="action-row">
+              <div class="act-accept">Accept</div>
+              <div class="act-decline">Decline</div>
+            </div>
+            <div class="nb-time">2 min ago</div>
+          </div>
+        </div>
+        <div class="notif-item">
+          <div class="avatar av-ms">MS</div>
+          <div class="nb">
+            <div class="nb-name">Workout reminder</div>
+            <div class="nb-text">Time for your Upper Body A session</div>
+            <div class="nb-time">1 hr ago</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow-col" style="padding-top: 120px;">
+    <div class="arrow">›</div>
+    <div class="arrow-lbl">student<br>accepts</div>
+  </div>
+
+  <div>
+    <div class="screen-lbl">4 · Coach — student accepted</div>
+    <div class="phone">
+      <div class="screen">
+        <div class="sbar"><span class="sbar-t">19:12</span><span class="sbar-r">▪▪ WiFi 68%</span></div>
+        <div style="padding: 8px 14px 6px; display: flex; justify-content: space-between; align-items: center;">
+          <div style="color:#fff; font-size: 15px; font-weight: 700;">Notifications</div>
+        </div>
+        <div class="divider"></div>
+        <div class="notif-item unread">
+          <div class="avatar av-ms">MS</div>
+          <div class="nb">
+            <div class="nb-name">Marta Sierpatowska</div>
+            <div class="nb-text">Accepted your invite — now on your roster</div>
+            <div class="accepted-badge">✓ Added to roster</div>
+            <div class="nb-time">Just now</div>
+          </div>
+        </div>
+        <div class="notif-item">
+          <div class="avatar av-ms" style="background:#2a2a2a; color:#666;">JK</div>
+          <div class="nb">
+            <div class="nb-name">Jan Kowalski</div>
+            <div class="nb-text">Invite pending</div>
+            <div class="pending-badge">⏳ Waiting for response</div>
+            <div class="nb-time">1 hr ago</div>
+          </div>
+        </div>
+        <div class="notif-item">
+          <div class="avatar" style="background:#2a0a0a; color:#ff6b6b;">PK</div>
+          <div class="nb">
+            <div class="nb-name">Piotr Krawczyk</div>
+            <div class="nb-text">Declined your invite</div>
+            <div class="declined-badge">✕ Declined</div>
+            <div class="nb-time">Yesterday</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div style="margin-top: 14px; background: #111; border-radius: 10px; padding: 10px 14px;">
+  <div style="color: #C8FF00; font-size: 10px; font-weight: 600; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.06em;">Design notes</div>
+  <div style="display: flex; flex-direction: column; gap: 5px;">
+    <div style="color: #888; font-size: 10px;">• Button label changes from "Link Student" → "Send Invite" once email is verified</div>
+    <div style="color: #888; font-size: 10px;">• Button is disabled (dimmed) while email is not verified — prevents sending blind invites</div>
+    <div style="color: #888; font-size: 10px;">• Pending / Accepted / Declined states are all visible in coach's notification tab</div>
+    <div style="color: #888; font-size: 10px;">• Student's notification shows Accept + Decline inline — no extra screen needed</div>
+    <div style="color: #888; font-size: 10px;">• Once declined, coach can re-invite after 7 days (prevent spam)</div>
+  </div>
+</div>
+
+</div>

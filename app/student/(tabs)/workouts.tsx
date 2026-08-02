@@ -23,6 +23,7 @@ import { Radius, Spacing } from "../../../theme/spacing";
 import { Typography, FontSizes } from "../../../theme/typography";
 import { PrimaryButton } from "../../../components/PrimaryButton";
 import { ScreenLayout } from "../../../components/ScreenLayout";
+import { NotificationBellButton } from "../../../components/NotificationBellButton";
 import { formatElapsedForTimer } from "../../../utils/workoutDuration";
 import { useStartWorkout } from "../../../hooks/useStartWorkout";
 import { formatDateShort } from "../../../utils/formatLocale";
@@ -334,17 +335,20 @@ export default function StudentWorkouts() {
             }}
           >
             <Text style={{ ...Typography.title, fontSize: FontSizes.h3 }}>{t("workouts")}</Text>
-            <Pressable
-              onPress={() => router.push("/student/workoutHistory")}
-              hitSlop={12}
-              style={({ pressed }) => ({
-                padding: Spacing.sm,
-                borderRadius: Radius.md,
-                opacity: pressed ? 0.7 : 1,
-              })}
-            >
-              <Ionicons name="calendar-outline" size={24} color={Colors.primary} />
-            </Pressable>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.xs }}>
+              <NotificationBellButton />
+              <Pressable
+                onPress={() => router.push("/student/workoutHistory")}
+                hitSlop={12}
+                style={({ pressed }) => ({
+                  padding: Spacing.sm,
+                  borderRadius: Radius.md,
+                  opacity: pressed ? 0.7 : 1,
+                })}
+              >
+                <Ionicons name="calendar-outline" size={24} color={Colors.primary} />
+              </Pressable>
+            </View>
           </View>
 
           {/* ── Active session resume banner ── */}
