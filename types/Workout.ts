@@ -48,6 +48,12 @@ export interface WorkoutPlan {
   note?: string;
   // Optional estimated duration in minutes.
   estimatedDurationMinutes?: number;
+  /**
+   * Whether the student has seen this plan in their notification feed.
+   * Missing (legacy plans) is treated as read — only plans explicitly
+   * written with this `false` should ever surface as unread.
+   */
+  studentNotificationRead?: boolean;
 }
 
 export interface WorkoutLog {

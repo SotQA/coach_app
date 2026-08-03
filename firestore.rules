@@ -18,6 +18,13 @@ service cloud.firestore {
             .hasOnly(['coachFeedback', 'coachFeedbackPending']);
     }
 
+    // Production rule for the student's "new workout" notification-read flag —
+    // takes effect once the catch-all below is removed.
+    match /workoutPlans/{planId} {
+      allow update: if request.auth != null && resource.data.studentId == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['studentNotificationRead']);
+    }
+
     // Production rules for invites — take effect once the catch-all below is removed.
     match /invites/{inviteId} {
       allow create: if request.auth != null && request.resource.data.coachId == request.auth.uid;

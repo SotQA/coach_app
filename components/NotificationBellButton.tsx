@@ -31,7 +31,10 @@ export function NotificationBellButton() {
             inviteService.getUnreadInviteCountForCoach(user.id),
           ]).then(([workouts, invites]) => workouts + invites)
         : user.role === "student"
-        ? inviteService.getUnreadInviteCountForStudent(user.id)
+        ? Promise.all([
+            inviteService.getUnreadInviteCountForStudent(user.id),
+            workoutService.getUnreadPlanNotificationCountForStudent(user.id),
+          ]).then(([invites, plans]) => invites + plans)
         : null;
 
       load

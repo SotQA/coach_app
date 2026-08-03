@@ -7,8 +7,10 @@ import { useAuth } from "../../context/AuthContext";
 import { useI18n } from "../../context/I18nContext";
 import { studentService } from "../../services/studentService";
 import { inviteService } from "../../services/inviteService";
+import { workoutService } from "../../services/workoutService";
 import type { StudentSummary } from "../../types/StudentSummary";
 import type { Invite } from "../../types/Invite";
+import type { WorkoutPlan } from "../../types/Workout";
 import { Avatar } from "../../components/Avatar";
 import { ScreenLayout } from "../../components/ScreenLayout";
 import { Colors } from "../../theme/colors";
@@ -20,24 +22,65 @@ import { toMs } from "../../utils/dateConvert";
 
 type FilterKey = "all" | "unread" | "read";
 
+type FeedItem =
+  | { kind: "invite"; id: string; ts: number; unread: boolean; invite: Invite }
+  | { kind: "workoutPlan"; id: string; ts: number; unread: boolean; plan: WorkoutPlan };
+
 /**
- * Splits the localized "X wants to add you..." string around the coach's name so
- * it can be highlighted, mirroring CompletedLine in the coach notifications screen.
+ * Splits a localized string around a literal substring (typically a coach's
+ * name) so it can be highlighted, without assuming any particular word order
+ * (safe across en/pl/ru phrasing).
  */
-function InviteText({ coachName, t }: { coachName: string; t: (k: string, o?: Record<string, unknown>) => string }) {
-  const full = t("coachInviteText", { name: coachName });
-  const idx = full.indexOf(coachName);
+function HighlightText({ full, highlight, color }: { full: string; highlight: string; color: string }) {
+  const idx = highlight ? full.indexOf(highlight) : -1;
   if (idx === -1) {
     return <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 2 }}>{full}</Text>;
   }
   const before = full.slice(0, idx);
-  const after = full.slice(idx + coachName.length);
+  const after = full.slice(idx + highlight.length);
   return (
     <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 2 }}>
       {before}
-      <Text style={{ color: Colors.primary, fontWeight: "700" }}>{coachName}</Text>
+      <Text style={{ color, fontWeight: "700" }}>{highlight}</Text>
       {after}
     </Text>
+  );
+}
+
+function NotificationAvatar({
+  photoURL,
+  initials,
+  unread,
+}: {
+  photoURL?: string | null;
+  initials: string;
+  unread: boolean;
+}) {
+  return (
+    <View>
+      {unread ? (
+        <View
+          style={{
+            position: "absolute",
+            left: -6,
+            top: 12,
+            width: 6,
+            height: 6,
+            borderRadius: 3,
+            backgroundColor: Colors.primary,
+          }}
+        />
+      ) : null}
+      <Avatar
+        photoURL={photoURL}
+        initials={initials}
+        size={40}
+        backgroundColor={Colors.surface}
+        textColor={Colors.text}
+        borderColor={Colors.primary}
+        borderWidth={2}
+      />
+    </View>
   );
 }
 
@@ -72,33 +115,12 @@ function InviteRow({
         backgroundColor: isUnread ? Colors.surface : "transparent",
       }}
     >
-      {isUnread ? (
-        <View
-          style={{
-            position: "absolute",
-            left: 6,
-            top: 22,
-            width: 6,
-            height: 6,
-            borderRadius: 3,
-            backgroundColor: Colors.primary,
-          }}
-        />
-      ) : null}
-      <Avatar
-        photoURL={coach?.photoURL}
-        initials={initials}
-        size={40}
-        backgroundColor={Colors.surface}
-        textColor={Colors.text}
-        borderColor={Colors.primary}
-        borderWidth={2}
-      />
+      <NotificationAvatar photoURL={coach?.photoURL} initials={initials} unread={isUnread} />
       <View style={{ flex: 1, minWidth: 0 }}>
         <Text style={{ ...Typography.section, fontSize: FontSizes.note, fontWeight: "700" }}>
           {t("coachInviteTitle")}
         </Text>
-        <InviteText coachName={coachName} t={t} />
+        <HighlightText full={t("coachInviteText", { name: coachName })} highlight={coachName} color={Colors.primary} />
 
         {invite.status === "pending" ? (
           responding ? (
@@ -156,6 +178,72 @@ function InviteRow({
   );
 }
 
+function WorkoutPlanRow({
+  plan,
+  coach,
+  onPress,
+  t,
+  locale,
+}: {
+  plan: WorkoutPlan;
+  coach: StudentSummary | undefined;
+  onPress: () => void;
+  t: (k: string, o?: Record<string, unknown>) => string;
+  locale: Parameters<typeof formatDateShort>[1];
+}) {
+  const isUnread = plan.studentNotificationRead === false;
+  const initials = getUserInitials(coach, "?");
+  const coachName = getDisplayName(coach, "Coach");
+  const ms = toMs(plan.createdAt);
+
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => ({
+        flexDirection: "row",
+        alignItems: "flex-start",
+        gap: Spacing.sm,
+        paddingVertical: Spacing.sm,
+        paddingHorizontal: Spacing.md,
+        backgroundColor: isUnread ? Colors.surface : "transparent",
+        opacity: pressed ? 0.85 : 1,
+      })}
+    >
+      <NotificationAvatar photoURL={coach?.photoURL} initials={initials} unread={isUnread} />
+      <View style={{ flex: 1, minWidth: 0 }}>
+        <Text style={{ ...Typography.section, fontSize: FontSizes.note, fontWeight: "700" }}>
+          {t("newWorkoutNotifTitle")}
+        </Text>
+        <HighlightText
+          full={t("newWorkoutNotifText", { name: coachName, workout: plan.name })}
+          highlight={coachName}
+          color={Colors.primary}
+        />
+        {plan.groupName ? (
+          <View
+            style={{
+              backgroundColor: Colors.primaryTint,
+              borderRadius: Radius.sm,
+              paddingHorizontal: 8,
+              paddingVertical: 3,
+              alignSelf: "flex-start",
+              marginTop: 4,
+            }}
+          >
+            <Text style={{ color: Colors.primary, fontSize: FontSizes.tiny, fontWeight: "700" }}>
+              {plan.groupName}
+            </Text>
+          </View>
+        ) : null}
+        <Text style={{ ...Typography.secondary, color: Colors.textMuted, fontSize: FontSizes.tiny, marginTop: 6 }}>
+          {ms ? formatRelativeTime(ms, t, locale) : ""}
+        </Text>
+      </View>
+      <Ionicons name="chevron-forward" size={16} color={Colors.textMuted} style={{ alignSelf: "center" }} />
+    </Pressable>
+  );
+}
+
 export default function StudentNotifications() {
   const router = useRouter();
   const { user, refreshUser } = useAuth();
@@ -163,6 +251,7 @@ export default function StudentNotifications() {
 
   const [coaches, setCoaches] = useState<StudentSummary[]>([]);
   const [invites, setInvites] = useState<Invite[]>([]);
+  const [plans, setPlans] = useState<WorkoutPlan[]>([]);
   const [filter, setFilter] = useState<FilterKey>("all");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -174,10 +263,16 @@ export default function StudentNotifications() {
     if (!user || user.role !== "student") return;
     setError(null);
     try {
-      const inviteList = await inviteService.getInvitesForStudent(user.id);
-      const coachIds = Array.from(new Set(inviteList.map((i) => i.coachId).filter(Boolean)));
+      const [inviteList, planList] = await Promise.all([
+        inviteService.getInvitesForStudent(user.id),
+        workoutService.getNotificationPlansForStudent(user.id),
+      ]);
+      const coachIds = Array.from(
+        new Set([...inviteList.map((i) => i.coachId), ...planList.map((p) => p.coachId)].filter(Boolean))
+      );
       const coachList = await Promise.all(coachIds.map((id) => studentService.getUserSummaryById(id)));
       setInvites(inviteList);
+      setPlans(planList);
       setCoaches(coachList.filter((c): c is StudentSummary => c !== null));
     } catch (e: any) {
       setError(e?.message ?? t("failedToLoad"));
@@ -206,13 +301,22 @@ export default function StudentNotifications() {
     return map;
   }, [coaches]);
 
-  const unreadCount = useMemo(() => invites.filter((i) => i.studentNotificationRead === false).length, [invites]);
+  const unreadCount = useMemo(
+    () =>
+      invites.filter((i) => i.studentNotificationRead === false).length +
+      plans.filter((p) => p.studentNotificationRead === false).length,
+    [invites, plans]
+  );
 
   const handleMarkAllRead = async () => {
     if (!user || unreadCount === 0) return;
     setInvites((prev) => prev.map((i) => ({ ...i, studentNotificationRead: true })));
+    setPlans((prev) => prev.map((p) => ({ ...p, studentNotificationRead: true })));
     try {
-      await inviteService.markAllInviteNotificationsReadForStudent(user.id);
+      await Promise.all([
+        inviteService.markAllInviteNotificationsReadForStudent(user.id),
+        workoutService.markAllPlanNotificationsReadForStudent(user.id),
+      ]);
     } catch {
       load();
     }
@@ -234,11 +338,37 @@ export default function StudentNotifications() {
     }
   };
 
-  const filteredInvites = useMemo(() => {
-    if (filter === "unread") return invites.filter((i) => i.studentNotificationRead === false);
-    if (filter === "read") return invites.filter((i) => i.studentNotificationRead !== false);
-    return invites;
-  }, [invites, filter]);
+  const handleOpenPlan = (plan: WorkoutPlan) => {
+    if (plan.studentNotificationRead === false) {
+      setPlans((prev) => prev.map((p) => (p.id === plan.id ? { ...p, studentNotificationRead: true } : p)));
+      workoutService.markPlanNotificationRead(plan.id).catch(() => {});
+    }
+    router.push({ pathname: "/student/workoutPlanDetail" as any, params: { workoutPlanId: plan.id } });
+  };
+
+  const items = useMemo<FeedItem[]>(() => {
+    const inviteItems: FeedItem[] = invites.map((invite) => ({
+      kind: "invite",
+      id: `i_${invite.id}`,
+      ts: toMs(invite.createdAt),
+      unread: invite.studentNotificationRead === false,
+      invite,
+    }));
+    const planItems: FeedItem[] = plans.map((plan) => ({
+      kind: "workoutPlan",
+      id: `p_${plan.id}`,
+      ts: toMs(plan.createdAt),
+      unread: plan.studentNotificationRead === false,
+      plan,
+    }));
+    return [...inviteItems, ...planItems].sort((a, b) => b.ts - a.ts);
+  }, [invites, plans]);
+
+  const filteredItems = useMemo(() => {
+    if (filter === "unread") return items.filter((i) => i.unread);
+    if (filter === "read") return items.filter((i) => !i.unread);
+    return items;
+  }, [items, filter]);
 
   const sections = useMemo(() => {
     const now = new Date();
@@ -249,19 +379,18 @@ export default function StudentNotifications() {
     const todayMs = todayStart.getTime();
     const yestMs = yesterdayStart.getTime();
 
-    const groups = new Map<string, Invite[]>();
+    const groups = new Map<string, FeedItem[]>();
     const order: string[] = [];
-    for (const invite of filteredInvites) {
-      const ms = toMs(invite.createdAt);
-      const key = ms >= todayMs ? t("today") : ms >= yestMs ? t("yesterday") : formatDateShort(ms, locale);
+    for (const item of filteredItems) {
+      const key = item.ts >= todayMs ? t("today") : item.ts >= yestMs ? t("yesterday") : formatDateShort(item.ts, locale);
       if (!groups.has(key)) {
         groups.set(key, []);
         order.push(key);
       }
-      groups.get(key)!.push(invite);
+      groups.get(key)!.push(item);
     }
     return order.map((title) => ({ title, data: groups.get(title)! }));
-  }, [filteredInvites, locale, t]);
+  }, [filteredItems, locale, t]);
 
   const filterOptions: { key: FilterKey; labelKey: string }[] = [
     { key: "all", labelKey: "notificationsTabAll" },
@@ -391,16 +520,26 @@ export default function StudentNotifications() {
                 </Text>
               </View>
             )}
-            renderItem={({ item }) => (
-              <InviteRow
-                invite={item}
-                coach={coachById.get(item.coachId)}
-                responding={respondingId === item.id}
-                onRespond={(response) => handleRespond(item, response)}
-                t={t}
-                locale={locale}
-              />
-            )}
+            renderItem={({ item }) =>
+              item.kind === "invite" ? (
+                <InviteRow
+                  invite={item.invite}
+                  coach={coachById.get(item.invite.coachId)}
+                  responding={respondingId === item.invite.id}
+                  onRespond={(response) => handleRespond(item.invite, response)}
+                  t={t}
+                  locale={locale}
+                />
+              ) : (
+                <WorkoutPlanRow
+                  plan={item.plan}
+                  coach={coachById.get(item.plan.coachId)}
+                  onPress={() => handleOpenPlan(item.plan)}
+                  t={t}
+                  locale={locale}
+                />
+              )
+            }
             ItemSeparatorComponent={() => (
               <View style={{ height: 1, backgroundColor: Colors.border, marginLeft: Spacing.md + 40 + Spacing.sm }} />
             )}

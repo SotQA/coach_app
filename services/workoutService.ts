@@ -102,6 +102,8 @@ const normalizePlanData = (id: string, data: any): WorkoutPlan => ({
   // Keep group fields optional (legacy plans may not have them).
   groupId: data?.groupId != null ? String(data.groupId) : undefined,
   groupName: data?.groupName != null ? String(data.groupName) : undefined,
+  // Missing field (legacy plans) is treated as read.
+  studentNotificationRead: data?.studentNotificationRead !== false,
   estimatedDurationMinutes:
     data?.estimatedDurationMinutes == null || data.estimatedDurationMinutes === ""
       ? undefined
@@ -241,6 +243,9 @@ export const workoutService = {
         ? payload.scheduledDays.filter((d) => typeof d === "string" && d.trim().length > 0)
         : undefined,
       note: payload.note?.trim() || undefined,
+      // A freshly-assigned plan is always unread for the student, regardless
+      // of what the caller passed (coach action just created it).
+      studentNotificationRead: false,
     };
 
     // Ensure no `undefined` fields are sent to Firestore.
@@ -647,6 +652,50 @@ export const workoutService = {
     const batch = writeBatch(db);
     for (const d of snap.docs) {
       batch.update(d.ref, { notificationRead: true });
+    }
+    await batch.commit();
+  },
+
+  /** Plans behind the student's "coach assigned a new workout" notification feed, most recent first. */
+  async getNotificationPlansForStudent(studentId: string, limit = 100): Promise<WorkoutPlan[]> {
+    assertNonEmpty(studentId, "studentId");
+    return listWorkoutPlans([
+      where("studentId", "==", studentId),
+      orderBy("createdAt", "desc"),
+      limitFn(limit),
+    ]);
+  },
+
+  /** Number of unread new-workout notifications for a student — cheap count-only query for a badge. */
+  async getUnreadPlanNotificationCountForStudent(studentId: string): Promise<number> {
+    assertNonEmpty(studentId, "studentId");
+    const q = query(
+      collection(db, WORKOUT_PLANS_COLLECTION),
+      where("studentId", "==", studentId),
+      where("studentNotificationRead", "==", false)
+    );
+    const snap = await getCountFromServer(q);
+    return snap.data().count;
+  },
+
+  async markPlanNotificationRead(planId: string): Promise<void> {
+    assertNonEmpty(planId, "workoutPlanId");
+    await updateDoc(doc(db, WORKOUT_PLANS_COLLECTION, planId), { studentNotificationRead: true });
+  },
+
+  /** Marks every unread new-workout notification for this student as read (the "Mark all read" action). */
+  async markAllPlanNotificationsReadForStudent(studentId: string): Promise<void> {
+    assertNonEmpty(studentId, "studentId");
+    const q = query(
+      collection(db, WORKOUT_PLANS_COLLECTION),
+      where("studentId", "==", studentId),
+      where("studentNotificationRead", "==", false)
+    );
+    const snap = await getDocs(q);
+    if (snap.empty) return;
+    const batch = writeBatch(db);
+    for (const d of snap.docs) {
+      batch.update(d.ref, { studentNotificationRead: true });
     }
     await batch.commit();
   },

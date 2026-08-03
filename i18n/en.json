@@ -154,7 +154,9 @@
   "inviteAcceptedNotifText": "Accepted your invite — now on your roster",
   "inviteDeclinedNotifText": "Declined your invite",
   "inviteRespondFailed": "Failed to respond to invite.",
-  "noNotificationsYetSubtitleStudent": "You'll see it here when a coach invites you.",
+  "noNotificationsYetSubtitleStudent": "You'll see it here when a coach invites you or assigns a workout.",
+  "newWorkoutNotifTitle": "New workout assigned",
+  "newWorkoutNotifText": "%{name} assigned you a new workout: %{workout}",
 
   "noPreviousSession": "No previous session to compare yet",
   "improvedLegend": "Lime = improved vs previous session",

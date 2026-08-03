@@ -44,6 +44,7 @@ export interface WorkoutPlanFirestoreDoc {
   estimatedDurationMinutes?: number | string;
   createdAt?: Timestamp | string;
   updatedAt?: Timestamp | string;
+  studentNotificationRead?: boolean;
 }
 
 export interface WorkoutLogExerciseFirestoreDoc {
