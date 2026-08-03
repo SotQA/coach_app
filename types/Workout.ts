@@ -1,4 +1,10 @@
 export interface Exercise {
+  /**
+   * Stable id for this exercise row, used to match exercises across an edit
+   * (reordering, diffing old vs new). Legacy exercises may not have one yet —
+   * backfilled the next time the plan is saved through the editor.
+   */
+  id?: string;
   name: string;
   sets: number;
   // Stored in Firestore as string (Firestore previously stored as int64).
@@ -52,6 +58,67 @@ export interface WorkoutPlan {
    * Whether the student has seen this plan in their notification feed.
    * Missing (legacy plans) is treated as read — only plans explicitly
    * written with this `false` should ever surface as unread.
+   */
+  studentNotificationRead?: boolean;
+  /**
+   * Most recent message a coach attached to an edit or removal — copied into
+   * the corresponding `WorkoutPlanChange` doc by the server-side trigger.
+   */
+  lastCoachMessage?: string;
+}
+
+/** One field that differs between the previous and current version of a plan or exercise. */
+export interface FieldDiff {
+  from: string;
+  to: string;
+}
+
+/** A single exercise involved in a plan edit — used for the added/removed lists. */
+export interface ExerciseChangeSummary {
+  id: string;
+  name: string;
+  sets?: number;
+  reps?: string;
+}
+
+/** One exercise whose fields changed between the previous and current version of a plan. */
+export interface ExerciseFieldChange {
+  id: string;
+  name: string;
+  fields: Record<string, FieldDiff>;
+}
+
+/**
+ * Immutable record of one coach edit or removal of a `WorkoutPlan`, written by a
+ * Cloud Function off the Firestore before/after snapshot. Drives the student's
+ * "what changed" / "what was removed" notification screen.
+ */
+export interface WorkoutPlanChange {
+  id: string;
+  planId: string;
+  studentId: string;
+  coachId: string;
+  type: "updated" | "deleted";
+  changedAt: any;
+  /** Plan name at the time of the change (survives the plan itself being renamed/removed later). */
+  planNameSnapshot: string;
+  /** Optional note the coach attached when saving the edit or removing the plan. */
+  coachMessage?: string;
+  /** Present when `type === "updated"`. */
+  diff?: {
+    planFields?: Record<string, FieldDiff>;
+    exercisesChanged?: ExerciseFieldChange[];
+    exercisesAdded?: ExerciseChangeSummary[];
+    exercisesRemoved?: ExerciseChangeSummary[];
+  };
+  /** Present when `type === "deleted"` — a full snapshot of what the plan contained. */
+  planSnapshot?: {
+    name: string;
+    exercises: Exercise[];
+  };
+  /**
+   * Whether the student has seen this change in their notification feed.
+   * Missing is treated as unread (every change doc is written with this `false`).
    */
   studentNotificationRead?: boolean;
 }

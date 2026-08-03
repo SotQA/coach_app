@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../context/AuthContext";
@@ -9,7 +9,22 @@ import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
 import { ScreenLayout } from "../../components/ScreenLayout";
+import { PrimaryButton } from "../../components/PrimaryButton";
 import { toMs } from "../../utils/dateConvert";
+
+/** Coach-facing relative time (coach screens are plain English today, unlike the student i18n strings). */
+function formatEditedAgo(ms: number): string {
+  if (!ms) return "";
+  const diffMs = Date.now() - ms;
+  if (diffMs < 0) return "just now";
+  const minutes = Math.floor(diffMs / 60000);
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+}
 
 export default function AssignedWorkouts() {
   const router = useRouter();
@@ -31,6 +46,8 @@ export default function AssignedWorkouts() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deletingPlanId, setDeletingPlanId] = useState<string | null>(null);
+  const [removeTarget, setRemoveTarget] = useState<WorkoutPlan | null>(null);
+  const [removeNote, setRemoveNote] = useState("");
 
   useEffect(() => {
     const load = async () => {
@@ -172,6 +189,14 @@ export default function AssignedWorkouts() {
                   ? new Date(lastCompletedMs).toLocaleDateString(undefined, { month: "short", day: "numeric" })
                   : null;
 
+              // A plan edited after its own creation gets an "Edited …" line instead of
+              // "Last completed" — lets a coach see at a glance that a change is pending
+              // delivery to the student. The 60s guard skips the create-then-immediately-
+              // read-back timestamp pair some writes produce.
+              const createdMs = toMs(item.createdAt);
+              const updatedMs = toMs(item.updatedAt);
+              const editedLabel = updatedMs > 0 && updatedMs - createdMs > 60000 ? formatEditedAgo(updatedMs) : null;
+
               return (
                 <View
                   key={item.id}
@@ -189,8 +214,12 @@ export default function AssignedWorkouts() {
                       <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4 }}>
                         {item.note?.trim() ? item.note.trim() : "—"}
                       </Text>
-                      <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4 }}>
-                        {lastCompletedLabel ? `Last completed: ${lastCompletedLabel}` : "Last completed: —"}
+                      <Text style={{ ...Typography.secondary, color: editedLabel ? Colors.primary : Colors.textMuted, marginTop: 4, fontWeight: editedLabel ? "700" : "400" }}>
+                        {editedLabel
+                          ? `Edited ${editedLabel}`
+                          : lastCompletedLabel
+                            ? `Last completed: ${lastCompletedLabel}`
+                            : "Last completed: —"}
                       </Text>
                     </View>
                     <View style={{ flexDirection: "row", gap: 8 }}>
@@ -216,33 +245,12 @@ export default function AssignedWorkouts() {
                       />
                       <RowAction
                         icon="trash-outline"
-                        label="Delete workout"
+                        label="Remove workout"
                         tone="danger"
                         disabled={deletingPlanId !== null}
                         onPress={() => {
-                          Alert.alert(
-                            "Delete workout?",
-                            "This will remove the workout from the student’s active list. You can’t undo this in the app.",
-                            [
-                              { text: "Cancel", style: "cancel" },
-                              {
-                                text: "Delete",
-                                style: "destructive",
-                                onPress: async () => {
-                                  try {
-                                    if (!user || user.role !== "coach") throw new Error("You must be logged in as a coach.");
-                                    setDeletingPlanId(item.id);
-                                    await workoutService.deactivateWorkoutPlan(item.id, user.id);
-                                    setPlans((prev) => prev.map((p) => (p.id === item.id ? { ...p, isActive: false } : p)));
-                                  } catch (e: any) {
-                                    Alert.alert("Failed to delete", e?.message ?? "Unknown error");
-                                  } finally {
-                                    setDeletingPlanId(null);
-                                  }
-                                },
-                              },
-                            ]
-                          );
+                          setRemoveNote("");
+                          setRemoveTarget(item);
                         }}
                       />
                     </View>
@@ -253,6 +261,80 @@ export default function AssignedWorkouts() {
           </View>
         )}
       </ScrollView>
+
+      <Modal visible={removeTarget !== null} transparent animationType="fade" onRequestClose={() => setRemoveTarget(null)}>
+        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.55)", justifyContent: "flex-end" }}>
+          <Pressable
+            style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
+            onPress={() => setRemoveTarget(null)}
+          />
+          <View
+            style={{
+              backgroundColor: Colors.card,
+              borderWidth: 1,
+              borderColor: Colors.border,
+              borderBottomWidth: 0,
+              borderTopLeftRadius: Radius.xl,
+              borderTopRightRadius: Radius.xl,
+              padding: Spacing.md,
+              paddingBottom: Spacing.lg,
+            }}
+          >
+            <View style={{ width: 36, height: 4, borderRadius: 2, backgroundColor: Colors.border, alignSelf: "center", marginBottom: Spacing.md }} />
+            <Text style={{ ...Typography.title, fontSize: 18, marginBottom: 6 }}>
+              Remove &ldquo;{removeTarget?.name}&rdquo;?
+            </Text>
+            <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: Spacing.md }}>
+              {studentName} will be notified immediately. This plan can&rsquo;t be recovered once removed.
+            </Text>
+
+            <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Note for {studentName} (optional)</Text>
+            <TextInput
+              value={removeNote}
+              onChangeText={(t) => setRemoveNote(t.slice(0, 500))}
+              placeholder="Why this plan is going away…"
+              placeholderTextColor={Colors.textMuted}
+              multiline
+              style={{
+                borderWidth: 1,
+                borderColor: Colors.border,
+                padding: 12,
+                borderRadius: Radius.sm,
+                marginBottom: Spacing.md,
+                color: Colors.text,
+                backgroundColor: Colors.surface,
+                minHeight: 64,
+              }}
+            />
+
+            {deletingPlanId ? (
+              <ActivityIndicator />
+            ) : (
+              <View style={{ flexDirection: "row", gap: Spacing.sm }}>
+                <PrimaryButton title="Cancel" variant="secondary" onPress={() => setRemoveTarget(null)} style={{ flex: 1, width: "auto" }} />
+                <PrimaryButton
+                  title="Remove"
+                  onPress={async () => {
+                    if (!removeTarget) return;
+                    try {
+                      if (!user || user.role !== "coach") throw new Error("You must be logged in as a coach.");
+                      setDeletingPlanId(removeTarget.id);
+                      await workoutService.deactivateWorkoutPlan(removeTarget.id, user.id, removeNote.trim() || undefined);
+                      setPlans((prev) => prev.map((p) => (p.id === removeTarget.id ? { ...p, isActive: false } : p)));
+                      setRemoveTarget(null);
+                    } catch (e: any) {
+                      Alert.alert("Failed to remove", e?.message ?? "Unknown error");
+                    } finally {
+                      setDeletingPlanId(null);
+                    }
+                  }}
+                  style={{ flex: 1, width: "auto", backgroundColor: Colors.danger }}
+                />
+              </View>
+            )}
+          </View>
+        </View>
+      </Modal>
     </ScreenLayout>
   );
 }

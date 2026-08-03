@@ -203,6 +203,38 @@ function RootNavigator() {
     return () => clearTimeout(timer);
   }, [lastResponse?.notification.request.identifier, user?.role]);
 
+  // Student tapped a "new workout assigned" push — jump to their notifications
+  // tab, same as tapping the bell (the plan itself is marked read from there).
+  useEffect(() => {
+    if (!lastResponse) return;
+    const data = lastResponse.notification.request.content.data as { type?: string } | undefined;
+    if (data?.type !== "workout-plan-created") return;
+    if (user?.role !== "student") return;
+
+    const timer = setTimeout(() => {
+      router.push({ pathname: "/student/notifications" as any });
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [lastResponse?.notification.request.identifier, user?.role]);
+
+  // Student tapped a "workout updated/removed" push — jump straight to the
+  // diff (or removed-snapshot) screen for that specific change.
+  useEffect(() => {
+    if (!lastResponse) return;
+    const data = lastResponse.notification.request.content.data as
+      | { type?: string; changeId?: string }
+      | undefined;
+    if (data?.type !== "workout-plan-updated" && data?.type !== "workout-plan-deleted") return;
+    if (!data.changeId || user?.role !== "student") return;
+
+    workoutService.markChangeRead(data.changeId).catch(() => {});
+
+    const timer = setTimeout(() => {
+      router.push({ pathname: "/student/workoutPlanChange" as any, params: { changeId: data.changeId } });
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [lastResponse?.notification.request.identifier, user?.role]);
+
   if (loading) {
     return (
       <View

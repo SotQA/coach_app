@@ -39,6 +39,17 @@ service cloud.firestore {
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['coachNotificationRead']);
     }
 
+    // Production rules for the coach edit/removal notification trail — take
+    // effect once the catch-all below is removed. Change docs are written
+    // server-side only (Cloud Functions using the Admin SDK, which bypasses
+    // these rules); clients only ever read them and flip their own read flag.
+    match /workoutPlanChanges/{changeId} {
+      allow read: if request.auth != null &&
+        (resource.data.studentId == request.auth.uid || resource.data.coachId == request.auth.uid);
+      allow update: if request.auth != null && resource.data.studentId == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['studentNotificationRead']);
+    }
+
     match /{document=**} {
       // TODO: tighten these rules before production deployment.
       // Open access is used to support local emulator testing.

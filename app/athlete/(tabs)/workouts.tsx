@@ -3,6 +3,7 @@ import {
   ActivityIndicator,
   Animated,
   Pressable,
+  RefreshControl,
   ScrollView,
   Text,
   View,
@@ -93,7 +94,16 @@ export default function AthleteWorkoutsTab() {
   const [logs, setLogs] = useState<WorkoutLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
   const hasLoadedOnceRef = useRef(false);
+
+  const fetchHubData = useCallback(async (athleteId: string) => {
+    const [activePlans, history] = await Promise.all([
+      workoutService.getActiveWorkoutPlansForStudent(athleteId),
+      workoutService.getWorkoutHistory(athleteId),
+    ]);
+    return { activePlans, history };
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -105,10 +115,7 @@ export default function AthleteWorkoutsTab() {
         if (showFullScreenLoad) setLoading(true);
         setError(null);
         try {
-          const [activePlans, history] = await Promise.all([
-            workoutService.getActiveWorkoutPlansForStudent(user.id),
-            workoutService.getWorkoutHistory(user.id),
-          ]);
+          const { activePlans, history } = await fetchHubData(user.id);
           if (cancelled) return;
           setPlans(activePlans);
           setLogs(history);
@@ -122,8 +129,22 @@ export default function AthleteWorkoutsTab() {
         }
       })();
       return () => { cancelled = true; };
-    }, [user?.id, user?.role, t])
+    }, [user?.id, user?.role, t, fetchHubData])
   );
+
+  const onRefresh = useCallback(async () => {
+    if (!user || user.role !== "athlete") return;
+    setRefreshing(true);
+    try {
+      const { activePlans, history } = await fetchHubData(user.id);
+      setPlans(activePlans);
+      setLogs(history);
+    } catch {
+      // Non-fatal: pull-to-refresh failing silently just leaves the last good data on screen.
+    } finally {
+      setRefreshing(false);
+    }
+  }, [user?.id, user?.role, fetchHubData]);
 
   const sortedPlans = useMemo(
     () => [...plans].sort((a, b) => (a.order ?? Number.MAX_SAFE_INTEGER) - (b.order ?? Number.MAX_SAFE_INTEGER)),
@@ -236,6 +257,7 @@ export default function AthleteWorkoutsTab() {
             paddingBottom: Spacing.xl * 2,
           }}
           showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.primary} />}
         >
           <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: Spacing.md }}>
             <Text style={{ ...Typography.title, fontSize: FontSizes.h3 }}>{t("nav_workouts")}</Text>

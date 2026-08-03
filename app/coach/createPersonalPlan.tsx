@@ -15,6 +15,7 @@ import { ExerciseLibraryModal } from "../../components/ExerciseLibraryModal";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { ScreenLayout } from "../../components/ScreenLayout";
 import { useAuth } from "../../context/AuthContext";
+import { useHideCoachFabOnFocus } from "../../context/CoachFabVisibilityContext";
 import { exerciseTemplateService } from "../../services/exerciseTemplateService";
 import { workoutService } from "../../services/workoutService";
 import { Colors } from "../../theme/colors";
@@ -26,6 +27,7 @@ export default function CreatePersonalPlan() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
+  useHideCoachFabOnFocus();
 
   const [planName, setPlanName] = useState("");
   const [note, setNote] = useState("");

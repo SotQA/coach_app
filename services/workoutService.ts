@@ -15,7 +15,7 @@ import {
   type QueryDocumentSnapshot,
 } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
-import type { Exercise, LoggedSet, WorkoutLog, WorkoutLogExercise, WorkoutPlan } from "../types/Workout";
+import type { Exercise, LoggedSet, WorkoutLog, WorkoutLogExercise, WorkoutPlan, WorkoutPlanChange } from "../types/Workout";
 import {
   computeExerciseVolumeFromLoggedSets,
   computeTotalVolume,
@@ -59,7 +59,14 @@ function sanitizeForFirestore<T>(value: T): T {
 
 import { logger } from "../utils/logger";
 import { toMs } from "../utils/dateConvert";
-import type { WorkoutPlanFirestoreDoc, WorkoutLogFirestoreDoc, UserFirestoreDoc } from "../types/firestore";
+import type {
+  WorkoutPlanFirestoreDoc,
+  WorkoutLogFirestoreDoc,
+  UserFirestoreDoc,
+  WorkoutPlanChangeFirestoreDoc,
+} from "../types/firestore";
+
+const WORKOUT_PLAN_CHANGES_COLLECTION = "workoutPlanChanges";
 
 const assertNonEmpty = (value: string, label: string) => {
   if (!value || !value.trim()) throw new Error(`Missing ${label}.`);
@@ -68,6 +75,10 @@ const assertNonEmpty = (value: string, label: string) => {
   }
 };
 
+/** Stable id for an exercise row (reorder/diff identity) or a draft list key. */
+function generateId(): string {
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
 
 const normalizeExercise = (ex: any): Exercise => {
   const reps = ex?.reps != null ? String(ex.reps) : "";
@@ -83,6 +94,9 @@ const normalizeExercise = (ex: any): Exercise => {
   const sets = Number.isFinite(Number(ex?.sets)) ? Number(ex.sets) : 0;
 
   return {
+    // Legacy exercises saved before this field existed get one assigned here;
+    // it's only persisted once the plan is next saved through the editor.
+    id: ex?.id != null && String(ex.id).trim() !== "" ? String(ex.id) : generateId(),
     name: ex?.name != null ? String(ex.name) : "",
     sets,
     reps,
@@ -93,6 +107,31 @@ const normalizeExercise = (ex: any): Exercise => {
     coachNote: ex?.coachNote != null && String(ex.coachNote).trim() !== "" ? String(ex.coachNote) : undefined,
     videoUrl: ex?.videoUrl != null && String(ex.videoUrl).trim() !== "" ? String(ex.videoUrl) : undefined,
     exerciseDbId: ex?.exerciseDbId != null && String(ex.exerciseDbId).trim() !== "" ? String(ex.exerciseDbId) : undefined,
+  };
+};
+
+const mapChangeDoc = (snap: QueryDocumentSnapshot): WorkoutPlanChange => {
+  const data = (snap.data() as WorkoutPlanChangeFirestoreDoc | undefined) ?? {};
+  return {
+    id: snap.id,
+    planId: data.planId ?? "",
+    studentId: data.studentId ?? "",
+    coachId: data.coachId ?? "",
+    type: data.type === "deleted" ? "deleted" : "updated",
+    changedAt: data.changedAt,
+    planNameSnapshot: data.planNameSnapshot ?? "Workout",
+    coachMessage: data.coachMessage?.trim() || undefined,
+    diff: data.diff as WorkoutPlanChange["diff"],
+    planSnapshot: data.planSnapshot
+      ? {
+          name: data.planSnapshot.name ?? "Workout",
+          exercises: Array.isArray(data.planSnapshot.exercises)
+            ? data.planSnapshot.exercises.map(normalizeExercise)
+            : [],
+        }
+      : undefined,
+    // Missing field is treated as unread — every change doc is written with this `false`.
+    studentNotificationRead: data.studentNotificationRead !== false,
   };
 };
 
@@ -327,9 +366,11 @@ export const workoutService = {
 
   /**
    * Soft delete a workout plan by setting `isActive=false`.
-   * Validates coach ownership before updating.
+   * Validates coach ownership before updating. `coachMessage` (if given) is
+   * picked up by the server-side change trigger and attached to the
+   * student's "workout removed" notification.
    */
-  async deactivateWorkoutPlan(planId: string, coachId: string): Promise<void> {
+  async deactivateWorkoutPlan(planId: string, coachId: string, coachMessage?: string): Promise<void> {
     assertNonEmpty(planId, "workoutPlanId");
     assertNonEmpty(coachId, "coachId (Firebase Auth UID)");
 
@@ -338,10 +379,18 @@ export const workoutService = {
     if (existing.coachId !== coachId) throw new Error("You don't have access to this workout plan.");
 
     const ref = doc(db, WORKOUT_PLANS_COLLECTION, planId);
-    await updateDoc(ref, {
-      isActive: false,
-      updatedAt: new Date(),
-    });
+    await updateDoc(
+      ref,
+      sanitizeForFirestore({
+        isActive: false,
+        updatedAt: new Date(),
+        // Always write an explicit value (never `undefined`, which `sanitizeForFirestore`
+        // would drop from the patch entirely) — otherwise a message left by a previous
+        // edit would silently survive into a later edit that didn't set one, and the
+        // change-diff Cloud Function would misattribute it.
+        lastCoachMessage: coachMessage?.trim() ?? "",
+      }) as any
+    );
   },
 
   /** Clone a plan for the same student with a new id and fresh timestamps. */
@@ -378,11 +427,15 @@ export const workoutService = {
   /**
    * Updates an existing workout plan (coach-owned).
    * Does NOT change `isActive` or `order` unless explicitly provided.
+   * `coachMessage` (if given) is picked up by the server-side change trigger
+   * and attached to the student's "workout updated" notification — it is not
+   * itself part of the plan's edit history.
    */
   async updateWorkoutPlan(
     planId: string,
     coachId: string,
-    patch: Partial<Pick<WorkoutPlan, "name" | "exercises" | "note" | "order" | "isActive">>
+    patch: Partial<Pick<WorkoutPlan, "name" | "exercises" | "note" | "order" | "isActive">>,
+    coachMessage?: string
   ): Promise<void> {
     assertNonEmpty(planId, "workoutPlanId");
     assertNonEmpty(coachId, "coachId (Firebase Auth UID)");
@@ -396,6 +449,7 @@ export const workoutService = {
       ...patch,
       name: patch.name !== undefined ? patch.name.trim() : undefined,
       updatedAt: new Date(),
+      lastCoachMessage: coachMessage?.trim() || undefined,
     } as any);
     await updateDoc(ref, updateData as any);
   },
@@ -703,6 +757,7 @@ export const workoutService = {
   // Helper used by coach screens when building workout plans interactively.
   createEmptyExercise(): Exercise {
     return {
+      id: generateId(),
       name: "",
       sets: 3,
       reps: "10",
@@ -711,6 +766,61 @@ export const workoutService = {
       tempo: "",
       rpe: null,
     };
+  },
+
+  /** One plan-edit or plan-removal record — feeds the student's "what changed" screen. */
+  async getWorkoutPlanChangeById(changeId: string): Promise<WorkoutPlanChange | null> {
+    assertNonEmpty(changeId, "changeId");
+    const snap = await getDoc(doc(db, WORKOUT_PLAN_CHANGES_COLLECTION, changeId));
+    if (!snap.exists()) return null;
+    return mapChangeDoc(snap as unknown as QueryDocumentSnapshot);
+  },
+
+  /** Plan-edit/removal records behind the student's notification feed, most recent first. */
+  async getWorkoutPlanChangesForStudent(studentId: string, limit = 100): Promise<WorkoutPlanChange[]> {
+    assertNonEmpty(studentId, "studentId");
+    const q = query(
+      collection(db, WORKOUT_PLAN_CHANGES_COLLECTION),
+      where("studentId", "==", studentId),
+      orderBy("changedAt", "desc"),
+      limitFn(limit)
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map(mapChangeDoc);
+  },
+
+  /** Number of unread plan-edit/removal notifications for a student — cheap count-only query for a badge. */
+  async getUnreadChangeCountForStudent(studentId: string): Promise<number> {
+    assertNonEmpty(studentId, "studentId");
+    const q = query(
+      collection(db, WORKOUT_PLAN_CHANGES_COLLECTION),
+      where("studentId", "==", studentId),
+      where("studentNotificationRead", "==", false)
+    );
+    const snap = await getCountFromServer(q);
+    return snap.data().count;
+  },
+
+  async markChangeRead(changeId: string): Promise<void> {
+    assertNonEmpty(changeId, "changeId");
+    await updateDoc(doc(db, WORKOUT_PLAN_CHANGES_COLLECTION, changeId), { studentNotificationRead: true });
+  },
+
+  /** Marks every unread plan-edit/removal notification for this student as read (the "Mark all read" action). */
+  async markAllChangesReadForStudent(studentId: string): Promise<void> {
+    assertNonEmpty(studentId, "studentId");
+    const q = query(
+      collection(db, WORKOUT_PLAN_CHANGES_COLLECTION),
+      where("studentId", "==", studentId),
+      where("studentNotificationRead", "==", false)
+    );
+    const snap = await getDocs(q);
+    if (snap.empty) return;
+    const batch = writeBatch(db);
+    for (const d of snap.docs) {
+      batch.update(d.ref, { studentNotificationRead: true });
+    }
+    await batch.commit();
   },
 };
 

@@ -3,6 +3,7 @@ import {
   ActivityIndicator,
   Animated,
   Pressable,
+  RefreshControl,
   ScrollView,
   Text,
   View,
@@ -115,6 +116,7 @@ export default function StudentWorkouts() {
   const [activeGroup, setActiveGroup] = useState<TrainingGroup | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
   /** After the first successful paint, refocus only soft-refreshes (no full-screen spinner). */
   const hasLoadedOnceRef = useRef(false);
 
@@ -172,6 +174,21 @@ export default function StudentWorkouts() {
   useEffect(() => {
     hasLoadedOnceRef.current = false;
   }, [user?.id]);
+
+  const onRefresh = useCallback(async () => {
+    if (!user || user.role !== "student") return;
+    setRefreshing(true);
+    try {
+      const { activePlans, history, group } = await fetchHubData(user.id);
+      setPlans(activePlans);
+      setLogs(history);
+      setActiveGroup(group);
+    } catch {
+      // Non-fatal: pull-to-refresh failing silently just leaves the last good data on screen.
+    } finally {
+      setRefreshing(false);
+    }
+  }, [user?.id, user?.role, fetchHubData]);
 
   const sortedPlans = useMemo(() => {
     return [...plans].sort(
@@ -325,6 +342,7 @@ export default function StudentWorkouts() {
             paddingBottom: Spacing.xl * 2,
           }}
           showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.primary} />}
         >
           <View
             style={{

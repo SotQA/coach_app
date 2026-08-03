@@ -10,7 +10,7 @@ import { inviteService } from "../../services/inviteService";
 import { workoutService } from "../../services/workoutService";
 import type { StudentSummary } from "../../types/StudentSummary";
 import type { Invite } from "../../types/Invite";
-import type { WorkoutPlan } from "../../types/Workout";
+import type { WorkoutPlan, WorkoutPlanChange } from "../../types/Workout";
 import { Avatar } from "../../components/Avatar";
 import { ScreenLayout } from "../../components/ScreenLayout";
 import { Colors } from "../../theme/colors";
@@ -24,7 +24,8 @@ type FilterKey = "all" | "unread" | "read";
 
 type FeedItem =
   | { kind: "invite"; id: string; ts: number; unread: boolean; invite: Invite }
-  | { kind: "workoutPlan"; id: string; ts: number; unread: boolean; plan: WorkoutPlan };
+  | { kind: "workoutPlan"; id: string; ts: number; unread: boolean; plan: WorkoutPlan }
+  | { kind: "planChange"; id: string; ts: number; unread: boolean; change: WorkoutPlanChange };
 
 /**
  * Splits a localized string around a literal substring (typically a coach's
@@ -244,6 +245,82 @@ function WorkoutPlanRow({
   );
 }
 
+function PlanChangeRow({
+  change,
+  coach,
+  onPress,
+  t,
+  locale,
+}: {
+  change: WorkoutPlanChange;
+  coach: StudentSummary | undefined;
+  onPress: () => void;
+  t: (k: string, o?: Record<string, unknown>) => string;
+  locale: Parameters<typeof formatDateShort>[1];
+}) {
+  const isUnread = change.studentNotificationRead === false;
+  const coachName = getDisplayName(coach, "Coach");
+  const ms = toMs(change.changedAt);
+  const isDeleted = change.type === "deleted";
+
+  const title = isDeleted ? t("workoutRemovedNotifTitle") : t("workoutUpdatedNotifTitle");
+  const bodyText = t(isDeleted ? "workoutRemovedNotifText" : "workoutUpdatedNotifText", {
+    name: coachName,
+    workout: change.planNameSnapshot,
+  });
+
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => ({
+        flexDirection: "row",
+        alignItems: "flex-start",
+        gap: Spacing.sm,
+        paddingVertical: Spacing.sm,
+        paddingHorizontal: Spacing.md,
+        backgroundColor: isUnread ? Colors.surface : "transparent",
+        opacity: pressed ? 0.85 : 1,
+      })}
+    >
+      <View>
+        {isUnread ? (
+          <View
+            style={{
+              position: "absolute",
+              left: -6,
+              top: 12,
+              width: 6,
+              height: 6,
+              borderRadius: 3,
+              backgroundColor: Colors.primary,
+            }}
+          />
+        ) : null}
+        <View
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: 20,
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: isDeleted ? "rgba(255,69,58,0.14)" : "rgba(212,255,68,0.14)",
+          }}
+        >
+          <Ionicons name={isDeleted ? "trash-outline" : "create-outline"} size={18} color={isDeleted ? "#FF6B62" : Colors.primary} />
+        </View>
+      </View>
+      <View style={{ flex: 1, minWidth: 0 }}>
+        <Text style={{ ...Typography.section, fontSize: FontSizes.note, fontWeight: "700" }}>{title}</Text>
+        <HighlightText full={bodyText} highlight={coachName} color={isDeleted ? "#FF6B62" : Colors.primary} />
+        <Text style={{ ...Typography.secondary, color: Colors.textMuted, fontSize: FontSizes.tiny, marginTop: 6 }}>
+          {ms ? formatRelativeTime(ms, t, locale) : ""}
+        </Text>
+      </View>
+      <Ionicons name="chevron-forward" size={16} color={Colors.textMuted} style={{ alignSelf: "center" }} />
+    </Pressable>
+  );
+}
+
 export default function StudentNotifications() {
   const router = useRouter();
   const { user, refreshUser } = useAuth();
@@ -252,6 +329,7 @@ export default function StudentNotifications() {
   const [coaches, setCoaches] = useState<StudentSummary[]>([]);
   const [invites, setInvites] = useState<Invite[]>([]);
   const [plans, setPlans] = useState<WorkoutPlan[]>([]);
+  const [changes, setChanges] = useState<WorkoutPlanChange[]>([]);
   const [filter, setFilter] = useState<FilterKey>("all");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -263,16 +341,22 @@ export default function StudentNotifications() {
     if (!user || user.role !== "student") return;
     setError(null);
     try {
-      const [inviteList, planList] = await Promise.all([
+      const [inviteList, planList, changeList] = await Promise.all([
         inviteService.getInvitesForStudent(user.id),
         workoutService.getNotificationPlansForStudent(user.id),
+        workoutService.getWorkoutPlanChangesForStudent(user.id),
       ]);
       const coachIds = Array.from(
-        new Set([...inviteList.map((i) => i.coachId), ...planList.map((p) => p.coachId)].filter(Boolean))
+        new Set(
+          [...inviteList.map((i) => i.coachId), ...planList.map((p) => p.coachId), ...changeList.map((c) => c.coachId)].filter(
+            Boolean
+          )
+        )
       );
       const coachList = await Promise.all(coachIds.map((id) => studentService.getUserSummaryById(id)));
       setInvites(inviteList);
       setPlans(planList);
+      setChanges(changeList);
       setCoaches(coachList.filter((c): c is StudentSummary => c !== null));
     } catch (e: any) {
       setError(e?.message ?? t("failedToLoad"));
@@ -304,18 +388,21 @@ export default function StudentNotifications() {
   const unreadCount = useMemo(
     () =>
       invites.filter((i) => i.studentNotificationRead === false).length +
-      plans.filter((p) => p.studentNotificationRead === false).length,
-    [invites, plans]
+      plans.filter((p) => p.studentNotificationRead === false).length +
+      changes.filter((c) => c.studentNotificationRead === false).length,
+    [invites, plans, changes]
   );
 
   const handleMarkAllRead = async () => {
     if (!user || unreadCount === 0) return;
     setInvites((prev) => prev.map((i) => ({ ...i, studentNotificationRead: true })));
     setPlans((prev) => prev.map((p) => ({ ...p, studentNotificationRead: true })));
+    setChanges((prev) => prev.map((c) => ({ ...c, studentNotificationRead: true })));
     try {
       await Promise.all([
         inviteService.markAllInviteNotificationsReadForStudent(user.id),
         workoutService.markAllPlanNotificationsReadForStudent(user.id),
+        workoutService.markAllChangesReadForStudent(user.id),
       ]);
     } catch {
       load();
@@ -346,6 +433,14 @@ export default function StudentNotifications() {
     router.push({ pathname: "/student/workoutPlanDetail" as any, params: { workoutPlanId: plan.id } });
   };
 
+  const handleOpenChange = (change: WorkoutPlanChange) => {
+    if (change.studentNotificationRead === false) {
+      setChanges((prev) => prev.map((c) => (c.id === change.id ? { ...c, studentNotificationRead: true } : c)));
+      workoutService.markChangeRead(change.id).catch(() => {});
+    }
+    router.push({ pathname: "/student/workoutPlanChange" as any, params: { changeId: change.id } });
+  };
+
   const items = useMemo<FeedItem[]>(() => {
     const inviteItems: FeedItem[] = invites.map((invite) => ({
       kind: "invite",
@@ -361,8 +456,15 @@ export default function StudentNotifications() {
       unread: plan.studentNotificationRead === false,
       plan,
     }));
-    return [...inviteItems, ...planItems].sort((a, b) => b.ts - a.ts);
-  }, [invites, plans]);
+    const changeItems: FeedItem[] = changes.map((change) => ({
+      kind: "planChange",
+      id: `c_${change.id}`,
+      ts: toMs(change.changedAt),
+      unread: change.studentNotificationRead === false,
+      change,
+    }));
+    return [...inviteItems, ...planItems, ...changeItems].sort((a, b) => b.ts - a.ts);
+  }, [invites, plans, changes]);
 
   const filteredItems = useMemo(() => {
     if (filter === "unread") return items.filter((i) => i.unread);
@@ -530,11 +632,19 @@ export default function StudentNotifications() {
                   t={t}
                   locale={locale}
                 />
-              ) : (
+              ) : item.kind === "workoutPlan" ? (
                 <WorkoutPlanRow
                   plan={item.plan}
                   coach={coachById.get(item.plan.coachId)}
                   onPress={() => handleOpenPlan(item.plan)}
+                  t={t}
+                  locale={locale}
+                />
+              ) : (
+                <PlanChangeRow
+                  change={item.change}
+                  coach={coachById.get(item.change.coachId)}
+                  onPress={() => handleOpenChange(item.change)}
                   t={t}
                   locale={locale}
                 />
