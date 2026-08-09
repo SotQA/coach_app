@@ -378,5 +378,25 @@
 
   "a11y_sparkline_summary": "%{exerciseName} one-rep max trend, currently %{latest}, change %{delta}",
   "a11y_weekly_volume_summary": "Weekly volume bars over %{weeks} weeks, peak %{peak}",
-  "a11y_heatmap_summary": "Consistency heatmap, %{sessions} sessions across %{weeks} weeks"
+  "a11y_heatmap_summary": "Consistency heatmap, %{sessions} sessions across %{weeks} weeks",
+
+  "exerciseNoLocalData": "Exercise details not available for custom exercises",
+  "primaryMusclesLabel": "PRIMARY MUSCLES",
+  "secondaryMusclesLabel": "SECONDARY MUSCLES",
+  "equipmentLabel": "Equipment",
+  "levelLabel": "Level",
+  "categoryLabel": "Category",
+  "tutorialVideoLabel": "TUTORIAL VIDEO",
+  "watchTutorial": "Watch Tutorial",
+  "searchOnYoutube": "Search on YouTube",
+  "coachNotesLabel": "Coach Notes",
+  "howToPerformLabel": "HOW TO PERFORM",
+  "exerciseNameLabel": "Exercise Name",
+  "weightLabel": "Weight",
+  "restSecondsLabel": "Rest (seconds)",
+  "rpeRangeLabel": "RPE (1-10)",
+  "tempoLabel": "Tempo",
+  "tempoExampleLabel": "Tempo (e.g. 3-1-1)",
+  "coachNoteFieldLabel": "Coach Note",
+  "exercisesHeading": "Exercises"
 }

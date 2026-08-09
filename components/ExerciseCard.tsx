@@ -6,6 +6,7 @@ import { parseFloatInput } from "../utils/inputParsing";
 import { Radius, Spacing } from "../theme/spacing";
 import { Typography } from "../theme/typography";
 import { useUnits } from "../context/UnitsContext";
+import { useI18n } from "../context/I18nContext";
 import { toKg, toUnit, unitSuffix } from "../utils/units";
 
 export type ExerciseDraft = {
@@ -55,6 +56,7 @@ export function ExerciseCard({
   dragHandleProps,
 }: Props) {
   const { unit } = useUnits();
+  const { t } = useI18n();
   const nameRef = useRef<TextInput | null>(null);
 
   // Convert stored kg → display unit for the weight input.
@@ -199,7 +201,7 @@ export function ExerciseCard({
 
       {expanded ? (
         <View style={{ padding: Spacing.md, paddingTop: 0 }}>
-          <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Exercise Name</Text>
+          <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("exerciseNameLabel")}</Text>
           <TextInput
             ref={(r) => { nameRef.current = r; }}
             autoFocus={autoFocusName === true}
@@ -222,7 +224,7 @@ export function ExerciseCard({
 
           <View style={{ flexDirection: "row", gap: Spacing.sm }}>
             <View style={{ flex: 1 }}>
-              <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Sets</Text>
+              <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("exerciseFieldSets")}</Text>
               <TextInput
                 keyboardType="number-pad"
                 value={String(value.sets ?? "")}
@@ -238,7 +240,7 @@ export function ExerciseCard({
               />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Reps</Text>
+              <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("exerciseFieldReps")}</Text>
               <TextInput
                 value={String(value.reps ?? "")}
                 onChangeText={(t) => update({ reps: t })}
@@ -258,7 +260,7 @@ export function ExerciseCard({
 
           <View style={{ flexDirection: "row", gap: Spacing.sm, marginTop: Spacing.sm }}>
             <View style={{ flex: 1 }}>
-              <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Weight ({suffix.toUpperCase()})</Text>
+              <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("weightLabel")} ({suffix.toUpperCase()})</Text>
               <TextInput
                 // iOS supports decimal-pad; Android may show a numeric keyboard with locale comma.
                 keyboardType={Platform.OS === "ios" ? "decimal-pad" : "numeric"}
@@ -302,7 +304,7 @@ export function ExerciseCard({
               />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Rest (sec)</Text>
+              <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("restSecondsLabel")}</Text>
               <TextInput
                 keyboardType="number-pad"
                 value={String(value.rest ?? "")}
@@ -323,7 +325,7 @@ export function ExerciseCard({
 
           <View style={{ flexDirection: "row", gap: Spacing.sm, marginTop: Spacing.sm }}>
             <View style={{ flex: 1 }}>
-              <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Tempo</Text>
+              <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("tempoLabel")}</Text>
               <TextInput
                 value={String(value.tempo ?? "")}
                 onChangeText={(t) => update({ tempo: t })}
@@ -341,7 +343,7 @@ export function ExerciseCard({
               />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={{ ...Typography.secondary, marginBottom: 6 }}>RPE</Text>
+              <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("exerciseFieldRpe")}</Text>
               <TextInput
                 keyboardType="decimal-pad"
                 value={value.rpe == null ? "" : String(value.rpe)}
@@ -365,7 +367,7 @@ export function ExerciseCard({
           </View>
 
           <View style={{ marginTop: Spacing.sm }}>
-            <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Coach Note</Text>
+            <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("coachNoteFieldLabel")}</Text>
             <TextInput
               value={value.coachNote ?? ""}
               onChangeText={(t) => update({ coachNote: t })}

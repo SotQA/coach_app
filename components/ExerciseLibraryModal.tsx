@@ -19,7 +19,9 @@ import {
   type ExerciseTemplate,
 } from "../services/exerciseTemplateService";
 import * as localExerciseService from "../services/localExerciseService";
-import type { LocalExercise } from "../services/localExerciseService";
+import { getExerciseName, type LocalExercise } from "../services/localExerciseService";
+import { translateEquipment, translateMuscle } from "../services/exerciseEnumTranslations";
+import { useI18n } from "../context/I18nContext";
 import { toMs } from "../utils/dateConvert";
 
 // ---------------------------------------------------------------------------
@@ -76,6 +78,8 @@ type LocalCardProps = {
 };
 
 function LocalExerciseCard({ item, onAdd, isSelected = false }: LocalCardProps) {
+  const { locale } = useI18n();
+  const displayName = getExerciseName(item, locale);
   return (
     <View
       style={{
@@ -96,7 +100,7 @@ function LocalExerciseCard({ item, onAdd, isSelected = false }: LocalCardProps) 
           style={{ ...Typography.section, fontWeight: "900" }}
           numberOfLines={2}
         >
-          {toTitleCase(item.name)}
+          {toTitleCase(displayName)}
         </Text>
         <View
           style={{
@@ -118,7 +122,7 @@ function LocalExerciseCard({ item, onAdd, isSelected = false }: LocalCardProps) 
               }}
             >
               <Text style={{ ...Typography.secondary, color: Colors.textMuted, fontSize: 11 }}>
-                {toTitleCase(item.primaryMuscles[0])}
+                {translateMuscle(item.primaryMuscles[0], locale)}
               </Text>
             </View>
           ) : null}
@@ -136,7 +140,7 @@ function LocalExerciseCard({ item, onAdd, isSelected = false }: LocalCardProps) 
               <Text
                 style={{ ...Typography.secondary, color: Colors.textMuted, fontSize: 11 }}
               >
-                {toTitleCase(item.equipment)}
+                {translateEquipment(item.equipment, locale)}
               </Text>
             </View>
           ) : null}

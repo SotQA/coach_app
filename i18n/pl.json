@@ -377,5 +377,25 @@
 
   "a11y_sparkline_summary": "Trend 1RM %{exerciseName}, aktualnie %{latest}, zmiana %{delta}",
   "a11y_weekly_volume_summary": "Tygodniowa objętość przez %{weeks} tygodni, szczyt %{peak}",
-  "a11y_heatmap_summary": "Heatmapa regularności, %{sessions} sesji w %{weeks} tygodniach"
+  "a11y_heatmap_summary": "Heatmapa regularności, %{sessions} sesji w %{weeks} tygodniach",
+
+  "exerciseNoLocalData": "Szczegóły ćwiczenia niedostępne dla ćwiczeń niestandardowych",
+  "primaryMusclesLabel": "GŁÓWNE MIĘŚNIE",
+  "secondaryMusclesLabel": "MIĘŚNIE POMOCNICZE",
+  "equipmentLabel": "Sprzęt",
+  "levelLabel": "Poziom",
+  "categoryLabel": "Kategoria",
+  "tutorialVideoLabel": "FILM INSTRUKTAŻOWY",
+  "watchTutorial": "Obejrzyj instruktaż",
+  "searchOnYoutube": "Szukaj na YouTube",
+  "coachNotesLabel": "Notatki trenera",
+  "howToPerformLabel": "JAK WYKONAĆ",
+  "exerciseNameLabel": "Nazwa ćwiczenia",
+  "weightLabel": "Ciężar",
+  "restSecondsLabel": "Przerwa (sekundy)",
+  "rpeRangeLabel": "RPE (1-10)",
+  "tempoLabel": "Tempo",
+  "tempoExampleLabel": "Tempo (np. 3-1-1)",
+  "coachNoteFieldLabel": "Notatka trenera",
+  "exercisesHeading": "Ćwiczenia"
 }

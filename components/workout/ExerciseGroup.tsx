@@ -11,6 +11,7 @@ import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
 import { SetInputRow, type SetDraft } from "./SetInputRow";
+import { getExerciseById, getExerciseName } from "../../services/localExerciseService";
 
 export interface ExerciseGroupProps {
   exerciseIndex: number;
@@ -43,7 +44,7 @@ export function ExerciseGroup({
   onMarkSetDone,
   registerRef,
 }: ExerciseGroupProps) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const { unit } = useUnits();
   const router = useRouter();
   const { user } = useAuth();
@@ -53,6 +54,9 @@ export function ExerciseGroup({
       : user?.role === "athlete"
       ? "/athlete/exerciseDetail"
       : "/student/exerciseDetail";
+
+  const localExercise = exercise.exerciseDbId ? getExerciseById(exercise.exerciseDbId) : null;
+  const displayName = localExercise ? getExerciseName(localExercise, locale) : exercise.name;
 
   const displayWeight =
     exercise.weight != null && Number.isFinite(Number(exercise.weight))
@@ -84,11 +88,11 @@ export function ExerciseGroup({
           router.push({
             pathname: exerciseDetailPath as any,
             params: {
-              exerciseName: exercise.name,
+              exerciseName: displayName,
               exerciseDbId: exercise.exerciseDbId ?? "",
               videoUrl: exercise.videoUrl ?? "",
               coachNote: exercise.coachNote ?? "",
-              lang: "en",
+              lang: locale,
             },
           })
         }
@@ -99,7 +103,7 @@ export function ExerciseGroup({
         </View>
         <View style={{ flex: 1 }}>
           <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 6 }}>
-            <Text style={[styles.exerciseName, { flex: 1 }]}>{exercise.name}</Text>
+            <Text style={[styles.exerciseName, { flex: 1 }]}>{displayName}</Text>
             <Ionicons name="information-circle" size={16} color={Colors.primary} style={{ marginTop: 2 }} />
           </View>
           <Text style={styles.exerciseMeta}>

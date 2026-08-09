@@ -4,7 +4,9 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "../../context/AuthContext";
+import { useI18n } from "../../context/I18nContext";
 import { workoutService } from "../../services/workoutService";
+import { getExerciseById, getExerciseName } from "../../services/localExerciseService";
 import type { WorkoutPlan } from "../../types/Workout";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { Colors } from "../../theme/colors";
@@ -19,6 +21,7 @@ export default function WorkoutPlanDetail() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
+  const { t, locale } = useI18n();
   const { unit } = useUnits();
   const startWorkout = useStartWorkout();
   const params = useLocalSearchParams<{ workoutPlanId?: string }>();
@@ -115,7 +118,7 @@ export default function WorkoutPlanDetail() {
           ) : null}
         </View>
 
-        <Text style={{ ...Typography.section, marginBottom: Spacing.sm }}>Exercises</Text>
+        <Text style={{ ...Typography.section, marginBottom: Spacing.sm }}>{t("exercisesHeading")}</Text>
         <View style={{ gap: Spacing.sm, marginBottom: Spacing.lg }}>
           {(plan.exercises ?? []).map((ex, i) => {
             const lastResults = lastResultsByExercise.get(normalizeExerciseName(ex.name));
@@ -126,6 +129,8 @@ export default function WorkoutPlanDetail() {
                   return `${wStr}×${s.reps}`;
                 }).join(", ")
               : null;
+            const localExercise = ex.exerciseDbId ? getExerciseById(ex.exerciseDbId) : null;
+            const displayName = localExercise ? getExerciseName(localExercise, locale) : ex.name;
             return (
               <TouchableOpacity
                 key={`${ex.name}-${i}`}
@@ -134,11 +139,11 @@ export default function WorkoutPlanDetail() {
                   router.push({
                     pathname: `${rolePrefix}/exerciseDetail` as any,
                     params: {
-                      exerciseName: ex.name,
+                      exerciseName: displayName,
                       exerciseDbId: ex.exerciseDbId ?? "",
                       videoUrl: ex.videoUrl ?? "",
                       coachNote: ex.coachNote ?? "",
-                      lang: "en",
+                      lang: locale,
                     },
                   })
                 }
@@ -152,7 +157,7 @@ export default function WorkoutPlanDetail() {
               >
                 <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 6 }}>
                   <Text style={{ ...Typography.section, fontWeight: "800", flex: 1 }}>
-                    {ex.name}
+                    {displayName}
                   </Text>
                   <Ionicons name="information-circle" size={16} color={Colors.primary} style={{ marginTop: 2 }} />
                 </View>

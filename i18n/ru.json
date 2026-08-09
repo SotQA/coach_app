@@ -377,5 +377,25 @@
 
   "a11y_sparkline_summary": "Тренд 1ПМ %{exerciseName}, текущий %{latest}, изменение %{delta}",
   "a11y_weekly_volume_summary": "Объём по неделям за %{weeks} недель, пик %{peak}",
-  "a11y_heatmap_summary": "Тепловая карта регулярности: %{sessions} тренировок за %{weeks} недель"
+  "a11y_heatmap_summary": "Тепловая карта регулярности: %{sessions} тренировок за %{weeks} недель",
+
+  "exerciseNoLocalData": "Подробности упражнения недоступны для пользовательских упражнений",
+  "primaryMusclesLabel": "ОСНОВНЫЕ МЫШЦЫ",
+  "secondaryMusclesLabel": "ВТОРИЧНЫЕ МЫШЦЫ",
+  "equipmentLabel": "Инвентарь",
+  "levelLabel": "Уровень",
+  "categoryLabel": "Категория",
+  "tutorialVideoLabel": "ОБУЧАЮЩЕЕ ВИДЕО",
+  "watchTutorial": "Смотреть видео",
+  "searchOnYoutube": "Искать на YouTube",
+  "coachNotesLabel": "Заметки тренера",
+  "howToPerformLabel": "КАК ВЫПОЛНЯТЬ",
+  "exerciseNameLabel": "Название упражнения",
+  "weightLabel": "Вес",
+  "restSecondsLabel": "Отдых (секунды)",
+  "rpeRangeLabel": "RPE (1-10)",
+  "tempoLabel": "Темп",
+  "tempoExampleLabel": "Темп (напр. 3-1-1)",
+  "coachNoteFieldLabel": "Заметка тренера",
+  "exercisesHeading": "Упражнения"
 }
