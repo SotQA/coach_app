@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { Platform, Pressable, View, Text } from "react-native";
+import { Platform, View, Text } from "react-native";
 import type { StudentSummary } from "../types/StudentSummary";
 import { Avatar } from "./Avatar";
 import { PrimaryButton } from "./PrimaryButton";
@@ -89,20 +89,14 @@ export const StudentCard: FC<StudentCardProps> = ({
             />
           </View>
           <View style={{ flex: 1, minWidth: 0 }}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={actionTitle}
-              onPress={onPress}
-              style={({ pressed }) => ({
+            <PrimaryButton
+              title={actionTitle}
+              onPress={onPress as () => void}
+              style={{
                 width: "100%",
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
+                borderRadius: Radius.md,
                 paddingVertical: 11,
                 paddingHorizontal: Spacing.xs,
-                borderRadius: Radius.md,
-                backgroundColor: Colors.primary,
-                opacity: pressed ? 0.92 : 1,
                 ...(Platform.OS === "ios"
                   ? {
                       shadowColor: Colors.primary,
@@ -111,12 +105,9 @@ export const StudentCard: FC<StudentCardProps> = ({
                       shadowRadius: 10,
                     }
                   : { elevation: 8 }),
-              })}
-            >
-              <Text style={{ ...Typography.section, fontWeight: "800", fontSize: FontSizes.note, color: Colors.onPrimary }}>
-                {actionTitle}
-              </Text>
-            </Pressable>
+              }}
+              textStyle={{ fontWeight: "800", fontSize: FontSizes.note }}
+            />
           </View>
         </View>
       ) : onPress ? (

@@ -20,6 +20,7 @@ export interface UserFirestoreDoc {
 }
 
 export interface ExerciseFirestoreDoc {
+  id?: string;
   name?: string;
   sets?: number | string;
   reps?: string;
@@ -44,6 +45,29 @@ export interface WorkoutPlanFirestoreDoc {
   estimatedDurationMinutes?: number | string;
   createdAt?: Timestamp | string;
   updatedAt?: Timestamp | string;
+  studentNotificationRead?: boolean;
+  lastCoachMessage?: string;
+}
+
+export interface WorkoutPlanChangeFirestoreDoc {
+  planId?: string;
+  studentId?: string;
+  coachId?: string;
+  type?: "updated" | "deleted";
+  changedAt?: Timestamp | string;
+  planNameSnapshot?: string;
+  coachMessage?: string;
+  diff?: {
+    planFields?: Record<string, { from?: string; to?: string }>;
+    exercisesChanged?: Array<{ id?: string; name?: string; fields?: Record<string, { from?: string; to?: string }> }>;
+    exercisesAdded?: Array<{ id?: string; name?: string; sets?: number; reps?: string }>;
+    exercisesRemoved?: Array<{ id?: string; name?: string; sets?: number; reps?: string }>;
+  };
+  planSnapshot?: {
+    name?: string;
+    exercises?: ExerciseFirestoreDoc[];
+  };
+  studentNotificationRead?: boolean;
 }
 
 export interface WorkoutLogExerciseFirestoreDoc {
@@ -81,6 +105,18 @@ export interface WorkoutLogFirestoreDoc {
   feedbackCreatedAt?: string;
   coachFeedbackPending?: boolean;
   notificationRead?: boolean;
+}
+
+export interface InviteFirestoreDoc {
+  coachId?: string;
+  studentId?: string;
+  studentEmail?: string;
+  status?: "pending" | "accepted" | "declined";
+  createdAt?: Timestamp | string;
+  respondedAt?: Timestamp | string;
+  expiresAt?: Timestamp | string;
+  coachNotificationRead?: boolean;
+  studentNotificationRead?: boolean;
 }
 
 export interface TrainingGroupFirestoreDoc {

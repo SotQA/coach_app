@@ -36,6 +36,9 @@ export const Colors = {
   warning:         "#F59E0B",
   warningTint:     "rgba(245,158,11,0.20)",
 
+  // Lime tint (invite-accepted / success badges)
+  primaryTint:     "rgba(212,255,68,0.20)",
+
   // Chart series (Progress analytics — weight vs reps detail chart)
   chartBlue:   "#4A9EFF",
   chartOrange: "#FF9E64",

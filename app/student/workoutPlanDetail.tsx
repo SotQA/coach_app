@@ -11,8 +11,7 @@ import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
 import { useUnits } from "../../context/UnitsContext";
-import { useActiveWorkoutSession } from "../../context/ActiveWorkoutSessionContext";
-import { FLOATING_BAR_SCROLL_OFFSET } from "../../components/FloatingWorkoutBar";
+import { useStartWorkout } from "../../hooks/useStartWorkout";
 import { buildLastResultsMapFromLogs, normalizeExerciseName, type LastSetResult } from "../../utils/workoutMetrics";
 import { toUnit } from "../../utils/units";
 
@@ -21,7 +20,7 @@ export default function WorkoutPlanDetail() {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const { unit } = useUnits();
-  const { session } = useActiveWorkoutSession();
+  const startWorkout = useStartWorkout();
   const params = useLocalSearchParams<{ workoutPlanId?: string }>();
   const planId = String(params.workoutPlanId ?? "").trim();
   const [plan, setPlan] = useState<WorkoutPlan | null>(null);
@@ -88,9 +87,7 @@ export default function WorkoutPlanDetail() {
       <ScrollView
         contentContainerStyle={{
           padding: Spacing.md,
-          paddingBottom: session
-            ? insets.bottom + FLOATING_BAR_SCROLL_OFFSET + 8
-            : insets.bottom + Spacing.xl,
+          paddingBottom: insets.bottom + Spacing.xl,
           backgroundColor: Colors.bg,
         }}
       >
@@ -181,13 +178,10 @@ export default function WorkoutPlanDetail() {
         <PrimaryButton
           title="Start Workout"
           onPress={() =>
-            router.push({
-              pathname: `${rolePrefix}/workoutExecution` as any,
-              params: {
-                workoutPlanId: plan.id,
-                groupId: plan.groupId ?? "",
-                workoutName: plan.name,
-              },
+            startWorkout({
+              workoutPlanId: plan.id,
+              groupId: plan.groupId ?? "",
+              workoutName: plan.name,
             })
           }
         />

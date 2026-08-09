@@ -18,6 +18,38 @@ service cloud.firestore {
             .hasOnly(['coachFeedback', 'coachFeedbackPending']);
     }
 
+    // Production rule for the student's "new workout" notification-read flag —
+    // takes effect once the catch-all below is removed.
+    match /workoutPlans/{planId} {
+      allow update: if request.auth != null && resource.data.studentId == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['studentNotificationRead']);
+    }
+
+    // Production rules for invites — take effect once the catch-all below is removed.
+    match /invites/{inviteId} {
+      allow create: if request.auth != null && request.resource.data.coachId == request.auth.uid;
+      allow read: if request.auth != null &&
+        (resource.data.coachId == request.auth.uid || resource.data.studentId == request.auth.uid);
+      // Student accepts/declines their own pending invite.
+      allow update: if request.auth != null && resource.data.studentId == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['status', 'respondedAt', 'expiresAt', 'studentNotificationRead', 'coachNotificationRead']);
+      // Coach marks their own notification read.
+      allow update: if request.auth != null && resource.data.coachId == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['coachNotificationRead']);
+    }
+
+    // Production rules for the coach edit/removal notification trail — take
+    // effect once the catch-all below is removed. Change docs are written
+    // server-side only (Cloud Functions using the Admin SDK, which bypasses
+    // these rules); clients only ever read them and flip their own read flag.
+    match /workoutPlanChanges/{changeId} {
+      allow read: if request.auth != null &&
+        (resource.data.studentId == request.auth.uid || resource.data.coachId == request.auth.uid);
+      allow update: if request.auth != null && resource.data.studentId == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['studentNotificationRead']);
+    }
+
     match /{document=**} {
       // TODO: tighten these rules before production deployment.
       // Open access is used to support local emulator testing.

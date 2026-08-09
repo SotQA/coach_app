@@ -1,16 +1,38 @@
+import { useEffect } from "react";
 import { View } from "react-native";
-import { Tabs } from "expo-router";
+import { Tabs, useNavigation } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Colors } from "../../../theme/colors";
 import { FontSizes } from "../../../theme/typography";
 import { useI18n } from "../../../context/I18nContext";
+import { useCoachFabVisibility } from "../../../context/CoachFabVisibilityContext";
 
 const FAB_SIZE = 56;
 
 export default function CoachTabsLayout() {
   const insets = useSafeAreaInsets();
   const { t } = useI18n();
+  const navigation = useNavigation();
+  const { setVisible } = useCoachFabVisibility();
+
+  // Mirrors the same transitionStart-driven approach in coach/_layout.tsx,
+  // scoped to this "(tabs)" screen within the coach Stack — covers pushes to
+  // studentDetails / createWorkoutPlan / notifications and back.
+  useEffect(() => {
+    setVisible(navigation.isFocused());
+    // `transitionStart` is a native-stack-only event not present on the
+    // generic navigation type expo-router's useNavigation() returns here.
+    const nativeStackNavigation = navigation as unknown as {
+      addListener: (
+        event: "transitionStart",
+        callback: (e: { data: { closing: boolean } }) => void
+      ) => () => void;
+    };
+    return nativeStackNavigation.addListener("transitionStart", (e) => {
+      setVisible(!e.data.closing);
+    });
+  }, [navigation, setVisible]);
 
   return (
     <Tabs

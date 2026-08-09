@@ -3,6 +3,7 @@ import {
   ActivityIndicator,
   Platform,
   Pressable,
+  ScrollView,
   Text,
   View,
 } from "react-native";
@@ -194,66 +195,75 @@ export default function GoogleRoleScreen() {
         </View>
       </View>
 
-      <View
-        style={{
-          backgroundColor: Colors.card,
-          borderRadius: Radius.lg,
-          padding: Spacing.lg,
-          borderWidth: 1,
-          borderColor: Colors.border,
-          ...(Platform.OS === "ios"
-            ? { shadowColor: "#000", shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.25, shadowRadius: 16 }
-            : { elevation: 6 }),
-        }}
+      <ScrollView
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: Spacing.screenBottom }}
+        bounces={false}
+        alwaysBounceVertical={false}
+        overScrollMode="never"
       >
-        <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: Spacing.lg, lineHeight: 22 }}>
-          {t("howWillYouUse")}
-        </Text>
-
-        <RoleCard
-          value="coach"
-          title={t("roleCoach")}
-          subtitle={t("roleCoachDesc")}
-          icon="school-outline"
-          selected={role === "coach"}
-          submitting={submitting}
-          features={[t("roleCoachF1"), t("roleCoachF2"), t("roleCoachF3")]}
-          onSelect={(v) => { setRole(v); setError(null); }}
-        />
-        <RoleCard
-          value="student"
-          title={t("roleStudent")}
-          subtitle={t("roleStudentDesc")}
-          icon="barbell-outline"
-          selected={role === "student"}
-          submitting={submitting}
-          features={[t("roleStudentF1"), t("roleStudentF2"), t("roleStudentF3")]}
-          onSelect={(v) => { setRole(v); setError(null); }}
-        />
-        <RoleCard
-          value="athlete"
-          title={t("roleAthlete")}
-          subtitle={t("roleAthleteDesc")}
-          icon="fitness-outline"
-          selected={role === "athlete"}
-          submitting={submitting}
-          features={[t("roleAthleteF1"), t("roleAthleteF2"), t("roleAthleteF3")]}
-          onSelect={(v) => { setRole(v); setError(null); }}
-        />
-
-        <PrimaryButton
-          title={submitting ? "" : t("continue")}
-          onPress={handleContinue}
-          loading={submitting}
-          disabled={submitting}
-        />
-
-        {error ? (
-          <Text style={{ ...Typography.secondary, color: Colors.danger, marginTop: Spacing.md, fontWeight: "600" }}>
-            {error}
+        <View
+          style={{
+            backgroundColor: Colors.card,
+            borderRadius: Radius.lg,
+            padding: Spacing.lg,
+            borderWidth: 1,
+            borderColor: Colors.border,
+            ...(Platform.OS === "ios"
+              ? { shadowColor: "#000", shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.25, shadowRadius: 16 }
+              : { elevation: 6 }),
+          }}
+        >
+          <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: Spacing.lg, lineHeight: 22 }}>
+            {t("howWillYouUse")}
           </Text>
-        ) : null}
-      </View>
+
+          <RoleCard
+            value="coach"
+            title={t("roleCoach")}
+            subtitle={t("roleCoachDesc")}
+            icon="school-outline"
+            selected={role === "coach"}
+            submitting={submitting}
+            features={[t("roleCoachF1"), t("roleCoachF2"), t("roleCoachF3")]}
+            onSelect={(v) => { setRole(v); setError(null); }}
+          />
+          <RoleCard
+            value="student"
+            title={t("roleStudent")}
+            subtitle={t("roleStudentDesc")}
+            icon="barbell-outline"
+            selected={role === "student"}
+            submitting={submitting}
+            features={[t("roleStudentF1"), t("roleStudentF2"), t("roleStudentF3")]}
+            onSelect={(v) => { setRole(v); setError(null); }}
+          />
+          <RoleCard
+            value="athlete"
+            title={t("roleAthlete")}
+            subtitle={t("roleAthleteDesc")}
+            icon="fitness-outline"
+            selected={role === "athlete"}
+            submitting={submitting}
+            features={[t("roleAthleteF1"), t("roleAthleteF2"), t("roleAthleteF3")]}
+            onSelect={(v) => { setRole(v); setError(null); }}
+          />
+
+          <PrimaryButton
+            title={submitting ? "" : t("continue")}
+            onPress={handleContinue}
+            loading={submitting}
+            disabled={submitting}
+          />
+
+          {error ? (
+            <Text style={{ ...Typography.secondary, color: Colors.danger, marginTop: Spacing.md, fontWeight: "600" }}>
+              {error}
+            </Text>
+          ) : null}
+        </View>
+      </ScrollView>
     </View>
   );
 }

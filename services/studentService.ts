@@ -77,13 +77,11 @@ export const studentService = {
     await setDoc(ref, { coachId }, { merge: true });
   },
 
-  // Finds a student user by email and links them to the coach.
-  async assignStudentToCoachByEmail(email: string, coachId: string): Promise<void> {
+  // Looks up any user by email (any role) — used by the invite flow to validate
+  // a coach-entered email before an invite is created. Case-sensitive Firestore
+  // match, with a fallback to the raw trimmed value for safety.
+  async findUserByEmail(email: string): Promise<(StudentSummary & { role?: string }) | null> {
     assertNonEmpty(email, "email");
-    assertNonEmpty(coachId, "coachId (Firebase Auth UID)");
-
-    // Firestore equality match is case-sensitive. We store normalized lower-case on signup,
-    // but for safety we also try the raw trimmed email if needed.
     const normalizedEmail = email.trim().toLowerCase();
     const q = query(
       collection(db, USERS_COLLECTION),
@@ -100,24 +98,24 @@ export const studentService = {
       }
     }
 
-    if (snapshot.empty) {
-      throw new Error("No user found with that email.");
-    }
-
+    if (snapshot.empty) return null;
     if (snapshot.docs.length > 1) {
       console.warn("[studentService] Multiple users matched email", normalizedEmail);
     }
 
     const match = snapshot.docs[0];
     const data = match.data() as UserFirestoreDoc | undefined;
-    if (data?.role !== "student") {
-      throw new Error("That user is not a student (cannot add a coach).");
-    }
-    if (data.coachId && data.coachId !== coachId) {
-      throw new Error("That student already belongs to another coach.");
-    }
+    return { ...mapStudentDoc(match), role: data?.role };
+  },
 
-    await setDoc(doc(db, USERS_COLLECTION, match.id), { coachId }, { merge: true });
+  // Fetches any user by UID regardless of role — used to display coach/student
+  // info on invite notification cards outside of the coach's own roster.
+  async getUserSummaryById(uid: string): Promise<StudentSummary | null> {
+    assertNonEmpty(uid, "uid (Firebase Auth UID)");
+    const ref = doc(db, USERS_COLLECTION, uid);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return null;
+    return mapStudentDoc(snap);
   },
 };
 

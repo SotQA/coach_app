@@ -15,6 +15,7 @@ import { ExerciseLibraryModal } from "../../components/ExerciseLibraryModal";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { ScreenLayout } from "../../components/ScreenLayout";
 import { useAuth } from "../../context/AuthContext";
+import { useHideCoachFabOnFocus } from "../../context/CoachFabVisibilityContext";
 import { exerciseTemplateService } from "../../services/exerciseTemplateService";
 import { trainingGroupService } from "../../services/trainingGroupService";
 import { workoutService } from "../../services/workoutService";
@@ -29,6 +30,7 @@ export default function CreateWorkoutPlan() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
+  useHideCoachFabOnFocus();
   const params = useLocalSearchParams<{
     studentId?: string;
     studentName?: string;

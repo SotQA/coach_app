@@ -3,6 +3,7 @@ import {
   ActivityIndicator,
   Animated,
   Pressable,
+  RefreshControl,
   ScrollView,
   Text,
   View,
@@ -23,8 +24,9 @@ import { Radius, Spacing } from "../../../theme/spacing";
 import { Typography, FontSizes } from "../../../theme/typography";
 import { PrimaryButton } from "../../../components/PrimaryButton";
 import { ScreenLayout } from "../../../components/ScreenLayout";
+import { NotificationBellButton } from "../../../components/NotificationBellButton";
 import { formatElapsedForTimer } from "../../../utils/workoutDuration";
-import { FLOATING_BAR_SCROLL_OFFSET } from "../../../components/FloatingWorkoutBar";
+import { useStartWorkout } from "../../../hooks/useStartWorkout";
 import { formatDateShort } from "../../../utils/formatLocale";
 import type { SupportedLocale } from "../../../context/I18nContext";
 import { toMs } from "../../../utils/dateConvert";
@@ -106,6 +108,7 @@ export default function StudentWorkouts() {
   const { user } = useAuth();
   const { t, locale } = useI18n();
   const { session } = useActiveWorkoutSession();
+  const startWorkout = useStartWorkout();
   const activePlanId = session?.workoutPlanId ?? null;
   const elapsedSeconds = useElapsedSeconds();
   const [plans, setPlans] = useState<WorkoutPlan[]>([]);
@@ -113,6 +116,7 @@ export default function StudentWorkouts() {
   const [activeGroup, setActiveGroup] = useState<TrainingGroup | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
   /** After the first successful paint, refocus only soft-refreshes (no full-screen spinner). */
   const hasLoadedOnceRef = useRef(false);
 
@@ -170,6 +174,21 @@ export default function StudentWorkouts() {
   useEffect(() => {
     hasLoadedOnceRef.current = false;
   }, [user?.id]);
+
+  const onRefresh = useCallback(async () => {
+    if (!user || user.role !== "student") return;
+    setRefreshing(true);
+    try {
+      const { activePlans, history, group } = await fetchHubData(user.id);
+      setPlans(activePlans);
+      setLogs(history);
+      setActiveGroup(group);
+    } catch {
+      // Non-fatal: pull-to-refresh failing silently just leaves the last good data on screen.
+    } finally {
+      setRefreshing(false);
+    }
+  }, [user?.id, user?.role, fetchHubData]);
 
   const sortedPlans = useMemo(() => {
     return [...plans].sort(
@@ -268,24 +287,13 @@ export default function StudentWorkouts() {
 
   const openExecution = useCallback(
     (plan: WorkoutPlan) => {
-      // If another session is already active, redirect to it instead of starting a new one.
-      if (session) {
-        router.push({
-          pathname: "/student/workoutExecution",
-          params: { workoutPlanId: session.workoutPlanId },
-        });
-        return;
-      }
-      router.push({
-        pathname: "/student/workoutExecution",
-        params: {
-          workoutPlanId: plan.id,
-          groupId: plan.groupId ?? activeGroup?.id ?? "",
-          workoutName: plan.name,
-        },
+      startWorkout({
+        workoutPlanId: plan.id,
+        groupId: plan.groupId ?? activeGroup?.id ?? "",
+        workoutName: plan.name,
       });
     },
-    [router, activeGroup?.id, session]
+    [startWorkout, activeGroup?.id]
   );
 
   const openDetail = useCallback(
@@ -331,10 +339,10 @@ export default function StudentWorkouts() {
         <ScrollView
           contentContainerStyle={{
             padding: Spacing.md,
-            // Extra bottom padding when floating bar is visible so content isn't hidden under it.
-            paddingBottom: session ? FLOATING_BAR_SCROLL_OFFSET + Spacing.xl : Spacing.xl * 2,
+            paddingBottom: Spacing.xl * 2,
           }}
           showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.primary} />}
         >
           <View
             style={{
@@ -345,17 +353,20 @@ export default function StudentWorkouts() {
             }}
           >
             <Text style={{ ...Typography.title, fontSize: FontSizes.h3 }}>{t("workouts")}</Text>
-            <Pressable
-              onPress={() => router.push("/student/workoutHistory")}
-              hitSlop={12}
-              style={({ pressed }) => ({
-                padding: Spacing.sm,
-                borderRadius: Radius.md,
-                opacity: pressed ? 0.7 : 1,
-              })}
-            >
-              <Ionicons name="calendar-outline" size={24} color={Colors.primary} />
-            </Pressable>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.xs }}>
+              <NotificationBellButton />
+              <Pressable
+                onPress={() => router.push("/student/workoutHistory")}
+                hitSlop={12}
+                style={({ pressed }) => ({
+                  padding: Spacing.sm,
+                  borderRadius: Radius.md,
+                  opacity: pressed ? 0.7 : 1,
+                })}
+              >
+                <Ionicons name="calendar-outline" size={24} color={Colors.primary} />
+              </Pressable>
+            </View>
           </View>
 
           {/* ── Active session resume banner ── */}
