@@ -10,6 +10,8 @@ export type LocalExercise = {
   primaryMuscles: string[];
   secondaryMuscles: string[];
   instructions: string[];
+  instructionsRu?: string[];
+  instructionsPl?: string[];
   level: string | null;
   force: string | null;
   mechanic: string | null;
@@ -25,6 +27,15 @@ export function getExerciseName(
   if (lang === "ru" && exercise.nameRu) return exercise.nameRu;
   if (lang === "pl" && exercise.namePl) return exercise.namePl;
   return exercise.name;
+}
+
+export function getExerciseInstructions(
+  exercise: LocalExercise,
+  lang: "en" | "ru" | "pl"
+): string[] {
+  if (lang === "ru" && exercise.instructionsRu) return exercise.instructionsRu;
+  if (lang === "pl" && exercise.instructionsPl) return exercise.instructionsPl;
+  return exercise.instructions;
 }
 
 export function getExerciseById(id: string): LocalExercise | null {

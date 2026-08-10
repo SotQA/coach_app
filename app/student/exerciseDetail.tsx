@@ -13,7 +13,11 @@ import * as WebBrowser from "expo-web-browser";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { getExerciseById, getExerciseName } from "../../services/localExerciseService";
+import {
+  getExerciseById,
+  getExerciseInstructions,
+  getExerciseName,
+} from "../../services/localExerciseService";
 import {
   translateCategory,
   translateEquipment,
@@ -41,6 +45,7 @@ export default function ExerciseDetailScreen() {
   const displayName = localExercise
     ? getExerciseName(localExercise, lang)
     : params.exerciseName;
+  const instructions = localExercise ? getExerciseInstructions(localExercise, lang) : [];
 
   const { width } = useWindowDimensions();
   const playerWidth = width - Spacing.md * 2;
@@ -233,10 +238,10 @@ export default function ExerciseDetailScreen() {
       )}
 
       {/* Instructions */}
-      {localExercise && localExercise.instructions.length > 0 && (
+      {instructions.length > 0 && (
         <View style={styles.muscleCard}>
           <Text style={styles.microLabel}>{t("howToPerformLabel")}</Text>
-          {localExercise.instructions.map((step, i) => (
+          {instructions.map((step, i) => (
             <View key={i} style={styles.instructionRow}>
               <View style={styles.stepBadge}>
                 <Text style={styles.stepNum}>{i + 1}</Text>
