@@ -25431,7 +25431,21 @@
     ],
     "level": "beginner",
     "force": "push",
-    "mechanic": "isolation"
+    "mechanic": "isolation",
+    "instructionsRu": [
+      "Поместите брусок или блин под гриф машины Смита. Установите гриф на высоту, соответствующую вашему росту. Выбрав нужную высоту и загрузив гриф, встаньте на платформы носками стоп и положите гриф на заднюю часть плеч.",
+      "Возьмитесь за гриф обеими руками ладонями вперёд. Поверните гриф, чтобы снять его со стоек. Это будет исходное положение.",
+      "Поднимите пятки как можно выше, отталкиваясь носками, сокращая икры в верхней точке. Колени должны оставаться выпрямленными. Задержитесь в сокращённом положении на секунду, прежде чем опускаться обратно.",
+      "Медленно вернитесь в исходное положение, вдыхая и опуская пятки.",
+      "Повторите рекомендованное количество повторений."
+    ],
+    "instructionsPl": [
+      "Umieść klocek lub talerz pod gryfem maszyny Smitha. Ustaw gryf na wysokości odpowiadającej twojemu wzrostowi. Po wybraniu odpowiedniej wysokości i załadowaniu gryfu, wejdź na podesty przodami stóp i połóż gryf na tylnej części barków.",
+      "Chwyć gryf oburącz, dłońmi skierowanymi do przodu. Obróć gryf, aby zdjąć go z zaczepów. To będzie pozycja wyjściowa.",
+      "Unieś pięty tak wysoko, jak to możliwe, odpychając się przodami stóp i napinając łydki w górnej fazie ruchu. Kolana powinny pozostać wyprostowane. Zatrzymaj się w napiętej pozycji na sekundę, zanim zaczniesz opuszczać się z powrotem.",
+      "Wróć powoli do pozycji wyjściowej, wdychając powietrze i opuszczając pięty.",
+      "Powtórz zalecaną liczbę powtórzeń."
+    ]
   },
   {
     "id": "Smith_Machine_Close-Grip_Bench_Press",
@@ -25456,7 +25470,21 @@
     ],
     "level": "beginner",
     "force": "push",
-    "mechanic": "compound"
+    "mechanic": "compound",
+    "instructionsRu": [
+      "Поставьте горизонтальную скамью под машину Смита. Установите гриф на высоту, которую сможете достать лёжа, когда руки почти полностью выпрямлены. Выбрав нужный вес, лягте на скамью. Узким пронированным хватом (ладони вперёд) примерно на ширине плеч снимите гриф со стоек и держите его прямо над собой с выпрямленными руками. Это исходное положение.",
+      "На вдохе медленно опускайте гриф, пока не почувствуете его на середине груди. Совет: в отличие от обычного жима лёжа, держите локти близко к корпусу на протяжении всего движения, чтобы максимально задействовать трицепсы.",
+      "После секундной паузы верните гриф в исходное положение на выдохе, выжимая его усилием трицепсов. Зафиксируйте руки в сокращённом положении, задержитесь на секунду и снова начинайте медленно опускать гриф. Совет: опускание должно занимать как минимум вдвое больше времени, чем подъём.",
+      "Повторите движение рекомендованное количество раз.",
+      "По окончании зафиксируйте гриф обратно на стойках."
+    ],
+    "instructionsPl": [
+      "Ustaw płaską ławkę pod maszyną Smitha. Ustaw sztangę na wysokości, którą będziesz w stanie osiągnąć leżąc, przy niemal całkowicie wyprostowanych ramionach. Po wybraniu odpowiedniego ciężaru połóż się na ławce. Wąskim, pronacyjnym chwytem (dłonie skierowane do przodu), mniej więcej na szerokość barków, zdejmij sztangę z zaczepów i trzymaj ją prosto nad sobą z zablokowanymi ramionami. To pozycja wyjściowa.",
+      "Wdychając powietrze, powoli opuszczaj sztangę, aż poczujesz ją na środku klatki piersiowej. Wskazówka: w przeciwieństwie do zwykłego wyciskania, trzymaj łokcie blisko tułowia przez cały czas, aby maksymalnie zaangażować triceps.",
+      "Po sekundowej przerwie wróć ze sztangą do pozycji wyjściowej, wydychając powietrze i wyciskając sztangę siłą tricepsów. Zablokuj ramiona w pozycji napiętej, zatrzymaj się na sekundę i ponownie zacznij powoli opuszczać sztangę. Wskazówka: opuszczanie powinno trwać co najmniej dwa razy dłużej niż wyciskanie.",
+      "Powtórz ruch zalecaną liczbę razy.",
+      "Po zakończeniu zablokuj sztangę z powrotem na zaczepach."
+    ]
   },
   {
     "id": "Smith_Machine_Decline_Press",
@@ -25481,7 +25509,21 @@
     ],
     "level": "beginner",
     "force": null,
-    "mechanic": "compound"
+    "mechanic": "compound",
+    "instructionsRu": [
+      "Установите скамью для жима на наклонной плоскости вниз в стойке так, чтобы гриф оказался над грудью. Загрузите подходящий вес и займите место на скамье.",
+      "Поверните гриф, чтобы снять его со стоек, и полностью выпрямите руки. Спина должна быть слегка прогнута, лопатки сведены. Это исходное положение.",
+      "Начните движение, сгибая руки и опуская гриф к груди.",
+      "Сделайте короткую паузу, затем выпрямите руки, возвращая вес в исходное положение.",
+      "Выполнив нужное количество повторений, поверните гриф, чтобы зафиксировать его на стойках."
+    ],
+    "instructionsPl": [
+      "Ustaw ławkę skośną (głową w dół) w stojaku tak, aby sztanga znajdowała się nad klatką piersiową. Załaduj odpowiedni ciężar i zajmij miejsce na ławce.",
+      "Obróć sztangę, aby zdjąć ją z zaczepów, i całkowicie wyprostuj ramiona. Plecy powinny być lekko wygięte, a łopatki ściągnięte. To pozycja wyjściowa.",
+      "Rozpocznij ruch, zginając ramiona i opuszczając sztangę do klatki piersiowej.",
+      "Zatrzymaj się na chwilę, a następnie wyprostuj ramiona, wypychając ciężar z powrotem do pozycji wyjściowej.",
+      "Po wykonaniu żądanej liczby powtórzeń obróć sztangę, aby zablokować ją na zaczepach."
+    ]
   },
   {
     "id": "Smith_Machine_Hang_Power_Clean",
@@ -25510,7 +25552,23 @@
     ],
     "level": "intermediate",
     "force": "pull",
-    "mechanic": "compound"
+    "mechanic": "compound",
+    "instructionsRu": [
+      "Установите гриф на уровне колен и загрузите подходящий вес.",
+      "Возьмитесь за гриф пронированным хватом чуть шире плеч и снимите его со стоек. Руки должны быть полностью выпрямлены, голова и грудь подняты. Локти направлены в стороны, плечи отведены назад и вниз. Таз отведён назад, создавая натяжение в бицепсах бедра. Это исходное положение.",
+      "Начните движение с мощного разгибания бёдер и коленей, ускоряя гриф вверх. Следите за тем, чтобы руки оставались прямыми на этом этапе движения.",
+      "Достигнув полного разгибания, снова согните бёдра и колени, опускаясь в положение приёма грифа.",
+      "На этом этапе позвольте рукам согнуться, разворачивая локти вокруг грифа, чтобы принять его на плечи.",
+      "Разогните бёдра и колени, чтобы встать в вертикальное положение с грифом, зафиксированным на плечах, завершив движение."
+    ],
+    "instructionsPl": [
+      "Ustaw sztangę na wysokości kolan i załaduj odpowiedni ciężar.",
+      "Chwyć sztangę chwytem pronacyjnym nieco szerzej niż szerokość barków i zdejmij ją z maszyny. Ramiona powinny być całkowicie wyprostowane, głowa i klatka piersiowa uniesione. Łokcie skierowane na zewnątrz, barki cofnięte i opuszczone. Biodra cofnięte, co wywołuje napięcie w mięśniach dwugłowych uda. To pozycja wyjściowa.",
+      "Rozpocznij ruch gwałtownym wyprostem bioder i kolan, przyspieszając sztangę w górę. Dbaj o to, aby ramiona pozostały proste w tej fazie ruchu.",
+      "Po pełnym wyproście ponownie ugnij biodra i kolana, obniżając się do pozycji odbioru sztangi.",
+      "W tym momencie pozwól ramionom się ugiąć, obracając łokcie wokół sztangi, aby przyjąć ją na barki.",
+      "Wyprostuj biodra i kolana, aby wstać do pozycji stojącej ze sztangą opartą na barkach, kończąc ruch."
+    ]
   },
   {
     "id": "Smith_Machine_Hip_Raise",
@@ -25531,7 +25589,19 @@
     ],
     "level": "beginner",
     "force": "pull",
-    "mechanic": "isolation"
+    "mechanic": "isolation",
+    "instructionsRu": [
+      "Установите скамью в стойке и загрузите гриф до подходящего веса. Лягте на скамью, упираясь ступнями в гриф. Снимите гриф со стоек и выпрямите ноги. Возможно, вам понадобится помощь рук. Для дополнительной устойчивости держитесь за стойки машины Смита. Это исходное положение.",
+      "Начните движение, поворачивая таз и сгибая позвоночник, чтобы поднять бёдра над скамьёй. Сохраняйте лёгкий изгиб в коленях на протяжении всего движения.",
+      "После короткой паузы верните бёдра на скамью.",
+      "Повторите нужное количество раз."
+    ],
+    "instructionsPl": [
+      "Ustaw ławkę w stojaku i załaduj sztangę do odpowiedniego ciężaru. Połóż się na ławce, opierając stopy o sztangę. Zdejmij sztangę z zaczepów i wyprostuj nogi. Może być potrzebna pomoc rąk. Dla dodatkowej stabilności chwyć się boków maszyny Smitha. To pozycja wyjściowa.",
+      "Rozpocznij ruch, obracając miednicę i zginając kręgosłup, aby unieść biodra nad ławką. Utrzymuj lekkie ugięcie w kolanach przez cały ruch.",
+      "Po krótkiej przerwie opuść biodra z powrotem na ławkę.",
+      "Powtórz żądaną liczbę powtórzeń."
+    ]
   },
   {
     "id": "Smith_Machine_Incline_Bench_Press",
@@ -25556,7 +25626,21 @@
     ],
     "level": "beginner",
     "force": "push",
-    "mechanic": "compound"
+    "mechanic": "compound",
+    "instructionsRu": [
+      "Поставьте наклонную скамью под машину Смита. Установите гриф на высоту, которую сможете достать лёжа, когда руки почти полностью выпрямлены. Выбрав нужный вес, лягте на наклонную скамью так, чтобы верхняя часть груди была на одной линии с грифом. Пронированным хватом (ладони вперёд) шире плеч снимите гриф со стоек и держите его прямо над собой с выпрямленными руками. Это исходное положение.",
+      "На вдохе медленно опускайте гриф, пока не почувствуете его на верхней части груди.",
+      "После секундной паузы верните гриф в исходное положение на выдохе, выжимая его усилием грудных мышц. Зафиксируйте руки в сокращённом положении, задержитесь на секунду и снова начинайте медленно опускать гриф. Совет: опускание должно занимать как минимум вдвое больше времени, чем подъём.",
+      "Повторите движение рекомендованное количество раз.",
+      "По окончании зафиксируйте гриф обратно на стойках."
+    ],
+    "instructionsPl": [
+      "Ustaw ławkę skośną pod maszyną Smitha. Ustaw sztangę na wysokości, którą będziesz w stanie osiągnąć leżąc, przy niemal całkowicie wyprostowanych ramionach. Po wybraniu odpowiedniego ciężaru połóż się na ławce skośnej tak, aby górna część klatki piersiowej znajdowała się w jednej linii ze sztangą. Pronacyjnym chwytem (dłonie skierowane do przodu) szerszym niż barki zdejmij sztangę z zaczepów i trzymaj ją prosto nad sobą z zablokowanymi ramionami. To pozycja wyjściowa.",
+      "Wdychając powietrze, powoli opuszczaj sztangę, aż poczujesz ją na górnej części klatki piersiowej.",
+      "Po sekundowej przerwie wróć ze sztangą do pozycji wyjściowej, wydychając powietrze i wyciskając sztangę siłą mięśni klatki piersiowej. Zablokuj ramiona w pozycji napiętej, zatrzymaj się na sekundę i ponownie zacznij powoli opuszczać sztangę. Wskazówka: opuszczanie powinno trwać co najmniej dwa razy dłużej niż wyciskanie.",
+      "Powtórz ruch zalecaną liczbę razy.",
+      "Po zakończeniu odłóż sztangę z powrotem na zaczepy."
+    ]
   },
   {
     "id": "Smith_Machine_Leg_Press",
@@ -25580,7 +25664,17 @@
     ],
     "level": "intermediate",
     "force": "push",
-    "mechanic": "compound"
+    "mechanic": "compound",
+    "instructionsRu": [
+      "Установите гриф машины Смита на высоте пары футов от пола. Убедитесь, что он опирается на страховочные упоры. Загрузив гриф до подходящего веса, лягте под ним. Поставьте середину стоп на гриф, подтянув колени к груди. Это исходное положение.",
+      "Начните движение, отталкиваясь стопами, чтобы поднять гриф вверх, разгибая бёдра и колени. Не блокируйте колени полностью.",
+      "В верхней точке движения сделайте короткую паузу, прежде чем вернуться в исходное положение."
+    ],
+    "instructionsPl": [
+      "Ustaw sztangę maszyny Smitha na wysokości kilkudziesięciu centymetrów nad podłogą. Upewnij się, że opiera się na ogranicznikach bezpieczeństwa. Po załadowaniu sztangi do odpowiedniego ciężaru, połóż się pod nią. Umieść środek stóp na sztandze, podciągając kolana do klatki piersiowej. To pozycja wyjściowa.",
+      "Rozpocznij ruch, odpychając się stopami, aby unieść sztangę w górę, prostując biodra i kolana. Nie blokuj kolan całkowicie.",
+      "W górnej fazie ruchu zrób krótką przerwę, zanim wrócisz do pozycji wyjściowej."
+    ]
   },
   {
     "id": "Smith_Machine_One-Arm_Upright_Row",
@@ -25605,7 +25699,21 @@
     ],
     "level": "beginner",
     "force": "pull",
-    "mechanic": "compound"
+    "mechanic": "compound",
+    "instructionsRu": [
+      "Установив гриф на уровне бёдер, загрузите подходящий вес.",
+      "Возьмитесь за гриф широким хватом и снимите его со стоек, убрав свободную руку с грифа. Рука должна быть выпрямлена, вы стоите прямо, голова и грудь подняты. Это исходное положение.",
+      "Начните движение, сгибая локоть и поднимая плечо вверх с локтем, направленным в сторону. Продолжайте, пока плечо не станет параллельно полу.",
+      "После короткой паузы верните вес в исходное положение.",
+      "Повторите нужное количество раз, прежде чем зафиксировать гриф на стойках."
+    ],
+    "instructionsPl": [
+      "Ustawiając sztangę na wysokości ud, załaduj odpowiedni ciężar.",
+      "Chwyć sztangę szerokim chwytem i zdejmij ciężar z zaczepów, zdejmując wolną rękę ze sztangi. Ramię powinno być wyprostowane, gdy stoisz prosto z uniesioną głową i klatką piersiową. To pozycja wyjściowa.",
+      "Rozpocznij ruch, zginając łokieć i unosząc ramię z łokciem skierowanym na zewnątrz. Kontynuuj, aż ramię będzie równoległe do podłogi.",
+      "Po krótkiej przerwie wróć z ciężarem do pozycji wyjściowej.",
+      "Powtórz żądaną liczbę powtórzeń, zanim zablokujesz sztangę na zaczepach."
+    ]
   },
   {
     "id": "Smith_Machine_Overhead_Shoulder_Press",
@@ -25629,7 +25737,21 @@
     ],
     "level": "beginner",
     "force": "push",
-    "mechanic": "compound"
+    "mechanic": "compound",
+    "instructionsRu": [
+      "Для начала поставьте горизонтальную скамью (желательно со спинкой) под машину Смита. Установите гриф на такую высоту, чтобы сидя на скамье, руки нужно было почти полностью выпрямить, чтобы достать до грифа.",
+      "Подобрав нужную высоту, сядьте чуть позади грифа так, чтобы воображаемая прямая линия шла от кончика носа до грифа. Стопы должны быть неподвижны. Возьмитесь за гриф ладонями вперёд, снимите его со стоек и поднимите так, чтобы руки были полностью выпрямлены. Это исходное положение.",
+      "Медленно опускайте гриф, пока он не окажется на уровне подбородка, вдыхая при этом.",
+      "Затем поднимите гриф обратно в исходное положение усилием плеч, выдыхая.",
+      "Повторите рекомендованное количество повторений."
+    ],
+    "instructionsPl": [
+      "Na początek ustaw płaską ławkę (najlepiej z oparciem) pod maszyną Smitha. Ustaw sztangę na takiej wysokości, aby siedząc na ławce, ramiona musiały być niemal całkowicie wyprostowane, by dosięgnąć sztangi.",
+      "Po ustaleniu odpowiedniej wysokości usiądź nieco za sztangą tak, aby wyobrażona linia prosta biegła od czubka nosa do sztangi. Stopy powinny pozostać nieruchome. Chwyć sztangę dłońmi skierowanymi do przodu, zdejmij ją z zaczepów i unieś tak, aby ramiona były całkowicie wyprostowane. To pozycja wyjściowa.",
+      "Powoli zacznij opuszczać sztangę, aż znajdzie się na wysokości podbródka, wdychając powietrze.",
+      "Następnie unieś sztangę z powrotem do pozycji wyjściowej siłą barków, wydychając powietrze.",
+      "Powtórz zalecaną liczbę powtórzeń."
+    ]
   },
   {
     "id": "Smith_Machine_Pistol_Squat",
@@ -25655,7 +25777,21 @@
     ],
     "level": "intermediate",
     "force": "push",
-    "mechanic": "compound"
+    "mechanic": "compound",
+    "instructionsRu": [
+      "Для начала установите гриф на высоту, соответствующую вашему росту. Встаньте под него и разместите гриф на задней части плеч.",
+      "Возьмитесь за гриф ладонями вперёд, снимите его и поднимите со стоек, разгибая ноги.",
+      "Выдвиньте одну стопу вперёд примерно на 30 см от грифа. Вытяните другую ногу вперёд перед собой, удерживая её на весу. Смотрите вперёд и сохраняйте нейтральное или слегка прогнутое положение позвоночника. Это исходное положение.",
+      "Сохраняя правильную осанку, опускайтесь, сгибая колено и таз опорной ноги, насколько позволяет гибкость.",
+      "Сделайте короткую паузу внизу, затем вернитесь в исходное положение, отталкиваясь пяткой опорной ноги, разгибая колено и таз."
+    ],
+    "instructionsPl": [
+      "Na początek ustaw sztangę na wysokości odpowiadającej twojemu wzrostowi. Stań pod nią i umieść sztangę na tylnej części barków.",
+      "Chwyć sztangę dłońmi skierowanymi do przodu, zdejmij ją i unieś z zaczepów, prostując nogi.",
+      "Wysuń jedną stopę do przodu na około 30 cm przed sztangę. Wyprostuj drugą nogę do przodu przed sobą, trzymając ją nad podłogą. Patrz cały czas przed siebie i utrzymuj neutralny lub lekko wygięty kręgosłup. To pozycja wyjściowa.",
+      "Zachowując prawidłową postawę, opuszczaj się, zginając kolano i biodro nogi podporowej, na tyle, na ile pozwala twoja gibkość.",
+      "Zrób krótką przerwę na dole, a następnie wróć do pozycji wyjściowej, odpychając się piętą nogi podporowej i prostując kolano oraz biodro."
+    ]
   },
   {
     "id": "Smith_Machine_Reverse_Calf_Raises",
@@ -25678,7 +25814,23 @@
     ],
     "level": "beginner",
     "force": "push",
-    "mechanic": "isolation"
+    "mechanic": "isolation",
+    "instructionsRu": [
+      "Отрегулируйте гриф машины Смита под свой рост и разместите приподнятую платформу прямо под ним.",
+      "Встаньте на платформу, зафиксировав на ней пятки, а носки стоп свесив за край. Направьте носки вперёд, поставив стопы на ширине плеч.",
+      "Теперь разместите плечи под грифом, сохраняя описанное положение стоп, и толкните гриф вверх, разгибая бёдра и колени, пока корпус не выпрямится. Колени должны быть слегка согнуты, никогда не заблокированы полностью. Это исходное положение. Совет: гриф на спине служит только для баланса.",
+      "Поднимите носки стоп на выдохе, вытягивая их как можно выше и сокращая икры. Следите, чтобы колено оставалось неподвижным всё время. Сгибания не должно быть вовсе. Задержитесь в сокращённом положении на секунду, прежде чем опускаться обратно.",
+      "Медленно вернитесь в исходное положение на вдохе, опуская носки стоп.",
+      "Повторите рекомендованное количество повторений."
+    ],
+    "instructionsPl": [
+      "Dostosuj sztangę na maszynie Smitha do swojego wzrostu i ustaw podwyższoną platformę bezpośrednio pod nią.",
+      "Stań na platformie, opierając na niej pięty, a przodami stóp wystając poza jej krawędź. Ustaw palce stóp skierowane do przodu, w rozstawie na szerokość barków.",
+      "Teraz umieść barki pod sztangą, zachowując opisaną pozycję stóp, i wypchnij sztangę w górę, prostując biodra i kolana, aż tułów będzie wyprostowany. Kolana powinny być lekko ugięte, nigdy całkowicie zablokowane. To pozycja wyjściowa. Wskazówka: sztanga na plecach służy jedynie do utrzymania równowagi.",
+      "Unieś przody stóp, wydychając powietrze, wysuwając palce jak najwyżej i napinając łydki. Dbaj o to, aby kolano pozostało nieruchome przez cały czas. Nie powinno być żadnego zginania. Zatrzymaj się w napiętej pozycji na sekundę, zanim zaczniesz opuszczać się z powrotem.",
+      "Powoli wróć do pozycji wyjściowej, wdychając powietrze i opuszczając przody stóp oraz palce.",
+      "Powtórz zalecaną liczbę powtórzeń."
+    ]
   },
   {
     "id": "Smith_Machine_Squat",
@@ -25706,7 +25858,23 @@
     ],
     "level": "beginner",
     "force": "push",
-    "mechanic": "compound"
+    "mechanic": "compound",
+    "instructionsRu": [
+      "Для начала установите гриф на высоту, соответствующую вашему росту. Выбрав нужную высоту и загрузив гриф, встаньте под ним и положите заднюю часть плеч (чуть ниже шеи) на гриф.",
+      "Возьмитесь за гриф обеими руками с каждой стороны (ладони вперёд), снимите его и поднимите со стоек, одновременно отталкиваясь ногами и выпрямляя корпус.",
+      "Поставьте ноги на ширине плеч, слегка развернув носки наружу. Держите голову поднятой всё время и сохраняйте прямую спину. Это исходное положение. (Примечание: здесь рассматривается средняя стойка, направленная на общее развитие, однако вы можете выбрать любую из трёх стоек, описанных в разделе о постановке стоп).",
+      "Медленно начните опускать гриф, сгибая колени, сохраняя прямую осанку с поднятой головой. Продолжайте опускаться, пока угол между бедром и голенью не станет чуть меньше 90 градусов (это точка, в которой бёдра оказываются ниже параллели с полом). Вдыхайте, выполняя эту часть движения. Совет: при правильном выполнении передняя часть колен должна образовывать воображаемую прямую линию с носками, перпендикулярную полу. Если колени выходят за эту линию (за носки), вы создаёте излишнюю нагрузку на колени, и упражнение выполняется неправильно.",
+      "Начните поднимать гриф на выдохе, отталкиваясь пяткой от пола, выпрямляя ноги и возвращаясь в исходное положение.",
+      "Повторите рекомендованное количество повторений."
+    ],
+    "instructionsPl": [
+      "Na początek ustaw sztangę na wysokości odpowiadającej twojemu wzrostowi. Po wybraniu odpowiedniej wysokości i załadowaniu sztangi, stań pod nią i połóż tylną część barków (nieco poniżej szyi) na sztandze.",
+      "Chwyć sztangę oburącz po obu stronach (dłonie skierowane do przodu), zdejmij ją i unieś z zaczepów, jednocześnie odpychając się nogami i prostując tułów.",
+      "Ustaw nogi na szerokość barków, z lekko rozstawionymi na zewnątrz palcami stóp. Trzymaj głowę uniesioną przez cały czas i utrzymuj proste plecy. To pozycja wyjściowa. (Uwaga: w tym opisie stosujemy średni rozstaw stóp, który rozwija mięśnie równomiernie; możesz jednak wybrać dowolny z trzech ustawień stóp opisanych w rozdziale o pozycjach stóp).",
+      "Powoli zacznij opuszczać sztangę, zginając kolana, zachowując prostą postawę z uniesioną głową. Kontynuuj opuszczanie, aż kąt między udem a łydką stanie się nieco mniejszy niż 90 stopni (jest to punkt, w którym uda znajdują się poniżej równoległości z podłogą). Wdychaj powietrze podczas wykonywania tej części ruchu. Wskazówka: jeśli ćwiczenie wykonujesz poprawnie, przód kolan powinien tworzyć wyimaginowaną linię prostą z palcami stóp, prostopadłą do przodu. Jeśli kolana wychodzą poza tę linię (za palce stóp), obciążasz nadmiernie kolana, a ćwiczenie jest wykonywane nieprawidłowo.",
+      "Zacznij unosić sztangę, wydychając powietrze, odpychając się piętami od podłogi, prostując nogi i wracając do pozycji wyjściowej.",
+      "Powtórz zalecaną liczbę powtórzeń."
+    ]
   },
   {
     "id": "Smith_Machine_Stiff-Legged_Deadlift",
@@ -25731,7 +25899,21 @@
     ],
     "level": "beginner",
     "force": "pull",
-    "mechanic": "compound"
+    "mechanic": "compound",
+    "instructionsRu": [
+      "Для начала установите гриф машины Смита на высоту примерно середины бёдер. Выбрав нужную высоту и загрузив гриф, возьмитесь за него пронированным хватом (ладони вперёд) на ширине плеч. При работе со значительным весом может понадобиться кистевые бинты.",
+      "Поднимите гриф, полностью выпрямив руки и сохраняя прямую спину. Встаньте с прямым корпусом, ноги расставлены на ширине плеч или чуть уже. Колени должны быть слегка согнуты. Это исходное положение.",
+      "Удерживая колени неподвижными, опустите гриф над стопами, наклоняясь в тазобедренном суставе и сохраняя прямую спину. Продолжайте наклоняться вперёд, как будто хотите поднять что-то с пола, пока не почувствуете растяжение в бицепсах бедра. Выдыхайте, выполняя это движение.",
+      "Начните выпрямлять корпус обратно, как только почувствуете растяжение бицепса бедра, разгибая бёдра и таз, пока не вернётесь в исходное положение. Вдыхайте, выполняя это движение.",
+      "Повторите рекомендованное количество повторений."
+    ],
+    "instructionsPl": [
+      "Na początek ustaw sztangę maszyny Smitha na wysokości mniej więcej połowy ud. Po wybraniu odpowiedniej wysokości i załadowaniu sztangi, chwyć ją pronacyjnym chwytem (dłonie skierowane do przodu) na szerokość barków. Przy dużym obciążeniu może być potrzebne owinięcie nadgarstków.",
+      "Unieś sztangę, całkowicie prostując ramiona i utrzymując proste plecy. Stój z wyprostowanym tułowiem, a nogi rozstaw na szerokość barków lub węziej. Kolana powinny być lekko ugięte. To pozycja wyjściowa.",
+      "Trzymając kolana nieruchomo, opuść sztangę nad przody stóp, pochylając się w biodrach i utrzymując proste plecy. Kontynuuj pochylanie do przodu, jakbyś miał podnieść coś z podłogi, aż poczujesz rozciąganie w mięśniach dwugłowych uda. Wydychaj powietrze podczas wykonywania tego ruchu.",
+      "Zacznij prostować tułów z powrotem, gdy tylko poczujesz rozciąganie mięśni dwugłowych uda, prostując biodra i talię, aż wrócisz do pozycji wyjściowej. Wdychaj powietrze podczas wykonywania tego ruchu.",
+      "Powtórz zalecaną liczbę powtórzeń."
+    ]
   },
   {
     "id": "Smith_Machine_Upright_Row",
@@ -25757,7 +25939,21 @@
     ],
     "level": "beginner",
     "force": "pull",
-    "mechanic": "compound"
+    "mechanic": "compound",
+    "instructionsRu": [
+      "Для начала установите гриф машины Смита на высоту примерно середины бёдер. Выбрав нужную высоту и загрузив гриф, возьмитесь за него пронированным хватом (ладони вперёд) на ширине плеч. При работе со значительным весом может понадобиться кистевые бинты.",
+      "Поднимите гриф и полностью выпрямите руки, сохраняя прямую спину. В локтях должен быть небольшой изгиб. Это исходное положение.",
+      "Используйте боковые дельты, чтобы поднять гриф на выдохе. Гриф должен двигаться близко к телу. Продолжайте тянуть его вверх, пока он почти не коснётся подбородка. Совет: движение должны вести локти. Поднимая гриф, локти должны всегда быть выше предплечий. Также держите корпус неподвижным и сделайте паузу на секунду в верхней точке движения.",
+      "Медленно опустите гриф обратно в исходное положение. Вдыхайте, выполняя эту часть движения.",
+      "Повторите рекомендованное количество повторений."
+    ],
+    "instructionsPl": [
+      "Na początek ustaw sztangę maszyny Smitha na wysokości mniej więcej połowy ud. Po wybraniu odpowiedniej wysokości i załadowaniu sztangi, chwyć ją pronacyjnym chwytem (dłonie skierowane do przodu) na szerokość barków. Przy dużym obciążeniu może być potrzebne owinięcie nadgarstków.",
+      "Unieś sztangę i całkowicie wyprostuj ramiona, utrzymując proste plecy. W łokciach powinno być lekkie ugięcie. To pozycja wyjściowa.",
+      "Użyj bocznych mięśni naramiennych, aby unieść sztangę, wydychając powietrze. Sztanga powinna poruszać się blisko ciała. Kontynuuj podciąganie, aż niemal dotknie podbródka. Wskazówka: ruch powinny prowadzić łokcie. Podczas podciągania sztangi łokcie powinny zawsze być wyżej niż przedramiona. Utrzymuj również tułów nieruchomo i zrób sekundową przerwę w górnej fazie ruchu.",
+      "Powoli opuść sztangę z powrotem do pozycji wyjściowej. Wdychaj powietrze podczas wykonywania tej części ruchu.",
+      "Powtórz zalecaną liczbę powtórzeń."
+    ]
   },
   {
     "id": "Smith_Single-Leg_Split_Squat",
@@ -25785,7 +25981,25 @@
     ],
     "level": "beginner",
     "force": "push",
-    "mechanic": "compound"
+    "mechanic": "compound",
+    "instructionsRu": [
+      "Для начала поставьте горизонтальную скамью в 60-90 см позади машины Смита. Затем установите гриф на высоту, соответствующую вашему росту. Выбрав нужную высоту и загрузив гриф, встаньте под ним и положите заднюю часть плеч (чуть ниже шеи) на гриф.",
+      "Возьмитесь за гриф обеими руками с каждой стороны (ладони вперёд), снимите его и поднимите со стоек, одновременно отталкиваясь ногами и выпрямляя корпус.",
+      "Расположите ноги, поставив одну стопу немного вперёд под грифом, а другую отведя назад и поставив верхнюю часть стопы на скамью. Это исходное положение.",
+      "Медленно начните опускать гриф, сгибая колено, сохраняя прямую осанку с поднятой головой. Продолжайте опускаться, пока угол между бедром и голенью не станет чуть меньше 90 градусов (это точка, в которой бедро оказывается ниже параллели с полом). Вдыхайте, выполняя эту часть движения. Совет: при правильном выполнении передняя часть колена должна образовывать воображаемую прямую линию с носком, перпендикулярную полу. Если колено выходит за эту линию (за носок), вы создаёте излишнюю нагрузку на колено, и упражнение выполняется неправильно.",
+      "Начните поднимать гриф на выдохе, отталкиваясь в основном пяткой от пола, выпрямляя ногу и возвращаясь в исходное положение.",
+      "Повторите рекомендованное количество повторений.",
+      "Смените ноги и повторите движение."
+    ],
+    "instructionsPl": [
+      "Na początek ustaw płaską ławkę 60-90 cm za maszyną Smitha. Następnie ustaw sztangę na wysokości odpowiadającej twojemu wzrostowi. Po wybraniu odpowiedniej wysokości i załadowaniu sztangi, stań pod nią i połóż tylną część barków (nieco poniżej szyi) na sztandze.",
+      "Chwyć sztangę oburącz po obu stronach (dłonie skierowane do przodu), zdejmij ją i unieś z zaczepów, jednocześnie odpychając się nogami i prostując tułów.",
+      "Ustaw nogi, kładąc jedną stopę nieco do przodu pod sztangą, a drugą nogę wyciągając do tyłu i opierając wierzch stopy na ławce. To pozycja wyjściowa.",
+      "Powoli zacznij opuszczać sztangę, zginając kolano, zachowując prostą postawę z uniesioną głową. Kontynuuj opuszczanie, aż kąt między udem a łydką stanie się nieco mniejszy niż 90 stopni (jest to punkt, w którym udo znajduje się poniżej równoległości z podłogą). Wdychaj powietrze podczas wykonywania tej części ruchu. Wskazówka: jeśli ćwiczenie wykonujesz poprawnie, przód kolana powinien tworzyć wyimaginowaną linię prostą z palcami stopy, prostopadłą do przodu. Jeśli kolano wychodzi poza tę linię (za palce stopy), obciążasz nadmiernie kolano, a ćwiczenie jest wykonywane nieprawidłowo.",
+      "Zacznij unosić sztangę, wydychając powietrze, odpychając się głównie piętą od podłogi, prostując nogę i wracając do pozycji wyjściowej.",
+      "Powtórz zalecaną liczbę powtórzeń.",
+      "Zmień nogi i powtórz ruch."
+    ]
   },
   {
     "id": "Snatch",
@@ -25817,7 +26031,25 @@
     ],
     "level": "intermediate",
     "force": "pull",
-    "mechanic": "compound"
+    "mechanic": "compound",
+    "instructionsRu": [
+      "Поставьте стопы на ширине плеч, а гриф разместите прямо над точкой соединения пальцев ног со стопой.",
+      "Хватом ладонями вниз, согнув колени и сохраняя ровную спину, возьмитесь за гриф хватом шире плеч. Опустите таз вниз, как будто вы садитесь на стул. Это исходное положение.",
+      "Начните отталкиваться от пола ногами, как будто пол — это движущаяся платформа, и одновременно начните поднимать гриф, удерживая его близко к ногам.",
+      "Когда гриф достигнет середины бёдер, оттолкнитесь ногами от пола и поднимите тело в полное разгибание взрывным движением.",
+      "Отведите плечи назад пожимающим движением, поднимая гриф вверх, разводя локти в стороны и удерживая их выше грифа как можно дольше.",
+      "Теперь очень быстрым, но мощным движением подведите тело под гриф, когда он достигнет достаточно высокой точки, где им можно управлять, и опуститесь, фиксируя руки и удерживая гриф над головой, принимая положение приседа.",
+      "Завершите движение, поднявшись из приседа, чтобы закончить подъём. В конце подъёма обе стопы должны быть на одной линии, а руки полностью выпрямлены, удерживая гриф над головой."
+    ],
+    "instructionsPl": [
+      "Ustaw stopy na szerokość barków, a sztangę umieść dokładnie nad miejscem, gdzie palce stóp łączą się z resztą stopy.",
+      "Chwytem dłońmi w dół, uginając kolana i utrzymując proste plecy, chwyć sztangę chwytem szerszym niż barki. Opuść biodra tak, jakbyś miał usiąść na krześle. To pozycja wyjściowa.",
+      "Zacznij odpychać się od podłogi stopami, jakby była ruchomą platformą, i jednocześnie zacznij unosić sztangę, trzymając ją blisko nóg.",
+      "Gdy sztanga dotrze do połowy ud, odepchnij się nogami od podłogi i wybuchowym ruchem unieś ciało do pełnego wyprostu.",
+      "Odciągnij barki do tyłu ruchem wzruszenia, unosząc sztangę, rozkładając łokcie na boki i utrzymując je nad sztangą tak długo, jak to możliwe.",
+      "Teraz bardzo szybkim, ale mocnym ruchem wprowadź ciało pod sztangę, gdy osiągnie ona wystarczająco wysoki punkt, w którym można ją kontrolować, i opuść się, blokując ramiona i trzymając sztangę nad głową, przyjmując pozycję przysiadu.",
+      "Zakończ ruch, wstając z przysiadu, aby dokończyć podnoszenie. Na końcu podnoszenia obie stopy powinny być w jednej linii, a ramiona całkowicie wyprostowane, trzymając sztangę nad głową."
+    ]
   },
   {
     "id": "Snatch_Balance",
@@ -25844,7 +26076,19 @@
     ],
     "level": "intermediate",
     "force": "push",
-    "mechanic": "compound"
+    "mechanic": "compound",
+    "instructionsRu": [
+      "Начните со стоп в тяговом положении, гриф зафиксирован на задней части плеч, руки размещены широким рывковым хватом.",
+      "Резко присядьте и разогните колени, толкая гриф вверх, и агрессивно уйдите под гриф, переводя стопы в положение приёма.",
+      "Примите гриф, зафиксировав руки над головой, ближе к нижней точке приседа. Корпус должен оставаться вертикальным, опуская таз между ног.",
+      "Продолжайте опускаться до полной глубины, затем вернитесь в положение стоя. Аккуратно опустите вес."
+    ],
+    "instructionsPl": [
+      "Zacznij, ustawiając stopy w pozycji ciągnięcia, sztanga zablokowana na tylnej części barków, ręce w szerokim chwycie rwania.",
+      "Wykonaj gwałtowne zejście i wyprost kolan, wypychając sztangę w górę, i agresywnie schodź pod sztangę, przenosząc stopy do pozycji odbioru.",
+      "Przyjmij sztangę z zablokowanymi ramionami nad głową, blisko dolnej pozycji przysiadu. Tułów powinien pozostać pionowy, a biodra opuszczają się między nogami.",
+      "Kontynuuj schodzenie do pełnej głębokości, a następnie wróć do pozycji stojącej. Ostrożnie opuść ciężar."
+    ]
   },
   {
     "id": "Snatch_Deadlift",
@@ -25871,7 +26115,17 @@
     ],
     "level": "intermediate",
     "force": "pull",
-    "mechanic": "compound"
+    "mechanic": "compound",
+    "instructionsRu": [
+      "Тяга рывковым хватом укрепляет первую фазу рывка. Начните с широкого рывкового хвата, гриф лежит на помосте. Стопы должны быть точно под тазом, развёрнуты наружу. Присядьте к грифу, сохраняя полное разгибание спины и голову, направленную вперёд.",
+      "Начните движение, отталкиваясь пятками и поднимая таз. Угол наклона спины должен оставаться неизменным, пока гриф не пройдёт колени.",
+      "После этого протолкните таз вперёд к грифу, отклоняясь назад. Верните гриф на помост, выполнив движение в обратном порядке."
+    ],
+    "instructionsPl": [
+      "Martwy ciąg w chwycie rwania wzmacnia pierwszą fazę rwania. Zacznij z szerokim chwytem rwania, sztanga leży na podłodze. Stopy powinny znajdować się dokładnie pod biodrami, rozstawione na zewnątrz. Przysiądź do sztangi, zachowując pełne wyprostowanie pleców i głowę skierowaną do przodu.",
+      "Rozpocznij ruch, odpychając się piętami i unosząc biodra. Kąt nachylenia pleców powinien pozostać niezmienny, dopóki sztanga nie minie kolan.",
+      "W tym momencie przepchnij biodra w stronę sztangi, odchylając się do tyłu. Odłóż sztangę na podłogę, wykonując ruch w odwrotnej kolejności."
+    ]
   },
   {
     "id": "Snatch_Pull",
@@ -25898,7 +26152,19 @@
     ],
     "level": "intermediate",
     "force": "pull",
-    "mechanic": "compound"
+    "mechanic": "compound",
+    "instructionsRu": [
+      "Со штангой на полу, близко к голеням, возьмитесь широким рывковым хватом. Опустите таз, перенеся вес на пятки, спина прямая, голова направлена вперёд, грудь поднята, плечи чуть впереди грифа. Это исходное положение.",
+      "Начните первую фазу тяги, отталкиваясь пятками, разгибая колени. Угол наклона спины должен оставаться неизменным, руки прямые. Двигайте вес подконтрольно, пока не пройдёте уровень колен.",
+      "Далее следует вторая фаза тяги — основной источник ускорения при подъёме. Когда гриф приближается к середине бедра, начните разгибать таз. Прыжковым движением ускоряйтесь, разгибая таз, колени и голеностопы, используя скорость, чтобы поднять гриф вверх.",
+      "Активно тянуть руками для ускорения веса не нужно; к концу второй фазы тяги тело должно быть полностью выпрямлено, слегка отклонено назад. Полное разгибание должно быть резким и взрывным — не затягивайте его дольше необходимого."
+    ],
+    "instructionsPl": [
+      "Ze sztangą na podłodze, blisko goleni, chwyć ją szerokim chwytem rwania. Opuść biodra, przenosząc ciężar na pięty, plecy proste, głowa skierowana do przodu, klatka piersiowa uniesiona, a barki nieco przed sztangą. To pozycja wyjściowa.",
+      "Rozpocznij pierwszą fazę ciągnięcia, odpychając się piętami i prostując kolana. Kąt nachylenia pleców powinien pozostać niezmienny, a ramiona proste. Przemieszczaj ciężar kontrolowanie, aż minie poziom kolan.",
+      "Następnie następuje druga faza ciągnięcia — główne źródło przyspieszenia podczas podnoszenia. Gdy sztanga zbliża się do połowy uda, zacznij prostować biodra. Ruchem podobnym do wyskoku przyspiesz, prostując biodra, kolana i kostki, wykorzystując prędkość, aby przesunąć sztangę w górę.",
+      "Nie ma potrzeby aktywnego ciągnięcia ramionami, aby przyspieszyć ciężar; pod koniec drugiej fazy ciągnięcia ciało powinno być w pełni wyprostowane, lekko odchylone do tyłu. Pełny wyprost powinien być gwałtowny i nagły — nie przedłużaj go dłużej niż to konieczne."
+    ]
   },
   {
     "id": "Snatch_Shrug",
@@ -25920,7 +26186,15 @@
     ],
     "level": "intermediate",
     "force": "pull",
-    "mechanic": "compound"
+    "mechanic": "compound",
+    "instructionsRu": [
+      "Начните с широкого хвата, гриф свисает на уровне середины бедра. Можно использовать крюковой или обычный хват сверху. Спина должна быть прямой, слегка наклонённой вперёд.",
+      "Пожмите плечами по направлению к ушам. Хотя это упражнение обычно можно выполнять с большим весом, чем рывок, избегайте перегрузки до такой степени, что техника выполнения замедляется."
+    ],
+    "instructionsPl": [
+      "Zacznij z szerokim chwytem, sztanga zwisa na wysokości połowy uda. Możesz użyć chwytu hakowego lub zwykłego chwytu górnego. Plecy powinny być proste, lekko pochylone do przodu.",
+      "Wzrusz barkami w kierunku uszu. Choć to ćwiczenie zwykle można obciążać większym ciężarem niż rwanie, unikaj przeciążenia do takiego stopnia, że wykonanie ruchu zwalnia."
+    ]
   },
   {
     "id": "Snatch_from_Blocks",
@@ -25951,7 +26225,21 @@
     ],
     "level": "expert",
     "force": "pull",
-    "mechanic": "compound"
+    "mechanic": "compound",
+    "instructionsRu": [
+      "Начните с загруженного грифа на подставках или стойках нужной высоты. Возьмитесь широким хватом за гриф. Стопы должны быть точно под тазом, развёрнуты наружу по мере необходимости. Опустите таз, грудь поднята, голова смотрит вперёд. Плечи должны быть чуть впереди грифа, локти направлены наружу. Это исходное положение.",
+      "Начните первую фазу тяги, отталкиваясь передней частью пяток, поднимая гриф с подставок.",
+      "Перейдите ко второй фазе тяги, разгибая таз, колени и голеностопы, поднимая гриф вверх как можно быстрее. Гриф должен оставаться близко к телу. В пиковой точке разгибания пожмите плечами и позвольте локтям согнуться в стороны.",
+      "Переводя стопы в положение приёма, энергично уйдите под гриф, одновременно поднимая его над головой. Стопы должны переместиться чуть шире таза, развёрнуты наружу по мере необходимости. Примите гриф, опустив тело как можно ниже, руки полностью выпрямлены над головой.",
+      "Удерживая гриф над передней частью пяток, голову и грудь поднятыми, оттолкнитесь пятками, чтобы встать в вертикальное положение. Аккуратно верните вес на подставки."
+    ],
+    "instructionsPl": [
+      "Zacznij z załadowaną sztangą na podstawkach lub stojakach o żądanej wysokości. Chwyć sztangę szerokim chwytem. Stopy powinny znajdować się dokładnie pod biodrami, rozstawione na zewnątrz w razie potrzeby. Opuść biodra, klatka piersiowa uniesiona, głowa skierowana do przodu. Barki powinny być nieco przed sztangą, łokcie skierowane na zewnątrz. To pozycja wyjściowa.",
+      "Rozpocznij pierwszą fazę ciągnięcia, odpychając się przodami pięt, unosząc sztangę z podstawek.",
+      "Przejdź do drugiej fazy ciągnięcia, prostując biodra, kolana i kostki, unosząc sztangę w górę tak szybko, jak to możliwe. Sztanga powinna pozostać blisko ciała. W szczytowym punkcie wyprostu wzrusz barkami i pozwól łokciom ugiąć się na boki.",
+      "Przenosząc stopy do pozycji odbioru, energicznie schodź pod sztangę, jednocześnie unosząc ją nad głowę. Stopy powinny przesunąć się nieco szerzej niż biodra, rozstawione na zewnątrz w razie potrzeby. Przyjmij sztangę, obniżając ciało jak najbardziej, z ramionami w pełni wyprostowanymi nad głową.",
+      "Trzymając sztangę nad przodami pięt, głowę i klatkę piersiową uniesione, odepchnij się piętami, aby przejść do pozycji stojącej. Ostrożnie odłóż ciężar z powrotem na podstawki."
+    ]
   },
   {
     "id": "Speed_Band_Overhead_Triceps",
@@ -25972,7 +26260,19 @@
     ],
     "level": "beginner",
     "force": "push",
-    "mechanic": "isolation"
+    "mechanic": "isolation",
+    "instructionsRu": [
+      "Для этого упражнения закрепите эспандер на полу. Мы использовали наклонную скамью, закрепив ленту у её основания, стоя над скамьёй. Также это упражнение можно выполнять, стоя на ленте.",
+      "Для начала протяните ленту за голову, удерживая её пронированным хватом с поднятыми локтями. Это исходное положение.",
+      "Чтобы выполнить движение, разогните руки в локтях, выпрямляя их, следя за тем, чтобы плечо оставалось неподвижным.",
+      "Сделайте паузу, затем вернитесь в исходное положение."
+    ],
+    "instructionsPl": [
+      "Do tego ćwiczenia przymocuj taśmę oporową do podłogi. My użyliśmy ławki skośnej, mocując taśmę do jej podstawy, stojąc nad ławką. Alternatywnie można to wykonać, stojąc na taśmie.",
+      "Na początek pociągnij taśmę za głowę, trzymając ją chwytem pronacyjnym z uniesionymi łokciami. To pozycja wyjściowa.",
+      "Aby wykonać ruch, wyprostuj ramiona w łokciach, dbając o to, aby ramię górne pozostało nieruchome.",
+      "Zatrzymaj się, a następnie wróć do pozycji wyjściowej."
+    ]
   },
   {
     "id": "Speed_Box_Squat",
@@ -25998,7 +26298,21 @@
     ],
     "level": "intermediate",
     "force": "push",
-    "mechanic": "compound"
+    "mechanic": "compound",
+    "instructionsRu": [
+      "Прикрепите резиновые ленты к грифу, надёжно закрепив их у пола. Возможно, потребуется натянуть ленты сильнее для нужного натяжения.",
+      "Используйте бокс подходящей высоты для этого упражнения. Загрузите гриф до веса, который всё ещё требует усилий, но не настолько тяжёлого, чтобы страдала скорость. Обычно это 50-70% от вашего разового максимума.",
+      "Разместите гриф на верхней части спины, лопатки сведены, спина прогнута, всё тело напряжено с головы до пят. Это исходное положение.",
+      "Снимите гриф со стоек и встаньте перед боксом. Отведите таз назад, пока не сядете на бокс, опускаясь подконтрольно, не бросая тело на поверхность.",
+      "Сделайте короткую паузу и взрывным движением вставайте с бокса, разгибая бёдра и колени."
+    ],
+    "instructionsPl": [
+      "Przymocuj taśmy oporowe do sztangi, mocując je pewnie blisko podłogi. Może być konieczne skrócenie taśm, aby uzyskać odpowiednie napięcie.",
+      "Użyj boksu o odpowiedniej wysokości do tego ćwiczenia. Załaduj sztangę do ciężaru, który nadal wymaga wysiłku, ale nie jest na tyle ciężki, by zaburzyć szybkość. Zwykle będzie to 50-70% twojego maksymalnego ciężaru na jedno powtórzenie.",
+      "Ustaw sztangę na górnej części pleców, łopatki ściągnięte, plecy wygięte, całe ciało napięte od głowy po palce stóp. To pozycja wyjściowa.",
+      "Zdejmij sztangę z zaczepów i ustaw się przed boksem. Cofnij biodra, aż usiądziesz na boksie, upewniając się, że schodzisz kontrolowanie i nie opadasz gwałtownie na powierzchnię.",
+      "Zrób krótką przerwę, a następnie eksploduj z boksu, prostując biodra i kolana."
+    ]
   },
   {
     "id": "Speed_Squats",
@@ -26026,7 +26340,23 @@
     ],
     "level": "expert",
     "force": "push",
-    "mechanic": "compound"
+    "mechanic": "compound",
+    "instructionsRu": [
+      "Это упражнение лучше всего выполнять в силовой раме ради безопасности. Для начала установите гриф на стойке на высоту, соответствующую вашему росту. Выбрав нужную высоту и загрузив гриф, встаньте под ним и положите заднюю часть плеч (чуть ниже шеи) на гриф.",
+      "Возьмитесь за гриф обеими руками с каждой стороны и снимите его со стоек, одновременно отталкиваясь ногами и выпрямляя корпус.",
+      "Отойдите от стойки и поставьте ноги на ширине плеч, слегка развернув носки наружу. Держите голову поднятой всё время, так как взгляд вниз собьёт равновесие, и сохраняйте прямую спину. Это исходное положение. (Примечание: здесь рассматривается средняя стойка, направленная на общее развитие, однако вы можете выбрать любую из трёх стоек, описанных в разделе о постановке стоп).",
+      "Начните опускать гриф, сгибая колени, сохраняя прямую осанку с поднятой головой. Продолжайте опускаться, пока угол между бедром и голенью не станет чуть меньше 90 градусов (это точка, в которой бёдра оказываются ниже параллели с полом). Вдыхайте, выполняя эту часть движения. Совет: при правильном выполнении передняя часть колен должна образовывать воображаемую прямую линию с носками, перпендикулярную полу. Если колени выходят за эту линию (за носки), вы создаёте излишнюю нагрузку на колени, и упражнение выполняется неправильно.",
+      "Начните поднимать гриф как можно быстрее без использования инерции на выдохе, отталкиваясь в основном пяткой от пола, выпрямляя ноги и возвращаясь в исходное положение. Примечание: выполняйте это упражнение как можно быстрее, но не нарушая идеальную технику и не используя инерцию.",
+      "Повторите рекомендованное количество повторений."
+    ],
+    "instructionsPl": [
+      "To ćwiczenie najlepiej wykonywać w klatce do przysiadów dla bezpieczeństwa. Na początek ustaw sztangę na stojaku na wysokości odpowiadającej twojemu wzrostowi. Po wybraniu odpowiedniej wysokości i załadowaniu sztangi, stań pod nią i połóż tylną część barków (nieco poniżej szyi) na sztandze.",
+      "Chwyć sztangę oburącz po obu stronach i zdejmij ją z zaczepów, jednocześnie odpychając się nogami i prostując tułów.",
+      "Odejdź od stojaka i ustaw nogi na szerokość barków, z lekko rozstawionymi na zewnątrz palcami stóp. Trzymaj głowę uniesioną przez cały czas, ponieważ patrzenie w dół zaburzy równowagę, i utrzymuj proste plecy. To pozycja wyjściowa. (Uwaga: w tym opisie stosujemy średni rozstaw stóp, który rozwija mięśnie równomiernie; możesz jednak wybrać dowolny z trzech ustawień stóp opisanych w rozdziale o pozycjach stóp).",
+      "Zacznij opuszczać sztangę, zginając kolana, zachowując prostą postawę z uniesioną głową. Kontynuuj opuszczanie, aż kąt między udem a łydką stanie się nieco mniejszy niż 90 stopni (jest to punkt, w którym uda znajdują się poniżej równoległości z podłogą). Wdychaj powietrze podczas wykonywania tej części ruchu. Wskazówka: jeśli ćwiczenie wykonujesz poprawnie, przód kolan powinien tworzyć wyimaginowaną linię prostą z palcami stóp, prostopadłą do przodu. Jeśli kolana wychodzą poza tę linię (za palce stóp), obciążasz nadmiernie kolana, a ćwiczenie jest wykonywane nieprawidłowo.",
+      "Zacznij unosić sztangę tak szybko, jak to możliwe, bez wykorzystywania rozpędu, wydychając powietrze, odpychając się głównie piętą od podłogi, prostując nogi i wracając do pozycji wyjściowej. Uwaga: ćwiczenie to należy wykonywać tak szybko, jak to możliwe, ale bez utraty idealnej techniki i bez wykorzystywania rozpędu.",
+      "Powtórz zalecaną liczbę powtórzeń."
+    ]
   },
   {
     "id": "Spell_Caster",
@@ -26050,7 +26380,19 @@
     ],
     "level": "beginner",
     "force": "pull",
-    "mechanic": "compound"
+    "mechanic": "compound",
+    "instructionsRu": [
+      "Держите по гантели в каждой руке пронированным хватом. Стопы должны быть широко расставлены, таз и колени выпрямлены. Это исходное положение.",
+      "Начните движение, потянув обе гантели к одному боку рядом с бедром, поворачивая корпус.",
+      "Держа руки прямыми, а гантели параллельно полу, поверните корпус, чтобы перенести вес на противоположную сторону.",
+      "Продолжайте чередовать, поворачивая с одной стороны на другую, пока не завершите подход."
+    ],
+    "instructionsPl": [
+      "Trzymaj hantlę w każdej ręce chwytem pronacyjnym. Stopy powinny być szeroko rozstawione, biodra i kolana wyprostowane. To pozycja wyjściowa.",
+      "Rozpocznij ruch, ciągnąc obie hantle w stronę jednego boku obok biodra, obracając tułów.",
+      "Trzymając ramiona proste, a hantle równolegle do podłogi, obróć tułów, aby przenieść ciężar na przeciwną stronę.",
+      "Kontynuuj naprzemiennie, obracając się z jednej strony na drugą, aż zakończysz serię."
+    ]
   },
   {
     "id": "Spider_Crawl",
@@ -26074,7 +26416,17 @@
     ],
     "level": "beginner",
     "force": "pull",
-    "mechanic": "compound"
+    "mechanic": "compound",
+    "instructionsRu": [
+      "Начните в положении лёжа на животе на полу. Опирайтесь весом тела на ладони и носки, стопы вместе, тело прямое. Руки должны быть согнуты под углом 90 градусов. Это исходное положение.",
+      "Начните движение, приподняв одну стопу над полом. Разверните ногу наружу и подтяните колено к локтю как можно дальше вперёд.",
+      "Верните эту ногу в исходное положение и повторите с другой стороны."
+    ],
+    "instructionsPl": [
+      "Zacznij w pozycji leżącej na brzuchu na podłodze. Podpieraj ciężar ciała na dłoniach i palcach stóp, stopy razem, ciało proste. Ramiona powinny być ugięte pod kątem 90 stopni. To pozycja wyjściowa.",
+      "Rozpocznij ruch, unosząc jedną stopę nad podłogę. Obróć nogę na zewnątrz i podciągnij kolano w kierunku łokcia, jak najdalej do przodu.",
+      "Wróć tą nogą do pozycji wyjściowej i powtórz po przeciwnej stronie."
+    ]
   },
   {
     "id": "Spider_Curl",
@@ -26098,7 +26450,25 @@
     ],
     "level": "beginner",
     "force": "pull",
-    "mechanic": "isolation"
+    "mechanic": "isolation",
+    "instructionsRu": [
+      "Начните с того, что установите гриф на той части скамьи Скотта, на которую обычно садитесь. Убедитесь, что гриф расположен правильно, сбалансирован и не упадёт.",
+      "Переместитесь на переднюю сторону скамьи Скотта (там, где обычно лежат руки) и расположитесь под углом 45 градусов, прижав торс и живот к передней стороне скамьи.",
+      "Убедитесь, что стопы (особенно носки) хорошо упираются в пол, и разместите верхнюю часть рук на подушке с внутренней стороны скамьи Скотта.",
+      "Возьмитесь руками за гриф супинированным хватом (ладони вверх) примерно на ширине плеч или чуть уже.",
+      "Медленно поднимите гриф вверх на выдохе. Задержитесь в сокращённом положении на секунду, напрягая бицепсы.",
+      "Медленно верните гриф в исходное положение на вдохе.",
+      "Повторите рекомендованное количество повторений."
+    ],
+    "instructionsPl": [
+      "Zacznij od ustawienia sztangi na tej części ławki Scotta, na której zwykle siadasz. Upewnij się, że sztanga jest odpowiednio wyważona i nie spadnie.",
+      "Przejdź na przednią stronę ławki Scotta (tam, gdzie zwykle opierają się ramiona) i ustaw się pod kątem 45 stopni, przyciskając tułów i brzuch do przedniej strony ławki.",
+      "Upewnij się, że stopy (zwłaszcza palce) są dobrze oparte na podłodze, i umieść górną część ramion na poduszce po wewnętrznej stronie ławki Scotta.",
+      "Chwyć sztangę rękoma chwytem supinacyjnym (dłonie skierowane do góry), mniej więcej na szerokość barków lub nieco węziej.",
+      "Powoli zacznij unosić sztangę, wydychając powietrze. Zatrzymaj się w napiętej pozycji na sekundę, napinając biceps.",
+      "Powoli zacznij wracać ze sztangą do pozycji wyjściowej, wdychając powietrze.",
+      "Powtórz zalecaną liczbę powtórzeń."
+    ]
   },
   {
     "id": "Spinal_Stretch",
@@ -26124,7 +26494,19 @@
     ],
     "level": "beginner",
     "force": "static",
-    "mechanic": "isolation"
+    "mechanic": "isolation",
+    "instructionsRu": [
+      "Сядьте на стул так, чтобы спина была прямой, а стопы стояли на полу.",
+      "Сцепите пальцы за головой, локти в стороны, подбородок опущен.",
+      "Разверните верхнюю часть тела в одну сторону примерно в три раза дальше, чем обычно. Затем наклонитесь вперёд и разверните торс, чтобы дотянуться локтем до пола с внутренней стороны колена.",
+      "Вернитесь в вертикальное положение, а затем повторите для другой стороны."
+    ],
+    "instructionsPl": [
+      "Usiądź na krześle tak, aby plecy były proste, a stopy oparte na podłodze.",
+      "Splecione palce umieść za głową, łokcie na zewnątrz, podbródek opuszczony.",
+      "Skręć górną część ciała w jedną stronę, około trzy razy dalej, niż zwykle. Następnie pochyl się do przodu i skręć tułów, aby sięgnąć łokciem do podłogi po wewnętrznej stronie kolana.",
+      "Wróć do pozycji wyprostowanej, a następnie powtórz po drugiej stronie."
+    ]
   },
   {
     "id": "Split_Clean",
@@ -26155,7 +26537,23 @@
     ],
     "level": "intermediate",
     "force": "pull",
-    "mechanic": "compound"
+    "mechanic": "compound",
+    "instructionsRu": [
+      "Со штангой на полу близко к голеням возьмитесь хватом сверху чуть шире ног. Опустите таз, перенеся вес на пятки, спина прямая, голова направлена вперёд, грудь поднята, плечи чуть впереди грифа. Это исходное положение.",
+      "Начните первую фазу тяги, отталкиваясь пятками, разгибая колени. Угол наклона спины должен оставаться неизменным, руки прямые. Двигайте вес подконтрольно, пока не пройдёте уровень колен.",
+      "Далее следует вторая фаза тяги — основной источник ускорения при взятии на грудь. Когда гриф приближается к середине бедра, начните разгибать таз. Прыжковым движением ускоряйтесь, разгибая таз, колени и голеностопы, используя скорость, чтобы поднять гриф вверх. Активно тянуть руками для ускорения веса не нужно; к концу второй фазы тяги тело должно быть полностью выпрямлено, слегка отклонено назад, руки всё ещё выпрямлены.",
+      "Достигнув полного разгибания, переходите к третьей фазе тяги, агрессивно пожимая плечами и сгибая руки с локтями, направленными вверх и в стороны. В пиковой точке разгибания энергично подтяните себя вниз, разворачивая локти под гриф.",
+      "Примите гриф, расставив стопы врозь, агрессивно выдвинув одну ногу вперёд, а другую отведя назад. Гриф должен лежать на выдвинутых вперёд плечах, слегка касаясь горла, кисти расслаблены. Продолжайте опускаться в нижнее положение, что поможет в восстановлении.",
+      "Немедленно восстановите положение, отталкиваясь пятками, удерживая корпус вертикально, а локти поднятыми. Сведите стопы вместе, вставая."
+    ],
+    "instructionsPl": [
+      "Ze sztangą na podłodze, blisko goleni, chwyć ją chwytem górnym nieco szerzej niż nogi. Opuść biodra, przenosząc ciężar na pięty, plecy proste, głowa skierowana do przodu, klatka piersiowa uniesiona, a barki nieco przed sztangą. To pozycja wyjściowa.",
+      "Rozpocznij pierwszą fazę ciągnięcia, odpychając się piętami i prostując kolana. Kąt nachylenia pleców powinien pozostać niezmienny, a ramiona proste. Przemieszczaj ciężar kontrolowanie, aż minie poziom kolan.",
+      "Następnie następuje druga faza ciągnięcia — główne źródło przyspieszenia podczas rwania sztangi na klatkę. Gdy sztanga zbliża się do połowy uda, zacznij prostować biodra. Ruchem podobnym do wyskoku przyspiesz, prostując biodra, kolana i kostki, wykorzystując prędkość, aby przesunąć sztangę w górę. Nie ma potrzeby aktywnego ciągnięcia ramionami, aby przyspieszyć ciężar; pod koniec drugiej fazy ciągnięcia ciało powinno być w pełni wyprostowane, lekko odchylone do tyłu, z ramionami wciąż wyprostowanymi.",
+      "Po osiągnięciu pełnego wyprostu przejdź do trzeciej fazy ciągnięcia, agresywnie wzruszając barkami i uginając ramiona z łokciami skierowanymi w górę i na zewnątrz. W szczytowym punkcie wyprostu energicznie pociągnij się w dół, obracając łokcie pod sztangę.",
+      "Przyjmij sztangę z rozstawionymi stopami, energicznie wysuwając jedną nogę do przodu, a drugą cofając do tyłu. Sztanga powinna spocząć na wysuniętych do przodu barkach, lekko dotykając gardła, z rozluźnionymi dłońmi. Kontynuuj schodzenie do najniższej pozycji, co pomoże w powrocie do pozycji stojącej.",
+      "Natychmiast wróć do pozycji stojącej, odpychając się piętami, utrzymując tułów wyprostowany i łokcie uniesione. Złącz stopy, wstając."
+    ]
   },
   {
     "id": "Split_Jerk",
@@ -26181,7 +26579,19 @@
     ],
     "level": "intermediate",
     "force": "push",
-    "mechanic": "compound"
+    "mechanic": "compound",
+    "instructionsRu": [
+      "Стоя с весом на передней части плеч, начните с приседания. Стопы точно под тазом, согните колени, не отводя таз назад.",
+      "Опуститесь совсем немного и как можно мощнее смените направление движения. Оттолкнитесь пятками, создавая максимальную скорость и силу, и обязательно уведите голову с пути грифа, когда он покидает плечи. В момент, когда стопы отрываются от пола, они должны как можно быстрее занять положение приёма.",
+      "В тот краткий момент, когда стопы не отталкиваются активно от помоста, усилие спортсмена, толкающего гриф вверх, опустит тело вниз. Стопы должны разойтись в положение выпада — одна нога вперёд, другая назад, колени слегка согнуты. Примите гриф с зафиксированными руками над головой.",
+      "Вернитесь в положение стоя, сведя стопы вместе."
+    ],
+    "instructionsPl": [
+      "Stojąc z ciężarem opartym na przedniej części barków, zacznij od zejścia. Stopy dokładnie pod biodrami, ugnij kolana, nie cofając bioder.",
+      "Zejdź tylko nieznacznie i jak najmocniej zmień kierunek ruchu. Odepchnij się piętami, tworząc jak najwięcej prędkości i siły, i koniecznie usuń głowę z drogi sztangi, gdy opuszcza barki. W momencie, gdy stopy odrywają się od podłogi, muszą jak najszybciej znaleźć się w pozycji odbioru.",
+      "W tym krótkim momencie, gdy stopy nie odpychają się aktywnie od podłoża, wysiłek zawodnika wypychającego sztangę w górę spowoduje opadnięcie ciała w dół. Stopy powinny przejść do rozkroku, jedna noga do przodu, druga do tyłu, kolana częściowo ugięte. Przyjmij sztangę z ramionami zablokowanymi nad głową.",
+      "Wróć do pozycji stojącej, łącząc stopy razem."
+    ]
   },
   {
     "id": "Split_Jump",
@@ -26207,7 +26617,21 @@
     ],
     "level": "beginner",
     "force": "push",
-    "mechanic": "compound"
+    "mechanic": "compound",
+    "instructionsRu": [
+      "Примите положение выпада, одна нога впереди с согнутым коленом, а заднее колено почти касается пола.",
+      "Убедитесь, что переднее колено находится над серединой стопы.",
+      "Разгибая обе ноги, прыгните как можно выше, взмахнув руками, чтобы придать себе высоту.",
+      "В прыжке сведите стопы вместе, а затем верните их в исходные положения при приземлении.",
+      "Смягчите приземление, вернувшись в исходное положение."
+    ],
+    "instructionsPl": [
+      "Przyjmij pozycję wypadu, jedna noga do przodu z ugiętym kolanem, a tylne kolano niemal dotyka podłogi.",
+      "Upewnij się, że przednie kolano znajduje się nad środkiem stopy.",
+      "Prostując obie nogi, wyskocz najwyżej jak potrafisz, wymachując ramionami, aby uzyskać wysokość.",
+      "W trakcie skoku złącz stopy razem, a następnie przesuń je z powrotem do pozycji wyjściowych podczas lądowania.",
+      "Zamortyzuj upadek, wracając do pozycji wyjściowej."
+    ]
   },
   {
     "id": "Split_Snatch",
@@ -26240,7 +26664,23 @@
     ],
     "level": "expert",
     "force": "pull",
-    "mechanic": "compound"
+    "mechanic": "compound",
+    "instructionsRu": [
+      "Начните с загруженного грифа на полу. Гриф должен быть близко или касаться голеней, возьмитесь широким хватом за гриф. Стопы должны быть точно под тазом, развёрнуты наружу по мере необходимости. Опустите таз, грудь поднята, голова смотрит вперёд. Плечи должны быть чуть впереди грифа. Это исходное положение.",
+      "Начните первую фазу тяги, отталкиваясь передней частью пяток, поднимая гриф с пола. Угол наклона спины должен оставаться неизменным, пока гриф не пройдёт колени.",
+      "Перейдите ко второй фазе тяги, разгибая таз, колени и голеностопы, поднимая гриф вверх как можно быстрее. Гриф должен оставаться близко к телу. В пиковой точке разгибания пожмите плечами и позвольте локтям согнуться в стороны.",
+      "Переводя стопы в положение приёма, энергично уйдите под гриф, одновременно поднимая его над головой. Стопы должны энергично разойтись в положение выпада — одна нога вперёд, другая назад. Примите гриф, опустив тело как можно ниже, руки полностью выпрямлены над головой.",
+      "Удерживая гриф над передней частью пяток, голову и грудь поднятыми, оттолкнитесь пятками, чтобы встать в вертикальное положение, сводя стопы вместе.",
+      "Аккуратно верните вес на пол."
+    ],
+    "instructionsPl": [
+      "Zacznij z załadowaną sztangą na podłodze. Sztanga powinna być blisko lub dotykać goleni, chwyć ją szerokim chwytem. Stopy powinny znajdować się dokładnie pod biodrami, rozstawione na zewnątrz w razie potrzeby. Opuść biodra, klatka piersiowa uniesiona, głowa skierowana do przodu. Barki powinny być nieco przed sztangą. To pozycja wyjściowa.",
+      "Rozpocznij pierwszą fazę ciągnięcia, odpychając się przodami pięt, unosząc sztangę z podłogi. Kąt nachylenia pleców powinien pozostać niezmienny, dopóki sztanga nie minie kolan.",
+      "Przejdź do drugiej fazy ciągnięcia, prostując biodra, kolana i kostki, unosząc sztangę w górę tak szybko, jak to możliwe. Sztanga powinna pozostać blisko ciała. W szczytowym punkcie wyprostu wzrusz barkami i pozwól łokciom ugiąć się na boki.",
+      "Przenosząc stopy do pozycji odbioru, energicznie schodź pod sztangę, jednocześnie unosząc ją nad głowę. Stopy powinny energicznie przejść do rozkroku, jedna noga do przodu, druga do tyłu. Przyjmij sztangę, obniżając ciało jak najbardziej, z ramionami w pełni wyprostowanymi nad głową.",
+      "Trzymając sztangę nad przodami pięt, głowę i klatkę piersiową uniesione, odepchnij się piętami, aby przejść do pozycji stojącej, łącząc stopy razem.",
+      "Ostrożnie odłóż ciężar na podłogę."
+    ]
   },
   {
     "id": "Split_Squat_with_Dumbbells",
@@ -26264,7 +26704,19 @@
     ],
     "level": "beginner",
     "force": "push",
-    "mechanic": "compound"
+    "mechanic": "compound",
+    "instructionsRu": [
+      "Примите разножку, отставив заднюю ногу на носок, а переднюю поставив вперёд.",
+      "Держите по гантели в каждой руке, опустив их вдоль тела. Это исходное положение.",
+      "Начните с опускания, сгибая колено и таз, чтобы опустить тело вниз. Сохраняйте правильную осанку на протяжении всего движения. Держите переднее колено на одной линии со стопой, выполняя упражнение.",
+      "В нижней точке движения оттолкнитесь пяткой, разгибая колено и таз, чтобы вернуться в исходное положение."
+    ],
+    "instructionsPl": [
+      "Ustaw się w pozycji rozkrocznej, z tylną stopą uniesioną na palcach i przednią nogą wysuniętą do przodu.",
+      "Trzymaj hantlę w każdej ręce, opuszczoną wzdłuż ciała. To pozycja wyjściowa.",
+      "Rozpocznij, opuszczając się, uginając kolano i biodro, aby obniżyć ciało. Utrzymuj prawidłową postawę przez cały ruch. Trzymaj przednie kolano w linii ze stopą, wykonując ćwiczenie.",
+      "W dolnej fazie ruchu odepchnij się piętą, prostując kolano i biodro, aby wrócić do pozycji wyjściowej."
+    ]
   },
   {
     "id": "Split_Squats",
@@ -26287,7 +26739,15 @@
     ],
     "level": "intermediate",
     "force": "push",
-    "mechanic": null
+    "mechanic": null,
+    "instructionsRu": [
+      "Начните в положении стоя. Впрыгните в разножку, выставив одну ногу вперёд, а другую назад, сгибая колени и слегка опуская таз.",
+      "Опускаясь, сразу же смените направление, вставая и подпрыгивая, меняя положение ног местами. Повторите 5-10 раз на каждую ногу."
+    ],
+    "instructionsPl": [
+      "Zacznij w pozycji stojącej. Wyskocz do pozycji rozkrocznej, z jedną nogą do przodu i drugą do tyłu, uginając kolana i lekko opuszczając biodra.",
+      "Podczas schodzenia natychmiast zmień kierunek, wstając i wyskakując, zamieniając ułożenie nóg miejscami. Powtórz 5-10 razy na każdą nogę."
+    ]
   },
   {
     "id": "Squat_Jerk",
@@ -26313,7 +26773,17 @@
     ],
     "level": "expert",
     "force": "push",
-    "mechanic": "compound"
+    "mechanic": "compound",
+    "instructionsRu": [
+      "Стоя с весом на передней части плеч, начните с приседания. Стопы точно под тазом, согните колени, не отводя таз назад. Опуститесь совсем немного и как можно мощнее смените направление движения. Оттолкнитесь пятками, создавая максимальную скорость и силу, и обязательно уведите голову с пути грифа, когда он покидает плечи.",
+      "В момент, когда стопы отрываются от пола, они должны как можно быстрее занять положение приёма. В тот краткий момент, когда стопы не отталкиваются активно от помоста, усилие спортсмена, толкающего гриф вверх, опустит тело вниз. Стопы должны энергично разойтись чуть шире таза, развёрнуты наружу по мере необходимости. Примите гриф, полностью присев, с руками, зафиксированными над головой.",
+      "Удерживая гриф над передней частью пяток, голову и грудь поднятыми, оттолкнитесь пятками, чтобы встать в вертикальное положение. Аккуратно верните вес на пол."
+    ],
+    "instructionsPl": [
+      "Stojąc z ciężarem opartym na przedniej części barków, zacznij od zejścia. Stopy dokładnie pod biodrami, ugnij kolana, nie cofając bioder. Zejdź tylko nieznacznie i jak najmocniej zmień kierunek ruchu. Odepchnij się piętami, tworząc jak najwięcej prędkości i siły, i koniecznie usuń głowę z drogi sztangi, gdy opuszcza barki.",
+      "W momencie, gdy stopy odrywają się od podłogi, muszą jak najszybciej znaleźć się w pozycji odbioru. W tym krótkim momencie, gdy stopy nie odpychają się aktywnie od podłoża, wysiłek zawodnika wypychającego sztangę w górę spowoduje opadnięcie ciała w dół. Stopy powinny energicznie rozejść się nieco szerzej niż biodra, rozstawione na zewnątrz w razie potrzeby. Przyjmij sztangę w pełnym przysiadzie, z ramionami zablokowanymi nad głową.",
+      "Trzymając sztangę nad przodami pięt, głowę i klatkę piersiową uniesione, odepchnij się piętami, aby przejść do pozycji stojącej. Ostrożnie odłóż ciężar na podłogę."
+    ]
   },
   {
     "id": "Squat_with_Bands",
@@ -26340,7 +26810,19 @@
     ],
     "level": "intermediate",
     "force": "push",
-    "mechanic": "compound"
+    "mechanic": "compound",
+    "instructionsRu": [
+      "Установите ленты на гриф, закрепив их на пегах, стойке или гантелях так, чтобы создать нужное натяжение.",
+      "Начните, встав под гриф и разместив его на задней части плеч. Сведите лопатки вместе и разверните локти вперёд, будто пытаетесь согнуть гриф на плечах. Снимите гриф со стоек, создав плотный прогиб в пояснице, и сделайте шаг назад в исходное положение. Расставьте стопы шире для большего акцента на спину, ягодицы, приводящие мышцы и бицепс бедра. Держите голову направленной вперёд.",
+      "Напрягая спину, плечи и корпус, отведите колени и таз наружу и начните опускание. Отведите таз назад настолько, насколько возможно. В идеале голени должны быть перпендикулярны полу. Более низкое положение грифа требует большего наклона корпуса, чтобы удерживать гриф над пятками. Продолжайте опускаться, пока не пройдёте параллель, что определяется положением, когда складка тазобедренного сустава оказывается на уровне верхней части колена.",
+      "Удерживая вес на пятках и отводя стопы и колени наружу, поднимайтесь вверх, ведя движение головой. Продолжайте движение вверх, сохраняя напряжение с головы до пят, пока не вернётесь в исходное положение."
+    ],
+    "instructionsPl": [
+      "Zamocuj taśmy na tulejach sztangi, przymocowane do kołków, stojaka lub hantli, tak aby uzyskać odpowiednie napięcie.",
+      "Zacznij, stając pod sztangą i umieszczając ją na tylnej części barków. Ściągnij łopatki razem i obróć łokcie do przodu, jakbyś próbował zgiąć sztangę na barkach. Zdejmij sztangę z zaczepów, tworząc mocne wygięcie w dolnej części pleców, i zrób krok do tyłu w pozycję wyjściową. Rozstaw stopy szerzej, aby bardziej zaangażować plecy, pośladki, przywodziciele i mięśnie dwugłowe uda. Trzymaj głowę skierowaną do przodu.",
+      "Napinając plecy, barki i tułów, wypchnij kolana i pośladki na zewnątrz i rozpocznij zejście. Cofnij biodra tak daleko, jak to możliwe. Idealnie golenie powinny być prostopadłe do podłogi. Niższa pozycja sztangi wymaga większego pochylenia tułowia, aby utrzymać sztangę nad piętami. Kontynuuj zejście, aż przekroczysz równoległość, definiowaną jako moment, gdy zgięcie biodra znajduje się w linii z górną częścią kolana.",
+      "Utrzymując ciężar na piętach i wypychając stopy i kolana na zewnątrz, wstawaj, prowadząc ruch głową. Kontynuuj ruch w górę, utrzymując napięcie od głowy po palce stóp, aż wrócisz do pozycji wyjściowej."
+    ]
   },
   {
     "id": "Squat_with_Chains",
@@ -26367,7 +26849,19 @@
     ],
     "level": "intermediate",
     "force": "push",
-    "mechanic": "compound"
+    "mechanic": "compound",
+    "instructionsRu": [
+      "Чтобы установить цепи, начните с продевания ведущей цепи через гриф. Тяжёлую цепь следует прикрепить с помощью карабина. Отрегулируйте длину ведущей цепи так, чтобы несколько звеньев оставались на полу в верхней точке движения.",
+      "Начните, встав под гриф и разместив его на задней части плеч. Сведите лопатки вместе и разверните локти вперёд, будто пытаетесь согнуть гриф на плечах. Снимите гриф со стоек, создав плотный прогиб в пояснице, и сделайте шаг назад в исходное положение. Расставьте стопы шире для большего акцента на спину, ягодицы, приводящие мышцы и бицепс бедра. Держите голову направленной вперёд.",
+      "Напрягая спину, плечи и корпус, отведите колени и таз наружу и начните опускание. Отведите таз назад настолько, насколько возможно. В идеале голени должны быть перпендикулярны полу. Более низкое положение грифа требует большего наклона корпуса, чтобы удерживать гриф над пятками. Продолжайте опускаться, пока не пройдёте параллель, что определяется положением, когда складка тазобедренного сустава оказывается на уровне верхней части колена.",
+      "Удерживая вес на пятках и отводя стопы и колени наружу, поднимайтесь вверх, ведя движение головой. Продолжайте движение вверх, сохраняя напряжение с головы до пят, пока не вернётесь в исходное положение."
+    ],
+    "instructionsPl": [
+      "Aby założyć łańcuchy, zacznij od przełożenia głównego łańcucha przez tuleje sztangi. Ciężki łańcuch należy przymocować za pomocą karabińczyka. Dostosuj długość głównego łańcucha tak, aby kilka ogniw pozostawało na podłodze w górnej fazie ruchu.",
+      "Zacznij, stając pod sztangą i umieszczając ją na tylnej części barków. Ściągnij łopatki razem i obróć łokcie do przodu, jakbyś próbował zgiąć sztangę na barkach. Zdejmij sztangę z zaczepów, tworząc mocne wygięcie w dolnej części pleców, i zrób krok do tyłu w pozycję wyjściową. Rozstaw stopy szerzej, aby bardziej zaangażować plecy, pośladki, przywodziciele i mięśnie dwugłowe uda. Trzymaj głowę skierowaną do przodu.",
+      "Napinając plecy, barki i tułów, wypchnij kolana i pośladki na zewnątrz i rozpocznij zejście. Cofnij biodra tak daleko, jak to możliwe. Idealnie golenie powinny być prostopadłe do podłogi. Niższa pozycja sztangi wymaga większego pochylenia tułowia, aby utrzymać sztangę nad piętami. Kontynuuj zejście, aż przekroczysz równoległość, definiowaną jako moment, gdy zgięcie biodra znajduje się w linii z górną częścią kolana.",
+      "Utrzymując ciężar na piętach i wypychając stopy i kolana na zewnątrz, wstawaj, prowadząc ruch głową. Kontynuuj ruch w górę, utrzymując napięcie od głowy po palce stóp, aż wrócisz do pozycji wyjściowej."
+    ]
   },
   {
     "id": "Squat_with_Plate_Movers",
@@ -26398,7 +26892,27 @@
     ],
     "level": "intermediate",
     "force": "push",
-    "mechanic": "compound"
+    "mechanic": "compound",
+    "instructionsRu": [
+      "Для начала установите гриф на стойке чуть ниже уровня плеч. Разместите блин на полу в паре шагов позади стойки. Загрузив гриф, встаньте под ним и положите заднюю часть плеч на гриф.",
+      "Возьмитесь за гриф обеими руками и снимите его со стоек, одновременно отталкиваясь ногами и выпрямляя корпус.",
+      "Отойдите от стойки и примите широкую стойку, слегка развернув носки наружу, поставив одну стопу на блин. Держите голову поднятой всё время. Это исходное положение.",
+      "Медленно начните опускать гриф, сгибая колени и таз. Продолжайте опускаться, пока угол между бедром и голенью не станет чуть меньше 90 градусов.",
+      "Поднимите гриф на выдохе, отталкиваясь пятками от пола, разгибая таз и колени.",
+      "В верхней точке движения сделайте приставной шаг, сводя стопы вместе с противоположной стороны от блина.",
+      "Внутренней стопой толкните блин, скользя им по полу туда, где вы только что стояли.",
+      "Поставьте внутреннюю стопу на блин, принимая широкую стойку для следующего повторения."
+    ],
+    "instructionsPl": [
+      "Na początek ustaw sztangę na stojaku tuż poniżej poziomu barków. Umieść talerz obciążeniowy na podłodze kilka kroków za stojakiem. Po załadowaniu sztangi stań pod nią i połóż tylną część barków na sztandze.",
+      "Chwyć sztangę oburącz i zdejmij ją z zaczepów, jednocześnie odpychając się nogami i prostując tułów.",
+      "Odejdź od stojaka i przyjmij szeroką postawę, z lekko rozstawionymi na zewnątrz palcami stóp, stawiając jedną stopę na talerzu. Trzymaj głowę uniesioną przez cały czas. To pozycja wyjściowa.",
+      "Powoli zacznij opuszczać sztangę, uginając kolana i biodra. Kontynuuj opuszczanie, aż kąt między udem a łydką stanie się nieco mniejszy niż 90 stopni.",
+      "Unieś sztangę, wydychając powietrze, odpychając się piętami od podłogi, prostując biodra i kolana.",
+      "W górnej fazie ruchu wykonaj krok dostawny, łącząc stopy po przeciwnej stronie talerza.",
+      "Wewnętrzną stopą pchnij talerz, ślizgając nim po podłodze tam, gdzie właśnie stałeś.",
+      "Postaw wewnętrzną stopę na talerzu, przyjmując szeroką postawę do kolejnego powtórzenia."
+    ]
   },
   {
     "id": "Squats_-_With_Bands",
@@ -26425,7 +26939,21 @@
     ],
     "level": "beginner",
     "force": "push",
-    "mechanic": "compound"
+    "mechanic": "compound",
+    "instructionsRu": [
+      "Для начала убедитесь, что эспандер натянут равномерно с левой и правой стороны тела. Для этого возьмитесь руками за обе стороны ленты и поставьте обе стопы в середину ленты. Стопы должны быть на ширине плеч.",
+      "Удерживая ленты, они должны быть на одинаковой высоте с обеих сторон. Используйте пронированный хват (ладони вперёд) и разместите рукоятки лент возле лица для этого упражнения. Это исходное положение.",
+      "Медленно начните сгибать колени и опускать ноги так, чтобы бёдра стали параллельны полу, выдыхая при этом.",
+      "Оттолкнитесь пяткой стопы, чтобы вернуть тело в исходное положение на выдохе.",
+      "Повторите рекомендованное количество повторений."
+    ],
+    "instructionsPl": [
+      "Na początek upewnij się, że taśma oporowa jest równomiernie rozłożona po lewej i prawej stronie ciała. Aby to zrobić, chwyć rękami obie strony taśmy i umieść obie stopy na środku taśmy. Stopy powinny być rozstawione na szerokość barków.",
+      "Trzymając taśmy, powinny znajdować się na tej samej wysokości po obu stronach. Użyj chwytu pronacyjnego (dłonie skierowane do przodu) i umieść uchwyty taśm blisko twarzy w tym ćwiczeniu. To pozycja wyjściowa.",
+      "Powoli zacznij zginać kolana i opuszczać nogi tak, aby uda były równoległe do podłogi, wydychając przy tym powietrze.",
+      "Odepchnij się piętami stóp, aby wrócić ciałem do pozycji wyjściowej, wydychając powietrze.",
+      "Powtórz zalecaną liczbę powtórzeń."
+    ]
   },
   {
     "id": "Stairmaster",
@@ -26449,7 +26977,17 @@
     ],
     "level": "intermediate",
     "force": null,
-    "mechanic": null
+    "mechanic": null,
+    "instructionsRu": [
+      "Для начала встаньте на степпер и выберите нужную опцию в меню. Можно выбрать ручной режим или запустить одну из программ. Обычно можно ввести свой возраст и вес, чтобы оценить количество сожжённых калорий во время тренировки.",
+      "Двигайте ногами вверх и вниз в установившемся ритме, продавливая педали вниз, но не до самого пола. Рекомендуется держаться за поручни, чтобы не упасть. Поручни также можно использовать для отслеживания пульса, чтобы поддерживать нужную интенсивность.",
+      "Степперы удобны, полезны для сердечно-сосудистой системы и обычно создают меньшую нагрузку на суставы, чем бег на улице. Как правило, они гораздо тяжелее других кардиотренажёров. Человек весом около 68 кг обычно сжигает более 300 калорий за 30 минут, по сравнению примерно с 175 калориями при ходьбе."
+    ],
+    "instructionsPl": [
+      "Na początek wejdź na stepper i wybierz odpowiednią opcję z menu. Możesz wybrać tryb ręczny lub uruchomić jeden z programów. Zwykle możesz wpisać swój wiek i wagę, aby oszacować liczbę spalonych kalorii podczas treningu.",
+      "Poruszaj nogami w górę i w dół w ustalonym rytmie, wciskając pedały w dół, ale nie do samej podłogi. Zaleca się trzymanie uchwytów, aby nie stracić równowagi. Uchwyty mogą też służyć do monitorowania tętna, co pomaga utrzymać odpowiednią intensywność.",
+      "Steppery są wygodne, korzystne dla układu krążenia i zwykle obciążają stawy mniej niż bieganie na zewnątrz. Zazwyczaj są znacznie bardziej wymagające niż inne sprzęty cardio. Osoba ważąca około 68 kg zwykle spala ponad 300 kalorii w ciągu 30 minut, w porównaniu do około 175 kalorii przy chodzeniu."
+    ]
   },
   {
     "id": "Standing_Alternating_Dumbbell_Press",
@@ -26472,7 +27010,19 @@
     ],
     "level": "beginner",
     "force": "push",
-    "mechanic": "compound"
+    "mechanic": "compound",
+    "instructionsRu": [
+      "Встаньте, держа по гантели в каждой руке. Поднимите гантели к плечам, развернув ладони вперёд, локти направлены в стороны. Это исходное положение.",
+      "Выпрямите одну руку, выжимая гантель прямо вверх, удерживая свободную руку на месте. Не наклоняйтесь и не рывком поднимайте вес во время движения.",
+      "После короткой паузы верните вес в исходное положение.",
+      "Повторите для противоположной стороны, продолжая чередовать руки."
+    ],
+    "instructionsPl": [
+      "Stań, trzymając hantlę w każdej ręce. Unieś hantle do wysokości barków, dłońmi skierowanymi do przodu, łokcie skierowane na zewnątrz. To pozycja wyjściowa.",
+      "Wyprostuj jedną rękę, wyciskając hantlę prosto w górę, trzymając wolną rękę w miejscu. Nie pochylaj się ani nie szarp ciężarem podczas ruchu.",
+      "Po krótkiej przerwie wróć z ciężarem do pozycji wyjściowej.",
+      "Powtórz po przeciwnej stronie, kontynuując naprzemienną pracę rąk."
+    ]
   },
   {
     "id": "Standing_Barbell_Calf_Raise",
@@ -26495,7 +27045,23 @@
     ],
     "level": "beginner",
     "force": "push",
-    "mechanic": "isolation"
+    "mechanic": "isolation",
+    "instructionsRu": [
+      "Это упражнение лучше всего выполнять в силовой раме ради безопасности. Для начала установите гриф на стойке на высоту, соответствующую вашему росту. Выбрав нужную высоту и загрузив гриф, встаньте под ним и положите гриф на заднюю часть плеч (чуть ниже шеи).",
+      "Возьмитесь за гриф обеими руками с каждой стороны и снимите его со стоек, одновременно отталкиваясь ногами и выпрямляя корпус.",
+      "Отойдите от стойки и поставьте ноги на ширине плеч, слегка развернув носки наружу. Держите голову поднятой всё время, так как взгляд вниз собьёт равновесие, и сохраняйте прямую спину. Колени должны быть слегка согнуты, никогда не заблокированы полностью. Это исходное положение. Совет: для большей амплитуды движения можно также поставить носки на деревянный брусок, но будьте осторожны — этот вариант требует лучшей устойчивости и прочного бруска.",
+      "Поднимите пятки на выдохе, разгибая голеностопы как можно выше и сокращая икры. Следите, чтобы колено оставалось неподвижным всё время. Сгибания не должно быть вовсе. Задержитесь в сокращённом положении на секунду, прежде чем опускаться обратно.",
+      "Медленно вернитесь в исходное положение на вдохе, опуская пятки, сгибая голеностопы, пока икры не растянутся.",
+      "Повторите рекомендованное количество повторений."
+    ],
+    "instructionsPl": [
+      "To ćwiczenie najlepiej wykonywać w klatce do przysiadów dla bezpieczeństwa. Na początek ustaw sztangę na stojaku na wysokości odpowiadającej twojemu wzrostowi. Po wybraniu odpowiedniej wysokości i załadowaniu sztangi, stań pod nią i połóż sztangę na tylnej części barków (nieco poniżej szyi).",
+      "Chwyć sztangę oburącz po obu stronach i zdejmij ją z zaczepów, jednocześnie odpychając się nogami i prostując tułów.",
+      "Odejdź od stojaka i ustaw nogi na szerokość barków, z lekko rozstawionymi na zewnątrz palcami stóp. Trzymaj głowę uniesioną przez cały czas, ponieważ patrzenie w dół zaburzy równowagę, i utrzymuj proste plecy. Kolana powinny być lekko ugięte, nigdy całkowicie zablokowane. To pozycja wyjściowa. Wskazówka: dla lepszego zakresu ruchu możesz też postawić przody stóp na drewnianym klocku, ale zachowaj ostrożność — ta opcja wymaga lepszej równowagi i stabilnego klocka.",
+      "Unieś pięty, wydychając powietrze, prostując kostki jak najwyżej i napinając łydki. Dbaj o to, aby kolano pozostało nieruchome przez cały czas. Nie powinno być żadnego zginania. Zatrzymaj się w napiętej pozycji na sekundę, zanim zaczniesz opuszczać się z powrotem.",
+      "Powoli wróć do pozycji wyjściowej, wdychając powietrze i opuszczając pięty, uginając kostki, aż łydki się rozciągną.",
+      "Powtórz zalecaną liczbę powtórzeń."
+    ]
   },
   {
     "id": "Standing_Barbell_Press_Behind_Neck",
@@ -26520,7 +27086,23 @@
     ],
     "level": "intermediate",
     "force": "push",
-    "mechanic": "compound"
+    "mechanic": "compound",
+    "instructionsRu": [
+      "Это упражнение лучше всего выполнять в силовой раме для более лёгкого подъёма грифа. Для начала установите гриф на стойке на высоту, соответствующую вашему росту. Выбрав нужную высоту и загрузив гриф, встаньте под ним и положите заднюю часть плеч (чуть ниже шеи) на гриф.",
+      "Возьмитесь за гриф обеими руками с каждой стороны и снимите его со стоек, одновременно отталкиваясь ногами и выпрямляя корпус.",
+      "Отойдите от стойки и поставьте ноги на ширине плеч, слегка развернув носки наружу. Держите спину прямой на протяжении всего упражнения. Это исходное положение.",
+      "Поднимите гриф над головой, полностью выпрямляя руки на выдохе.",
+      "Задержитесь в сокращённом положении на секунду и опустите гриф обратно в исходное положение на вдохе.",
+      "Повторите рекомендованное количество повторений."
+    ],
+    "instructionsPl": [
+      "To ćwiczenie najlepiej wykonywać w klatce do przysiadów, aby łatwiej zdjąć sztangę. Na początek ustaw sztangę na stojaku na wysokości odpowiadającej twojemu wzrostowi. Po wybraniu odpowiedniej wysokości i załadowaniu sztangi, stań pod nią i połóż tylną część barków (nieco poniżej szyi) na sztandze.",
+      "Chwyć sztangę oburącz po obu stronach i zdejmij ją z zaczepów, jednocześnie odpychając się nogami i prostując tułów.",
+      "Odejdź od stojaka i ustaw nogi na szerokość barków, z lekko rozstawionymi na zewnątrz palcami stóp. Utrzymuj plecy proste przez cały czas wykonywania ćwiczenia. To pozycja wyjściowa.",
+      "Unieś sztangę nad głowę, całkowicie prostując ramiona, wydychając powietrze.",
+      "Zatrzymaj się w napiętej pozycji na sekundę i opuść sztangę z powrotem do pozycji wyjściowej, wdychając powietrze.",
+      "Powtórz zalecaną liczbę powtórzeń."
+    ]
   },
   {
     "id": "Standing_Bent-Over_One-Arm_Dumbbell_Triceps_Extension",
@@ -26545,7 +27127,23 @@
     ],
     "level": "beginner",
     "force": "push",
-    "mechanic": "isolation"
+    "mechanic": "isolation",
+    "instructionsRu": [
+      "Держа гантель в одной руке ладонью к корпусу, слегка согните колени и наклоните торс вперёд, сгибаясь в тазобедренном суставе, сохраняя прямую спину, пока она не станет почти параллельна полу. Держите голову поднятой.",
+      "Плечо должно быть близко к корпусу и параллельно полу, а предплечье направлено к полу, удерживая гантель кистью. Совет: между предплечьем и плечом должен быть угол 90 градусов. Это исходное положение.",
+      "Удерживая плечо неподвижным, поднимите вес усилием трицепса на выдохе, пока предплечье не станет параллельно полу, а рука полностью не выпрямится. Как и в других упражнениях на руки, движется только предплечье.",
+      "После секундного сокращения в верхней точке медленно опустите гантель обратно в исходное положение на вдохе.",
+      "Повторите движение рекомендованное количество раз.",
+      "Смените руку и повторите упражнение."
+    ],
+    "instructionsPl": [
+      "Trzymając hantlę w jednej ręce, dłonią skierowaną do tułowia, lekko ugnij kolana i pochyl tułów do przodu, zginając się w biodrach, zachowując proste plecy, aż będą niemal równoległe do podłogi. Trzymaj głowę uniesioną.",
+      "Ramię powinno być blisko tułowia i równoległe do podłogi, a przedramię skierowane w dół, gdy dłoń trzyma ciężar. Wskazówka: między przedramieniem a ramieniem powinien być kąt 90 stopni. To pozycja wyjściowa.",
+      "Trzymając ramię nieruchomo, unieś ciężar siłą tricepsu, wydychając powietrze, aż przedramię będzie równoległe do podłogi, a cała ręka wyprostowana. Podobnie jak w innych ćwiczeniach na ręce, porusza się tylko przedramię.",
+      "Po sekundowym napięciu w górnej fazie ruchu powoli opuść hantlę z powrotem do pozycji wyjściowej, wdychając powietrze.",
+      "Powtórz ruch zalecaną liczbę razy.",
+      "Zmień rękę i powtórz ćwiczenie."
+    ]
   },
   {
     "id": "Standing_Bent-Over_Two-Arm_Dumbbell_Triceps_Extension",
@@ -26566,7 +27164,19 @@
     ],
     "level": "beginner",
     "force": "push",
-    "mechanic": "isolation"
+    "mechanic": "isolation",
+    "instructionsRu": [
+      "Держа по гантели в каждой руке ладонями к корпусу, слегка согните колени и наклоните торс вперёд, сгибаясь в тазобедренном суставе, сохраняя прямую спину, пока она не станет почти параллельна полу. Держите голову поднятой. Плечи должны быть близко к корпусу и параллельны полу, а предплечья направлены к полу, удерживая гантели в кистях. Совет: между предплечьями и плечами должен быть угол 90 градусов. Это исходное положение.",
+      "Удерживая плечи неподвижными, поднимите вес усилием трицепсов на выдохе, пока предплечья не станут параллельны полу, а руки полностью не выпрямятся. Как и в других упражнениях на руки, движутся только предплечья.",
+      "После секундного сокращения в верхней точке медленно опустите гантели обратно в исходное положение на вдохе.",
+      "Повторите движение рекомендованное количество раз."
+    ],
+    "instructionsPl": [
+      "Trzymając hantlę w każdej ręce, dłońmi skierowanymi do tułowia, lekko ugnij kolana i pochyl tułów do przodu, zginając się w biodrach, zachowując proste plecy, aż będą niemal równoległe do podłogi. Trzymaj głowę uniesioną. Ramiona powinny być blisko tułowia i równoległe do podłogi, a przedramiona skierowane w dół, gdy dłonie trzymają ciężary. Wskazówka: między przedramionami a ramionami powinien być kąt 90 stopni. To pozycja wyjściowa.",
+      "Trzymając ramiona nieruchomo, unieś ciężary siłą tricepsów, wydychając powietrze, aż przedramiona będą równoległe do podłogi, a całe ręce wyprostowane. Podobnie jak w innych ćwiczeniach na ręce, poruszają się tylko przedramiona.",
+      "Po sekundowym napięciu w górnej fazie ruchu powoli opuść hantle z powrotem do pozycji wyjściowej, wdychając powietrze.",
+      "Powtórz ruch zalecaną liczbę razy."
+    ]
   },
   {
     "id": "Standing_Biceps_Cable_Curl",
@@ -26587,7 +27197,19 @@
     ],
     "level": "beginner",
     "force": "pull",
-    "mechanic": "isolation"
+    "mechanic": "isolation",
+    "instructionsRu": [
+      "Встаньте прямо, держа рукоять для бицепса, прикреплённую к нижнему блоку. Возьмитесь за рукоять на ширине плеч и держите локти близко к корпусу. Ладони должны быть развёрнуты вверх (супинированный хват). Это исходное положение.",
+      "Удерживая плечи неподвижными, сгибайте руки, сокращая бицепсы на выдохе. Должны двигаться только предплечья. Продолжайте движение, пока бицепсы полностью не сократятся, а рукоять не окажется на уровне плеч. Задержитесь в сокращённом положении на секунду, напрягая мышцу.",
+      "Медленно верните рукоять в исходное положение на вдохе.",
+      "Повторите рекомендованное количество повторений."
+    ],
+    "instructionsPl": [
+      "Stań prosto, trzymając uchwyt na biceps przymocowany do dolnego bloczka. Chwyć uchwyt na szerokość barków i trzymaj łokcie blisko tułowia. Dłonie powinny być skierowane do góry (chwyt supinacyjny). To pozycja wyjściowa.",
+      "Trzymając ramiona nieruchomo, zginaj ręce, napinając biceps, wydychając powietrze. Powinny poruszać się tylko przedramiona. Kontynuuj ruch, aż biceps będzie w pełni napięty, a uchwyt znajdzie się na wysokości barków. Zatrzymaj się w napiętej pozycji na sekundę, napinając mięsień.",
+      "Powoli wróć z uchwytem do pozycji wyjściowej, wdychając powietrze.",
+      "Powtórz zalecaną liczbę powtórzeń."
+    ]
   },
   {
     "id": "Standing_Biceps_Stretch",
@@ -26609,7 +27231,15 @@
     ],
     "level": "beginner",
     "force": "static",
-    "mechanic": "isolation"
+    "mechanic": "isolation",
+    "instructionsRu": [
+      "Сцепите руки за спиной ладонями вместе, выпрямите руки, а затем разверните их так, чтобы ладони были направлены вниз.",
+      "Поднимите руки вверх и удерживайте, пока не почувствуете растяжение в бицепсах."
+    ],
+    "instructionsPl": [
+      "Splecione dłonie umieść za plecami, złączone razem, wyprostuj ramiona, a następnie obróć je tak, aby dłonie były skierowane w dół.",
+      "Unieś ramiona w górę i przytrzymaj, aż poczujesz rozciąganie bicepsów."
+    ]
   },
   {
     "id": "Standing_Bradford_Press",
@@ -26634,7 +27264,23 @@
     ],
     "level": "beginner",
     "force": "push",
-    "mechanic": "compound"
+    "mechanic": "compound",
+    "instructionsRu": [
+      "Разместите загруженный гриф на стойке на уровне плеч. Пронированным хватом на ширине плеч начните с грифа, лежащего на передней части плеч. Это исходное положение.",
+      "Начните подъём, разгибая локти, чтобы выжать гриф над головой. Избегайте полного выпрямления локтей, перемещая вес за голову.",
+      "Опустите гриф на заднюю часть головы, пока локоть не образует прямой угол.",
+      "Поднимите гриф обратно над головой, разгибая локти",
+      "Опустите гриф в исходное положение.",
+      "Продолжайте чередовать, пока не выполните рекомендованное количество повторений."
+    ],
+    "instructionsPl": [
+      "Umieść załadowaną sztangę na stojaku na wysokości barków. Chwytem pronacyjnym na szerokość barków zacznij ze sztangą opartą na przedniej części barków. To pozycja wyjściowa.",
+      "Rozpocznij podnoszenie, prostując łokcie, aby wycisnąć sztangę nad głowę. Unikaj całkowitego blokowania łokci podczas przenoszenia ciężaru za głowę.",
+      "Opuść sztangę za głowę, aż łokieć utworzy kąt prosty.",
+      "Unieś sztangę z powrotem nad głowę, prostując łokcie.",
+      "Opuść sztangę do pozycji wyjściowej.",
+      "Kontynuuj naprzemiennie, aż wykonasz zalecaną liczbę powtórzeń."
+    ]
   },
   {
     "id": "Standing_Cable_Chest_Press",
@@ -26658,7 +27304,19 @@
     ],
     "level": "beginner",
     "force": "push",
-    "mechanic": "compound"
+    "mechanic": "compound",
+    "instructionsRu": [
+      "Установите два блока на уровне груди и подберите подходящий вес. Встаньте в шаге-двух перед блоками, держа по рукояти в каждой руке. Для большей устойчивости можно поставить ноги в шахматном порядке.",
+      "Разместите плечо под углом 90 градусов, лопатки сведены вместе. Это исходное положение.",
+      "Удерживая остальную часть тела неподвижной, разогните руки в локтях, выжимая рукояти вперёд, сводя их вместе перед собой.",
+      "Сделайте паузу в верхней точке движения и вернитесь в исходное положение."
+    ],
+    "instructionsPl": [
+      "Ustaw dwa bloczki na wysokości klatki piersiowej i wybierz odpowiedni ciężar. Stań krok lub dwa przed bloczkami, trzymając uchwyt w każdej ręce. Dla lepszej stabilności możesz ustawić stopy w rozkroku naprzemiennym.",
+      "Ustaw ramię pod kątem 90 stopni, łopatki ściągnięte razem. To pozycja wyjściowa.",
+      "Utrzymując resztę ciała nieruchomo, wyprostuj ramiona w łokciach, wyciskając uchwyty do przodu, łącząc je razem przed sobą.",
+      "Zatrzymaj się w górnej fazie ruchu i wróć do pozycji wyjściowej."
+    ]
   },
   {
     "id": "Standing_Cable_Lift",
@@ -26685,7 +27343,27 @@
     ],
     "level": "beginner",
     "force": "pull",
-    "mechanic": "compound"
+    "mechanic": "compound",
+    "instructionsRu": [
+      "Прикрепите стандартную рукоять к стойке и переместите блок в самое нижнее положение.",
+      "Развернувшись боком к тросу, возьмитесь одной рукой за рукоять и отойдите от стойки. Вы должны быть на расстоянии вытянутой руки от блока, с натяжением веса на тросе. Вытянутая рука должна быть на одной линии с тросом.",
+      "Поставив стопы на ширине плеч, присядьте и возьмитесь за рукоять обеими руками. Руки должны оставаться полностью выпрямленными.",
+      "Одним движением потяните рукоять вверх и через тело, пока руки не окажутся полностью вытянутыми над головой.",
+      "Держите спину прямой, а руки близко к телу, поворачивая заднюю стопу и выпрямляя ноги, чтобы получить полную амплитуду движения.",
+      "Верните руки, а затем корпус. Вернитесь в нейтральное положение медленно и подконтрольно.",
+      "Повторяйте до отказа.",
+      "Затем поменяйте сторону и повторите ту же последовательность движений с другой стороны."
+    ],
+    "instructionsPl": [
+      "Przymocuj standardowy uchwyt do wieży i przesuń bloczek do najniższej pozycji.",
+      "Ustawiając się bokiem do liny, chwyć uchwyt jedną ręką i odejdź od wieży. Powinieneś być w odległości długości ramienia od bloczka, z napięciem ciężaru na linie. Wyciągnięta ręka powinna być w linii z liną.",
+      "Ustawiając stopy na szerokość barków, przysiądź i chwyć uchwyt oburącz. Ramiona powinny nadal być całkowicie wyprostowane.",
+      "Jednym ruchem pociągnij uchwyt w górę i w poprzek ciała, aż ramiona znajdą się w pełni wyprostowane nad głową.",
+      "Trzymaj plecy proste, a ramiona blisko ciała, obracając tylną stopę i prostując nogi, aby uzyskać pełny zakres ruchu.",
+      "Cofnij ramiona, a następnie tułów. Wróć do pozycji neutralnej powoli i kontrolowanie.",
+      "Powtarzaj do odmowy.",
+      "Następnie zmień pozycję i powtórz tę samą serię ruchów po przeciwnej stronie."
+    ]
   },
   {
     "id": "Standing_Cable_Wood_Chop",
@@ -26712,7 +27390,27 @@
     ],
     "level": "beginner",
     "force": "pull",
-    "mechanic": "compound"
+    "mechanic": "compound",
+    "instructionsRu": [
+      "Прикрепите стандартную рукоять к стойке и переместите блок в самое верхнее положение.",
+      "Развернувшись боком к тросу, возьмитесь одной рукой за рукоять и отойдите от стойки. Вы должны быть на расстоянии вытянутой руки от блока, с натяжением веса на тросе. Вытянутая рука должна быть на одной линии с тросом.",
+      "Поставив стопы на ширине плеч, потянитесь вверх свободной рукой и возьмитесь за рукоять обеими руками. Руки должны оставаться полностью выпрямленными.",
+      "Одним движением потяните рукоять вниз и через тело к переднему колену, разворачивая корпус.",
+      "Держите спину и руки прямыми, а корпус напряжённым, поворачивая заднюю стопу и сгибая колени, чтобы получить полную амплитуду движения.",
+      "Сохраняйте положение стоп и прямые руки. Вернитесь в нейтральное положение медленно и подконтрольно.",
+      "Повторяйте до отказа.",
+      "Затем поменяйте сторону и повторите ту же последовательность движений с другой стороны."
+    ],
+    "instructionsPl": [
+      "Przymocuj standardowy uchwyt do wieży i przesuń bloczek do najwyższej pozycji.",
+      "Ustawiając się bokiem do liny, chwyć uchwyt jedną ręką i odejdź od wieży. Powinieneś być w odległości długości ramienia od bloczka, z napięciem ciężaru na linie. Wyciągnięta ręka powinna być w linii z liną.",
+      "Ustawiając stopy na szerokość barków, sięgnij w górę drugą ręką i chwyć uchwyt oburącz. Ramiona powinny nadal być całkowicie wyprostowane.",
+      "Jednym ruchem pociągnij uchwyt w dół i w poprzek ciała do przedniego kolana, obracając tułów.",
+      "Trzymaj plecy i ramiona proste, a tułów napięty, obracając tylną stopę i uginając kolana, aby uzyskać pełny zakres ruchu.",
+      "Zachowaj postawę i proste ramiona. Wróć do pozycji neutralnej powoli i kontrolowanie.",
+      "Powtarzaj do odmowy.",
+      "Następnie zmień pozycję i powtórz tę samą serię ruchów po przeciwnej stronie."
+    ]
   },
   {
     "id": "Standing_Calf_Raises",
@@ -26734,7 +27432,21 @@
     ],
     "level": "beginner",
     "force": "push",
-    "mechanic": "isolation"
+    "mechanic": "isolation",
+    "instructionsRu": [
+      "Отрегулируйте мягкий рычаг тренажёра для икр под свой рост.",
+      "Разместите плечи под предусмотренными подушками и поставьте носки вперёд (или используйте любое из двух других положений, описанных в начале главы). Подушечки стоп должны быть зафиксированы на платформе, а пятки свисать с неё. Толкните рычаг вверх, разгибая таз и колени, пока корпус не выпрямится. Колени должны быть слегка согнуты, никогда не заблокированы полностью. Носки могут быть направлены вперёд, наружу или внутрь, как описано в начале главы. Это исходное положение.",
+      "Поднимите пятки на выдохе, разгибая голеностопы как можно выше и сокращая икры. Следите, чтобы колено оставалось неподвижным всё время. Сгибания не должно быть вовсе. Задержитесь в сокращённом положении на секунду, прежде чем опускаться обратно.",
+      "Медленно вернитесь в исходное положение на вдохе, опуская пятки, сгибая голеностопы, пока икры не растянутся.",
+      "Повторите рекомендованное количество повторений."
+    ],
+    "instructionsPl": [
+      "Dostosuj wyściełaną dźwignię maszyny do łydek do swojego wzrostu.",
+      "Umieść barki pod przewidzianymi podkładkami i ustaw palce stóp skierowane do przodu (lub użyj jednej z dwóch innych pozycji opisanych na początku rozdziału). Przody stóp powinny być oparte na podeście, a pięty zwisać poza nim. Wypchnij dźwignię w górę, prostując biodra i kolana, aż tułów będzie wyprostowany. Kolana powinny być lekko ugięte, nigdy całkowicie zablokowane. Palce stóp mogą być skierowane do przodu, na zewnątrz lub do wewnątrz, jak opisano na początku rozdziału. To pozycja wyjściowa.",
+      "Unieś pięty, wydychając powietrze, prostując kostki jak najwyżej i napinając łydki. Dbaj o to, aby kolano pozostało nieruchome przez cały czas. Nie powinno być żadnego zginania. Zatrzymaj się w napiętej pozycji na sekundę, zanim zaczniesz opuszczać się z powrotem.",
+      "Powoli wróć do pozycji wyjściowej, wdychając powietrze i opuszczając pięty, uginając kostki, aż łydki się rozciągną.",
+      "Powtórz zalecaną liczbę powtórzeń."
+    ]
   },
   {
     "id": "Standing_Concentration_Curl",
@@ -26757,7 +27469,19 @@
     ],
     "level": "beginner",
     "force": "pull",
-    "mechanic": "isolation"
+    "mechanic": "isolation",
+    "instructionsRu": [
+      "Взяв гантель в рабочую руку, наклонитесь вперёд. Позвольте рабочей руке свисать перпендикулярно полу, локоть направлен наружу. Это исходное положение.",
+      "Согните локоть, поднимая вес, удерживая плечо неподвижным. В верхней точке повторения напрягите бицепс и сделайте паузу.",
+      "Опустите гантель обратно в исходное положение.",
+      "Повторите движение рекомендованное количество раз."
+    ],
+    "instructionsPl": [
+      "Trzymając hantlę w pracującej ręce, pochyl się do przodu. Pozwól pracującej ręce zwisać prostopadle do podłogi, z łokciem skierowanym na zewnątrz. To pozycja wyjściowa.",
+      "Ugnij łokieć, podnosząc ciężar, trzymając ramię nieruchomo. W górnej fazie powtórzenia napnij biceps i zatrzymaj się.",
+      "Opuść hantlę z powrotem do pozycji wyjściowej.",
+      "Powtórz ruch zalecaną liczbę razy."
+    ]
   },
   {
     "id": "Standing_Dumbbell_Calf_Raise",
@@ -26778,7 +27502,19 @@
     ],
     "level": "intermediate",
     "force": "push",
-    "mechanic": "isolation"
+    "mechanic": "isolation",
+    "instructionsRu": [
+      "Встаньте прямо, держа две гантели в опущенных вдоль тела руках. Поставьте подушечки стоп на устойчивую деревянную подставку (высотой около 5-7 см), пятки свисают и касаются пола. Это исходное положение.",
+      "Носки направлены прямо (для равномерной нагрузки), внутрь (для акцента на внешнюю головку) или наружу (для акцента на внутреннюю головку), поднимите пятки от пола на выдохе, сокращая икры. Задержитесь в верхней точке сокращения на секунду.",
+      "На вдохе вернитесь в исходное положение, медленно опуская пятки.",
+      "Повторите рекомендованное количество раз."
+    ],
+    "instructionsPl": [
+      "Stań prosto, trzymając dwie hantle opuszczone wzdłuż ciała. Postaw przody stóp na stabilnej i solidnej drewnianej podstawce (o wysokości około 5-7 cm), pięty zwisają i dotykają podłogi. To pozycja wyjściowa.",
+      "Z palcami stóp skierowanymi prosto (aby obciążyć wszystkie części równomiernie), do wewnątrz (aby zaakcentować zewnętrzną głowę) lub na zewnątrz (aby zaakcentować wewnętrzną głowę), unieś pięty znad podłogi, wydychając powietrze i napinając łydki. Zatrzymaj się w górnym napięciu na sekundę.",
+      "Wdychając powietrze, wróć do pozycji wyjściowej, powoli opuszczając pięty.",
+      "Powtórz zalecaną liczbę razy."
+    ]
   },
   {
     "id": "Standing_Dumbbell_Press",
@@ -26800,7 +27536,17 @@
     ],
     "level": "beginner",
     "force": "push",
-    "mechanic": "compound"
+    "mechanic": "compound",
+    "instructionsRu": [
+      "Стоя на ширине плеч, возьмите по гантели в каждую руку. Поднимите гантели на уровень головы, локти в стороны примерно под углом 90 градусов. Это исходное положение.",
+      "Сохраняя строгую технику без помощи ног и отклонения назад, разогните руки в локтях, поднимая гантели вместе прямо над головой.",
+      "Сделайте паузу и медленно верните вес в исходное положение."
+    ],
+    "instructionsPl": [
+      "Stojąc ze stopami rozstawionymi na szerokość barków, weź hantlę w każdą rękę. Unieś hantle na wysokość głowy, łokcie na zewnątrz, pod kątem około 90 stopni. To pozycja wyjściowa.",
+      "Zachowując ścisłą technikę, bez pomocy nóg i bez odchylania się do tyłu, wyprostuj ramiona w łokciach, unosząc hantle razem bezpośrednio nad głowę.",
+      "Zatrzymaj się i powoli wróć z ciężarem do pozycji wyjściowej."
+    ]
   },
   {
     "id": "Standing_Dumbbell_Reverse_Curl",
@@ -26823,7 +27569,19 @@
     ],
     "level": "intermediate",
     "force": "pull",
-    "mechanic": "isolation"
+    "mechanic": "isolation",
+    "instructionsRu": [
+      "Для начала встаньте прямо, держа по гантели в каждой руке пронированным хватом (ладони вниз). Руки должны быть полностью выпрямлены, стопы на ширине плеч. Это исходное положение.",
+      "Удерживая плечи неподвижными, сгибайте руки, сокращая бицепсы на выдохе. Должны двигаться только предплечья. Продолжайте движение, пока бицепсы полностью не сократятся, а гантели не окажутся на уровне плеч. Задержитесь в сокращённом положении на секунду, напрягая мышцу.",
+      "Медленно верните гантели в исходное положение на вдохе.",
+      "Повторите рекомендованное количество повторений."
+    ],
+    "instructionsPl": [
+      "Na początek stań prosto, trzymając hantlę w każdej ręce chwytem pronacyjnym (dłonie skierowane w dół). Ramiona powinny być całkowicie wyprostowane, a stopy rozstawione na szerokość barków. To pozycja wyjściowa.",
+      "Trzymając ramiona nieruchomo, zginaj ręce, napinając biceps, wydychając powietrze. Powinny poruszać się tylko przedramiona. Kontynuuj ruch, aż biceps będzie w pełni napięty, a hantle znajdą się na wysokości barków. Zatrzymaj się w napiętej pozycji na sekundę, napinając mięsień.",
+      "Powoli wróć z hantlami do pozycji wyjściowej, wdychając powietrze.",
+      "Powtórz zalecaną liczbę powtórzeń."
+    ]
   },
   {
     "id": "Standing_Dumbbell_Straight-Arm_Front_Delt_Raise_Above_Head",
@@ -26845,7 +27603,21 @@
     ],
     "level": "intermediate",
     "force": "push",
-    "mechanic": "isolation"
+    "mechanic": "isolation",
+    "instructionsRu": [
+      "Держите гантели перед бёдрами, ладони обращены к бёдрам.",
+      "Держите руки прямыми с небольшим изгибом в локтях, но зафиксированными. Это исходное положение.",
+      "Поднимите гантели полукруглым движением на длину вытянутых рук над головой, выдыхая при этом.",
+      "Медленно вернитесь в исходное положение по той же траектории, вдыхая при этом.",
+      "Повторите рекомендованное количество повторений."
+    ],
+    "instructionsPl": [
+      "Trzymaj hantle przed udami, dłońmi skierowanymi w stronę ud.",
+      "Trzymaj ramiona proste, z lekkim ugięciem w łokciach, ale zablokowane. To pozycja wyjściowa.",
+      "Unieś hantle ruchem półokręgu na długość wyprostowanych ramion nad głowę, wydychając przy tym powietrze.",
+      "Powoli wróć do pozycji wyjściowej tą samą trasą, wdychając przy tym powietrze.",
+      "Powtórz zalecaną liczbę powtórzeń."
+    ]
   },
   {
     "id": "Standing_Dumbbell_Triceps_Extension",
@@ -26867,7 +27639,21 @@
     ],
     "level": "beginner",
     "force": "push",
-    "mechanic": "isolation"
+    "mechanic": "isolation",
+    "instructionsRu": [
+      "Для начала встаньте, держа гантель обеими руками. Стопы должны быть на ширине плеч. Медленно возьмитесь обеими руками за гантель и поднимите её над головой, пока обе руки не будут полностью выпрямлены.",
+      "Вес должен лежать на ладонях, а большие пальцы обхватывать его вокруг. Ладони должны быть направлены к потолку. Это исходное положение.",
+      "Удерживая плечи близко к голове, локти внутрь и перпендикулярно полу, опустите вес полукруглым движением за голову, пока предплечья не коснутся бицепсов. Совет: плечи должны оставаться неподвижными, движутся только предплечья. Вдыхайте, выполняя этот шаг.",
+      "Вернитесь в исходное положение, поднимая гантель усилием трицепсов. Выдыхайте, выполняя этот шаг.",
+      "Повторите рекомендованное количество повторений."
+    ],
+    "instructionsPl": [
+      "Na początek stań, trzymając hantlę obiema rękami. Stopy powinny być rozstawione na szerokość barków. Powoli chwyć hantlę obiema rękami i unieś ją nad głowę, aż obie ręce będą całkowicie wyprostowane.",
+      "Ciężar powinien spoczywać w dłoniach, z kciukami wokół niego. Dłonie powinny być skierowane w stronę sufitu. To pozycja wyjściowa.",
+      "Trzymając ramiona blisko głowy, łokcie skierowane do wewnątrz i prostopadle do podłogi, opuść ciężar ruchem półokręgu za głowę, aż przedramiona dotkną bicepsów. Wskazówka: ramiona powinny pozostać nieruchome, poruszają się tylko przedramiona. Wdychaj powietrze, wykonując ten krok.",
+      "Wróć do pozycji wyjściowej, unosząc hantlę siłą tricepsów. Wydychaj powietrze, wykonując ten krok.",
+      "Powtórz zalecaną liczbę powtórzeń."
+    ]
   },
   {
     "id": "Standing_Dumbbell_Upright_Row",
@@ -26891,7 +27677,19 @@
     ],
     "level": "beginner",
     "force": "pull",
-    "mechanic": "compound"
+    "mechanic": "compound",
+    "instructionsRu": [
+      "Возьмите по гантели в каждую руку пронированным хватом (ладони вперёд), чуть уже ширины плеч. Гантели должны лежать на бёдрах. Руки должны быть выпрямлены с небольшим изгибом в локтях, а спина прямая. Это исходное положение.",
+      "Используйте боковые дельты, чтобы поднять гантели на выдохе. Гантели должны двигаться близко к телу вверх, а движение должны вести локти. Продолжайте тянуть их вверх, пока они почти не коснутся подбородка. Совет: движение должны вести локти. Поднимая гантели, локти должны всегда быть выше предплечий. Также держите корпус неподвижным и сделайте паузу на секунду в верхней точке движения.",
+      "Медленно опустите гантели обратно в исходное положение. Вдыхайте, выполняя эту часть движения.",
+      "Повторите рекомендованное количество повторений."
+    ],
+    "instructionsPl": [
+      "Chwyć hantlę w każdej ręce chwytem pronacyjnym (dłonie skierowane do przodu), nieco węziej niż szerokość barków. Hantle powinny spoczywać na udach. Ramiona powinny być wyprostowane, z lekkim ugięciem w łokciach, a plecy proste. To pozycja wyjściowa.",
+      "Użyj bocznych mięśni naramiennych, aby unieść hantle, wydychając powietrze. Hantle powinny poruszać się blisko ciała w górę, a ruch powinny prowadzić łokcie. Kontynuuj podciąganie, aż niemal dotkną podbródka. Wskazówka: ruch powinny prowadzić łokcie. Podczas podciągania hantli łokcie powinny zawsze być wyżej niż przedramiona. Utrzymuj również tułów nieruchomo i zrób sekundową przerwę w górnej fazie ruchu.",
+      "Powoli opuść hantle z powrotem do pozycji wyjściowej. Wdychaj powietrze podczas wykonywania tej części ruchu.",
+      "Powtórz zalecaną liczbę powtórzeń."
+    ]
   },
   {
     "id": "Standing_Elevated_Quad_Stretch",
@@ -26911,7 +27709,17 @@
     ],
     "level": "beginner",
     "force": "static",
-    "mechanic": null
+    "mechanic": null,
+    "instructionsRu": [
+      "Начните, встав спиной на расстоянии около 60-90 см от скамьи или ступени.",
+      "Отведите одну ногу назад и поставьте стопу на ступень, опираясь на подъём стопы или её носок, в зависимости от того, что удобнее.",
+      "Держите опорное колено слегка согнутым и не позволяйте ему выходить за носок. Смените сторону."
+    ],
+    "instructionsPl": [
+      "Zacznij, stając plecami w odległości około 60-90 cm od ławki lub stopnia.",
+      "Odsuń jedną nogę do tyłu i oprzyj stopę na stopniu, opierając się na podbiciu lub przodzie stopy, w zależności od tego, co jest wygodniejsze.",
+      "Trzymaj podporowe kolano lekko ugięte i nie pozwalaj mu wychodzić poza palce stopy. Zmień stronę."
+    ]
   },
   {
     "id": "Standing_Front_Barbell_Raise_Over_Head",
@@ -26933,7 +27741,21 @@
     ],
     "level": "intermediate",
     "force": "push",
-    "mechanic": "isolation"
+    "mechanic": "isolation",
+    "instructionsRu": [
+      "Для начала встаньте прямо, держа гриф в руках. Возьмитесь за гриф ладонями вниз, хватом чуть уже ширины плеч.",
+      "Стопы должны быть на ширине плеч. Локти должны быть слегка согнуты. Это исходное положение.",
+      "Поднимите гриф вверх, пока он не окажется прямо над головой, выдыхая при этом. Следите, чтобы локти оставались слегка согнутыми на протяжении всего повторения.",
+      "Почувствовав сокращение, начните опускать гриф обратно в исходное положение на вдохе.",
+      "Повторите рекомендованное количество повторений."
+    ],
+    "instructionsPl": [
+      "Na początek stań prosto, trzymając sztangę w rękach. Chwyć sztangę dłońmi skierowanymi w dół, chwytem nieco węższym niż szerokość barków.",
+      "Stopy powinny być rozstawione na szerokość barków. Łokcie powinny być lekko ugięte. To pozycja wyjściowa.",
+      "Unieś sztangę w górę, aż znajdzie się bezpośrednio nad głową, wydychając przy tym powietrze. Dbaj o to, aby łokcie pozostały lekko ugięte przez całe powtórzenie.",
+      "Gdy poczujesz napięcie, zacznij opuszczać sztangę z powrotem do pozycji wyjściowej, wdychając powietrze.",
+      "Powtórz zalecaną liczbę powtórzeń."
+    ]
   },
   {
     "id": "Standing_Gastrocnemius_Calf_Stretch",
@@ -26955,7 +27777,17 @@
     ],
     "level": "beginner",
     "force": "static",
-    "mechanic": null
+    "mechanic": null,
+    "instructionsRu": [
+      "Поставьте правую пятку на ступень, колено выпрямлено, и наклонитесь вперёд, чтобы схватить правый носок правой рукой. Левое колено должно быть слегка согнуто, а спина прямая.",
+      "Перенесите вес на левую ногу и положите левую руку на левое бедро.",
+      "Потяните носки правой стопы к колену, пока не почувствуете растяжение в икре."
+    ],
+    "instructionsPl": [
+      "Postaw prawą piętę na stopniu, z wyprostowanym kolanem, i pochyl się do przodu, aby chwycić prawą ręką palce prawej stopy. Lewe kolano powinno być lekko ugięte, a plecy proste.",
+      "Przenieś ciężar na lewą nogę i połóż lewą dłoń na lewym udzie.",
+      "Pociągnij palce prawej stopy w kierunku kolana, aż poczujesz rozciąganie w łydce."
+    ]
   },
   {
     "id": "Standing_Hamstring_and_Calf_Stretch",
@@ -26975,7 +27807,17 @@
     ],
     "level": "beginner",
     "force": "static",
-    "mechanic": null
+    "mechanic": null,
+    "instructionsRu": [
+      "Начните, обвязав ремень, ленту или верёвку вокруг одной стопы. Стоя, поставьте эту стопу вперёд.",
+      "Согните заднюю ногу, сохраняя переднюю прямой. Теперь поднимите носки передней стопы от пола и наклонитесь вперёд.",
+      "Используя ремень, потяните за верхнюю часть стопы, чтобы усилить растяжение в икре. Удерживайте 10-20 секунд и повторите для другой стопы."
+    ],
+    "instructionsPl": [
+      "Zacznij, owijając pasek, taśmę lub linę wokół jednej stopy. Stojąc, ustaw tę stopę do przodu.",
+      "Ugnij tylną nogę, utrzymując przednią prostą. Teraz unieś palce przedniej stopy znad podłogi i pochyl się do przodu.",
+      "Za pomocą paska pociągnij za wierzch stopy, aby zwiększyć rozciąganie w łydce. Przytrzymaj przez 10-20 sekund i powtórz z drugą stopą."
+    ]
   },
   {
     "id": "Standing_Hip_Circles",
@@ -26998,7 +27840,19 @@
     ],
     "level": "beginner",
     "force": "pull",
-    "mechanic": "isolation"
+    "mechanic": "isolation",
+    "instructionsRu": [
+      "Начните, стоя на одной ноге, держась за вертикальную опору.",
+      "Поднимите свободное колено до угла 90 градусов. Это исходное положение.",
+      "Раскройте тазобедренный сустав как можно шире, пытаясь описать коленом большой круг.",
+      "Выполняйте это движение медленно нужное количество повторений, затем повторите на другой стороне."
+    ],
+    "instructionsPl": [
+      "Zacznij, stojąc na jednej nodze, trzymając się pionowego wsparcia.",
+      "Unieś wolne kolano do kąta 90 stopni. To pozycja wyjściowa.",
+      "Otwórz biodro tak szeroko, jak to możliwe, próbując zakreślić kolanem duży okrąg.",
+      "Wykonuj ten ruch powoli przez określoną liczbę powtórzeń, a następnie powtórz po drugiej stronie."
+    ]
   },
   {
     "id": "Standing_Hip_Flexors",
@@ -27017,7 +27871,15 @@
     ],
     "level": "beginner",
     "force": "static",
-    "mechanic": "isolation"
+    "mechanic": "isolation",
+    "instructionsRu": [
+      "Встаньте прямо с вертикальным позвоночником, левая стопа немного впереди правой.",
+      "Согните оба колена и приподнимите заднюю пятку от пола, продавливая правое бедро вперёд. В этом положении сложно получить глубокое растяжение, поскольку трудно расслабить сгибатель бедра и одновременно стоять на нём. Смените сторону."
+    ],
+    "instructionsPl": [
+      "Stań prosto z pionowym kręgosłupem, lewa stopa nieco przed prawą.",
+      "Ugnij oba kolana i unieś tylną piętę znad podłogi, przesuwając prawe biodro do przodu. W tej pozycji trudno uzyskać głębokie rozciąganie, ponieważ trudno jest rozluźnić zginacz biodra i jednocześnie na nim stać. Zmień stronę."
+    ]
   },
   {
     "id": "Standing_Inner-Biceps_Curl",
@@ -27041,7 +27903,25 @@
     ],
     "level": "intermediate",
     "force": "pull",
-    "mechanic": "isolation"
+    "mechanic": "isolation",
+    "instructionsRu": [
+      "Встаньте, держа по гантели в каждой руке на длине вытянутых рук. Локти должны быть близко к корпусу. Ноги должны быть примерно на ширине плеч.",
+      "Разверните ладони внутрь в нейтральное положение. Это исходное положение.",
+      "Удерживая плечи неподвижными, разведите руки в стороны, сокращая бицепсы на выдохе. Запястья должны разворачиваться так, чтобы при полном подъёме гантелей у вас был супинированный хват (ладони вверх).",
+      "Должны двигаться только предплечья. Продолжайте движение, пока бицепсы полностью не сократятся, а гантели не окажутся на уровне плеч. Совет: держите предплечья на одной линии с внешними дельтами.",
+      "Задержитесь в сокращённом положении на секунду, напрягая бицепсы.",
+      "Медленно верните гантели в исходное положение на вдохе. Не забывайте разворачивать запястья при опускании веса, чтобы вернуться к нейтральному хвату.",
+      "Повторите рекомендованное количество повторений."
+    ],
+    "instructionsPl": [
+      "Stań, trzymając hantlę w każdej ręce na wyciągniętych ramionach. Łokcie powinny być blisko tułowia. Nogi powinny być rozstawione mniej więcej na szerokość barków.",
+      "Obróć dłonie do wewnątrz, do pozycji neutralnej. To pozycja wyjściowa.",
+      "Trzymając ramiona nieruchomo, rozłóż ręce na boki, napinając biceps, wydychając powietrze. Nadgarstki powinny się obracać tak, aby przy pełnym uniesieniu hantli mieć chwyt supinacyjny (dłonie skierowane do góry).",
+      "Powinny poruszać się tylko przedramiona. Kontynuuj ruch, aż biceps będzie w pełni napięty, a hantle znajdą się na wysokości barków. Wskazówka: trzymaj przedramiona w linii z zewnętrznymi mięśniami naramiennymi.",
+      "Zatrzymaj się w napiętej pozycji na sekundę, napinając biceps.",
+      "Powoli wróć z hantlami do pozycji wyjściowej, wdychając powietrze. Pamiętaj, aby obracać nadgarstki podczas opuszczania ciężaru, aby wrócić do neutralnego chwytu.",
+      "Powtórz zalecaną liczbę powtórzeń."
+    ]
   },
   {
     "id": "Standing_Lateral_Stretch",
@@ -27062,7 +27942,19 @@
     ],
     "level": "beginner",
     "force": "static",
-    "mechanic": null
+    "mechanic": null,
+    "instructionsRu": [
+      "Примите стойку чуть шире бёдер, колени слегка согнуты.",
+      "Положите правую руку на правое бедро, чтобы поддержать позвоночник.",
+      "Поднимите левую руку вертикально вверх и положите левую ладонь за голову. Удерживайте её там, наклоняя корпус вправо.",
+      "Равномерно распределяйте вес между обеими ногами (не переносите вес на левое бедро). Смените сторону."
+    ],
+    "instructionsPl": [
+      "Przyjmij postawę nieco szerszą niż biodra, kolana lekko ugięte.",
+      "Połóż prawą dłoń na prawym biodrze, aby wesprzeć kręgosłup.",
+      "Unieś lewe ramię pionowo w górę i połóż lewą dłoń za głową. Trzymaj ją tam, pochylając tułów w prawo.",
+      "Rozkładaj ciężar równomiernie na obie nogi (nie opieraj się na lewym biodrze). Zmień stronę."
+    ]
   },
   {
     "id": "Standing_Leg_Curl",
@@ -27084,7 +27976,21 @@
     ],
     "level": "beginner",
     "force": "pull",
-    "mechanic": "isolation"
+    "mechanic": "isolation",
+    "instructionsRu": [
+      "Отрегулируйте рычаг тренажёра под свой рост и наклоните торс вперёд под углом примерно 30-45 градусов (поскольку такое положение лучше подходит для нагрузки на бицепс бедра), разместив подушку рычага на задней части правой ноги (чуть ниже икры), а переднюю часть правой ноги — на подушке тренажёра.",
+      "Сохраняя наклон торса вперёд, убедитесь, что нога полностью выпрямлена, и возьмитесь за боковые рукояти тренажёра. Носки должны быть направлены прямо. Это исходное положение.",
+      "На выдохе согните правую ногу как можно дальше, не отрывая бедро от подушки. Достигнув полного сокращения, задержитесь на секунду.",
+      "На вдохе верните ноги в исходное положение. Повторите рекомендованное количество повторений.",
+      "Выполните то же упражнение для левой ноги."
+    ],
+    "instructionsPl": [
+      "Dostosuj dźwignię maszyny do swojego wzrostu i pochyl tułów w pasie do przodu pod kątem około 30-45 stopni (ponieważ pozycja pod kątem lepiej angażuje mięśnie dwugłowe uda), z podkładką dźwigni z tyłu prawej nogi (kilka centymetrów poniżej łydki), a przednią częścią prawej nogi na podkładce maszyny.",
+      "Utrzymując tułów pochylony do przodu, upewnij się, że noga jest w pełni wyprostowana, i chwyć boczne uchwyty maszyny. Ustaw palce stóp prosto. To pozycja wyjściowa.",
+      "Wydychając powietrze, ugnij prawą nogę jak najdalej, nie odrywając uda od podkładki. Po osiągnięciu pełnego napięcia zatrzymaj się na sekundę.",
+      "Wdychając powietrze, wróć nogami do pozycji wyjściowej. Powtórz zalecaną liczbę powtórzeń.",
+      "Wykonaj to samo ćwiczenie dla lewej nogi."
+    ]
   },
   {
     "id": "Standing_Long_Jump",
@@ -27109,7 +28015,19 @@
     ],
     "level": "beginner",
     "force": "push",
-    "mechanic": "compound"
+    "mechanic": "compound",
+    "instructionsRu": [
+      "Это упражнение лучше всего выполнять на песке или другой мягкой поверхности для приземления. Убедитесь, что вы можете измерить расстояние. Встаньте в положение полуприседа, стопы на ширине плеч.",
+      "Используя мощный мах руками и предварительное движение ногами, прыгните вперёд как можно дальше.",
+      "Постарайтесь приземлиться, вытянув стопы вперёд себя, дотягиваясь ногами как можно дальше.",
+      "Измерьте расстояние от точки приземления до стартовой точки и фиксируйте результаты."
+    ],
+    "instructionsPl": [
+      "To ćwiczenie najlepiej wykonywać na piasku lub innej miękkiej powierzchni do lądowania. Upewnij się, że możesz zmierzyć odległość. Stań w pozycji częściowego przysiadu, stopy na szerokość barków.",
+      "Wykorzystując mocny wymach ramion i wstępny ruch nóg, skocz do przodu tak daleko, jak potrafisz.",
+      "Postaraj się wylądować z wysuniętymi stopami przed sobą, sięgając nogami jak najdalej.",
+      "Zmierz odległość od punktu lądowania do punktu startowego i zapisuj wyniki."
+    ]
   },
   {
     "id": "Standing_Low-Pulley_Deltoid_Raise",
@@ -27134,7 +28052,23 @@
     ],
     "level": "beginner",
     "force": "push",
-    "mechanic": "isolation"
+    "mechanic": "isolation",
+    "instructionsRu": [
+      "Начните, встав справа от нижнего блока. Левой рукой потянитесь через тело и возьмитесь за одинарную рукоять, прикреплённую к нижнему блоку, пронированным хватом (ладони вниз). Держите руку перед собой. Правой рукой держитесь за тренажёр для лучшей опоры и равновесия.",
+      "Убедитесь, что спина прямая, а стопы на ширине плеч. Это исходное положение.",
+      "Начните вести левую руку через тело, поднимая её до уровня плеча на выдохе.",
+      "Задержитесь в сокращении на секунду и медленно опустите рукоять обратно в исходное положение на вдохе.",
+      "Повторите рекомендованное количество повторений.",
+      "Смените руку и повторите упражнение."
+    ],
+    "instructionsPl": [
+      "Zacznij, stając po prawej stronie dolnego bloczka. Lewą ręką sięgnij w poprzek ciała i chwyć pojedynczy uchwyt przymocowany do dolnego bloczka, chwytem pronacyjnym (dłonie skierowane w dół). Trzymaj rękę przed sobą. Prawą ręką trzymaj się maszyny dla lepszego wsparcia i równowagi.",
+      "Upewnij się, że plecy są proste, a stopy rozstawione na szerokość barków. To pozycja wyjściowa.",
+      "Zacznij prowadzić lewą rękę w poprzek ciała, unosząc ją do wysokości barku, wydychając powietrze.",
+      "Zatrzymaj się w napięciu na sekundę i powoli opuść uchwyt z powrotem do pozycji wyjściowej, wdychając powietrze.",
+      "Powtórz zalecaną liczbę powtórzeń.",
+      "Zmień rękę i powtórz ćwiczenie."
+    ]
   },
   {
     "id": "Standing_Low-Pulley_One-Arm_Triceps_Extension",
