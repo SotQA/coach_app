@@ -101,7 +101,7 @@ export default function StudentDetails() {
   const weeklyProg = useMemo(() => weeklyProgress(logs, latestGroup, planById), [logs, latestGroup, planById]);
   const assignedPct = useMemo(() => assignedProgramBarPercent(compliancePct, weeklyProg), [compliancePct, weeklyProg]);
   const avgDurationSeconds = useMemo(() => averageRecentDurationSeconds(logs), [logs]);
-  const avgDurationLabel = useMemo(() => (avgDurationSeconds != null ? formatDurationForHistory(avgDurationSeconds) : null), [avgDurationSeconds]);
+  const avgDurationLabel = useMemo(() => (avgDurationSeconds != null ? formatDurationForHistory(avgDurationSeconds, t) : null), [avgDurationSeconds, t]);
 
   if (loading) {
     return (

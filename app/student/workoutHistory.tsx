@@ -147,7 +147,7 @@ export default function WorkoutHistory() {
           >
             <View style={{ flex: 1 }}>
               <Text style={{ ...Typography.title, fontSize: FontSizes.h2 }}>
-                History
+                {t("historyTitle")}
               </Text>
               <Text
                 style={{

@@ -34,7 +34,7 @@ function WorkoutLogCardImpl({ log, expanded, onToggle }: WorkoutLogCardProps) {
   const { t, locale } = useI18n();
   const vol = sessionVolumeKg(log);
   const prs = countPrs(log);
-  const dur = formatDurationForHistory(log.durationSeconds);
+  const dur = formatDurationForHistory(log.durationSeconds, t);
 
   return (
     <Pressable

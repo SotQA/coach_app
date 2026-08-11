@@ -27,6 +27,7 @@ import { useUnits } from "../../context/UnitsContext";
 import { toKg, toUnit } from "../../utils/units";
 import type { WeightUnit } from "../../context/UnitsContext";
 import { normalizeExerciseName } from "../../utils/workoutMetrics";
+import { formatWeekday } from "../../utils/formatLocale";
 
 type ExerciseDraft = { sets: SetDraft[] };
 
@@ -104,7 +105,7 @@ export default function WorkoutExecution() {
   const activeWorkout = useActiveWorkoutSession();
   const { hydrated } = activeWorkout;
   const elapsedSeconds = useElapsedSeconds();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const authUserId = authUser?.id;
 
   const params = useLocalSearchParams<{
@@ -324,9 +325,9 @@ export default function WorkoutExecution() {
           <Text style={S.planMeta}>
             {(authUser?.firstName || authUser?.lastName
               ? `${authUser?.firstName ?? ""} ${authUser?.lastName ?? ""}`.trim()
-              : "You") +
+              : t("youFallback")) +
               " • " +
-              new Date().toLocaleDateString(undefined, { weekday: "short" })}
+              formatWeekday(locale)}
           </Text>
         </View>
 

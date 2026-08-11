@@ -207,7 +207,7 @@ export const ExerciseInput: FC<ExerciseInputProps> = ({
         </View>
 
         <View style={{ flex: 1, marginLeft: 4 }}>
-          <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("weightLabel")} (kg)</Text>
+          <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("weightLabel")} ({t("unitKg").toUpperCase()})</Text>
           <TextInput
             keyboardType="numeric"
             value={weightText}

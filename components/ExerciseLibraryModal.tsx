@@ -340,8 +340,8 @@ export function ExerciseLibraryModal({
   // ---------------------------------------------------------------------------
 
   const handleAddLocal = useCallback((exercise: LocalExercise) => {
-    togglePending(exercise.id, { name: exercise.name, exerciseDbId: exercise.id });
-  }, [togglePending]);
+    togglePending(exercise.id, { name: getExerciseName(exercise, locale), exerciseDbId: exercise.id });
+  }, [togglePending, locale]);
 
   // ---------------------------------------------------------------------------
   // Computed (Library tab)
