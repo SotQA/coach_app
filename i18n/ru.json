@@ -694,5 +694,9 @@
   "workoutNotFoundError": "Тренировка не найдена.",
   "notFoundError": "Не найдено.",
   "unitKg": "кг",
-  "unitLb": "фунт"
+  "unitLb": "фунт",
+  "noPlansYetTitle": "Пока нет планов",
+  "noPlansYetSubtitle": "Создайте свой первый план и начните тренироваться.",
+  "createPlanButton": "Создать план",
+  "noPersonalPlansYetSubtitle": "Создайте свой первый план, чтобы начать отслеживать собственные тренировки."
 }

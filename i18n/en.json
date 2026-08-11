@@ -695,5 +695,9 @@
   "workoutNotFoundError": "Workout not found.",
   "notFoundError": "Not found.",
   "unitKg": "kg",
-  "unitLb": "lb"
+  "unitLb": "lb",
+  "noPlansYetTitle": "No plans yet",
+  "noPlansYetSubtitle": "Create your first plan and start training.",
+  "createPlanButton": "Create Plan",
+  "noPersonalPlansYetSubtitle": "Create your first plan to start tracking your own training."
 }

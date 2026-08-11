@@ -295,11 +295,11 @@ export default function AthleteWorkoutsTab() {
           {!showHub ? (
             <View style={{ backgroundColor: Colors.card, borderRadius: Radius.lg, padding: Spacing.lg, borderWidth: 1, borderColor: Colors.border, alignItems: "center", marginBottom: Spacing.md }}>
               <Ionicons name="barbell-outline" size={40} color={Colors.textMuted} style={{ marginBottom: Spacing.sm }} />
-              <Text style={{ ...Typography.section, textAlign: "center", marginBottom: Spacing.xs }}>No plans yet</Text>
+              <Text style={{ ...Typography.section, textAlign: "center", marginBottom: Spacing.xs }}>{t("noPlansYetTitle")}</Text>
               <Text style={{ ...Typography.secondary, color: Colors.textMuted, textAlign: "center", marginBottom: Spacing.md }}>
-                Create your first plan and start training.
+                {t("noPlansYetSubtitle")}
               </Text>
-              <PrimaryButton title="Create Plan" onPress={() => router.push("/athlete/createPlan" as any)} />
+              <PrimaryButton title={t("createPlanButton")} onPress={() => router.push("/athlete/createPlan" as any)} />
             </View>
           ) : (
             <>
