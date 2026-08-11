@@ -392,7 +392,7 @@ export default function MyTrainingTab() {
                       <View style={{ flexDirection: "row", gap: Spacing.sm, marginTop: Spacing.md }}>
                         <View style={{ flex: 1 }}>
                           <PrimaryButton
-                            title="Details"
+                            title={t("details")}
                             variant="secondary"
                             onPress={() => router.push({ pathname: "/coach/workoutPlanDetail" as any, params: { workoutPlanId: plan.id } })}
                           />

@@ -14,6 +14,7 @@ import {
 import type { LogWithMeta } from "@/hooks/useWorkoutHistory";
 import { useUnits } from "@/context/UnitsContext";
 import { useI18n } from "@/context/I18nContext";
+import { getExerciseByName, getExerciseName } from "@/services/localExerciseService";
 
 interface WorkoutLogCardProps {
   log: LogWithMeta;
@@ -30,7 +31,7 @@ interface WorkoutLogCardProps {
  */
 function WorkoutLogCardImpl({ log, expanded, onToggle }: WorkoutLogCardProps) {
   const { formatWeight } = useUnits();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const vol = sessionVolumeKg(log);
   const prs = countPrs(log);
   const dur = formatDurationForHistory(log.durationSeconds);
@@ -206,6 +207,8 @@ function WorkoutLogCardImpl({ log, expanded, onToggle }: WorkoutLogCardProps) {
               typeof exRow.volume === "number" && Number.isFinite(exRow.volume)
                 ? exRow.volume
                 : computeExerciseVolumeFromLoggedSets(exRow.sets);
+            const localExercise = getExerciseByName(ex.name);
+            const displayName = localExercise ? getExerciseName(localExercise, locale) : ex.name;
             return (
               <View
                 key={`${log.id}-${ex.name}-${i}`}
@@ -220,7 +223,7 @@ function WorkoutLogCardImpl({ log, expanded, onToggle }: WorkoutLogCardProps) {
                   }}
                 >
                   <Text style={{ ...Typography.section, fontSize: 15 }}>
-                    {ex.name}
+                    {displayName}
                   </Text>
                   {exRow.isPr ? (
                     <Text

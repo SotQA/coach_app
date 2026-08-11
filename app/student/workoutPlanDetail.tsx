@@ -125,7 +125,7 @@ export default function WorkoutPlanDetail() {
             const lastLabel = lastResults && lastResults.length > 0
               ? lastResults.map((s) => {
                   const w = s.weight != null ? toUnit(s.weight, unit) : null;
-                  const wStr = w != null ? parseFloat(w.toFixed(2)).toString() : "BW";
+                  const wStr = w != null ? parseFloat(w.toFixed(2)).toString() : t("bodyweightAbbrev");
                   return `${wStr}×${s.reps}`;
                 }).join(", ")
               : null;
@@ -181,7 +181,7 @@ export default function WorkoutPlanDetail() {
         </View>
 
         <PrimaryButton
-          title="Start Workout"
+          title={t("startWorkout")}
           onPress={() =>
             startWorkout({
               workoutPlanId: plan.id,

@@ -15,6 +15,7 @@ import { ExerciseLibraryModal } from "../../components/ExerciseLibraryModal";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { ScreenLayout } from "../../components/ScreenLayout";
 import { useAuth } from "../../context/AuthContext";
+import { useI18n } from "../../context/I18nContext";
 import { exerciseTemplateService } from "../../services/exerciseTemplateService";
 import { workoutService } from "../../services/workoutService";
 import { Colors } from "../../theme/colors";
@@ -26,6 +27,7 @@ export default function AthletCreatePlan() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
+  const { t } = useI18n();
 
   const [planName, setPlanName] = useState("");
   const [note, setNote] = useState("");
@@ -67,15 +69,15 @@ export default function AthletCreatePlan() {
     setLoading(true);
     try {
       const name = planName.trim();
-      if (!name) throw new Error("Workout name is required.");
-      if (name.length > 50) throw new Error("Workout name must be at most 50 characters.");
-      if (note.trim().length > 500) throw new Error("Notes must be at most 500 characters.");
+      if (!name) throw new Error(t("workoutNameRequiredError"));
+      if (name.length > 50) throw new Error(t("workoutNameMaxLenError"));
+      if (note.trim().length > 500) throw new Error(t("notesMaxLenError"));
 
       const durationTrim = estimatedMinutes.trim();
       const durationNum =
         durationTrim === "" ? undefined : Math.max(0, Math.floor(Number(durationTrim)));
       if (durationTrim !== "" && !Number.isFinite(Number(durationTrim))) {
-        throw new Error("Estimated duration must be a number of minutes.");
+        throw new Error(t("estDurationMustBeNumberError"));
       }
 
       const sanitizedExercises: Exercise[] = exercises
@@ -93,12 +95,12 @@ export default function AthletCreatePlan() {
         }))
         .filter((e) => e.name.length > 0);
 
-      if (sanitizedExercises.length === 0) throw new Error("Add at least one exercise.");
+      if (sanitizedExercises.length === 0) throw new Error(t("addAtLeastOneExerciseError"));
 
       for (const ex of sanitizedExercises) {
-        if (!Number.isFinite(ex.sets) || ex.sets <= 0) throw new Error(`Sets for "${ex.name}" must be > 0.`);
+        if (!Number.isFinite(ex.sets) || ex.sets <= 0) throw new Error(t("setsMustBePositiveError", { name: ex.name }));
         if (ex.rpe !== null && (!Number.isFinite(ex.rpe) || ex.rpe < 1 || ex.rpe > 10)) {
-          throw new Error(`RPE for "${ex.name}" must be between 1 and 10.`);
+          throw new Error(t("rpeRangeError", { name: ex.name }));
         }
       }
 
@@ -120,7 +122,7 @@ export default function AthletCreatePlan() {
       await Promise.all(sanitizedExercises.map((e) => exerciseTemplateService.upsertNameIfNeeded(e.name)));
       router.replace("/athlete/workouts" as any);
     } catch (e: any) {
-      setError(e.message ?? "Failed to save plan.");
+      setError(e.message ?? t("failedToSavePlanError"));
     } finally {
       setLoading(false);
     }
@@ -144,7 +146,7 @@ export default function AthletCreatePlan() {
           ListHeaderComponent={
             <>
               <View style={{ marginBottom: Spacing.md }}>
-                <Text style={{ ...Typography.title, marginBottom: 4 }}>New Plan</Text>
+                <Text style={{ ...Typography.title, marginBottom: 4 }}>{t("newPlanTitle")}</Text>
               </View>
               <View
                 style={{
@@ -156,23 +158,23 @@ export default function AthletCreatePlan() {
                   marginBottom: Spacing.md,
                 }}
               >
-                <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Workout name</Text>
+                <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("workoutNameLabel")}</Text>
                 <TextInput
-                  placeholder="e.g. Push Day"
+                  placeholder={t("workoutNamePlaceholder")}
                   placeholderTextColor={Colors.textMuted}
                   value={planName}
-                  onChangeText={(t) => setPlanName(t.slice(0, 50))}
+                  onChangeText={(text) => setPlanName(text.slice(0, 50))}
                   style={{ borderWidth: 1, borderColor: Colors.border, padding: 12, borderRadius: Radius.md, marginBottom: Spacing.sm, color: Colors.text, backgroundColor: Colors.surface }}
                 />
                 <View style={{ flexDirection: "row", gap: Spacing.sm, marginBottom: Spacing.sm }}>
                   <View style={{ flex: 1 }}>
-                    <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Order</Text>
+                    <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("orderLabel")}</Text>
                     <TextInput
                       placeholder="0"
                       placeholderTextColor={Colors.textMuted}
                       value={String(order)}
-                      onChangeText={(t) => {
-                        const n = Number(t.trim().replace(/[^0-9]/g, ""));
+                      onChangeText={(text) => {
+                        const n = Number(text.trim().replace(/[^0-9]/g, ""));
                         setOrder(Number.isFinite(n) ? Math.max(0, n) : 0);
                       }}
                       keyboardType="number-pad"
@@ -180,7 +182,7 @@ export default function AthletCreatePlan() {
                     />
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Est. minutes</Text>
+                    <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("estMinutesLabel")}</Text>
                     <TextInput
                       placeholder="60"
                       placeholderTextColor={Colors.textMuted}
@@ -191,19 +193,19 @@ export default function AthletCreatePlan() {
                     />
                   </View>
                 </View>
-                <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Notes (optional)</Text>
+                <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("notesOptionalLabel")}</Text>
                 <TextInput
-                  placeholder="Goals, cues, constraints…"
+                  placeholder={t("notesPlaceholder")}
                   placeholderTextColor={Colors.textMuted}
                   value={note}
-                  onChangeText={(t) => setNote(t.slice(0, 500))}
+                  onChangeText={(text) => setNote(text.slice(0, 500))}
                   multiline
                   style={{ borderWidth: 1, borderColor: Colors.border, padding: 12, borderRadius: Radius.md, color: Colors.text, backgroundColor: Colors.surface, minHeight: 80 }}
                 />
               </View>
               <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: Spacing.sm }}>
-                <Text style={{ ...Typography.section, fontWeight: "900" }}>Exercises</Text>
-                <PrimaryButton title="+ Add Exercise" onPress={() => setLibraryOpen(true)} style={{ width: "auto", paddingHorizontal: Spacing.md }} />
+                <Text style={{ ...Typography.section, fontWeight: "900" }}>{t("exercisesHeading")}</Text>
+                <PrimaryButton title={t("addExerciseButton")} onPress={() => setLibraryOpen(true)} style={{ width: "auto", paddingHorizontal: Spacing.md }} />
               </View>
             </>
           }
@@ -253,7 +255,7 @@ export default function AthletCreatePlan() {
       </KeyboardAvoidingView>
 
       <View style={{ position: "absolute", left: 0, right: 0, bottom: 0, padding: Spacing.md, paddingBottom: Math.max(insets.bottom, Spacing.md), backgroundColor: Colors.bg, borderTopWidth: 1, borderTopColor: Colors.border }}>
-        {loading ? <ActivityIndicator /> : <PrimaryButton title="Save Plan" onPress={handleSave} />}
+        {loading ? <ActivityIndicator /> : <PrimaryButton title={t("savePlanButton")} onPress={handleSave} />}
       </View>
 
       {user ? (

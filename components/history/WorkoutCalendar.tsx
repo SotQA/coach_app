@@ -97,7 +97,7 @@ function WorkoutCalendarImpl({
               fontWeight: "700",
             }}
           >
-            Today
+            {t("today")}
           </Text>
         </Pressable>
         <Pressable
@@ -253,7 +253,7 @@ function WorkoutCalendarImpl({
                 fontWeight: "600",
               }}
             >
-              Less
+              {t("heatmapLess")}
             </Text>
             {[0.15, 0.35, 0.55, 0.85].map((a, i) => (
               <View
@@ -275,7 +275,7 @@ function WorkoutCalendarImpl({
                 fontWeight: "600",
               }}
             >
-              More
+              {t("heatmapMore")}
             </Text>
           </View>
           <View
@@ -308,7 +308,7 @@ function WorkoutCalendarImpl({
                   fontWeight: "600",
                 }}
               >
-                Completed
+                {t("completedLegend")}
               </Text>
             </View>
           </View>

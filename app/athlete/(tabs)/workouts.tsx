@@ -365,7 +365,7 @@ export default function AthleteWorkoutsTab() {
                       <View style={{ flexDirection: "row", gap: Spacing.sm, marginTop: Spacing.md }}>
                         <View style={{ flex: 1 }}>
                           <PrimaryButton
-                            title="Details"
+                            title={t("details")}
                             variant="secondary"
                             onPress={() => router.push({ pathname: "/athlete/workoutPlanDetail" as any, params: { workoutPlanId: plan.id } })}
                           />

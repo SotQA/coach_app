@@ -31,6 +31,17 @@ export function getExerciseById(id: string): LocalExercise | null {
   return ALL_EXERCISES.find(e => e.id === id) ?? null;
 }
 
+/**
+ * Case-insensitive lookup by English name. Used to localize exercise names
+ * in places that only stored the raw name string (e.g. logged workout
+ * history), which predate the exerciseDbId-based lookups.
+ */
+export function getExerciseByName(name: string): LocalExercise | null {
+  const q = name.trim().toLowerCase();
+  if (!q) return null;
+  return ALL_EXERCISES.find(e => e.name.toLowerCase() === q) ?? null;
+}
+
 export type ExerciseFilter = {
   query?: string;
   equipment?: string | null;
