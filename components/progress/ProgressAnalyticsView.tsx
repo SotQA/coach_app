@@ -9,6 +9,7 @@ import { Typography, FontSizes } from "../../theme/typography";
 import { NotificationBellButton } from "../NotificationBellButton";
 import { ScreenLayout } from "../ScreenLayout";
 import { Dropdown } from "../Dropdown";
+import { useI18n } from "../../context/I18nContext";
 import { normalizeExerciseName } from "../../utils/workoutMetrics";
 import {
   type TimeRangePreset,
@@ -121,6 +122,7 @@ export function ProgressAnalyticsView({
   coachContext,
   coachProgressDefaults = null,
 }: ProgressAnalyticsViewProps) {
+  const { t } = useI18n();
   const { width: windowWidth } = useWindowDimensions();
   const chartWidth = Math.max(200, windowWidth - Spacing.md * 4);
 
@@ -229,13 +231,11 @@ export function ProgressAnalyticsView({
     [variant, weekly1RM, volLoad, compliance, compDelta]
   );
 
-  const screenTitle = variant === "coach" ? "Progress analytics" : "Progress";
+  const screenTitle = variant === "coach" ? t("progressAnalytics") : t("progress");
   const hasEnoughSessions = logs.length >= 2;
 
   const emptyBody =
-    variant === "coach"
-      ? "Student needs at least 2 logged sessions to show trends. Complete workouts from the student app to build history."
-      : "You need at least 2 logged workouts to see trends. Finish a couple of sessions to unlock charts and insights.";
+    variant === "coach" ? t("noProgressDataBodyCoach") : t("noProgressDataBodyStudent");
 
   const showStudentPicker = variant === "coach" && coachContext != null;
   const students = coachContext?.students ?? [];
@@ -247,10 +247,10 @@ export function ProgressAnalyticsView({
     [students]
   );
   const exerciseOptions = useMemo(
-    () => [{ value: ALL_EXERCISES, label: "All exercises" }, ...exerciseNames.map((n) => ({ value: n, label: n }))],
-    [exerciseNames]
+    () => [{ value: ALL_EXERCISES, label: t("allExercisesOption") }, ...exerciseNames.map((n) => ({ value: n, label: n }))],
+    [exerciseNames, t]
   );
-  const rangeOptions = useMemo(() => TIME_PRESETS.map((p) => ({ value: p.key, label: p.label })), []);
+  const rangeOptions = useMemo(() => TIME_PRESETS.map((p) => ({ value: p.key, label: t(p.labelKey) })), [t]);
 
   return (
     <ScreenLayout>
@@ -271,22 +271,22 @@ export function ProgressAnalyticsView({
           </View>
           {variant === "student" ? (
             <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: Spacing.sm }}>
-              Your volume, strength trends, and exercise insights.
+              {t("progressStudentSubtitle")}
             </Text>
           ) : null}
 
           {showStudentPicker ? (
             <Dropdown
-              label="Student"
+              label={t("studentFieldLabel")}
               value={studentId}
               options={studentOptions}
               onChange={(v) => setStudentId?.(v)}
-              placeholder="Select student…"
+              placeholder={t("selectStudentPlaceholder")}
             />
           ) : null}
 
           <Dropdown
-            label="Exercise"
+            label={t("exerciseDropdownLabel")}
             value={exerciseAll ? ALL_EXERCISES : exerciseName}
             options={exerciseOptions}
             onChange={(v) => {
@@ -301,7 +301,7 @@ export function ProgressAnalyticsView({
           />
 
           <Dropdown
-            label="Range"
+            label={t("rangeLabel")}
             value={timePreset}
             options={rangeOptions}
             onChange={(v) => setTimePreset(v as TimeRangePreset)}
@@ -327,7 +327,7 @@ export function ProgressAnalyticsView({
                 borderColor: Colors.border,
               }}
             >
-              <Text style={{ ...Typography.title, marginBottom: Spacing.sm }}>No progress data yet</Text>
+              <Text style={{ ...Typography.title, marginBottom: Spacing.sm }}>{t("noProgressDataTitle")}</Text>
               <Text style={{ ...Typography.secondary, color: Colors.textMuted }}>{emptyBody}</Text>
             </View>
           ) : (
@@ -335,7 +335,7 @@ export function ProgressAnalyticsView({
               <View style={{ flexDirection: "row", flexWrap: "wrap", gap: Spacing.sm, marginBottom: Spacing.sm }}>
                 <View style={{ width: "48%", flexGrow: 1 }}>
                   <KpiCard
-                    label="Est. 1RM"
+                    label={t("kpiEst1Rm")}
                     value={String(peakE1RMFromLogs(logsInRange, exerciseNorm, timePreset === "all" ? null : rangeStartMs, nowMs) || "—")}
                     delta={kpiE1rm.delta}
                     deltaPct={kpiE1rm.deltaPct}
@@ -344,7 +344,7 @@ export function ProgressAnalyticsView({
                 </View>
                 <View style={{ width: "48%", flexGrow: 1 }}>
                   <KpiCard
-                    label="Total volume"
+                    label={t("kpiTotalVolume")}
                     value={String(Math.round(totalVolumeFromLogs(logsInRange, exerciseNorm, timePreset === "all" ? null : rangeStartMs, nowMs)))}
                     delta={kpiVol.delta}
                     deltaPct={kpiVol.deltaPct}
@@ -352,7 +352,7 @@ export function ProgressAnalyticsView({
                 </View>
                 <View style={{ width: "48%", flexGrow: 1 }}>
                   <KpiCard
-                    label="Compliance"
+                    label={t("kpiCompliance")}
                     value={compliance != null ? `${compliance}%` : "—"}
                     delta={compDelta}
                     deltaPct={null}
@@ -360,7 +360,7 @@ export function ProgressAnalyticsView({
                 </View>
                 <View style={{ width: "48%", flexGrow: 1 }}>
                   <KpiCard
-                    label="Avg RPE"
+                    label={t("kpiAvgRpe")}
                     value={
                       averageRpeFromLogs(logsInRange, exerciseNorm, timePreset === "all" ? null : rangeStartMs, nowMs) != null
                         ? String(averageRpeFromLogs(logsInRange, exerciseNorm, timePreset === "all" ? null : rangeStartMs, nowMs))
@@ -374,17 +374,17 @@ export function ProgressAnalyticsView({
 
               <Card>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: Spacing.sm }}>
-                  <Text style={{ ...Typography.section }}>1RM progression</Text>
+                  <Text style={{ ...Typography.section }}>{t("chartTitle1Rm")}</Text>
                   <ChartInfoButton open={e1rmInfoOpen} onToggle={() => setE1rmInfoOpen((v) => !v)} />
                 </View>
                 {e1rmInfoOpen ? (
-                  <ChartInfoPanel text="Estimated 1RM = Weight × (1 + Reps/30). Shows strength independent of reps." />
+                  <ChartInfoPanel text={t("infoText1Rm")} />
                 ) : null}
                 <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: Spacing.sm, fontSize: FontSizes.caption }}>
-                  Weekly best estimated 1RM{exerciseNorm ? "" : " (best lift each week)"}. PR points highlighted.
+                  {exerciseNorm ? t("weekly1RmSubtitleExercise") : t("weekly1RmSubtitleAll")}
                 </Text>
                 {weekly1RM.length === 0 ? (
-                  <Text style={{ color: Colors.textMuted }}>No strength data in range.</Text>
+                  <Text style={{ color: Colors.textMuted }}>{t("noStrengthDataInRange")}</Text>
                 ) : (
                   <MiniLineChart points={weekly1RM} color={Colors.primary} height={190} highlightPr width={chartWidth} />
                 )}
@@ -392,24 +392,24 @@ export function ProgressAnalyticsView({
 
               <Card>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: Spacing.sm }}>
-                  <Text style={{ ...Typography.section }}>Workout detail</Text>
+                  <Text style={{ ...Typography.section }}>{t("chartTitleWorkoutDetail")}</Text>
                   <ChartInfoButton open={detailInfoOpen} onToggle={() => setDetailInfoOpen((v) => !v)} />
                 </View>
                 {detailInfoOpen ? (
-                  <ChartInfoPanel text="Blue = weight lifted | Orange = reps completed. Both drive 1RM improvement." />
+                  <ChartInfoPanel text={t("infoTextWorkoutDetail")} />
                 ) : null}
                 <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: Spacing.sm, fontSize: FontSizes.caption }}>
-                  Shows actual lifts each week. Both weight and reps drive 1RM improvement.
+                  {t("workoutDetailSubtitle")}
                 </Text>
                 {weightReps.length === 0 ? (
-                  <Text style={{ color: Colors.textMuted }}>No strength data in range.</Text>
+                  <Text style={{ color: Colors.textMuted }}>{t("noStrengthDataInRange")}</Text>
                 ) : (
                   <>
                     <WeightRepsChart data={weightReps} width={chartWidth} />
                     <ChartLegend
                       items={[
-                        { color: Colors.chartBlue, label: "Weight lifted (kg)" },
-                        { color: Colors.chartOrange, label: "Reps completed" },
+                        { color: Colors.chartBlue, label: t("legendWeightLifted") },
+                        { color: Colors.chartOrange, label: t("legendRepsCompleted") },
                       ]}
                     />
                   </>
@@ -418,27 +418,29 @@ export function ProgressAnalyticsView({
 
               {insights ? (
                 <Card>
-                  <Text style={{ ...Typography.section, marginBottom: Spacing.sm }}>Exercise insights</Text>
+                  <Text style={{ ...Typography.section, marginBottom: Spacing.sm }}>{t("chartTitleExerciseInsights")}</Text>
                   <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: 6 }}>
-                    Best set: {insights.bestSetEver}
+                    {t("insightBestSet", { value: insights.bestSetEver })}
                   </Text>
                   <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: 6 }}>
-                    Last PR: {insights.lastPrDate ?? "—"}
+                    {t("insightLastPr", { value: insights.lastPrDate ?? "—" })}
                   </Text>
                   <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: 6 }}>
-                    Top volume week: {insights.topVolumeWeek}
+                    {t("insightTopVolumeWeek", { value: insights.topVolumeWeek })}
                   </Text>
                   <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: 6 }}>
-                    Avg reps (sets): {insights.avgReps != null ? String(insights.avgReps) : "—"}
+                    {t("insightAvgReps", { value: insights.avgReps != null ? String(insights.avgReps) : "—" })}
                   </Text>
                   <Text style={{ ...Typography.secondary, color: Colors.textMuted }}>
-                    Avg weekly frequency: {insights.avgWeeklyFrequency != null ? String(insights.avgWeeklyFrequency) : "—"}
+                    {t("insightAvgWeeklyFrequency", {
+                      value: insights.avgWeeklyFrequency != null ? String(insights.avgWeeklyFrequency) : "—",
+                    })}
                   </Text>
                 </Card>
               ) : (
                 <Card>
                   <Text style={{ ...Typography.secondary, color: Colors.textMuted }}>
-                    Select a specific exercise to see detailed exercise insights.
+                    {t("selectExerciseForInsights")}
                   </Text>
                 </Card>
               )}
@@ -476,7 +478,7 @@ export function ProgressAnalyticsView({
                               s.status === "green" ? Colors.success : s.status === "red" ? Colors.danger : "#FFD60A",
                           }}
                         >
-                          {s.status === "green" ? "INSIGHT" : s.status === "red" ? "ATTENTION" : "WATCH"}
+                          {s.status === "green" ? t("signalInsight") : s.status === "red" ? t("signalAttention") : t("signalWatch")}
                         </Text>
                       </View>
                       <Text style={{ ...Typography.secondary, color: Colors.text, flex: 1 }}>{s.text}</Text>
@@ -496,19 +498,19 @@ export function ProgressAnalyticsView({
                     marginBottom: Spacing.sm,
                   }}
                 >
-                  <Text style={{ fontSize: FontSizes.tiny, fontWeight: "800", color: Colors.onPrimary }}>HOW TO READ</Text>
+                  <Text style={{ fontSize: FontSizes.tiny, fontWeight: "800", color: Colors.onPrimary }}>{t("howToReadBadge")}</Text>
                 </View>
                 <Text style={{ ...Typography.secondary, color: Colors.textSecondary, marginBottom: 6, fontSize: FontSizes.note }}>
-                  <Text style={{ fontWeight: "700", color: Colors.text }}>1RM chart:</Text> one clean line = consistent
-                  strength metric. Tap a point to see exact values and dates.
+                  <Text style={{ fontWeight: "700", color: Colors.text }}>{t("howToRead1RmLead")}</Text> {t("howToRead1RmBody")}
                 </Text>
                 <Text style={{ ...Typography.secondary, color: Colors.textSecondary, marginBottom: 6, fontSize: FontSizes.note }}>
-                  <Text style={{ fontWeight: "700", color: Colors.text }}>Workout detail chart:</Text> blue = weight,
-                  orange = reps. Weight up, reps down = normal periodized training.
+                  <Text style={{ fontWeight: "700", color: Colors.text }}>{t("howToReadDetailLead")}</Text> {t("howToReadDetailBody")}
                 </Text>
                 <Text style={{ ...Typography.secondary, color: Colors.textSecondary, fontSize: FontSizes.note }}>
-                  <Text style={{ fontWeight: "700", color: Colors.text }}>Both improving?</Text> Rare and excellent —
-                  {variant === "coach" ? " your student is" : " you're"} in a peak strength phase.
+                  <Text style={{ fontWeight: "700", color: Colors.text }}>{t("howToReadBothLead")}</Text>{" "}
+                  {t("howToReadBothBody", {
+                    who: variant === "coach" ? t("howToReadWhoCoach") : t("howToReadWhoStudent"),
+                  })}
                 </Text>
               </Card>
             </>

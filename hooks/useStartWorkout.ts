@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import { Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { useAuth } from "../context/AuthContext";
+import { useI18n } from "../context/I18nContext";
 import { useActiveWorkoutSession } from "../context/ActiveWorkoutSessionContext";
 
 type StartWorkoutTarget = {
@@ -20,6 +21,7 @@ type StartWorkoutTarget = {
 export function useStartWorkout() {
   const router = useRouter();
   const { user } = useAuth();
+  const { t } = useI18n();
   const { session } = useActiveWorkoutSession();
 
   const execPath =
@@ -33,12 +35,12 @@ export function useStartWorkout() {
     (target: StartWorkoutTarget) => {
       if (session && session.workoutPlanId !== target.workoutPlanId) {
         Alert.alert(
-          "Workout in progress",
-          `You already have "${session.workoutName}" in progress. Finish or discard it before starting another workout.`,
+          t("workoutInProgressTitle"),
+          t("workoutInProgressBody", { name: session.workoutName }),
           [
-            { text: "Cancel", style: "cancel" },
+            { text: t("cancel"), style: "cancel" },
             {
-              text: "Go to workout",
+              text: t("goToWorkoutButton"),
               onPress: () =>
                 router.push({
                   pathname: execPath as any,
@@ -61,6 +63,6 @@ export function useStartWorkout() {
             },
       });
     },
-    [session, execPath, router]
+    [session, execPath, router, t]
   );
 }

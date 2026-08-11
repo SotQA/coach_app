@@ -3,6 +3,7 @@ import { View, Text, ActivityIndicator, ScrollView, Pressable, StyleSheet } from
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../context/AuthContext";
+import { useI18n } from "../../context/I18nContext";
 import { studentService } from "../../services/studentService";
 import { trainingGroupService } from "../../services/trainingGroupService";
 import { workoutService } from "../../services/workoutService";
@@ -41,6 +42,7 @@ type StudentDetailsData = {
 
 export default function StudentDetails() {
   const router = useRouter();
+  const { t } = useI18n();
   const { user } = useAuth();
   const userId = user?.id;
   const userRole = user?.role;
@@ -49,12 +51,12 @@ export default function StudentDetails() {
 
   const fetcher = useCallback(async (): Promise<StudentDetailsData> => {
     logger.log("[coach/studentDetails] load start", { studentId });
-    if (!studentId) throw new Error("Missing studentId.");
-    if (!userId || userRole !== "coach") throw new Error("You must be logged in as a coach.");
+    if (!studentId) throw new Error(t("missingStudentIdError"));
+    if (!userId || userRole !== "coach") throw new Error(t("mustBeLoggedInAsCoachError"));
     const studentDoc = await studentService.getStudentById(studentId);
     logger.log("[coach/studentDetails] fetched student", studentDoc?.id);
-    if (!studentDoc) throw new Error("Student not found.");
-    if (studentDoc.coachId !== userId) throw new Error("You don't have access to this student.");
+    if (!studentDoc) throw new Error(t("studentNotFoundError"));
+    if (studentDoc.coachId !== userId) throw new Error(t("noAccessToStudentError"));
 
     const [gResult, plansResult, historyResult] = await Promise.allSettled([
       trainingGroupService.getLatestTrainingGroupForStudent(userId, studentId),
@@ -80,7 +82,7 @@ export default function StudentDetails() {
       plans: workoutPlans,
       logs: history,
     };
-  }, [studentId, userId, userRole]);
+  }, [studentId, userId, userRole, t]);
 
   const { data: detailsData, loading, error: loadError } = useAsyncData<StudentDetailsData>(fetcher, [fetcher]);
 
@@ -113,7 +115,7 @@ export default function StudentDetails() {
     return (
       <View style={styles.errorWrapPad16}>
         <Text style={styles.errorText}>{loadError.message}</Text>
-        <PrimaryButton title="Back to Dashboard" onPress={() => router.replace("/coach/dashboard")} />
+        <PrimaryButton title={t("backToDashboard")} onPress={() => router.replace("/coach/dashboard")} />
       </View>
     );
   }
@@ -121,13 +123,13 @@ export default function StudentDetails() {
   if (!student) {
     return (
       <View style={styles.errorWrap}>
-        <Text style={styles.errorText}>Student not loaded.</Text>
-        <PrimaryButton title="Back to Dashboard" onPress={() => router.replace("/coach/dashboard")} />
+        <Text style={styles.errorText}>{t("studentNotLoaded")}</Text>
+        <PrimaryButton title={t("backToDashboard")} onPress={() => router.replace("/coach/dashboard")} />
       </View>
     );
   }
 
-  const displayName = getDisplayName(student, "Student");
+  const displayName = getDisplayName(student, t("roleStudent"));
   const initials = getUserInitials(student, "S");
 
   return (
@@ -137,13 +139,15 @@ export default function StudentDetails() {
           <View style={styles.topBar}>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Back"
+              accessibilityLabel={t("back")}
               onPress={() => router.back()}
               style={({ pressed }) => [styles.backBtn, pressed && styles.pressedOpacity9]}
             >
               <Ionicons name="chevron-back" size={20} color={Colors.text} />
             </Pressable>
-            <Text style={styles.topTitle}>Student Command Center</Text>
+            <Text style={styles.topTitle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
+              {t("studentCommandCenter")}
+            </Text>
             <View style={styles.topBarSpacer} />
           </View>
 
@@ -158,7 +162,7 @@ export default function StudentDetails() {
 
           <View style={styles.actionsRow}>
             <StudentActionButton
-              title="Assign Workout"
+              title={t("assignWorkoutAction")}
               icon="barbell"
               variant="primary"
               onPress={() =>
@@ -166,7 +170,7 @@ export default function StudentDetails() {
               }
             />
             <StudentActionButton
-              title="Create New Group"
+              title={t("createNewGroupAction")}
               icon="add-circle-outline"
               variant="secondary"
               onPress={() =>
@@ -174,7 +178,7 @@ export default function StudentDetails() {
               }
             />
             <StudentActionButton
-              title="View Progress"
+              title={t("viewProgressAction")}
               icon="stats-chart-outline"
               iconColor="#64D2FF"
               variant="secondary"
@@ -182,11 +186,11 @@ export default function StudentDetails() {
             />
           </View>
 
-          <Text style={styles.sectionLabel}>Quick stats</Text>
+          <Text style={styles.sectionLabel}>{t("quickStats")}</Text>
           <View style={styles.statsRow}>
-            <StudentStatCard label="Workouts completed" value={String(logs.length)} icon="barbell-outline" tint={Colors.primary} />
+            <StudentStatCard label={t("statWorkoutsCompleted")} value={String(logs.length)} icon="barbell-outline" tint={Colors.primary} />
             <StudentStatCard
-              label="Compliance"
+              label={t("kpiCompliance")}
               value={compliancePct != null ? `${compliancePct}%` : "—"}
               icon="checkmark-done-outline"
               tint="#FF6B6B"
@@ -194,20 +198,20 @@ export default function StudentDetails() {
           </View>
           <View style={[styles.statsRow, styles.mbMd]}>
             <StudentStatCard
-              label="Current streak"
+              label={t("statCurrentStreak")}
               value={streakDays ? `${streakDays}d` : "—"}
               icon="flame-outline"
               tint="#FF8C42"
             />
-            <StudentStatCard label="Avg duration" value={avgDurationLabel ?? "—"} icon="time-outline" tint="#64D2FF" />
+            <StudentStatCard label={t("statAvgDuration")} value={avgDurationLabel ?? "—"} icon="time-outline" tint="#64D2FF" />
           </View>
 
           <View style={styles.assignedHeader}>
-            <Text style={Typography.section}>Assigned Program</Text>
+            <Text style={Typography.section}>{t("assignedProgramTitle")}</Text>
             {latestGroup ? (
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel="Change training split"
+                accessibilityLabel={t("changeTrainingSplitA11y")}
                 onPress={() =>
                   router.push({
                     pathname: "/coach/selectTrainingGroup",
@@ -216,7 +220,7 @@ export default function StudentDetails() {
                 }
                 style={({ pressed }) => [pressed && styles.pressedOpacity9]}
               >
-                <Text style={styles.changeLink}>Change</Text>
+                <Text style={styles.changeLink}>{t("changeAction")}</Text>
               </Pressable>
             ) : null}
           </View>
@@ -238,13 +242,17 @@ export default function StudentDetails() {
             }
           />
 
-          <Text style={styles.insightsTitle}>Compliance insights</Text>
+          <Text style={styles.insightsTitle}>{t("complianceInsightsTitle")}</Text>
           <View style={styles.insightsCard}>
             <Text style={styles.mutedSecondary}>
-              {compliancePct != null ? `This week: ${compliancePct}% of target (${latestGroup?.workoutsPerWeek ?? "—"} workouts/week).` : "Set a workouts/week target to track compliance."}
+              {compliancePct != null
+                ? t("complianceThisWeek", { pct: compliancePct, n: latestGroup?.workoutsPerWeek ?? "—" })
+                : t("setWorkoutsPerWeekTarget")}
             </Text>
             <Text style={[styles.mutedSecondary, styles.insightsSecondLine]}>
-              {streakDays ? `Current streak: ${streakDays} day${streakDays === 1 ? "" : "s"}.` : "No active streak yet."}
+              {streakDays
+                ? t(streakDays === 1 ? "currentStreakLine_one" : "currentStreakLine_other", { count: streakDays })
+                : t("noActiveStreak")}
             </Text>
           </View>
         </ScrollView>
@@ -263,7 +271,7 @@ const styles = StyleSheet.create({
   topBar: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: Spacing.md },
   backBtn: { width: 40, height: 40, borderRadius: Radius.lg, alignItems: "center", justifyContent: "center", backgroundColor: Colors.card, borderWidth: 1, borderColor: Colors.border },
   pressedOpacity9: { opacity: 0.9 },
-  topTitle: { ...Typography.section, fontWeight: "900" },
+  topTitle: { ...Typography.section, fontWeight: "900", flex: 1, textAlign: "center" },
   topBarSpacer: { width: 40, height: 40 },
   actionsRow: { flexDirection: "row", gap: Spacing.sm, marginBottom: Spacing.md },
   sectionLabel: { ...Typography.section, marginBottom: Spacing.xs },

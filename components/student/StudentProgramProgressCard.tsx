@@ -5,6 +5,7 @@ import { PrimaryButton } from "../PrimaryButton";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography, FontSizes } from "../../theme/typography";
+import { useI18n } from "../../context/I18nContext";
 import type { TrainingGroup } from "../../types/TrainingGroup";
 import type { WeeklyProgress } from "@/utils/studentMetrics";
 
@@ -25,6 +26,7 @@ function StudentProgramProgressCardImpl({
   onPressCard,
   onPressCreateGroup,
 }: StudentProgramProgressCardProps) {
+  const { t } = useI18n();
   return (
     <Pressable onPress={onPressCard} style={({ pressed }) => [styles.programCard, pressed && { opacity: 0.96 }]}>
       {latestGroup ? (
@@ -33,7 +35,9 @@ function StudentProgramProgressCardImpl({
             <View style={styles.programTitleCol}>
               <Text style={styles.programName}>{latestGroup.name}</Text>
               <Text style={styles.programSub}>
-                {latestGroup.workoutsPerWeek ? `${latestGroup.workoutsPerWeek} days/week` : "Days/week —"}
+                {latestGroup.workoutsPerWeek
+                  ? t("workoutsPerWeekChip", { n: latestGroup.workoutsPerWeek })
+                  : t("daysPerWeekEmpty")}
               </Text>
             </View>
             <View style={styles.flashIconWrap}>
@@ -46,27 +50,27 @@ function StudentProgramProgressCardImpl({
               <View style={[styles.progressFill, { width: `${assignedPct}%` }]} />
             </View>
             <View style={styles.progressLabels}>
-              <Text style={styles.mutedSecondary}>Progress</Text>
+              <Text style={styles.mutedSecondary}>{t("progress")}</Text>
               <Text style={styles.mutedSecondary}>
                 {typeof compliancePct === "number"
                   ? `${assignedPct}%`
                   : weeklyProg.target
-                    ? `${weeklyProg.completed} of ${weeklyProg.target} this week`
+                    ? t("weeklyProgressOfTarget", { completed: weeklyProg.completed, target: weeklyProg.target })
                     : "—"}
               </Text>
             </View>
           </View>
 
           <View style={styles.tapRow}>
-            <Text style={styles.mutedSecondary}>Tap to view assigned workouts</Text>
+            <Text style={styles.mutedSecondary}>{t("tapToViewAssignedWorkouts")}</Text>
             <Ionicons name="chevron-forward" size={18} color={Colors.textMuted} />
           </View>
         </>
       ) : (
         <>
-          <Text style={styles.programName}>No active training split</Text>
-          <Text style={styles.emptySub}>Create a split to start assigning workouts.</Text>
-          <PrimaryButton title="Create New Group" onPress={onPressCreateGroup} style={styles.createGroupBtn} />
+          <Text style={styles.programName}>{t("noActiveTrainingSplit")}</Text>
+          <Text style={styles.emptySub}>{t("createSplitToStartAssigning")}</Text>
+          <PrimaryButton title={t("createNewGroupAction")} onPress={onPressCreateGroup} style={styles.createGroupBtn} />
         </>
       )}
     </Pressable>

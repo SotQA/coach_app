@@ -15,6 +15,7 @@ import { ExerciseLibraryModal } from "../../components/ExerciseLibraryModal";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { ScreenLayout } from "../../components/ScreenLayout";
 import { useAuth } from "../../context/AuthContext";
+import { useI18n } from "../../context/I18nContext";
 import { useHideCoachFabOnFocus } from "../../context/CoachFabVisibilityContext";
 import { workoutService } from "../../services/workoutService";
 import { studentService } from "../../services/studentService";
@@ -44,6 +45,7 @@ export default function EditWorkout() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
+  const { t } = useI18n();
   useHideCoachFabOnFocus();
   const params = useLocalSearchParams<{ workoutPlanId?: string }>();
   const workoutPlanId = useMemo(() => String(params.workoutPlanId ?? "").trim(), [params]);
@@ -69,27 +71,27 @@ export default function EditWorkout() {
         setError(null);
 
         if (!workoutPlanId) {
-          setError("Missing workoutPlanId.");
+          setError(t("missingWorkoutPlanIdError"));
           return;
         }
 
         if (!user || user.role !== "coach") {
-          setError("You must be logged in as a coach.");
+          setError(t("mustBeLoggedInAsCoachError"));
           return;
         }
         setCoachId(user.id);
 
         const plan = await workoutService.getWorkoutPlanById(workoutPlanId);
         if (!plan) {
-          setError("Workout plan not found.");
+          setError(t("workoutPlanNotFoundError"));
           return;
         }
         if (plan.coachId !== user.id) {
-          setError("You don't have access to this workout plan.");
+          setError(t("noAccessToWorkoutPlanError"));
           return;
         }
 
-        setPlanName(plan.name ?? "Workout Plan");
+        setPlanName(plan.name ?? t("workoutPlanFallbackName"));
         setPlanNote(plan.note?.trim() ?? "");
         const initial =
           Array.isArray(plan.exercises) && plan.exercises.length ? plan.exercises : [workoutService.createEmptyExercise()];
@@ -97,18 +99,18 @@ export default function EditWorkout() {
 
         if (plan.studentId) {
           const student = await studentService.getStudentById(plan.studentId).catch(() => null);
-          if (student) setStudentDisplayName(getDisplayName(student, "the student"));
+          if (student) setStudentDisplayName(getDisplayName(student, t("theStudentFallback")));
         }
       } catch (e: any) {
         console.error("[coach/editWorkout] load error", e);
-        setError(e.message ?? "Failed to load workout plan.");
+        setError(e.message ?? t("failedToLoadWorkoutPlanError"));
       } finally {
         setLoading(false);
       }
     };
 
     load();
-  }, [workoutPlanId, user?.id, user?.role]);
+  }, [workoutPlanId, user?.id, user?.role, t]);
 
   const updateExercise = (key: string, patch: Partial<ExerciseDraft>) => {
     setExercises((prev) => prev.map((e) => (e._key === key ? { ...e, ...patch } : e)));
@@ -134,9 +136,9 @@ export default function EditWorkout() {
     setSaving(true);
     setError(null);
     try {
-      const trimmedName = planName.trim() || "Workout Plan";
-      if (planNote.trim().length > 500) throw new Error("Coach notes must be at most 500 characters.");
-      if (coachMessage.trim().length > 500) throw new Error("Message to student must be at most 500 characters.");
+      const trimmedName = planName.trim() || t("workoutPlanFallbackName");
+      if (planNote.trim().length > 500) throw new Error(t("coachNotesMaxLenError"));
+      if (coachMessage.trim().length > 500) throw new Error(t("messageToStudentMaxLenError"));
 
       const normalizedExercises: Exercise[] = exercises
         .map((e) => {
@@ -161,31 +163,31 @@ export default function EditWorkout() {
         .filter((e) => e.name.length > 0);
 
       if (normalizedExercises.length === 0) {
-        throw new Error("A workout must have at least one exercise.");
+        throw new Error(t("atLeastOneExerciseRequiredError"));
       }
 
       for (const ex of normalizedExercises) {
         if (!Number.isFinite(ex.sets) || ex.sets <= 0) {
-          throw new Error(`Sets for "${ex.name}" must be > 0.`);
+          throw new Error(t("setsMustBePositiveError", { name: ex.name }));
         }
         if (ex.rest !== "") {
           const n = Number(ex.rest);
           if (!Number.isFinite(n) || n < 0) {
-            throw new Error(`Rest for "${ex.name}" must be a number >= 0.`);
+            throw new Error(t("restMustBeNonNegativeError", { name: ex.name }));
           }
         }
         if (ex.tempo.length > 20) {
-          throw new Error(`Tempo for "${ex.name}" must be at most 20 characters.`);
+          throw new Error(t("tempoMaxLenError", { name: ex.name }));
         }
         if (ex.rpe !== null) {
           if (!Number.isFinite(ex.rpe) || ex.rpe < 1 || ex.rpe > 10) {
-            throw new Error(`RPE for "${ex.name}" must be between 1 and 10.`);
+            throw new Error(t("rpeRangeError", { name: ex.name }));
           }
         }
         if (ex.weight != null) {
           const w = Number(ex.weight);
           if (!Number.isFinite(w) || w < 0) {
-            throw new Error(`Weight for "${ex.name}" must be a number >= 0.`);
+            throw new Error(t("weightMustBeNonNegativeError", { name: ex.name }));
           }
         }
       }
@@ -207,7 +209,7 @@ export default function EditWorkout() {
 
       router.back();
     } catch (e: any) {
-      setError(e.message ?? "Failed to save workout plan.");
+      setError(e.message ?? t("failedToSaveWorkoutPlanError"));
     } finally {
       setSaving(false);
     }
@@ -229,7 +231,7 @@ export default function EditWorkout() {
     );
   }
 
-  const studentLabel = studentDisplayName ?? "the student";
+  const studentLabel = studentDisplayName ?? t("theStudentFallback");
 
   return (
     <ScreenLayout>
@@ -249,7 +251,7 @@ export default function EditWorkout() {
           ListHeaderComponent={
             <>
               <View style={{ marginBottom: Spacing.md }}>
-                <Text style={{ ...Typography.title, fontSize: FontSizes.h2, marginBottom: 6 }}>Edit Workout</Text>
+                <Text style={{ ...Typography.title, fontSize: FontSizes.h2, marginBottom: 6 }}>{t("editWorkoutTitle")}</Text>
               </View>
 
               <View
@@ -262,11 +264,11 @@ export default function EditWorkout() {
                   marginBottom: Spacing.md,
                 }}
               >
-                <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Plan name</Text>
+                <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("planNameLabel")}</Text>
                 <TextInput
                   value={planName}
-                  onChangeText={(t) => setPlanName(t.slice(0, 50))}
-                  placeholder="Workout Plan"
+                  onChangeText={(text) => setPlanName(text.slice(0, 50))}
+                  placeholder={t("workoutPlanFallbackName")}
                   placeholderTextColor={Colors.textMuted}
                   style={{
                     borderWidth: 1,
@@ -279,11 +281,11 @@ export default function EditWorkout() {
                   }}
                 />
 
-                <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Coach note (optional)</Text>
+                <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("coachNotesOptionalLabel")}</Text>
                 <TextInput
                   value={planNote}
-                  onChangeText={(t) => setPlanNote(t.slice(0, 500))}
-                  placeholder="Intent, cues, or progression notes…"
+                  onChangeText={(text) => setPlanNote(text.slice(0, 500))}
+                  placeholder={t("planNoteInputPlaceholder")}
                   placeholderTextColor={Colors.textMuted}
                   multiline
                   style={{
@@ -307,10 +309,12 @@ export default function EditWorkout() {
                 }}
               >
                 <Text style={{ ...Typography.section, fontWeight: "900" }}>
-                  {exercises.length} exercise{exercises.length === 1 ? "" : "s"} · drag to reorder
+                  {t(exercises.length === 1 ? "exerciseCountDragToReorder_one" : "exerciseCountDragToReorder_other", {
+                    count: exercises.length,
+                  })}
                 </Text>
                 <PrimaryButton
-                  title="+ Add"
+                  title={t("addButtonShort")}
                   onPress={() => setLibraryOpen(true)}
                   style={{ width: "auto", paddingHorizontal: Spacing.md }}
                 />
@@ -319,11 +323,11 @@ export default function EditWorkout() {
           }
           ListFooterComponent={
             <View style={{ marginTop: Spacing.sm }}>
-              <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Message to {studentLabel} (optional)</Text>
+              <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("messageToStudentLabel", { name: studentLabel })}</Text>
               <TextInput
                 value={coachMessage}
-                onChangeText={(t) => setCoachMessage(t.slice(0, 500))}
-                placeholder="What changed and why…"
+                onChangeText={(text) => setCoachMessage(text.slice(0, 500))}
+                placeholder={t("messageToStudentPlaceholder")}
                 placeholderTextColor={Colors.textMuted}
                 multiline
                 style={{
@@ -338,7 +342,7 @@ export default function EditWorkout() {
                 }}
               />
               <Text style={{ ...Typography.secondary, color: Colors.textMuted, fontSize: FontSizes.tiny, textAlign: "center" }}>
-                {studentLabel} will be notified of what changed
+                {t("studentWillBeNotifiedNote", { name: studentLabel })}
               </Text>
               {error ? (
                 <Text style={{ color: Colors.danger, marginTop: Spacing.sm, textAlign: "center" }}>{error}</Text>
@@ -402,7 +406,7 @@ export default function EditWorkout() {
           borderTopColor: Colors.border,
         }}
       >
-        {saving ? <ActivityIndicator /> : <PrimaryButton title="Save changes" onPress={handleSave} />}
+        {saving ? <ActivityIndicator /> : <PrimaryButton title={t("saveChanges")} onPress={handleSave} />}
       </View>
 
       {coachId ? (

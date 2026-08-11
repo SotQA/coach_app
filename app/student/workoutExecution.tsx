@@ -378,7 +378,7 @@ export default function WorkoutExecution() {
             S.keyboardDismissBtn,
             { bottom: keyboardHeight + 10, opacity: pressed ? 0.7 : 1 },
           ]}
-          accessibilityLabel="Dismiss keyboard"
+          accessibilityLabel={t("dismissKeyboardA11y")}
           accessibilityRole="button"
         >
           <Ionicons name="keypad-outline" size={22} color={Colors.text} />
@@ -393,7 +393,7 @@ export default function WorkoutExecution() {
         ) : (
           <View style={{ flexDirection: "row", gap: Spacing.sm }}>
             <View style={{ flex: 1 }}>
-              <HoldToConfirmButton title="Discard" onConfirm={handleDiscardWorkout} />
+              <HoldToConfirmButton title={t("discardWorkoutButton")} onConfirm={handleDiscardWorkout} />
             </View>
             <View style={{ flex: 1 }}>
               <PrimaryButton

@@ -10,6 +10,7 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "@/context/AuthContext";
+import { useI18n } from "@/context/I18nContext";
 import { useWorkoutHistory } from "@/hooks/useWorkoutHistory";
 import { PrimaryButton } from "@/components/PrimaryButton";
 import { EmptyState } from "@/components/EmptyState";
@@ -32,6 +33,7 @@ export default function WorkoutHistory() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
+  const { t } = useI18n();
   const h = useWorkoutHistory(user);
 
   // ── Loading / error / global-empty branches ───────────────────────────
@@ -63,7 +65,7 @@ export default function WorkoutHistory() {
         <Text style={{ color: Colors.danger, marginBottom: Spacing.sm }}>
           {h.loadError.message}
         </Text>
-        <PrimaryButton title="Go to Login" onPress={() => router.replace("/login")} />
+        <PrimaryButton title={t("goToLogin")} onPress={() => router.replace("/login")} />
       </View>
     );
   }
@@ -86,7 +88,7 @@ export default function WorkoutHistory() {
             marginBottom: Spacing.xs,
           }}
         >
-          History
+          {t("historyTitle")}
         </Text>
         <Text
           style={{
@@ -99,12 +101,12 @@ export default function WorkoutHistory() {
         </Text>
         <EmptyState
           icon="calendar-outline"
-          title="No workouts yet"
-          subtitle="Complete a workout from your plan to see it on the calendar."
+          title={t("noWorkoutsYetTitle")}
+          subtitle={t("noWorkoutsYetSubtitle")}
         />
         <View style={{ marginTop: Spacing.lg }}>
           <PrimaryButton
-            title="View Workouts"
+            title={t("viewWorkoutsButton")}
             onPress={() => router.replace("/student/workouts")}
           />
         </View>
@@ -159,7 +161,7 @@ export default function WorkoutHistory() {
             </View>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Open settings"
+              accessibilityLabel={t("openSettingsA11y")}
               onPress={() => router.push("/student/profile")}
               style={({ pressed }) => ({
                 width: 44,
@@ -212,7 +214,7 @@ export default function WorkoutHistory() {
               }}
               numberOfLines={2}
             >
-              {h.selectedDayLabel || "Select a day"}
+              {h.selectedDayLabel || t("selectADay")}
             </Text>
             <Text
               style={{
@@ -221,8 +223,9 @@ export default function WorkoutHistory() {
                 fontWeight: "600",
               }}
             >
-              {h.logsForSelectedDay.length}{" "}
-              {h.logsForSelectedDay.length === 1 ? "session" : "sessions"}
+              {t(h.logsForSelectedDay.length === 1 ? "sessionCount_one" : "sessionCount_other", {
+                count: h.logsForSelectedDay.length,
+              })}
             </Text>
           </View>
 
@@ -234,7 +237,7 @@ export default function WorkoutHistory() {
 
           <View style={{ marginTop: Spacing.md }}>
             <PrimaryButton
-              title="View Workouts"
+              title={t("viewWorkoutsButton")}
               onPress={() => router.replace("/student/workouts")}
               style={{ backgroundColor: Colors.border }}
             />

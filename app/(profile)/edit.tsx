@@ -114,10 +114,11 @@ function SexChip({
 }
 
 function SexChipGroup({ value, onChange }: { value: Sex; onChange: (v: Sex) => void }) {
+  const { t } = useI18n();
   return (
     <View style={{ flexDirection: "row", gap: Spacing.xs }}>
-      <SexChip label="Male" selected={value === "male"} onPress={() => onChange("male")} />
-      <SexChip label="Female" selected={value === "female"} onPress={() => onChange("female")} />
+      <SexChip label={t("male")} selected={value === "male"} onPress={() => onChange("male")} />
+      <SexChip label={t("female")} selected={value === "female"} onPress={() => onChange("female")} />
     </View>
   );
 }
@@ -526,7 +527,7 @@ export default function EditProfile() {
           {/* Read-only: role */}
           <View>
             <Text style={{ fontSize: 14, fontWeight: "600", color: Colors.text, marginBottom: 8 }}>
-              Role
+              {t("roleLabel")}
             </Text>
             <View
               style={{
