@@ -505,37 +505,29 @@ export default function StudentNotifications() {
       <View style={{ flex: 1, backgroundColor: Colors.bg }}>
         <View
           style={{
-            flexDirection: "row",
-            alignItems: "center",
-            gap: Spacing.sm,
             paddingHorizontal: Spacing.md,
             paddingTop: Spacing.sm,
             paddingBottom: Spacing.xs,
           }}
         >
-          <View style={{ width: 96, alignItems: "flex-start" }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.sm }}>
             <Pressable onPress={() => router.back()} hitSlop={10}>
               <Ionicons name="chevron-back" size={26} color={Colors.text} />
             </Pressable>
+            <Text style={{ ...Typography.title, fontSize: FontSizes.h3 }}>
+              {t("notifications")}
+            </Text>
           </View>
-          <Text
-            style={{
-              ...Typography.title,
-              fontSize: FontSizes.h3,
-              flex: 1,
-              textAlign: "center",
-            }}
-            numberOfLines={1}
+          <Pressable
+            onPress={handleMarkAllRead}
+            disabled={unreadCount === 0}
+            hitSlop={10}
+            style={{ alignSelf: "flex-end", marginTop: Spacing.xs }}
           >
-            {t("notifications")}
-          </Text>
-          <Pressable onPress={handleMarkAllRead} disabled={unreadCount === 0} hitSlop={10} style={{ width: 96, alignItems: "flex-end" }}>
             <Text
-              numberOfLines={2}
               style={{
                 ...Typography.secondary,
                 fontWeight: "700",
-                textAlign: "right",
                 color: unreadCount > 0 ? Colors.primary : Colors.textMuted,
               }}
             >
