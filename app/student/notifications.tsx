@@ -513,9 +513,11 @@ export default function StudentNotifications() {
             paddingBottom: Spacing.xs,
           }}
         >
-          <Pressable onPress={() => router.back()} hitSlop={10}>
-            <Ionicons name="chevron-back" size={26} color={Colors.text} />
-          </Pressable>
+          <View style={{ width: 96, alignItems: "flex-start" }}>
+            <Pressable onPress={() => router.back()} hitSlop={10}>
+              <Ionicons name="chevron-back" size={26} color={Colors.text} />
+            </Pressable>
+          </View>
           <Text
             style={{
               ...Typography.title,
@@ -527,8 +529,9 @@ export default function StudentNotifications() {
           >
             {t("notifications")}
           </Text>
-          <Pressable onPress={handleMarkAllRead} disabled={unreadCount === 0} hitSlop={10} style={{ maxWidth: 110 }}>
+          <Pressable onPress={handleMarkAllRead} disabled={unreadCount === 0} hitSlop={10} style={{ width: 96, alignItems: "flex-end" }}>
             <Text
+              numberOfLines={2}
               style={{
                 ...Typography.secondary,
                 fontWeight: "700",
