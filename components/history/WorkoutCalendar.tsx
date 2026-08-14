@@ -7,6 +7,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { dayKeyFromDate } from "@/utils/dateRanges";
+import { useI18n } from "@/context/I18nContext";
 import { Colors } from "@/theme/colors";
 import { Radius, Spacing } from "@/theme/spacing";
 import { FontSizes, Typography } from "@/theme/typography";
@@ -29,7 +30,6 @@ interface WorkoutCalendarProps {
 
 const ROW_GAP = 6;
 const CELL_HEIGHT = 38;
-const WEEKDAY_LABELS = ["M", "T", "W", "T", "F", "S", "S"] as const;
 
 /**
  * Month-navigation row + calendar card with day cells, heatmap, and legend.
@@ -46,6 +46,8 @@ function WorkoutCalendarImpl({
   onNextMonth,
   onCurrentMonth,
 }: WorkoutCalendarProps) {
+  const { t } = useI18n();
+  const weekdayLabels = t("weekdayLabels").split(",");
   const { width: windowW } = useWindowDimensions();
   const calendarMaxW = windowW - (Spacing.md + Spacing.lg) * 2;
   const cellW = Math.max(
@@ -66,7 +68,7 @@ function WorkoutCalendarImpl({
       >
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Previous month"
+          accessibilityLabel={t("previousMonthA11y")}
           onPress={onPrevMonth}
           style={({ pressed }) => ({
             padding: Spacing.sm,
@@ -81,7 +83,7 @@ function WorkoutCalendarImpl({
         </Pressable>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Jump to current month"
+          accessibilityLabel={t("jumpToCurrentMonthA11y")}
           onPress={onCurrentMonth}
           style={{
             paddingVertical: Spacing.xs,
@@ -95,12 +97,12 @@ function WorkoutCalendarImpl({
               fontWeight: "700",
             }}
           >
-            Today
+            {t("today")}
           </Text>
         </Pressable>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Next month"
+          accessibilityLabel={t("nextMonthA11y")}
           onPress={onNextMonth}
           style={({ pressed }) => ({
             padding: Spacing.sm,
@@ -136,7 +138,7 @@ function WorkoutCalendarImpl({
               gap: ROW_GAP,
             }}
           >
-            {WEEKDAY_LABELS.map((L, i) => (
+            {weekdayLabels.map((L, i) => (
               <View
                 key={`${L}-${i}`}
                 style={{ width: cellW, alignItems: "center" }}
@@ -251,7 +253,7 @@ function WorkoutCalendarImpl({
                 fontWeight: "600",
               }}
             >
-              Less
+              {t("heatmapLess")}
             </Text>
             {[0.15, 0.35, 0.55, 0.85].map((a, i) => (
               <View
@@ -273,7 +275,7 @@ function WorkoutCalendarImpl({
                 fontWeight: "600",
               }}
             >
-              More
+              {t("heatmapMore")}
             </Text>
           </View>
           <View
@@ -306,7 +308,7 @@ function WorkoutCalendarImpl({
                   fontWeight: "600",
                 }}
               >
-                Completed
+                {t("completedLegend")}
               </Text>
             </View>
           </View>

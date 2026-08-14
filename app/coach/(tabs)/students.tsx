@@ -11,6 +11,7 @@ import {
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../../context/AuthContext";
+import { useI18n } from "../../../context/I18nContext";
 import { studentService } from "../../../services/studentService";
 import { trainingGroupService } from "../../../services/trainingGroupService";
 import type { StudentSummary } from "../../../types/StudentSummary";
@@ -26,6 +27,7 @@ import { logger } from "@/utils/logger";
 
 export default function CoachStudents() {
   const router = useRouter();
+  const { t } = useI18n();
   const { user } = useAuth();
   const [students, setStudents] = useState<StudentSummary[]>([]);
   const [query, setQuery] = useState("");
@@ -86,7 +88,7 @@ export default function CoachStudents() {
         setLatestGroupByStudentId(nextMap);
       } catch (e: any) {
         console.error("[coach/students] load error", e);
-        setError(e.message ?? "Failed to load students.");
+        setError(e.message ?? t("failedToLoadStudents"));
       } finally {
         setLoading(false);
       }
@@ -110,7 +112,7 @@ export default function CoachStudents() {
       <ScreenLayout>
         <View style={{ flex: 1, justifyContent: "center", padding: 16, backgroundColor: Colors.bg }}>
           <Text style={{ color: Colors.danger, marginBottom: Spacing.xs }}>{error}</Text>
-          <PrimaryButton title="Go to Login" onPress={() => router.replace("/login")} />
+          <PrimaryButton title={t("goToLogin")} onPress={() => router.replace("/login")} />
         </View>
       </ScreenLayout>
     );
@@ -140,7 +142,7 @@ export default function CoachStudents() {
             <View style={{ flexDirection: "row", alignItems: "center", flex: 1, gap: Spacing.sm }}>
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel="Open profile settings"
+                accessibilityLabel={t("openProfileSettingsA11y")}
                 onPress={() => router.push("/coach/profile")}
                 style={({ pressed }) => ({ opacity: pressed ? 0.9 : 1 })}
               >
@@ -155,9 +157,9 @@ export default function CoachStudents() {
                 />
               </Pressable>
               <View style={{ flex: 1 }}>
-                <Text style={{ ...Typography.title, fontSize: FontSizes.h3 }}>Students</Text>
+                <Text style={{ ...Typography.title, fontSize: FontSizes.h3 }}>{t("students")}</Text>
                 <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 2 }}>
-                  {students.length} Active Students
+                  {t("activeStudents", { n: students.length })}
                 </Text>
               </View>
             </View>
@@ -182,7 +184,7 @@ export default function CoachStudents() {
             <TextInput
               value={query}
               onChangeText={setQuery}
-              placeholder="Search students…"
+              placeholder={t("searchStudents")}
               placeholderTextColor={Colors.textMuted}
               autoCapitalize="none"
               style={{
@@ -208,7 +210,7 @@ export default function CoachStudents() {
               }}
             >
               <Text style={Typography.secondary}>
-                No students yet. Create your first student to start assigning workout plans.
+                {t("noStudentsYetLong")}
               </Text>
             </View>
           ) : (
@@ -219,8 +221,8 @@ export default function CoachStudents() {
               renderItem={({ item }) => (
                 <StudentCard
                   student={item}
-                  actionTitle="Plan Workout"
-                  secondaryActionTitle="View Profile"
+                  actionTitle={t("planWorkout")}
+                  secondaryActionTitle={t("viewProfile")}
                   currentSplitName={latestGroupByStudentId[item.id] ?? null}
                   onSecondaryPress={() =>
                     router.push({
@@ -233,7 +235,7 @@ export default function CoachStudents() {
                       pathname: "/coach/createWorkoutPlan",
                       params: {
                         studentId: item.id,
-                        studentName: [item.firstName, item.lastName].filter(Boolean).join(" ").trim() || "Student",
+                        studentName: [item.firstName, item.lastName].filter(Boolean).join(" ").trim() || t("roleStudent"),
                       },
                     })
                   }

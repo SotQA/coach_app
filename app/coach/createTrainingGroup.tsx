@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useAuth } from "../../context/AuthContext";
+import { useI18n } from "../../context/I18nContext";
 import { trainingGroupService } from "../../services/trainingGroupService";
 import type { TrainingGroupType } from "../../types/TrainingGroup";
 import { PrimaryButton } from "../../components/PrimaryButton";
@@ -10,23 +11,27 @@ import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography, FontSizes } from "../../theme/typography";
 
-const typeLabel = (t: TrainingGroupType): string => {
-  switch (t) {
-    case "Strength Block":
-      return "Strength";
-    case "Upper / Lower":
-      return "Upper/Lower";
-    default:
-      return t;
-  }
+// Chip display label only — the underlying TrainingGroupType value (persisted as
+// the group's `name` when not "Custom") is never translated, only how it's shown here.
+const TYPE_LABEL_KEYS: Record<TrainingGroupType, string> = {
+  "Full Body": "groupTypeFullBody",
+  "Upper / Lower": "groupTypeUpperLower",
+  PPL: "groupTypePpl",
+  "Strength Block": "groupTypeStrength",
+  Hypertrophy: "groupTypeHypertrophy",
+  Deload: "groupTypeDeload",
+  Conditioning: "groupTypeConditioning",
+  Custom: "groupTypeCustom",
 };
 
 export default function CreateTrainingGroup() {
   const router = useRouter();
+  const { t } = useI18n();
   const { user } = useAuth();
   const params = useLocalSearchParams<{ studentId?: string; studentName?: string }>();
   const studentId = useMemo(() => String(params.studentId ?? "").trim(), [params.studentId]);
-  const studentName = useMemo(() => String(params.studentName ?? "Student"), [params.studentName]);
+  const studentName = useMemo(() => String(params.studentName ?? t("roleStudent")), [params.studentName, t]);
+  const typeLabel = (type: TrainingGroupType): string => t(TYPE_LABEL_KEYS[type] ?? "groupTypeCustom");
 
   const [type, setType] = useState<TrainingGroupType>("PPL");
   const [customName, setCustomName] = useState("");
@@ -59,9 +64,9 @@ export default function CreateTrainingGroup() {
         contentContainerStyle={{ padding: Spacing.md, paddingBottom: Spacing.lg, paddingTop: Spacing.lg }}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={{ ...Typography.title, fontSize: FontSizes.h2, marginBottom: 6 }}>Create Training Group</Text>
+        <Text style={{ ...Typography.title, fontSize: FontSizes.h2, marginBottom: 6 }}>{t("createTrainingGroupTitle")}</Text>
         <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: Spacing.md }}>
-          For: {studentName}
+          {t("forStudentLabel", { name: studentName })}
         </Text>
 
         <View
@@ -74,7 +79,7 @@ export default function CreateTrainingGroup() {
             marginBottom: Spacing.md,
           }}
         >
-          <Text style={{ ...Typography.section, marginBottom: Spacing.sm }}>Type</Text>
+          <Text style={{ ...Typography.section, marginBottom: Spacing.sm }}>{t("typeFieldLabel")}</Text>
           <View style={{ flexDirection: "row", flexWrap: "wrap", gap: Spacing.xs }}>
             {types.map((t) => {
               const active = t === type;
@@ -102,11 +107,11 @@ export default function CreateTrainingGroup() {
 
           {type === "Custom" ? (
             <View style={{ marginTop: Spacing.md }}>
-              <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Group Name</Text>
+              <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("groupNameLabel")}</Text>
               <TextInput
                 value={customName}
                 onChangeText={setCustomName}
-                placeholder="e.g. Hypertrophy Block A"
+                placeholder={t("groupNamePlaceholder")}
                 placeholderTextColor={Colors.textMuted}
                 style={{
                   borderWidth: 1,
@@ -121,7 +126,7 @@ export default function CreateTrainingGroup() {
           ) : null}
 
           <View style={{ marginTop: Spacing.md }}>
-            <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Workouts per week</Text>
+            <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("workoutsPerWeekLabel")}</Text>
             <TextInput
               value={workoutsPerWeek}
               onChangeText={setWorkoutsPerWeek}
@@ -147,14 +152,14 @@ export default function CreateTrainingGroup() {
         ) : null}
 
         <PrimaryButton
-          title={loading ? "Creating…" : "Create Group"}
+          title={loading ? t("creatingEllipsis") : t("createGroupButton")}
           disabled={!canCreate}
           onPress={async () => {
             try {
               setError(null);
               setLoading(true);
-              if (!user || user.role !== "coach") throw new Error("You must be logged in as a coach.");
-              if (!studentId) throw new Error("Missing student context.");
+              if (!user || user.role !== "coach") throw new Error(t("mustBeLoggedInAsCoachError"));
+              if (!studentId) throw new Error(t("missingStudentContextError"));
               const wpw = Number(workoutsPerWeek);
               const created = await trainingGroupService.createTrainingGroup({
                 coachId: user.id,
@@ -170,7 +175,7 @@ export default function CreateTrainingGroup() {
                 params: { studentId, studentName, selectedGroupId: created.id },
               });
             } catch (e: any) {
-              setError(e?.message ?? "Failed to create group.");
+              setError(e?.message ?? t("failedToCreateGroupError"));
             } finally {
               setLoading(false);
             }

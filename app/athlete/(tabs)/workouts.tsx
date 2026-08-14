@@ -46,12 +46,12 @@ function formatRelativeDone(
   return formatDateShort(ms, locale);
 }
 
-function focusFromPlan(plan: WorkoutPlan): string {
+function focusFromPlan(plan: WorkoutPlan, t: (key: string) => string): string {
   const names = (plan.exercises ?? []).map((e) => e.name).filter(Boolean);
-  if (names.length === 0) return "Full session";
+  if (names.length === 0) return t("fullSessionFallback");
   if (names.length === 1) return names[0];
   if (names.length === 2) return `${names[0]} + ${names[1]}`;
-  return `${names[0]} + ${names[1]} + more`;
+  return `${names[0]} + ${names[1]} + ${t("moreExercisesSuffix")}`;
 }
 
 function computeStreak(logDayKeys: Set<string>): number {
@@ -295,11 +295,11 @@ export default function AthleteWorkoutsTab() {
           {!showHub ? (
             <View style={{ backgroundColor: Colors.card, borderRadius: Radius.lg, padding: Spacing.lg, borderWidth: 1, borderColor: Colors.border, alignItems: "center", marginBottom: Spacing.md }}>
               <Ionicons name="barbell-outline" size={40} color={Colors.textMuted} style={{ marginBottom: Spacing.sm }} />
-              <Text style={{ ...Typography.section, textAlign: "center", marginBottom: Spacing.xs }}>No plans yet</Text>
+              <Text style={{ ...Typography.section, textAlign: "center", marginBottom: Spacing.xs }}>{t("noPlansYetTitle")}</Text>
               <Text style={{ ...Typography.secondary, color: Colors.textMuted, textAlign: "center", marginBottom: Spacing.md }}>
-                Create your first plan and start training.
+                {t("noPlansYetSubtitle")}
               </Text>
-              <PrimaryButton title="Create Plan" onPress={() => router.push("/athlete/createPlan" as any)} />
+              <PrimaryButton title={t("createPlanButton")} onPress={() => router.push("/athlete/createPlan" as any)} />
             </View>
           ) : (
             <>
@@ -309,7 +309,7 @@ export default function AthleteWorkoutsTab() {
                 >
                   <Text style={{ ...Typography.secondary, color: Colors.primary, fontWeight: "800", marginBottom: 6 }}>{t("nextUp")}</Text>
                   <Text style={{ ...Typography.title, fontSize: FontSizes.h3, marginBottom: Spacing.xs }}>{recommendedPlan.name}</Text>
-                  <Text style={{ ...Typography.secondary, color: Colors.textSecondary, marginBottom: Spacing.sm }}>{focusFromPlan(recommendedPlan)}</Text>
+                  <Text style={{ ...Typography.secondary, color: Colors.textSecondary, marginBottom: Spacing.sm }}>{focusFromPlan(recommendedPlan, t)}</Text>
                   <Text style={{ ...Typography.secondary, marginBottom: Spacing.md }}>
                     {t("lastWhen", { when: formatRelativeDone(lastMsByPlanId[recommendedPlan.id] ?? 0, t, locale) })}
                   </Text>
@@ -365,7 +365,7 @@ export default function AthleteWorkoutsTab() {
                       <View style={{ flexDirection: "row", gap: Spacing.sm, marginTop: Spacing.md }}>
                         <View style={{ flex: 1 }}>
                           <PrimaryButton
-                            title="Details"
+                            title={t("details")}
                             variant="secondary"
                             onPress={() => router.push({ pathname: "/athlete/workoutPlanDetail" as any, params: { workoutPlanId: plan.id } })}
                           />

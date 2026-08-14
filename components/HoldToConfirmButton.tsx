@@ -12,6 +12,7 @@ import * as Haptics from "expo-haptics";
 import { Colors } from "../theme/colors";
 import { Radius, Spacing } from "../theme/spacing";
 import { Typography } from "../theme/typography";
+import { useI18n } from "../context/I18nContext";
 
 interface HoldToConfirmButtonProps {
   title: string;
@@ -31,6 +32,7 @@ export function HoldToConfirmButton({
   textStyle,
   disabled,
 }: HoldToConfirmButtonProps) {
+  const { t } = useI18n();
   const progress = useSharedValue(0);
   const confirmedRef = useRef(false);
   const [isHolding, setIsHolding] = useState(false);
@@ -77,7 +79,7 @@ export function HoldToConfirmButton({
       disabled={disabled}
       accessibilityRole="button"
       accessibilityLabel={title}
-      accessibilityHint="Hold to confirm"
+      accessibilityHint={t("holdToConfirmHint")}
     >
       <View
         style={[
@@ -87,7 +89,7 @@ export function HoldToConfirmButton({
         ]}
       >
         <Animated.View style={[styles.fill, fillStyle]} />
-        <Text style={[styles.label, textStyle]}>{isHolding ? "Hold..." : title}</Text>
+        <Text style={[styles.label, textStyle]}>{isHolding ? t("holdingEllipsis") : title}</Text>
       </View>
     </Pressable>
   );

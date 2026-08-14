@@ -6,7 +6,8 @@ import { parseFloatInput } from "../utils/inputParsing";
 import { Radius, Spacing } from "../theme/spacing";
 import { Typography } from "../theme/typography";
 import { useUnits } from "../context/UnitsContext";
-import { toKg, toUnit, unitSuffix } from "../utils/units";
+import { useI18n } from "../context/I18nContext";
+import { toKg, toUnit } from "../utils/units";
 
 export type ExerciseDraft = {
   _key: string;
@@ -34,8 +35,8 @@ type Props = {
   dragHandleProps?: any;
 };
 
-function makeSummary(e: ExerciseDraft, displayUnit: string): string {
-  const n = (e.name ?? "").trim() || "New exercise";
+function makeSummary(e: ExerciseDraft, displayUnit: string, t: (key: string) => string): string {
+  const n = (e.name ?? "").trim() || t("newExerciseFallback");
   const sets = Math.max(0, Math.round(Number(e.sets) || 0));
   const reps = String(e.reps ?? "").trim();
   const w = e.weight != null && Number.isFinite(Number(e.weight)) ? `${Number(e.weight)}${displayUnit}` : "";
@@ -55,6 +56,7 @@ export function ExerciseCard({
   dragHandleProps,
 }: Props) {
   const { unit } = useUnits();
+  const { t } = useI18n();
   const nameRef = useRef<TextInput | null>(null);
 
   // Convert stored kg → display unit for the weight input.
@@ -74,8 +76,8 @@ export function ExerciseCard({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value.weight, weightFocused, unit]);
 
-  const suffix = unitSuffix(unit);
-  const summary = useMemo(() => makeSummary(value, suffix), [value, suffix]);
+  const translatedSuffix = t(unit === "lb" ? "unitLb" : "unitKg");
+  const summary = useMemo(() => makeSummary(value, translatedSuffix, t), [value, translatedSuffix, t]);
 
   const update = (patch: Partial<ExerciseDraft>) => onChange({ ...value, ...patch });
 
@@ -114,7 +116,7 @@ export function ExerciseCard({
       >
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Drag to reorder"
+          accessibilityLabel={t("dragToReorderA11y")}
           {...dragHandleProps}
           style={({ pressed }) => ({
             width: 34,
@@ -133,22 +135,22 @@ export function ExerciseCard({
 
         <View style={{ flex: 1 }}>
           <Text style={{ ...Typography.section, fontWeight: "900" }} numberOfLines={1}>
-            {expanded ? ((value.name ?? "").trim() || "New Exercise") : summary}
+            {expanded ? ((value.name ?? "").trim() || t("newExerciseFallbackTitle")) : summary}
           </Text>
           {expanded ? (
             <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 2 }}>
-              Tap to collapse
+              {t("tapToCollapse")}
             </Text>
           ) : (
             <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 2 }}>
-              Tap to expand
+              {t("tapToExpand")}
             </Text>
           )}
         </View>
 
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Duplicate exercise"
+          accessibilityLabel={t("duplicateExerciseA11y")}
           onPress={(e) => {
             e.stopPropagation();
             onDuplicate();
@@ -170,7 +172,7 @@ export function ExerciseCard({
 
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Delete exercise"
+          accessibilityLabel={t("deleteExerciseA11y")}
           onPress={(e) => {
             e.stopPropagation();
             onDelete();
@@ -199,7 +201,7 @@ export function ExerciseCard({
 
       {expanded ? (
         <View style={{ padding: Spacing.md, paddingTop: 0 }}>
-          <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Exercise Name</Text>
+          <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("exerciseNameLabel")}</Text>
           <TextInput
             ref={(r) => { nameRef.current = r; }}
             autoFocus={autoFocusName === true}
@@ -222,7 +224,7 @@ export function ExerciseCard({
 
           <View style={{ flexDirection: "row", gap: Spacing.sm }}>
             <View style={{ flex: 1 }}>
-              <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Sets</Text>
+              <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("exerciseFieldSets")}</Text>
               <TextInput
                 keyboardType="number-pad"
                 value={String(value.sets ?? "")}
@@ -238,7 +240,7 @@ export function ExerciseCard({
               />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Reps</Text>
+              <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("exerciseFieldReps")}</Text>
               <TextInput
                 value={String(value.reps ?? "")}
                 onChangeText={(t) => update({ reps: t })}
@@ -258,7 +260,7 @@ export function ExerciseCard({
 
           <View style={{ flexDirection: "row", gap: Spacing.sm, marginTop: Spacing.sm }}>
             <View style={{ flex: 1 }}>
-              <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Weight ({suffix.toUpperCase()})</Text>
+              <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("weightLabel")} ({translatedSuffix.toUpperCase()})</Text>
               <TextInput
                 // iOS supports decimal-pad; Android may show a numeric keyboard with locale comma.
                 keyboardType={Platform.OS === "ios" ? "decimal-pad" : "numeric"}
@@ -302,7 +304,7 @@ export function ExerciseCard({
               />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Rest (sec)</Text>
+              <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("restSecondsLabel")}</Text>
               <TextInput
                 keyboardType="number-pad"
                 value={String(value.rest ?? "")}
@@ -323,7 +325,7 @@ export function ExerciseCard({
 
           <View style={{ flexDirection: "row", gap: Spacing.sm, marginTop: Spacing.sm }}>
             <View style={{ flex: 1 }}>
-              <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Tempo</Text>
+              <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("tempoLabel")}</Text>
               <TextInput
                 value={String(value.tempo ?? "")}
                 onChangeText={(t) => update({ tempo: t })}
@@ -341,7 +343,7 @@ export function ExerciseCard({
               />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={{ ...Typography.secondary, marginBottom: 6 }}>RPE</Text>
+              <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("exerciseFieldRpe")}</Text>
               <TextInput
                 keyboardType="decimal-pad"
                 value={value.rpe == null ? "" : String(value.rpe)}
@@ -365,11 +367,11 @@ export function ExerciseCard({
           </View>
 
           <View style={{ marginTop: Spacing.sm }}>
-            <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Coach Note</Text>
+            <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("coachNoteFieldLabel")}</Text>
             <TextInput
               value={value.coachNote ?? ""}
-              onChangeText={(t) => update({ coachNote: t })}
-              placeholder="Cues, intent, tempo reminders…"
+              onChangeText={(text) => update({ coachNote: text })}
+              placeholder={t("coachNotePlaceholder")}
               placeholderTextColor={Colors.textMuted}
               multiline
               maxLength={500}
@@ -386,11 +388,11 @@ export function ExerciseCard({
           </View>
 
           <View style={{ marginTop: Spacing.sm }}>
-            <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Video link (optional)</Text>
+            <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("videoLinkLabel")}</Text>
             <TextInput
               value={value.videoUrl ?? ""}
-              onChangeText={(t) => update({ videoUrl: t })}
-              placeholder="https://youtube.com/..."
+              onChangeText={(text) => update({ videoUrl: text })}
+              placeholder={t("videoLinkPlaceholder")}
               placeholderTextColor={Colors.textMuted}
               autoCapitalize="none"
               keyboardType="url"
@@ -404,7 +406,7 @@ export function ExerciseCard({
               }}
             />
             <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4, fontSize: 11 }}>
-              Students can watch this when viewing the exercise
+              {t("videoLinkHelperText")}
             </Text>
           </View>
         </View>

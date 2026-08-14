@@ -13,6 +13,8 @@ import {
 } from "@/utils/workoutLogStats";
 import type { LogWithMeta } from "@/hooks/useWorkoutHistory";
 import { useUnits } from "@/context/UnitsContext";
+import { useI18n } from "@/context/I18nContext";
+import { getExerciseByName, getExerciseName } from "@/services/localExerciseService";
 
 interface WorkoutLogCardProps {
   log: LogWithMeta;
@@ -29,9 +31,10 @@ interface WorkoutLogCardProps {
  */
 function WorkoutLogCardImpl({ log, expanded, onToggle }: WorkoutLogCardProps) {
   const { formatWeight } = useUnits();
+  const { t, locale } = useI18n();
   const vol = sessionVolumeKg(log);
   const prs = countPrs(log);
-  const dur = formatDurationForHistory(log.durationSeconds);
+  const dur = formatDurationForHistory(log.durationSeconds, t);
 
   return (
     <Pressable
@@ -75,7 +78,7 @@ function WorkoutLogCardImpl({ log, expanded, onToggle }: WorkoutLogCardProps) {
                 letterSpacing: 0.5,
               }}
             >
-              COMPLETED
+              {t("completedBadge")}
             </Text>
           </View>
           <Text
@@ -86,7 +89,7 @@ function WorkoutLogCardImpl({ log, expanded, onToggle }: WorkoutLogCardProps) {
             }}
             numberOfLines={2}
           >
-            {log.workoutName || "Workout"}
+            {log.workoutName || t("workoutFallbackName")}
           </Text>
           <View
             style={{
@@ -150,7 +153,7 @@ function WorkoutLogCardImpl({ log, expanded, onToggle }: WorkoutLogCardProps) {
                     fontWeight: "700",
                   }}
                 >
-                  {prs} PR{prs === 1 ? "" : "s"}
+                  {t(prs === 1 ? "prCount_one" : "prCount_other", { count: prs })}
                 </Text>
               </View>
             ) : null}
@@ -191,7 +194,7 @@ function WorkoutLogCardImpl({ log, expanded, onToggle }: WorkoutLogCardProps) {
                   marginBottom: 4,
                 }}
               >
-                Coach feedback
+                {t("coachFeedbackLabel")}
               </Text>
               <Text style={{ ...Typography.secondary, color: Colors.text }}>
                 {log.coachFeedback}
@@ -204,6 +207,8 @@ function WorkoutLogCardImpl({ log, expanded, onToggle }: WorkoutLogCardProps) {
               typeof exRow.volume === "number" && Number.isFinite(exRow.volume)
                 ? exRow.volume
                 : computeExerciseVolumeFromLoggedSets(exRow.sets);
+            const localExercise = getExerciseByName(ex.name);
+            const displayName = localExercise ? getExerciseName(localExercise, locale) : ex.name;
             return (
               <View
                 key={`${log.id}-${ex.name}-${i}`}
@@ -218,7 +223,7 @@ function WorkoutLogCardImpl({ log, expanded, onToggle }: WorkoutLogCardProps) {
                   }}
                 >
                   <Text style={{ ...Typography.section, fontSize: 15 }}>
-                    {ex.name}
+                    {displayName}
                   </Text>
                   {exRow.isPr ? (
                     <Text
@@ -228,7 +233,7 @@ function WorkoutLogCardImpl({ log, expanded, onToggle }: WorkoutLogCardProps) {
                         fontSize: FontSizes.caption,
                       }}
                     >
-                      PR
+                      {t("prBadge")}
                     </Text>
                   ) : null}
                 </View>
@@ -239,13 +244,13 @@ function WorkoutLogCardImpl({ log, expanded, onToggle }: WorkoutLogCardProps) {
                     marginTop: 4,
                   }}
                 >
-                  Planned: {ex.repsPlanned || "—"}
+                  {t("plannedLabel", { value: ex.repsPlanned || "—" })}
                 </Text>
                 {(exRow.sets ?? []).map((s) => {
                   const wLabel =
                     s.weight != null && Number.isFinite(s.weight)
                       ? formatWeight(s.weight)
-                      : "BW";
+                      : t("bodyweightAbbrev");
                   return (
                     <Text
                       key={`${log.id}-${i}-${s.setNumber}`}
@@ -254,7 +259,7 @@ function WorkoutLogCardImpl({ log, expanded, onToggle }: WorkoutLogCardProps) {
                         fontSize: FontSizes.note,
                       }}
                     >
-                      Set {s.setNumber}: {wLabel} × {s.reps}
+                      {t("setLabel", { n: s.setNumber, weight: wLabel, reps: s.reps })}
                     </Text>
                   );
                 })}
@@ -267,7 +272,7 @@ function WorkoutLogCardImpl({ log, expanded, onToggle }: WorkoutLogCardProps) {
                       color: Colors.textMuted,
                     }}
                   >
-                    Volume: {formatWeight(v)}
+                    {t("volumeLabel", { value: formatWeight(v) })}
                   </Text>
                 ) : null}
               </View>

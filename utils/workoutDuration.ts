@@ -23,15 +23,18 @@ export function formatElapsedForTimer(totalSeconds: number): string {
 }
 
 /** History row, e.g. "52 min", "1 h 5 min", "45 sec". */
-export function formatDurationForHistory(seconds: number | undefined | null): string | null {
+export function formatDurationForHistory(
+  seconds: number | undefined | null,
+  t: (key: string, opts?: Record<string, unknown>) => string
+): string | null {
   if (seconds == null || !Number.isFinite(seconds) || seconds < 0) return null;
   const s = Math.floor(seconds);
   if (s === 0) return null;
-  if (s < 60) return `${s} sec`;
+  if (s < 60) return t("durationSec", { n: s });
   const minTotal = Math.round(s / 60);
-  if (minTotal < 60) return `${minTotal} min`;
+  if (minTotal < 60) return t("durationMin", { n: minTotal });
   const h = Math.floor(s / 3600);
   const m = Math.round((s % 3600) / 60);
-  if (m <= 0) return `${h} h`;
-  return `${h} h ${m} min`;
+  if (m <= 0) return t("durationHour", { n: h });
+  return t("durationHourMin", { n: h, m });
 }

@@ -3,6 +3,7 @@ import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, Text, TextInput
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../context/AuthContext";
+import { useI18n } from "../../context/I18nContext";
 import { workoutService } from "../../services/workoutService";
 import type { WorkoutLog, WorkoutPlan } from "../../types/Workout";
 import { Colors } from "../../theme/colors";
@@ -12,23 +13,23 @@ import { ScreenLayout } from "../../components/ScreenLayout";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { toMs } from "../../utils/dateConvert";
 
-/** Coach-facing relative time (coach screens are plain English today, unlike the student i18n strings). */
-function formatEditedAgo(ms: number): string {
+function formatEditedAgo(ms: number, t: (key: string, options?: Record<string, unknown>) => string): string {
   if (!ms) return "";
   const diffMs = Date.now() - ms;
-  if (diffMs < 0) return "just now";
+  if (diffMs < 0) return t("editedAgoJustNow");
   const minutes = Math.floor(diffMs / 60000);
-  if (minutes < 1) return "just now";
-  if (minutes < 60) return `${minutes}m ago`;
+  if (minutes < 1) return t("editedAgoJustNow");
+  if (minutes < 60) return t("editedAgoMinutes", { n: minutes });
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return t("editedAgoHours", { n: hours });
   const days = Math.floor(hours / 24);
-  return `${days}d ago`;
+  return t("editedAgoDays", { n: days });
 }
 
 export default function AssignedWorkouts() {
   const router = useRouter();
   const { user } = useAuth();
+  const { t } = useI18n();
   const params = useLocalSearchParams<{
     studentId?: string;
     studentName?: string;
@@ -38,8 +39,8 @@ export default function AssignedWorkouts() {
 
   const studentId = useMemo(() => String(params.studentId ?? "").trim(), [params.studentId]);
   const groupId = useMemo(() => String(params.groupId ?? "").trim(), [params.groupId]);
-  const studentName = useMemo(() => String(params.studentName ?? "Student"), [params.studentName]);
-  const groupName = useMemo(() => String(params.groupName ?? "Assigned workouts"), [params.groupName]);
+  const studentName = useMemo(() => String(params.studentName ?? t("roleStudent")), [params.studentName, t]);
+  const groupName = useMemo(() => String(params.groupName ?? t("assignedWorkoutsFallbackTitle")), [params.groupName, t]);
 
   const [plans, setPlans] = useState<WorkoutPlan[]>([]);
   const [logs, setLogs] = useState<WorkoutLog[]>([]);
@@ -54,8 +55,8 @@ export default function AssignedWorkouts() {
       setLoading(true);
       setError(null);
       try {
-        if (!user || user.role !== "coach") throw new Error("You must be logged in as a coach.");
-        if (!studentId) throw new Error("Missing studentId.");
+        if (!user || user.role !== "coach") throw new Error(t("mustBeLoggedInAsCoachError"));
+        if (!studentId) throw new Error(t("missingStudentIdError"));
 
         const [workoutPlans, history] = await Promise.all([
           workoutService.getWorkoutPlansForStudentAsCoach(user.id, studentId),
@@ -64,13 +65,13 @@ export default function AssignedWorkouts() {
         setPlans(workoutPlans);
         setLogs(history);
       } catch (e: any) {
-        setError(e?.message ?? "Failed to load assigned workouts.");
+        setError(e?.message ?? t("failedToLoadAssignedWorkoutsError"));
       } finally {
         setLoading(false);
       }
     };
     load();
-  }, [user?.id, user?.role, studentId]);
+  }, [user?.id, user?.role, studentId, t]);
 
   const allActiveSorted = useMemo(
     () =>
@@ -145,11 +146,11 @@ export default function AssignedWorkouts() {
         <View style={{ marginBottom: Spacing.md }}>
           <Text style={{ ...Typography.title, fontSize: 24 }}>{groupName}</Text>
           <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4 }}>
-            For: {studentName}
+            {t("forStudentLabel", { name: studentName })}
           </Text>
           {usingFallbackAll ? (
             <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4 }}>
-              No workouts were linked to this split yet — showing all assigned workouts.
+              {t("fallbackAllWorkoutsNote")}
             </Text>
           ) : null}
         </View>
@@ -177,7 +178,7 @@ export default function AssignedWorkouts() {
               borderColor: Colors.border,
             }}
           >
-            <Text style={{ ...Typography.secondary, color: Colors.textMuted }}>No workouts assigned yet</Text>
+            <Text style={{ ...Typography.secondary, color: Colors.textMuted }}>{t("noWorkoutsAssigned")}</Text>
           </View>
         ) : (
           <View style={{ gap: Spacing.sm }}>
@@ -195,7 +196,7 @@ export default function AssignedWorkouts() {
               // read-back timestamp pair some writes produce.
               const createdMs = toMs(item.createdAt);
               const updatedMs = toMs(item.updatedAt);
-              const editedLabel = updatedMs > 0 && updatedMs - createdMs > 60000 ? formatEditedAgo(updatedMs) : null;
+              const editedLabel = updatedMs > 0 && updatedMs - createdMs > 60000 ? formatEditedAgo(updatedMs, t) : null;
 
               return (
                 <View
@@ -216,16 +217,16 @@ export default function AssignedWorkouts() {
                       </Text>
                       <Text style={{ ...Typography.secondary, color: editedLabel ? Colors.primary : Colors.textMuted, marginTop: 4, fontWeight: editedLabel ? "700" : "400" }}>
                         {editedLabel
-                          ? `Edited ${editedLabel}`
+                          ? t("editedLabelPrefix", { when: editedLabel })
                           : lastCompletedLabel
-                            ? `Last completed: ${lastCompletedLabel}`
-                            : "Last completed: —"}
+                            ? t("lastCompletedLabel", { date: lastCompletedLabel })
+                            : t("lastCompletedEmpty")}
                       </Text>
                     </View>
                     <View style={{ flexDirection: "row", gap: 8 }}>
                       <RowAction
                         icon="open-outline"
-                        label="Open workout"
+                        label={t("openWorkoutA11y")}
                         onPress={() =>
                           router.push({
                             pathname: "/coach/workout",
@@ -235,7 +236,7 @@ export default function AssignedWorkouts() {
                       />
                       <RowAction
                         icon="create-outline"
-                        label="Edit workout"
+                        label={t("editWorkoutA11y")}
                         onPress={() =>
                           router.push({
                             pathname: "/coach/editWorkout",
@@ -245,7 +246,7 @@ export default function AssignedWorkouts() {
                       />
                       <RowAction
                         icon="trash-outline"
-                        label="Remove workout"
+                        label={t("removeWorkoutA11y")}
                         tone="danger"
                         disabled={deletingPlanId !== null}
                         onPress={() => {
@@ -282,17 +283,17 @@ export default function AssignedWorkouts() {
           >
             <View style={{ width: 36, height: 4, borderRadius: 2, backgroundColor: Colors.border, alignSelf: "center", marginBottom: Spacing.md }} />
             <Text style={{ ...Typography.title, fontSize: 18, marginBottom: 6 }}>
-              Remove &ldquo;{removeTarget?.name}&rdquo;?
+              {t("removePlanConfirmTitle", { name: removeTarget?.name ?? "" })}
             </Text>
             <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: Spacing.md }}>
-              {studentName} will be notified immediately. This plan can&rsquo;t be recovered once removed.
+              {t("removePlanConfirmBody", { name: studentName })}
             </Text>
 
-            <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Note for {studentName} (optional)</Text>
+            <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("noteForStudentLabel", { name: studentName })}</Text>
             <TextInput
               value={removeNote}
-              onChangeText={(t) => setRemoveNote(t.slice(0, 500))}
-              placeholder="Why this plan is going away…"
+              onChangeText={(text) => setRemoveNote(text.slice(0, 500))}
+              placeholder={t("removeNotePlaceholder")}
               placeholderTextColor={Colors.textMuted}
               multiline
               style={{
@@ -311,19 +312,19 @@ export default function AssignedWorkouts() {
               <ActivityIndicator />
             ) : (
               <View style={{ flexDirection: "row", gap: Spacing.sm }}>
-                <PrimaryButton title="Cancel" variant="secondary" onPress={() => setRemoveTarget(null)} style={{ flex: 1, width: "auto" }} />
+                <PrimaryButton title={t("cancel")} variant="secondary" onPress={() => setRemoveTarget(null)} style={{ flex: 1, width: "auto" }} />
                 <PrimaryButton
-                  title="Remove"
+                  title={t("removeAction")}
                   onPress={async () => {
                     if (!removeTarget) return;
                     try {
-                      if (!user || user.role !== "coach") throw new Error("You must be logged in as a coach.");
+                      if (!user || user.role !== "coach") throw new Error(t("mustBeLoggedInAsCoachError"));
                       setDeletingPlanId(removeTarget.id);
                       await workoutService.deactivateWorkoutPlan(removeTarget.id, user.id, removeNote.trim() || undefined);
                       setPlans((prev) => prev.map((p) => (p.id === removeTarget.id ? { ...p, isActive: false } : p)));
                       setRemoveTarget(null);
                     } catch (e: any) {
-                      Alert.alert("Failed to remove", e?.message ?? "Unknown error");
+                      Alert.alert(t("failedToRemoveTitle"), e?.message ?? t("unknownErrorFallback"));
                     } finally {
                       setDeletingPlanId(null);
                     }

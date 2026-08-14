@@ -4,6 +4,7 @@ import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography, FontSizes } from "../../theme/typography";
 import { PrimaryButton } from "../PrimaryButton";
+import { useI18n } from "../../context/I18nContext";
 
 const cardShadow = Platform.select({
   ios: {
@@ -39,6 +40,7 @@ export function SettingsProfileCard({
   metaLine = null,
   photoURL = null,
 }: Props) {
+  const { t } = useI18n();
   return (
     <View
       style={[
@@ -82,7 +84,7 @@ export function SettingsProfileCard({
           ) : null}
         </View>
       </View>
-      <PrimaryButton title="Edit Profile" onPress={onEditProfile} />
+      <PrimaryButton title={t("editProfile")} onPress={onEditProfile} />
     </View>
   );
 }

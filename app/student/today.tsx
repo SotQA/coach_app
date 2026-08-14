@@ -4,6 +4,7 @@ import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { WorkoutCard } from "../../components/WorkoutCard";
 import { useAuth } from "../../context/AuthContext";
+import { useI18n } from "../../context/I18nContext";
 import { workoutService } from "../../services/workoutService";
 import type { WorkoutPlan } from "../../types/Workout";
 import { Colors } from "../../theme/colors";
@@ -14,6 +15,7 @@ import { logger } from "@/utils/logger";
 export default function TodayWorkout() {
   const router = useRouter();
   const { user } = useAuth();
+  const { t } = useI18n();
   const [plans, setPlans] = useState<WorkoutPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -70,7 +72,7 @@ export default function TodayWorkout() {
         }}
       >
         <Text style={{ color: Colors.danger, marginBottom: Spacing.xs }}>{error}</Text>
-        <PrimaryButton title="Go to Login" onPress={() => router.replace("/login")} />
+        <PrimaryButton title={t("goToLogin")} onPress={() => router.replace("/login")} />
       </View>
     );
   }
