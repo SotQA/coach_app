@@ -701,5 +701,42 @@
   "noPersonalPlansYetSubtitle": "Utwórz swój pierwszy plan, aby zacząć śledzić własne treningi.",
   "weekAbbrev": "T",
   "fullSessionFallback": "Pełna sesja",
-  "moreExercisesSuffix": "więcej"
+  "moreExercisesSuffix": "więcej",
+
+  "onboardingShowMeAround": "Pokaż mi aplikację",
+  "onboardingSkipTour": "Pomiń",
+  "onboardingWelcomeCoachGreeting": "Witaj, %{name}!",
+  "onboardingWelcomeCoachSub": "Jesteś zalogowany jako Trener. Pokażemy Ci, gdzie wszystko się znajduje.",
+  "onboardingWelcomeStudentGreeting": "Witaj, %{name}!",
+  "onboardingWelcomeStudentSub": "Jesteś zalogowany jako Uczeń. Twój trener przypisze treningi — oto co Cię czeka.",
+  "onboardingWelcomeAthleteGreeting": "Witaj, %{name}!",
+  "onboardingWelcomeAthleteSub": "Jesteś zalogowany jako Atleta. Sam zarządzasz swoimi planami treningowymi.",
+  "onboardingRoleCoach": "Trener",
+  "onboardingRoleStudent": "Uczeń",
+  "onboardingRoleAthlete": "Atleta",
+
+  "onboardingNext": "Dalej →",
+  "onboardingDone": "Gotowe — zaczynamy! 🎉",
+  "onboardingSkip": "Pomiń",
+
+  "onboardingCoachStep1Title": "Powiadomienia",
+  "onboardingCoachStep1Body": "Dostaniesz powiadomienie, gdy uczeń ukończy trening. Kliknij, aby porównać z poprzednią sesją.",
+  "onboardingCoachStep2Title": "Dodaj ucznia",
+  "onboardingCoachStep2Body": "Wpisz e-mail ucznia, aby wysłać zaproszenie. Uczeń zaakceptuje je w swojej aplikacji.",
+  "onboardingCoachStep3Title": "Mój trening",
+  "onboardingCoachStep3Body": "Możesz też trenować sam. Twórz własne plany i śledź swoje sesje niezależnie od uczniów.",
+  "onboardingCoachStep4Title": "Zakładka «Uczniowie»",
+  "onboardingCoachStep4Body": "Tu znajdziesz wszystkich swoich uczniów, przypisane plany i ostatnią aktywność.",
+
+  "onboardingStudentStep1Title": "Czekasz na trenera",
+  "onboardingStudentStep1Body": "To normalne! Gdy trener Cię doda i przypisze plan — treningi pojawią się tutaj automatycznie.",
+  "onboardingStudentStep2Title": "Twoje powiadomienia",
+  "onboardingStudentStep2Body": "Gdy trener przypisze trening — dostaniesz powiadomienie z przyciskiem «Akceptuj».",
+  "onboardingStudentStep3Title": "Twój profil",
+  "onboardingStudentStep3Body": "Statystyki, dane osobowe i połączenie z trenerem — wszystko tutaj.",
+
+  "onboardingAthleteStep1Title": "Utwórz pierwszy plan",
+  "onboardingAthleteStep1Body": "Nazwij plan, dodaj ćwiczenia, ustaw serie i powtórzenia.",
+  "onboardingAthleteStep2Title": "Twój postęp",
+  "onboardingAthleteStep2Body": "Po kilku sesjach pojawią się tu wykresy siły, objętości i rekordów osobistych."
 }

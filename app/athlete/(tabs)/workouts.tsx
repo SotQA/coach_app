@@ -22,6 +22,7 @@ import { Radius, Spacing } from "../../../theme/spacing";
 import { Typography, FontSizes } from "../../../theme/typography";
 import { PrimaryButton } from "../../../components/PrimaryButton";
 import { ScreenLayout } from "../../../components/ScreenLayout";
+import { SpotlightTarget } from "../../../components/onboarding/SpotlightTarget";
 import { formatElapsedForTimer } from "../../../utils/workoutDuration";
 import { useStartWorkout } from "../../../hooks/useStartWorkout";
 import { formatDateShort } from "../../../utils/formatLocale";
@@ -293,14 +294,17 @@ export default function AthleteWorkoutsTab() {
           ) : null}
 
           {!showHub ? (
-            <View style={{ backgroundColor: Colors.card, borderRadius: Radius.lg, padding: Spacing.lg, borderWidth: 1, borderColor: Colors.border, alignItems: "center", marginBottom: Spacing.md }}>
+            <SpotlightTarget
+              id="athlete-emptyState"
+              style={{ backgroundColor: Colors.card, borderRadius: Radius.lg, padding: Spacing.lg, borderWidth: 1, borderColor: Colors.border, alignItems: "center", marginBottom: Spacing.md }}
+            >
               <Ionicons name="barbell-outline" size={40} color={Colors.textMuted} style={{ marginBottom: Spacing.sm }} />
               <Text style={{ ...Typography.section, textAlign: "center", marginBottom: Spacing.xs }}>{t("noPlansYetTitle")}</Text>
               <Text style={{ ...Typography.secondary, color: Colors.textMuted, textAlign: "center", marginBottom: Spacing.md }}>
                 {t("noPlansYetSubtitle")}
               </Text>
               <PrimaryButton title={t("createPlanButton")} onPress={() => router.push("/athlete/createPlan" as any)} />
-            </View>
+            </SpotlightTarget>
           ) : (
             <>
               {recommendedPlan ? (

@@ -1,9 +1,11 @@
+import { Pressable } from "react-native";
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "../../../theme/colors";
 import { FontSizes } from "../../../theme/typography";
 import { useI18n } from "../../../context/I18nContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SpotlightTarget } from "../../../components/onboarding/SpotlightTarget";
 
 export default function AthleteTabsLayout() {
   const { t } = useI18n();
@@ -50,6 +52,11 @@ export default function AthleteTabsLayout() {
           title: t("nav_progress"),
           tabBarIcon: ({ color, size, focused }) => (
             <Ionicons name={focused ? "stats-chart" : "stats-chart-outline"} color={color} size={size} />
+          ),
+          tabBarButton: ({ ref: _ref, ...props }) => (
+            <SpotlightTarget id="athlete-tab-progress" style={{ flex: 1 }}>
+              <Pressable {...props} />
+            </SpotlightTarget>
           ),
         }}
       />

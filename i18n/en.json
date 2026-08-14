@@ -702,5 +702,42 @@
   "noPersonalPlansYetSubtitle": "Create your first plan to start tracking your own training.",
   "weekAbbrev": "W",
   "fullSessionFallback": "Full session",
-  "moreExercisesSuffix": "more"
+  "moreExercisesSuffix": "more",
+
+  "onboardingShowMeAround": "Show me around",
+  "onboardingSkipTour": "Skip tour",
+  "onboardingWelcomeCoachGreeting": "Welcome, %{name}!",
+  "onboardingWelcomeCoachSub": "You're set up as a Coach. Let's take a quick tour so you know exactly where everything lives.",
+  "onboardingWelcomeStudentGreeting": "Welcome, %{name}!",
+  "onboardingWelcomeStudentSub": "You're set up as a Student. Your coach will assign workouts — here's what to expect while you wait.",
+  "onboardingWelcomeAthleteGreeting": "Welcome, %{name}!",
+  "onboardingWelcomeAthleteSub": "You're set up as an Athlete. You're in full control — build your own plans and track every session.",
+  "onboardingRoleCoach": "Coach",
+  "onboardingRoleStudent": "Student",
+  "onboardingRoleAthlete": "Athlete",
+
+  "onboardingNext": "Next →",
+  "onboardingDone": "Done — let's go! 🎉",
+  "onboardingSkip": "Skip",
+
+  "onboardingCoachStep1Title": "Notifications",
+  "onboardingCoachStep1Body": "Get alerted when a student completes a workout. Tap to see who finished and compare with their last session.",
+  "onboardingCoachStep2Title": "Add Student",
+  "onboardingCoachStep2Body": "Enter a student's email to send them an invite. They'll accept from their app and you'll be notified.",
+  "onboardingCoachStep3Title": "My Training",
+  "onboardingCoachStep3Body": "You can train too. Build your own plans here and track your personal sessions separately from your students.",
+  "onboardingCoachStep4Title": "Students tab",
+  "onboardingCoachStep4Body": "See all your students, their assigned plans, and recent activity. Your coaching hub.",
+
+  "onboardingStudentStep1Title": "Waiting on your coach",
+  "onboardingStudentStep1Body": "This is normal! Once your coach adds you and assigns a plan, your workouts appear here automatically.",
+  "onboardingStudentStep2Title": "Your notifications",
+  "onboardingStudentStep2Body": "When your coach assigns a workout or updates your plan, you'll get a notification here with an Accept button.",
+  "onboardingStudentStep3Title": "Your profile",
+  "onboardingStudentStep3Body": "Check your stats, edit your info, and see your coach connection here.",
+
+  "onboardingAthleteStep1Title": "Build your first plan",
+  "onboardingAthleteStep1Body": "Name it, add exercises, set sets and reps. Create as many plans as you need — Push/Pull/Legs, Upper/Lower, anything.",
+  "onboardingAthleteStep2Title": "Track your progress",
+  "onboardingAthleteStep2Body": "After a few sessions your charts appear here — strength curves, volume over time, PRs."
 }
