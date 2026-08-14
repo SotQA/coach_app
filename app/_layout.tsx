@@ -8,6 +8,10 @@ import { ActiveWorkoutSessionProvider, useActiveWorkoutSession } from "../contex
 import { ElapsedTimeProvider } from "../context/ElapsedTimeContext";
 import { I18nProvider } from "../context/I18nContext";
 import { UnitsProvider } from "../context/UnitsContext";
+import { SpotlightRegistryProvider } from "../context/SpotlightRegistryContext";
+import { OnboardingTourProvider } from "../context/OnboardingTourContext";
+import { WelcomeSplash } from "../components/onboarding/WelcomeSplash";
+import { SpotlightOverlay } from "../components/onboarding/SpotlightOverlay";
 import * as SystemUI from "expo-system-ui";
 import { DarkTheme, ThemeProvider } from "@react-navigation/native";
 import { Colors } from "../theme/colors";
@@ -276,15 +280,21 @@ export default function Layout() {
       <I18nProvider>
         <UnitsProvider>
         <AuthProvider>
+          <SpotlightRegistryProvider>
+          <OnboardingTourProvider>
           <ActiveWorkoutSessionProvider>
             <ElapsedTimeProvider>
               <ThemeProvider value={navTheme}>
                 <ErrorBoundary>
                   <RootNavigator />
                 </ErrorBoundary>
+                <WelcomeSplash />
+                <SpotlightOverlay />
               </ThemeProvider>
             </ElapsedTimeProvider>
           </ActiveWorkoutSessionProvider>
+          </OnboardingTourProvider>
+          </SpotlightRegistryProvider>
         </AuthProvider>
         </UnitsProvider>
       </I18nProvider>

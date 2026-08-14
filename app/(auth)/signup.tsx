@@ -19,6 +19,7 @@ import { PrimaryButton } from "../../components/PrimaryButton";
 import { InputField } from "../../components/InputField";
 import { useAuth } from "../../context/AuthContext";
 import { useI18n } from "../../context/I18nContext";
+import { useOnboardingTour } from "../../context/OnboardingTourContext";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography, FontSizes } from "../../theme/typography";
@@ -240,6 +241,7 @@ export default function Signup() {
   const { width: windowWidth } = useWindowDimensions();
   const { user, loading: authLoading, signup } = useAuth();
   const { t } = useI18n();
+  const { presentWelcome } = useOnboardingTour();
   const scrollRef = useRef<KeyboardAwareScrollView | null>(null);
   const trackWidth = Math.max(0, windowWidth - Spacing.lg * 2);
   const barW = useSharedValue((trackWidth * 1) / TOTAL_STEPS);
@@ -339,6 +341,7 @@ export default function Signup() {
         dateOfBirth.trim(),
         sex
       );
+      presentWelcome(firstName.trim());
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : t("failedToSignup");
       setError(msg);

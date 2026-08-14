@@ -701,5 +701,42 @@
   "noPersonalPlansYetSubtitle": "Создайте свой первый план, чтобы начать отслеживать собственные тренировки.",
   "weekAbbrev": "Н",
   "fullSessionFallback": "Полная тренировка",
-  "moreExercisesSuffix": "ещё"
+  "moreExercisesSuffix": "ещё",
+
+  "onboardingShowMeAround": "Показать приложение",
+  "onboardingSkipTour": "Пропустить",
+  "onboardingWelcomeCoachGreeting": "Добро пожаловать, %{name}!",
+  "onboardingWelcomeCoachSub": "Вы вошли как Тренер. Давайте покажем, где всё находится.",
+  "onboardingWelcomeStudentGreeting": "Добро пожаловать, %{name}!",
+  "onboardingWelcomeStudentSub": "Вы вошли как Ученик. Ваш тренер назначит тренировки — вот что вас ждёт.",
+  "onboardingWelcomeAthleteGreeting": "Добро пожаловать, %{name}!",
+  "onboardingWelcomeAthleteSub": "Вы вошли как Атлет. Вы сами управляете своим планом тренировок.",
+  "onboardingRoleCoach": "Тренер",
+  "onboardingRoleStudent": "Ученик",
+  "onboardingRoleAthlete": "Атлет",
+
+  "onboardingNext": "Далее →",
+  "onboardingDone": "Готово — вперёд! 🎉",
+  "onboardingSkip": "Пропустить",
+
+  "onboardingCoachStep1Title": "Уведомления",
+  "onboardingCoachStep1Body": "Вы получите уведомление, когда ученик завершит тренировку. Нажмите, чтобы сравнить с предыдущей.",
+  "onboardingCoachStep2Title": "Добавить ученика",
+  "onboardingCoachStep2Body": "Введите email ученика, чтобы отправить приглашение. Он примет его в своём приложении.",
+  "onboardingCoachStep3Title": "Мои тренировки",
+  "onboardingCoachStep3Body": "Вы тоже можете тренироваться. Создайте личные планы и отслеживайте свои сессии.",
+  "onboardingCoachStep4Title": "Вкладка «Ученики»",
+  "onboardingCoachStep4Body": "Здесь все ваши ученики, назначенные планы и последняя активность.",
+
+  "onboardingStudentStep1Title": "Ожидание тренера",
+  "onboardingStudentStep1Body": "Это нормально! Как только тренер добавит вас и назначит план — тренировки появятся здесь.",
+  "onboardingStudentStep2Title": "Ваши уведомления",
+  "onboardingStudentStep2Body": "Когда тренер назначит тренировку — вы получите уведомление с кнопкой «Принять».",
+  "onboardingStudentStep3Title": "Ваш профиль",
+  "onboardingStudentStep3Body": "Статистика, личные данные и связь с тренером — всё здесь.",
+
+  "onboardingAthleteStep1Title": "Создайте первый план",
+  "onboardingAthleteStep1Body": "Назовите план, добавьте упражнения, задайте подходы и повторения.",
+  "onboardingAthleteStep2Title": "Ваш прогресс",
+  "onboardingAthleteStep2Body": "После нескольких сессий здесь появятся графики силы, объёма и личных рекордов."
 }

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { View } from "react-native";
+import { Pressable, View } from "react-native";
 import { Tabs, useNavigation } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -7,6 +7,7 @@ import { Colors } from "../../../theme/colors";
 import { FontSizes } from "../../../theme/typography";
 import { useI18n } from "../../../context/I18nContext";
 import { useCoachFabVisibility } from "../../../context/CoachFabVisibilityContext";
+import { SpotlightTarget } from "../../../components/onboarding/SpotlightTarget";
 
 const FAB_SIZE = 56;
 
@@ -70,6 +71,11 @@ export default function CoachTabsLayout() {
           title: t("nav_students"),
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="people-outline" color={color} size={size} />
+          ),
+          tabBarButton: ({ ref: _ref, ...props }) => (
+            <SpotlightTarget id="coach-tab-students" style={{ flex: 1 }}>
+              <Pressable {...props} />
+            </SpotlightTarget>
           ),
         }}
       />

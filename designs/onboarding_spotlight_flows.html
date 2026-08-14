@@ -1,0 +1,506 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif; }
+.wrap { background: #0a0a0a; padding: 20px 12px 28px; border-radius: 16px; }
+.section-title { color: #C8FF00; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; text-align: center; margin-bottom: 14px; }
+.row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px; }
+.phone { width: 160px; background: #000; border-radius: 26px; border: 1.5px solid #2a2a2a; overflow: hidden; position: relative; }
+.screen { background: #000; min-height: 310px; display: flex; flex-direction: column; position: relative; }
+.sbar { padding: 9px 13px 3px; display: flex; justify-content: space-between; }
+.st { color: #fff; font-size: 9px; font-weight: 600; }
+.sr { color: #fff; font-size: 8px; }
+.slbl { font-size: 8px; font-weight: 700; color: #C8FF00; text-transform: uppercase; letter-spacing: 0.07em; text-align: center; padding: 5px 0 7px; }
+
+/* Overlay */
+.ov { position: absolute; inset: 0; background: rgba(0,0,0,0.82); z-index: 10; display: flex; flex-direction: column; }
+.skip { color: #888; font-size: 9px; padding: 10px 13px 0; text-align: right; }
+.steps-ind { display: flex; gap: 4px; justify-content: center; padding: 6px 0 0; }
+.dot { width: 5px; height: 5px; border-radius: 50%; background: #333; }
+.dot.on { background: #C8FF00; }
+
+/* Spotlight cutout effect via box-shadow on a transparent hole */
+.spotlight-area { position: relative; flex: 1; }
+.hole { position: absolute; border-radius: 12px; box-shadow: 0 0 0 600px rgba(0,0,0,0.82); z-index: 1; }
+.tooltip { position: absolute; z-index: 2; background: #1c1c1e; border: 1px solid #C8FF00; border-radius: 12px; padding: 10px 11px; width: 130px; }
+.tt-title { color: #C8FF00; font-size: 10px; font-weight: 700; margin-bottom: 3px; }
+.tt-body { color: #ccc; font-size: 9px; line-height: 1.4; }
+.tt-arrow { width: 0; height: 0; border-left: 7px solid transparent; border-right: 7px solid transparent; }
+.tt-arrow.up { border-bottom: 7px solid #C8FF00; margin-bottom: -1px; }
+.tt-arrow.down { border-top: 7px solid #C8FF00; margin-top: -1px; }
+
+/* Base UI elements */
+.dash-header { padding: 8px 13px 6px; display: flex; justify-content: space-between; align-items: center; }
+.avatar-row { display: flex; align-items: center; gap: 7px; }
+.av-circle { width: 28px; height: 28px; border-radius: 50%; background: #2a2a2a; border: 1.5px solid #C8FF00; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 9px; font-weight: 700; }
+.av-name { color: #fff; font-size: 11px; font-weight: 700; }
+.av-status { color: #C8FF00; font-size: 8px; }
+.bell { width: 26px; height: 26px; border-radius: 50%; background: #1c1c1e; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+.divider { height: 0.5px; background: #1e1e1e; margin: 0 13px; }
+.overview-lbl { color: #fff; font-size: 14px; font-weight: 700; padding: 8px 13px 2px; }
+.overview-sub { color: #555; font-size: 8px; padding: 0 13px 8px; }
+.stat-row { display: flex; gap: 6px; padding: 0 13px 8px; }
+.stat-card { flex: 1; background: #1c1c1e; border-radius: 10px; padding: 8px; }
+.stat-num { color: #fff; font-size: 14px; font-weight: 700; }
+.stat-lbl { color: #888; font-size: 7px; margin-top: 2px; }
+.btn-row { display: flex; gap: 6px; padding: 0 13px 8px; }
+.btn-lime-s { flex: 1; background: #C8FF00; border-radius: 14px; padding: 7px; text-align: center; color: #000; font-size: 9px; font-weight: 700; }
+.btn-dark-s { flex: 1; background: #1c1c1e; border-radius: 14px; padding: 7px; text-align: center; color: #fff; font-size: 9px; }
+.my-train { background: #1c1c1e; border-radius: 12px; margin: 0 13px; padding: 10px; }
+.mt-header { display: flex; justify-content: space-between; margin-bottom: 5px; }
+.mt-title { color: #fff; font-size: 10px; font-weight: 600; }
+.mt-link { color: #C8FF00; font-size: 8px; }
+.mt-empty { color: #555; font-size: 8px; display: flex; align-items: center; gap: 5px; }
+.nav-bar { background: #111; border-top: 0.5px solid #222; padding: 7px 0 10px; display: flex; justify-content: space-around; }
+.nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.nav-ic { font-size: 14px; color: #555; }
+.nav-ic.on { color: #C8FF00; }
+.nav-l { font-size: 7px; color: #555; }
+.nav-l.on { color: #C8FF00; }
+.fab-s { width: 32px; height: 32px; border-radius: 50%; background: #C8FF00; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #000; margin-top: -6px; }
+
+/* Student screen */
+.workout-empty { background: #1c1c1e; border-radius: 12px; margin: 0 13px; padding: 20px 12px; text-align: center; }
+.we-icon { font-size: 20px; color: #555; margin-bottom: 6px; }
+.we-title { color: #fff; font-size: 10px; font-weight: 600; margin-bottom: 3px; }
+.we-sub { color: #555; font-size: 8px; line-height: 1.3; }
+
+/* Next btn */
+.next-btn { background: #C8FF00; border-radius: 16px; padding: 7px 18px; color: #000; font-size: 10px; font-weight: 700; display: inline-block; }
+.next-wrap { text-align: center; padding: 10px 0 6px; }
+
+/* Role badge */
+.role-badge { display: inline-block; padding: 2px 8px; border-radius: 8px; font-size: 8px; font-weight: 700; }
+.rb-coach { background: #1a2a3a; color: #5ac8fa; }
+.rb-student { background: #2a2a1a; color: #C8FF00; }
+.rb-athlete { background: #2a1a2a; color: #ff6b9d; }
+
+.step-note { background: #111; border-radius: 10px; padding: 8px 10px; margin-top: 6px; width: 160px; }
+.sn-title { color: #C8FF00; font-size: 8px; font-weight: 700; margin-bottom: 3px; }
+.sn-body { color: #666; font-size: 8px; line-height: 1.4; }
+
+.role-intro { position: absolute; inset: 0; background: rgba(0,0,0,0.92); z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; text-align: center; }
+.ri-emoji { font-size: 28px; margin-bottom: 8px; }
+.ri-title { color: #fff; font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+.ri-sub { color: #888; font-size: 9px; line-height: 1.5; margin-bottom: 14px; }
+.ri-btn { background: #C8FF00; border-radius: 16px; padding: 8px 20px; color: #000; font-size: 10px; font-weight: 700; }
+.ri-skip { color: #555; font-size: 8px; margin-top: 8px; }
+</style>
+
+<div class="wrap">
+<h2 style="display:none">Onboarding spotlight designs for Coach, Student, and Athlete roles</h2>
+
+<!-- WELCOME SPLASH -->
+<div class="section-title">Step 0 — Welcome splash (all roles, right after registration)</div>
+<div class="row">
+
+  <div style="display:flex; flex-direction:column; align-items:center;">
+    <div class="phone">
+      <div class="screen">
+        <div class="sbar"><span class="st">21:28</span><span class="sr">▪▪ WiFi</span></div>
+        <div class="role-intro">
+          <div class="ri-emoji">🏋️</div>
+          <div class="ri-title">Welcome, Sergey!</div>
+          <div class="ri-sub">You're set up as a <span style="color:#5ac8fa; font-weight:600;">Coach</span>. Let's take a quick tour so you know exactly where everything lives.</div>
+          <div class="ri-btn">Show me around</div>
+          <div class="ri-skip">Skip tour</div>
+        </div>
+      </div>
+    </div>
+    <div class="step-note"><div class="sn-title">Coach splash</div><div class="sn-body">Role confirmed in accent color. Two options — tour or skip. Tour is 4 steps.</div></div>
+  </div>
+
+  <div style="display:flex; flex-direction:column; align-items:center;">
+    <div class="phone">
+      <div class="screen">
+        <div class="sbar"><span class="st">21:30</span><span class="sr">▪▪ WiFi</span></div>
+        <div class="role-intro">
+          <div class="ri-emoji">💪</div>
+          <div class="ri-title">Welcome, Marta!</div>
+          <div class="ri-sub">You're set up as a <span style="color:#C8FF00; font-weight:600;">Student</span>. Your coach will assign workouts — here's what to expect while you wait.</div>
+          <div class="ri-btn">Show me around</div>
+          <div class="ri-skip">Skip tour</div>
+        </div>
+      </div>
+    </div>
+    <div class="step-note"><div class="sn-title">Student splash</div><div class="sn-body">Sets expectation that coach drives the experience — reduces confusion on empty screen.</div></div>
+  </div>
+
+  <div style="display:flex; flex-direction:column; align-items:center;">
+    <div class="phone">
+      <div class="screen">
+        <div class="sbar"><span class="st">21:30</span><span class="sr">▪▪ WiFi</span></div>
+        <div class="role-intro">
+          <div class="ri-emoji">🔥</div>
+          <div class="ri-title">Welcome, Jan!</div>
+          <div class="ri-sub">You're set up as an <span style="color:#ff6b9d; font-weight:600;">Athlete</span>. You're in full control — build your own plans and track every session.</div>
+          <div class="ri-btn">Show me around</div>
+          <div class="ri-skip">Skip tour</div>
+        </div>
+      </div>
+    </div>
+    <div class="step-note"><div class="sn-title">Athlete splash</div><div class="sn-body">Signals independence — athlete owns their plan, no coach required.</div></div>
+  </div>
+
+</div>
+
+<!-- COACH FLOW -->
+<div class="section-title" style="margin-top:4px;">Coach tour — 4 spotlight steps</div>
+<div class="row">
+
+  <!-- Coach step 1: bell -->
+  <div style="display:flex; flex-direction:column; align-items:center;">
+    <div class="slbl">Step 1 of 4</div>
+    <div class="phone">
+      <div class="screen">
+        <div class="sbar"><span class="st">21:28</span><span class="sr">▪▪ WiFi</span></div>
+        <div class="dash-header">
+          <div class="avatar-row">
+            <div class="av-circle">SS</div>
+            <div><div class="av-name">Sergey</div><div class="av-status">Active Now</div></div>
+          </div>
+          <div class="bell">🔔</div>
+        </div>
+        <div class="divider"></div>
+        <div class="overview-lbl">Overview</div>
+        <div class="overview-sub">Here's what's happening today, Aug 14, 2026.</div>
+        <div class="stat-row">
+          <div class="stat-card"><div class="stat-num">0</div><div class="stat-lbl">Total Students</div></div>
+          <div class="stat-card"><div class="stat-num">0</div><div class="stat-lbl">Workouts Today</div></div>
+        </div>
+        <div class="btn-row">
+          <div class="btn-lime-s">▶ Start Log</div>
+          <div class="btn-dark-s">+👤 Add Student</div>
+        </div>
+
+        <!-- Overlay -->
+        <div class="ov">
+          <div class="skip">Skip</div>
+          <div class="steps-ind"><div class="dot on"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+          <div style="flex:1; position:relative; display:flex; align-items:flex-start; justify-content:flex-end; padding: 14px 13px 0;">
+            <div style="display:flex; flex-direction:column; align-items:flex-end;">
+              <div class="tooltip" style="margin-right:0;">
+                <div class="tt-title">🔔 Notifications</div>
+                <div class="tt-body">Get alerted when a student completes a workout. Tap to see who finished and compare with their last session.</div>
+              </div>
+              <div class="tt-arrow up" style="margin-right:10px;"></div>
+            </div>
+          </div>
+          <div class="next-wrap"><div class="next-btn">Next →</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="step-note"><div class="sn-title">Bell icon</div><div class="sn-body">Arrow points up-right at the bell. Explains notifications before they fire.</div></div>
+  </div>
+
+  <!-- Coach step 2: Add Student -->
+  <div style="display:flex; flex-direction:column; align-items:center;">
+    <div class="slbl">Step 2 of 4</div>
+    <div class="phone">
+      <div class="screen">
+        <div class="sbar"><span class="st">21:28</span><span class="sr">▪▪ WiFi</span></div>
+        <div class="dash-header">
+          <div class="avatar-row">
+            <div class="av-circle">SS</div>
+            <div><div class="av-name">Sergey</div><div class="av-status">Active Now</div></div>
+          </div>
+          <div class="bell">🔔</div>
+        </div>
+        <div class="divider"></div>
+        <div class="overview-lbl">Overview</div>
+        <div class="overview-sub">Here's what's happening today.</div>
+        <div class="stat-row">
+          <div class="stat-card"><div class="stat-num">0</div><div class="stat-lbl">Total Students</div></div>
+          <div class="stat-card"><div class="stat-num">0</div><div class="stat-lbl">Workouts Today</div></div>
+        </div>
+        <div class="btn-row">
+          <div class="btn-lime-s">▶ Start Log</div>
+          <div class="btn-dark-s" style="border:1.5px solid #C8FF00;">+👤 Add Student</div>
+        </div>
+
+        <div class="ov">
+          <div class="skip">Skip</div>
+          <div class="steps-ind"><div class="dot"></div><div class="dot on"></div><div class="dot"></div><div class="dot"></div></div>
+          <div style="flex:1; position:relative; display:flex; align-items:center; justify-content:flex-end; padding: 0 13px;">
+            <div style="display:flex; flex-direction:column; align-items:flex-end; margin-top: 40px;">
+              <div class="tooltip">
+                <div class="tt-title">➕ Add Student</div>
+                <div class="tt-body">Enter a student's email to send them an invite. They'll accept from their app and you'll be notified.</div>
+              </div>
+              <div class="tt-arrow up" style="margin-right:10px;"></div>
+            </div>
+          </div>
+          <div class="next-wrap"><div class="next-btn">Next →</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="step-note"><div class="sn-title">Add Student button</div><div class="sn-body">Highlights the button with lime border. Explains the invite flow upfront.</div></div>
+  </div>
+
+  <!-- Coach step 3: My Training -->
+  <div style="display:flex; flex-direction:column; align-items:center;">
+    <div class="slbl">Step 3 of 4</div>
+    <div class="phone">
+      <div class="screen">
+        <div class="sbar"><span class="st">21:28</span><span class="sr">▪▪ WiFi</span></div>
+        <div class="dash-header">
+          <div class="avatar-row">
+            <div class="av-circle">SS</div>
+            <div><div class="av-name">Sergey</div><div class="av-status">Active Now</div></div>
+          </div>
+          <div class="bell">🔔</div>
+        </div>
+        <div class="divider"></div>
+        <div class="overview-lbl">Overview</div>
+        <div class="overview-sub">Here's what's happening today.</div>
+        <div class="stat-row">
+          <div class="stat-card"><div class="stat-num">0</div><div class="stat-lbl">Total Students</div></div>
+          <div class="stat-card"><div class="stat-num">0</div><div class="stat-lbl">Workouts Today</div></div>
+        </div>
+        <div class="btn-row">
+          <div class="btn-lime-s">▶ Start Log</div>
+          <div class="btn-dark-s">+👤 Add Student</div>
+        </div>
+        <div class="my-train" style="border: 1.5px solid #C8FF00;">
+          <div class="mt-header"><div class="mt-title">My Training</div><div class="mt-link">View all</div></div>
+          <div class="mt-empty">⚙ No personal plans yet</div>
+        </div>
+
+        <div class="ov">
+          <div class="skip">Skip</div>
+          <div class="steps-ind"><div class="dot"></div><div class="dot"></div><div class="dot on"></div><div class="dot"></div></div>
+          <div style="flex:1; position:relative; display:flex; align-items:flex-end; padding: 0 13px 12px;">
+            <div style="display:flex; flex-direction:column; align-items:flex-start;">
+              <div class="tt-arrow down" style="margin-left:10px;"></div>
+              <div class="tooltip">
+                <div class="tt-title">🏋️ My Training</div>
+                <div class="tt-body">You can train too. Build your own plans here and track your personal sessions separately from your students.</div>
+              </div>
+            </div>
+          </div>
+          <div class="next-wrap"><div class="next-btn">Next →</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="step-note"><div class="sn-title">My Training section</div><div class="sn-body">Arrow points down at the card. Coaches often don't realise they can also track themselves.</div></div>
+  </div>
+
+  <!-- Coach step 4: Students tab -->
+  <div style="display:flex; flex-direction:column; align-items:center;">
+    <div class="slbl">Step 4 of 4</div>
+    <div class="phone">
+      <div class="screen">
+        <div class="sbar"><span class="st">21:28</span><span class="sr">▪▪ WiFi</span></div>
+        <div class="dash-header">
+          <div class="avatar-row">
+            <div class="av-circle">SS</div>
+            <div><div class="av-name">Sergey</div><div class="av-status">Active Now</div></div>
+          </div>
+          <div class="bell">🔔</div>
+        </div>
+        <div class="divider"></div>
+        <div class="overview-lbl">Overview</div>
+        <div class="stat-row">
+          <div class="stat-card"><div class="stat-num">0</div><div class="stat-lbl">Total Students</div></div>
+          <div class="stat-card"><div class="stat-num">0</div><div class="stat-lbl">Workouts Today</div></div>
+        </div>
+        <div class="btn-row">
+          <div class="btn-lime-s">▶ Start Log</div>
+          <div class="btn-dark-s">+👤 Add Student</div>
+        </div>
+        <div class="my-train">
+          <div class="mt-header"><div class="mt-title">My Training</div><div class="mt-link">View all</div></div>
+          <div class="mt-empty">⚙ No personal plans yet</div>
+        </div>
+        <div style="flex:1;"></div>
+        <div class="nav-bar">
+          <div class="nav-item"><div class="nav-ic on">⌂</div><div class="nav-l on">Dashboard</div></div>
+          <div class="nav-item" style="border: 1.5px solid #C8FF00; border-radius: 8px; padding: 2px 6px;"><div class="nav-ic">👥</div><div class="nav-l">Students</div></div>
+          <div class="nav-item"><div class="fab-s">+</div></div>
+          <div class="nav-item"><div class="nav-ic">▪▪▪</div><div class="nav-l">Progress</div></div>
+          <div class="nav-item"><div class="nav-ic">⚙</div><div class="nav-l">Settings</div></div>
+        </div>
+
+        <div class="ov">
+          <div class="skip">Skip</div>
+          <div class="steps-ind"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot on"></div></div>
+          <div style="flex:1;"></div>
+          <div style="padding: 0 13px 8px; display:flex; justify-content:flex-start;">
+            <div>
+              <div class="tt-arrow down" style="margin-left:22px;"></div>
+              <div class="tooltip">
+                <div class="tt-title">👥 Students tab</div>
+                <div class="tt-body">See all your students, their assigned plans, and recent activity. Your coaching hub.</div>
+              </div>
+            </div>
+          </div>
+          <div class="next-wrap"><div class="next-btn" style="background:#fff; color:#000;">Done — let's go! 🎉</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="step-note"><div class="sn-title">Students tab in nav</div><div class="sn-body">Last step — finish button instead of Next. Drops them straight into the app.</div></div>
+  </div>
+
+</div>
+
+<!-- STUDENT + ATHLETE -->
+<div class="section-title" style="margin-top:4px;">Student & Athlete — key steps</div>
+<div class="row">
+
+  <!-- Student: empty state explained -->
+  <div style="display:flex; flex-direction:column; align-items:center;">
+    <div class="slbl">Student — Step 1 of 3</div>
+    <div class="phone">
+      <div class="screen">
+        <div class="sbar"><span class="st">21:30</span><span class="sr">▪▪ WiFi</span></div>
+        <div style="padding: 8px 13px 6px; display:flex; justify-content:space-between; align-items:center;">
+          <div style="color:#fff; font-size:14px; font-weight:700;">Workouts</div>
+          <div style="display:flex; gap:6px;">
+            <div class="bell">🔔</div>
+            <div class="bell">📅</div>
+          </div>
+        </div>
+        <div style="padding: 10px 13px; flex:1;">
+          <div class="workout-empty">
+            <div class="we-icon">⚙</div>
+            <div class="we-title">No workouts assigned yet</div>
+            <div class="we-sub">Your coach will assign your training split soon</div>
+          </div>
+        </div>
+        <div class="nav-bar">
+          <div class="nav-item"><div class="nav-ic on">⚙</div><div class="nav-l on">Workouts</div></div>
+          <div class="nav-item"><div class="nav-ic">🕐</div><div class="nav-l">History</div></div>
+          <div class="nav-item"><div class="nav-ic">▪▪▪</div><div class="nav-l">Progress</div></div>
+          <div class="nav-item"><div class="nav-ic">👤</div><div class="nav-l">Profile</div></div>
+        </div>
+
+        <div class="ov">
+          <div class="skip">Skip</div>
+          <div class="steps-ind"><div class="dot on"></div><div class="dot"></div><div class="dot"></div></div>
+          <div style="flex:1; display:flex; align-items:center; padding: 0 13px;">
+            <div>
+              <div class="tt-arrow down" style="margin-left:10px;"></div>
+              <div class="tooltip" style="width:140px;">
+                <div class="tt-title">⏳ Waiting on your coach</div>
+                <div class="tt-body">This is normal! Once your coach adds you and assigns a plan, your workouts appear here automatically.</div>
+              </div>
+            </div>
+          </div>
+          <div class="next-wrap"><div class="next-btn">Next →</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="step-note"><div class="sn-title">Empty state explained</div><div class="sn-body">Removes confusion — students often think the app is broken when nothing shows up.</div></div>
+  </div>
+
+  <!-- Student: bell -->
+  <div style="display:flex; flex-direction:column; align-items:center;">
+    <div class="slbl">Student — Step 2 of 3</div>
+    <div class="phone">
+      <div class="screen">
+        <div class="sbar"><span class="st">21:30</span><span class="sr">▪▪ WiFi</span></div>
+        <div style="padding: 8px 13px 6px; display:flex; justify-content:space-between; align-items:center;">
+          <div style="color:#fff; font-size:14px; font-weight:700;">Workouts</div>
+          <div style="display:flex; gap:6px;">
+            <div class="bell" style="border: 1.5px solid #C8FF00;">🔔</div>
+            <div class="bell">📅</div>
+          </div>
+        </div>
+        <div style="padding: 10px 13px; flex:1;">
+          <div class="workout-empty">
+            <div class="we-icon">⚙</div>
+            <div class="we-title">No workouts assigned yet</div>
+            <div class="we-sub">Your coach will assign your training split soon</div>
+          </div>
+        </div>
+        <div class="nav-bar">
+          <div class="nav-item"><div class="nav-ic on">⚙</div><div class="nav-l on">Workouts</div></div>
+          <div class="nav-item"><div class="nav-ic">🕐</div><div class="nav-l">History</div></div>
+          <div class="nav-item"><div class="nav-ic">▪▪▪</div><div class="nav-l">Progress</div></div>
+          <div class="nav-item"><div class="nav-ic">👤</div><div class="nav-l">Profile</div></div>
+        </div>
+
+        <div class="ov">
+          <div class="skip">Skip</div>
+          <div class="steps-ind"><div class="dot"></div><div class="dot on"></div><div class="dot"></div></div>
+          <div style="flex:1; display:flex; align-items:flex-start; justify-content:flex-end; padding: 14px 10px 0;">
+            <div style="display:flex; flex-direction:column; align-items:flex-end;">
+              <div class="tooltip">
+                <div class="tt-title">🔔 Your notifications</div>
+                <div class="tt-body">When your coach assigns a workout or updates your plan, you'll get a notification here with an Accept button.</div>
+              </div>
+              <div class="tt-arrow up" style="margin-right:14px;"></div>
+            </div>
+          </div>
+          <div class="next-wrap"><div class="next-btn">Next →</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="step-note"><div class="sn-title">Bell icon — student</div><div class="sn-body">Primes them to watch for the coach invite notification.</div></div>
+  </div>
+
+  <!-- Athlete: Create Plan CTA -->
+  <div style="display:flex; flex-direction:column; align-items:center;">
+    <div class="slbl">Athlete — Step 2 of 3</div>
+    <div class="phone">
+      <div class="screen">
+        <div class="sbar"><span class="st">21:31</span><span class="sr">▪▪ WiFi</span></div>
+        <div style="padding: 8px 13px 6px; display:flex; justify-content:space-between; align-items:center;">
+          <div style="color:#fff; font-size:14px; font-weight:700;">Workouts</div>
+          <div class="bell">📅</div>
+        </div>
+        <div style="padding: 10px 13px; flex:1;">
+          <div class="workout-empty" style="border: 1.5px solid #C8FF00;">
+            <div class="we-icon" style="color:#888;">⚙</div>
+            <div class="we-title">No plans yet</div>
+            <div class="we-sub">Create your first plan and start training.</div>
+            <div class="btn-lime-s" style="margin-top:8px; border-radius:20px;">Create Plan</div>
+          </div>
+        </div>
+        <div class="nav-bar">
+          <div class="nav-item"><div class="nav-ic on">⚙</div><div class="nav-l on">Workouts</div></div>
+          <div class="nav-item"><div class="nav-ic">🕐</div><div class="nav-l">History</div></div>
+          <div class="nav-item"><div class="nav-ic">▪▪▪</div><div class="nav-l">Progress</div></div>
+          <div class="nav-item"><div class="nav-ic">👤</div><div class="nav-l">Profile</div></div>
+        </div>
+
+        <div class="ov">
+          <div class="skip">Skip</div>
+          <div class="steps-ind"><div class="dot"></div><div class="dot on"></div><div class="dot"></div></div>
+          <div style="flex:1; display:flex; align-items:center; padding: 0 13px;">
+            <div>
+              <div class="tt-arrow down" style="margin-left:10px;"></div>
+              <div class="tooltip" style="width:140px;">
+                <div class="tt-title">📋 Build your first plan</div>
+                <div class="tt-body">Name it, add exercises, set sets and reps. You can create as many plans as you need — Push/Pull/Legs, Upper/Lower, anything.</div>
+              </div>
+            </div>
+          </div>
+          <div class="next-wrap"><div class="next-btn">Next →</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="step-note"><div class="sn-title">Create Plan — athlete</div><div class="sn-body">Highlighted card drives them to the first real action immediately.</div></div>
+  </div>
+
+</div>
+
+<!-- Summary -->
+<div style="background:#111; border-radius:12px; padding:12px 14px; margin-top:4px;">
+  <div style="color:#C8FF00; font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px;">Tour steps per role</div>
+  <div style="display:flex; gap:10px;">
+    <div style="flex:1;">
+      <div style="color:#5ac8fa; font-size:9px; font-weight:600; margin-bottom:4px;">Coach (4 steps)</div>
+      <div style="color:#666; font-size:8px; line-height:1.8;">1. Notification bell<br>2. Add Student button<br>3. My Training section<br>4. Students tab → Done</div>
+    </div>
+    <div style="flex:1;">
+      <div style="color:#C8FF00; font-size:9px; font-weight:600; margin-bottom:4px;">Student (3 steps)</div>
+      <div style="color:#666; font-size:8px; line-height:1.8;">1. Empty state explained<br>2. Notification bell<br>3. Profile tab → Done</div>
+    </div>
+    <div style="flex:1;">
+      <div style="color:#ff6b9d; font-size:9px; font-weight:600; margin-bottom:4px;">Athlete (3 steps)</div>
+      <div style="color:#666; font-size:8px; line-height:1.8;">1. Empty state + CTA<br>2. Create Plan flow<br>3. Progress tab → Done</div>
+    </div>
+  </div>
+</div>
+
+</div>
