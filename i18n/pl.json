@@ -118,7 +118,7 @@
   "notificationsTabAll": "Wszystkie",
   "notificationsTabUnread": "Nieprzeczytane",
   "notificationsTabRead": "Przeczytane",
-  "markAllRead": "Oznacz wszystkie jako przeczytane",
+  "markAllRead": "Oznacz wszystko",
   "noNotificationsYet": "Brak powiadomień",
   "noNotificationsYetSubtitle": "Pojawi się tutaj, gdy tylko podopieczny ukończy trening.",
   "completedWorkoutNotif": "Ukończono %{workout}",

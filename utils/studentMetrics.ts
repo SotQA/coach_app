@@ -2,6 +2,8 @@ import { toMs } from "@/utils/dateConvert";
 import { dayKeyFromMs, startOfWeekMonday } from "@/utils/dateRanges";
 import type { TrainingGroup } from "@/types/TrainingGroup";
 import type { WorkoutLog, WorkoutPlan } from "@/types/Workout";
+import type { SupportedLocale } from "@/context/I18nContext";
+import { localeTag } from "@/utils/formatLocale";
 
 function logCompletedMs(log: WorkoutLog): number {
   return toMs(log.completedAt ?? log.date);
@@ -56,11 +58,11 @@ export function compliancePercent(
 }
 
 /** Same short date label as the pre-refactor screen (`MMM d` in local locale). */
-export function lastWorkoutLabel(logs: WorkoutLog[], now: Date = new Date()): string | null {
+export function lastWorkoutLabel(logs: WorkoutLog[], locale: SupportedLocale = "en", now: Date = new Date()): string | null {
   void now;
   const lastWorkoutMs = logs[0] ? logCompletedMs(logs[0]) : 0;
   if (lastWorkoutMs <= 0) return null;
-  return new Date(lastWorkoutMs).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  return new Date(lastWorkoutMs).toLocaleDateString(localeTag(locale), { month: "short", day: "numeric" });
 }
 
 export function buildPlanById(plans: WorkoutPlan[]): Map<string, WorkoutPlan> {

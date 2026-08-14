@@ -42,7 +42,7 @@ type StudentDetailsData = {
 
 export default function StudentDetails() {
   const router = useRouter();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const { user } = useAuth();
   const userId = user?.id;
   const userRole = user?.role;
@@ -97,7 +97,7 @@ export default function StudentDetails() {
     () => compliancePercent(logs, latestGroup?.workoutsPerWeek),
     [logs, latestGroup?.workoutsPerWeek]
   );
-  const lastWorkoutLbl = useMemo(() => lastWorkoutLabel(logs), [logs]);
+  const lastWorkoutLbl = useMemo(() => lastWorkoutLabel(logs, locale), [logs, locale]);
   const weeklyProg = useMemo(() => weeklyProgress(logs, latestGroup, planById), [logs, latestGroup, planById]);
   const assignedPct = useMemo(() => assignedProgramBarPercent(compliancePct, weeklyProg), [compliancePct, weeklyProg]);
   const avgDurationSeconds = useMemo(() => averageRecentDurationSeconds(logs), [logs]);

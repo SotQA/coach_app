@@ -373,36 +373,34 @@ export default function CoachNotifications() {
       <View style={{ flex: 1, backgroundColor: Colors.bg }}>
         <View
           style={{
-            position: "relative",
             flexDirection: "row",
             alignItems: "center",
-            justifyContent: "space-between",
+            gap: Spacing.sm,
             paddingHorizontal: Spacing.md,
             paddingTop: Spacing.sm,
             paddingBottom: Spacing.xs,
           }}
         >
-          <Pressable onPress={() => router.back()} hitSlop={10} style={{ zIndex: 1 }}>
+          <Pressable onPress={() => router.back()} hitSlop={10}>
             <Ionicons name="chevron-back" size={26} color={Colors.text} />
           </Pressable>
           <Text
             style={{
               ...Typography.title,
               fontSize: FontSizes.h3,
-              position: "absolute",
-              left: 0,
-              right: 0,
+              flex: 1,
               textAlign: "center",
             }}
-            pointerEvents="none"
+            numberOfLines={1}
           >
             {t("notifications")}
           </Text>
-          <Pressable onPress={handleMarkAllRead} disabled={unreadCount === 0} hitSlop={10} style={{ zIndex: 1 }}>
+          <Pressable onPress={handleMarkAllRead} disabled={unreadCount === 0} hitSlop={10} style={{ maxWidth: 110 }}>
             <Text
               style={{
                 ...Typography.secondary,
                 fontWeight: "700",
+                textAlign: "right",
                 color: unreadCount > 0 ? Colors.primary : Colors.textMuted,
               }}
             >

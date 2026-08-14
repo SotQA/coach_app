@@ -118,7 +118,7 @@
   "notificationsTabAll": "Все",
   "notificationsTabUnread": "Непрочитанные",
   "notificationsTabRead": "Прочитанные",
-  "markAllRead": "Отметить все как прочитанные",
+  "markAllRead": "Прочитать всё",
   "noNotificationsYet": "Пока нет уведомлений",
   "noNotificationsYetSubtitle": "Здесь появится уведомление, как только ученик завершит тренировку.",
   "completedWorkoutNotif": "Завершил(а) %{workout}",
