@@ -122,7 +122,7 @@ export function ProgressAnalyticsView({
   coachContext,
   coachProgressDefaults = null,
 }: ProgressAnalyticsViewProps) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const { width: windowWidth } = useWindowDimensions();
   const chartWidth = Math.max(200, windowWidth - Spacing.md * 4);
 
@@ -168,19 +168,19 @@ export function ProgressAnalyticsView({
   const exerciseNames = useMemo(() => collectExerciseNames(logs), [logs]);
 
   const weekly1RM = useMemo(
-    () => buildWeekly1RMSeries(logsInRange, exerciseNorm, timePreset === "all" ? null : rangeStartMs, nowMs),
-    [logsInRange, exerciseNorm, timePreset, rangeStartMs, nowMs]
+    () => buildWeekly1RMSeries(logsInRange, exerciseNorm, timePreset === "all" ? null : rangeStartMs, nowMs, locale),
+    [logsInRange, exerciseNorm, timePreset, rangeStartMs, nowMs, locale]
   );
 
   const weightReps = useMemo(
-    () => buildWeeklyWeightRepsSeries(logsInRange, exerciseNorm, timePreset === "all" ? null : rangeStartMs, nowMs),
-    [logsInRange, exerciseNorm, timePreset, rangeStartMs, nowMs]
+    () => buildWeeklyWeightRepsSeries(logsInRange, exerciseNorm, timePreset === "all" ? null : rangeStartMs, nowMs, locale),
+    [logsInRange, exerciseNorm, timePreset, rangeStartMs, nowMs, locale]
   );
 
   // Kept for the coaching-signals heuristic (volume-stable-but-intensity-rising check); not charted directly anymore.
   const volLoad = useMemo(
-    () => buildWeeklyVolumeVsLoad(logsInRange, exerciseNorm, timePreset === "all" ? null : rangeStartMs, nowMs),
-    [logsInRange, exerciseNorm, timePreset, rangeStartMs, nowMs]
+    () => buildWeeklyVolumeVsLoad(logsInRange, exerciseNorm, timePreset === "all" ? null : rangeStartMs, nowMs, locale),
+    [logsInRange, exerciseNorm, timePreset, rangeStartMs, nowMs, locale]
   );
 
   const { current: curLogs, previous: prevLogs } = useMemo(() => {
@@ -221,8 +221,8 @@ export function ProgressAnalyticsView({
 
   const insights = useMemo(
     () =>
-      exerciseNorm ? buildExerciseInsights(logsInRange, exerciseNorm, timePreset === "all" ? null : rangeStartMs, nowMs) : null,
-    [logsInRange, exerciseNorm, timePreset, rangeStartMs, nowMs]
+      exerciseNorm ? buildExerciseInsights(logsInRange, exerciseNorm, timePreset === "all" ? null : rangeStartMs, nowMs, locale) : null,
+    [logsInRange, exerciseNorm, timePreset, rangeStartMs, nowMs, locale]
   );
 
   const signals = useMemo(

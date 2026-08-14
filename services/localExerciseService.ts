@@ -80,12 +80,17 @@ export function filterExercises(filter: ExerciseFilter): LocalExercise[] {
   if (filter.query && filter.query.trim().length >= 2) {
     const q = filter.query.trim().toLowerCase();
     const lang = filter.lang ?? "en";
+    // Match against both the localized name and the English name — a query
+    // in the active language should work, but so should typing the English
+    // term even while the app is in ru/pl.
+    const matchNames = (e: LocalExercise): string[] =>
+      lang === "en" ? [e.name] : [getExerciseName(e, lang), e.name];
     const startsWith = results.filter(e =>
-      getExerciseName(e, lang).toLowerCase().startsWith(q)
+      matchNames(e).some(n => n.toLowerCase().startsWith(q))
     );
     const contains = results.filter(e =>
-      !getExerciseName(e, lang).toLowerCase().startsWith(q) &&
-      getExerciseName(e, lang).toLowerCase().includes(q)
+      !matchNames(e).some(n => n.toLowerCase().startsWith(q)) &&
+      matchNames(e).some(n => n.toLowerCase().includes(q))
     );
     results = [...startsWith, ...contains];
   }

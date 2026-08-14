@@ -46,12 +46,12 @@ function formatRelativeDone(
   return formatDateShort(ms, locale);
 }
 
-function focusFromPlan(plan: WorkoutPlan): string {
+function focusFromPlan(plan: WorkoutPlan, t: (key: string) => string): string {
   const names = (plan.exercises ?? []).map((e) => e.name).filter(Boolean);
-  if (names.length === 0) return "Full session";
+  if (names.length === 0) return t("fullSessionFallback");
   if (names.length === 1) return names[0];
   if (names.length === 2) return `${names[0]} + ${names[1]}`;
-  return `${names[0]} + ${names[1]} + more`;
+  return `${names[0]} + ${names[1]} + ${t("moreExercisesSuffix")}`;
 }
 
 function computeStreak(logDayKeys: Set<string>): number {
@@ -321,7 +321,7 @@ export default function MyTrainingTab() {
                         {recommendedPlan.name}
                       </Text>
                       <Text style={{ ...Typography.secondary, color: Colors.textSecondary, marginBottom: Spacing.sm }}>
-                        {focusFromPlan(recommendedPlan)}
+                        {focusFromPlan(recommendedPlan, t)}
                       </Text>
                       <Text style={Typography.secondary}>
                         {t("lastWhen", { when: formatRelativeDone(lastMsByPlanId[recommendedPlan.id] ?? 0, t, locale) })}

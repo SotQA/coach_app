@@ -69,6 +69,7 @@ function TapColumns({
 }
 
 function WeekAxisLabels({ coords, plotWidth }: { coords: { x: number }[]; plotWidth: number }) {
+  const { t } = useI18n();
   const labelWidth = 32;
   const maxLabels = Math.max(1, Math.floor(plotWidth / labelWidth));
   const step = Math.max(1, Math.ceil(coords.length / maxLabels));
@@ -91,7 +92,7 @@ function WeekAxisLabels({ coords, plotWidth }: { coords: { x: number }[]; plotWi
               color: Colors.textMuted,
             }}
           >
-            {`W${i + 1}`}
+            {`${t("weekAbbrev")}${i + 1}`}
           </Text>
         );
       })}

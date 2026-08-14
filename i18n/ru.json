@@ -698,5 +698,8 @@
   "noPlansYetTitle": "Пока нет планов",
   "noPlansYetSubtitle": "Создайте свой первый план и начните тренироваться.",
   "createPlanButton": "Создать план",
-  "noPersonalPlansYetSubtitle": "Создайте свой первый план, чтобы начать отслеживать собственные тренировки."
+  "noPersonalPlansYetSubtitle": "Создайте свой первый план, чтобы начать отслеживать собственные тренировки.",
+  "weekAbbrev": "Н",
+  "fullSessionFallback": "Полная тренировка",
+  "moreExercisesSuffix": "ещё"
 }

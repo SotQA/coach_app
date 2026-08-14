@@ -49,12 +49,12 @@ function formatRelativeDone(
   return formatDateShort(ms, locale);
 }
 
-function focusFromPlan(plan: WorkoutPlan): string {
+function focusFromPlan(plan: WorkoutPlan, t: (key: string) => string): string {
   const names = (plan.exercises ?? []).map((e) => e.name).filter(Boolean);
-  if (names.length === 0) return "Full session";
+  if (names.length === 0) return t("fullSessionFallback");
   if (names.length === 1) return names[0];
   if (names.length === 2) return `${names[0]} + ${names[1]}`;
-  return `${names[0]} + ${names[1]} + more`;
+  return `${names[0]} + ${names[1]} + ${t("moreExercisesSuffix")}`;
 }
 
 /** Consecutive calendar days with a session, ending today or (if idle today) yesterday. */
@@ -510,7 +510,7 @@ export default function StudentWorkouts() {
                         ) : null}
                       </View>
                       <Text style={{ ...Typography.secondary, color: Colors.textSecondary, marginBottom: Spacing.sm }}>
-                        {focusFromPlan(recommendedPlan)}
+                        {focusFromPlan(recommendedPlan, t)}
                       </Text>
                       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: Spacing.md }}>
                         <Text style={Typography.secondary}>

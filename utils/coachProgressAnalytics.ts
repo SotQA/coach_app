@@ -1,5 +1,7 @@
 import type { WorkoutLog, WorkoutLogExercise } from "../types/Workout";
 import { computeExerciseVolumeFromLoggedSets, normalizeExerciseName } from "./workoutMetrics";
+import type { SupportedLocale } from "../context/I18nContext";
+import { localeTag } from "./formatLocale";
 
 export type TimeRangePreset = "2w" | "1m" | "3m" | "all";
 
@@ -74,9 +76,9 @@ export function startOfWeekMondayMs(ms: number): number {
   return d.getTime();
 }
 
-export function weekLabel(ms: number): string {
+export function weekLabel(ms: number, locale: SupportedLocale = "en"): string {
   const d = new Date(ms);
-  return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  return d.toLocaleDateString(localeTag(locale), { month: "short", day: "numeric" });
 }
 
 export type WeeklyPoint = {
@@ -93,7 +95,8 @@ export function buildWeekly1RMSeries(
   logs: WorkoutLog[],
   exerciseNorm: string | null,
   rangeStartMs: number | null,
-  nowMs: number
+  nowMs: number,
+  locale: SupportedLocale = "en"
 ): WeeklyPoint[] {
   const filtered = logs
     .map((l) => ({ l, ms: logCompletedMs(l) }))
@@ -126,7 +129,7 @@ export function buildWeekly1RMSeries(
     if (v > runningMax) runningMax = v;
     out.push({
       weekStartMs: wk,
-      label: weekLabel(wk),
+      label: weekLabel(wk, locale),
       value: v,
       isPr,
     });
@@ -145,7 +148,8 @@ export function buildWeeklyVolumeVsLoad(
   logs: WorkoutLog[],
   exerciseNorm: string | null,
   rangeStartMs: number | null,
-  nowMs: number
+  nowMs: number,
+  locale: SupportedLocale = "en"
 ): WeeklyVolLoad[] {
   const filtered = logs
     .map((l) => ({ l, ms: logCompletedMs(l) }))
@@ -180,7 +184,7 @@ export function buildWeeklyVolumeVsLoad(
       a.loads.length > 0 ? Math.round((a.loads.reduce((s, x) => s + x, 0) / a.loads.length) * 10) / 10 : 0;
     return {
       weekStartMs: wk,
-      label: weekLabel(wk),
+      label: weekLabel(wk, locale),
       volume: Math.round(a.vol),
       avgLoad,
     };
@@ -203,7 +207,8 @@ export function buildWeeklyWeightRepsSeries(
   logs: WorkoutLog[],
   exerciseNorm: string | null,
   rangeStartMs: number | null,
-  nowMs: number
+  nowMs: number,
+  locale: SupportedLocale = "en"
 ): WeeklyWeightReps[] {
   const filtered = logs
     .map((l) => ({ l, ms: logCompletedMs(l) }))
@@ -232,7 +237,7 @@ export function buildWeeklyWeightRepsSeries(
   const weeks = Array.from(byWeek.keys()).sort((a, b) => a - b);
   return weeks.map((wk) => {
     const v = byWeek.get(wk)!;
-    return { weekStartMs: wk, label: weekLabel(wk), weight: v.weight, reps: v.reps };
+    return { weekStartMs: wk, label: weekLabel(wk, locale), weight: v.weight, reps: v.reps };
   });
 }
 
@@ -384,7 +389,8 @@ export function buildExerciseInsights(
   logs: WorkoutLog[],
   exerciseNorm: string,
   rangeStartMs: number | null,
-  nowMs: number
+  nowMs: number,
+  locale: SupportedLocale = "en"
 ): ExerciseInsight | null {
   if (!exerciseNorm) return null;
   let bestWeight = 0;
@@ -446,8 +452,8 @@ export function buildExerciseInsights(
 
   return {
     bestSetEver: bestWeight > 0 ? `${bestWeight} kg × ${bestReps}` : "—",
-    lastPrDate: lastPrMs ? new Date(lastPrMs).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }) : null,
-    topVolumeWeek: topVol > 0 ? `${weekLabel(topWeek)} (${Math.round(topVol)} kg·reps)` : "—",
+    lastPrDate: lastPrMs ? new Date(lastPrMs).toLocaleDateString(localeTag(locale), { month: "short", day: "numeric", year: "numeric" }) : null,
+    topVolumeWeek: topVol > 0 ? `${weekLabel(topWeek, locale)} (${Math.round(topVol)} kg·reps)` : "—",
     avgReps,
     avgWeeklyFrequency,
   };

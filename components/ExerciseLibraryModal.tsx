@@ -266,9 +266,9 @@ export function ExerciseLibraryModal({
         query: dbDebounced,
         muscle: selectedBodyPart,
         equipment: selectedEquipment,
-        lang: "en",
+        lang: locale,
       }),
-    [dbDebounced, selectedBodyPart, selectedEquipment]
+    [dbDebounced, selectedBodyPart, selectedEquipment, locale]
   );
 
   const displayedExercises = filteredExercises.slice(0, displayLimit);
