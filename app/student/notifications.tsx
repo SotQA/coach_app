@@ -510,13 +510,19 @@ export default function StudentNotifications() {
             paddingBottom: Spacing.xs,
           }}
         >
-          <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.sm }}>
-            <Pressable onPress={() => router.back()} hitSlop={10}>
-              <Ionicons name="chevron-back" size={26} color={Colors.text} />
-            </Pressable>
-            <Text style={{ ...Typography.title, fontSize: FontSizes.h3 }}>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <View style={{ width: 26, alignItems: "flex-start" }}>
+              <Pressable onPress={() => router.back()} hitSlop={10}>
+                <Ionicons name="chevron-back" size={26} color={Colors.text} />
+              </Pressable>
+            </View>
+            <Text
+              style={{ ...Typography.title, fontSize: FontSizes.h3, flex: 1, textAlign: "center" }}
+              numberOfLines={1}
+            >
               {t("notifications")}
             </Text>
+            <View style={{ width: 26 }} />
           </View>
           <Pressable
             onPress={handleMarkAllRead}
