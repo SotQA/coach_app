@@ -1,7 +1,7 @@
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, User } from "firebase/auth";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { auth, db } from "../firebase/firebaseConfig";
-import type { AppUser, SignupPayload, Sex } from "../types/User";
+import type { AppUser, SignupPayload, Sex, MessengerType } from "../types/User";
 import type { UserFirestoreDoc } from "../types/firestore";
 import { logger } from "../utils/logger";
 
@@ -22,6 +22,9 @@ const mapToAppUser = (user: User, role: AppUser["role"], data: any): AppUser => 
   dateOfBirth: data?.dateOfBirth ?? "",
   sex: normalizeSex(data?.sex),
   photoURL: data?.photoURL ?? null,
+  coachId: data?.coachId ?? null,
+  messengerType: data?.messengerType ?? null,
+  messengerHandle: data?.messengerHandle ?? null,
 });
 
 export const authService = {
@@ -84,13 +87,17 @@ export const authService = {
       lastName?: string;
       dateOfBirth?: string;
       sex?: Sex;
+      messengerType?: MessengerType | null;
+      messengerHandle?: string | null;
     }
   ): Promise<void> {
-    const sanitized: Record<string, string> = {};
+    const sanitized: Record<string, string | null> = {};
     if (patch.firstName !== undefined) sanitized.firstName = patch.firstName.trim();
     if (patch.lastName !== undefined) sanitized.lastName = patch.lastName.trim();
     if (patch.dateOfBirth !== undefined) sanitized.dateOfBirth = patch.dateOfBirth.trim();
     if (patch.sex !== undefined) sanitized.sex = patch.sex;
+    if (patch.messengerType !== undefined) sanitized.messengerType = patch.messengerType;
+    if (patch.messengerHandle !== undefined) sanitized.messengerHandle = patch.messengerHandle;
     if (Object.keys(sanitized).length === 0) return;
     try {
       await updateDoc(doc(db, USERS_COLLECTION, uid), sanitized);

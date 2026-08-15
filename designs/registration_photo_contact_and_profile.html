@@ -1,0 +1,487 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif; }
+.wrap { background: #0a0a0a; padding: 20px 12px 28px; border-radius: 16px; }
+.row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 8px; }
+.phone { width: 172px; background: #000; border-radius: 30px; border: 1.5px solid #2a2a2a; overflow: hidden; }
+.screen { background: #000; min-height: 370px; display: flex; flex-direction: column; }
+.sbar { padding: 10px 14px 4px; display: flex; justify-content: space-between; }
+.st { color: #fff; font-size: 10px; font-weight: 600; }
+.sr { color: #fff; font-size: 9px; }
+.slbl { font-size: 9px; font-weight: 700; color: #C8FF00; text-transform: uppercase; letter-spacing: 0.07em; text-align: center; padding: 0 0 8px; }
+.note { background: #111; border-radius: 10px; padding: 8px 10px; margin-top: 7px; width: 172px; }
+.nt { color: #C8FF00; font-size: 9px; font-weight: 700; margin-bottom: 3px; }
+.nb { color: #666; font-size: 9px; line-height: 1.5; }
+
+/* Progress bar */
+.prog-wrap { padding: 6px 14px 10px; }
+.prog-meta { display: flex; justify-content: space-between; margin-bottom: 4px; }
+.prog-step { color: #888; font-size: 9px; }
+.prog-title { color: #fff; font-size: 15px; font-weight: 700; }
+.prog-bar { height: 3px; background: #1c1c1e; border-radius: 2px; overflow: hidden; }
+.prog-fill { height: 100%; background: #C8FF00; border-radius: 2px; }
+
+/* Card */
+.card { background: #1c1c1e; border-radius: 14px; margin: 0 12px 10px; padding: 13px; }
+.card-title { color: #fff; font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+.card-sub { color: #888; font-size: 10px; line-height: 1.4; margin-bottom: 11px; }
+.field-lbl { color: #888; font-size: 9px; margin-bottom: 3px; }
+.field { background: #2a2a2c; border-radius: 9px; padding: 8px 10px; color: #555; font-size: 10px; margin-bottom: 8px; }
+.field.active { border: 1px solid #C8FF00; color: #fff; }
+.field-row { display: flex; gap: 6px; margin-bottom: 8px; }
+.field-row .field { flex: 1; margin-bottom: 0; }
+.btn-lime { background: #C8FF00; border-radius: 20px; padding: 9px; text-align: center; color: #000; font-size: 11px; font-weight: 700; margin-bottom: 6px; }
+.btn-lime.disabled { opacity: 0.4; }
+.btn-dark { background: #2a2a2c; border-radius: 20px; padding: 9px; text-align: center; color: #fff; font-size: 11px; }
+
+/* Photo upload area */
+.photo-upload { display: flex; flex-direction: column; align-items: center; margin-bottom: 12px; }
+.photo-circle { width: 72px; height: 72px; border-radius: 50%; background: #2a2a2c; border: 2px dashed #444; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 7px; position: relative; cursor: pointer; }
+.photo-circle.filled { border: 2px solid #C8FF00; background: #1a2a10; }
+.photo-icon { font-size: 22px; color: #555; }
+.photo-circle.filled .photo-icon { display: none; }
+.photo-face { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; display: none; }
+.photo-circle.filled .photo-face { display: block; }
+.photo-edit-badge { position: absolute; bottom: 0; right: 0; width: 20px; height: 20px; border-radius: 50%; background: #C8FF00; display: flex; align-items: center; justify-content: center; font-size: 10px; }
+.photo-hint { color: #888; font-size: 9px; text-align: center; }
+.photo-hint span { color: #C8FF00; }
+.photo-options { display: flex; gap: 6px; margin-top: 6px; }
+.photo-opt { background: #2a2a2c; border-radius: 10px; padding: 5px 8px; font-size: 9px; color: #aaa; text-align: center; }
+
+/* Messenger section */
+.messenger-lbl { color: #888; font-size: 9px; margin-bottom: 5px; }
+.messenger-row { display: flex; gap: 6px; margin-bottom: 7px; }
+.msg-opt { flex: 1; background: #2a2a2c; border-radius: 10px; padding: 7px 6px; display: flex; align-items: center; gap: 5px; cursor: pointer; }
+.msg-opt.selected { background: #1a2200; border: 1px solid #C8FF00; }
+.msg-icon { font-size: 14px; }
+.msg-name { font-size: 9px; color: #aaa; font-weight: 500; }
+.msg-opt.selected .msg-name { color: #C8FF00; }
+.msg-check { width: 10px; height: 10px; border-radius: 50%; background: #C8FF00; margin-left: auto; display: none; }
+.msg-opt.selected .msg-check { display: block; }
+.skip-link { text-align: center; color: #555; font-size: 9px; margin-top: 4px; }
+
+/* Profile tab */
+.profile-header { padding: 10px 14px 8px; }
+.ph-title { color: #fff; font-size: 20px; font-weight: 700; }
+.divider { height: 0.5px; background: #1e1e1e; margin: 0 14px; }
+.profile-card { background: #1c1c1e; border-radius: 14px; margin: 8px 12px; padding: 13px; }
+.pc-user { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.pc-avatar { width: 50px; height: 50px; border-radius: 50%; background: #2a3a1a; border: 2px solid #C8FF00; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #C8FF00; flex-shrink: 0; overflow: hidden; }
+.pc-name { color: #fff; font-size: 13px; font-weight: 700; }
+.pc-email { color: #666; font-size: 10px; margin-top: 1px; }
+.pc-role { color: #C8FF00; font-size: 10px; font-weight: 600; margin-top: 2px; }
+.pc-stats { color: #666; font-size: 9px; margin-top: 2px; line-height: 1.4; }
+.text-coach-btn { background: #1a2200; border: 1.5px solid #C8FF00; border-radius: 14px; padding: 10px 12px; display: flex; align-items: center; gap: 9px; margin-bottom: 8px; }
+.tcb-icon { font-size: 20px; }
+.tcb-body { flex: 1; }
+.tcb-title { color: #C8FF00; font-size: 11px; font-weight: 700; }
+.tcb-sub { color: #888; font-size: 9px; margin-top: 1px; }
+.tcb-arrow { color: #C8FF00; font-size: 14px; }
+.edit-btn { background: #C8FF00; border-radius: 20px; padding: 9px; text-align: center; color: #000; font-size: 11px; font-weight: 700; }
+
+.section-lbl { color: #C8FF00; font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 8px 14px 5px; }
+.settings-card { background: #1c1c1e; border-radius: 14px; margin: 0 12px 8px; }
+.setting-row { display: flex; align-items: center; gap: 9px; padding: 9px 12px; border-bottom: 0.5px solid #1a1a1a; }
+.setting-row:last-child { border-bottom: none; }
+.set-ic { width: 26px; height: 26px; border-radius: 7px; background: #2a2a2c; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+.set-body { flex: 1; }
+.set-title { color: #fff; font-size: 11px; font-weight: 500; }
+.set-sub { color: #666; font-size: 9px; margin-top: 1px; }
+.set-chev { color: #444; font-size: 13px; }
+
+.nav-bar { background: #111; border-top: 0.5px solid #222; padding: 8px 0 12px; display: flex; justify-content: space-around; }
+.nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.ni { font-size: 16px; color: #555; }
+.ni.on { color: #C8FF00; }
+.nl { font-size: 8px; color: #555; }
+.nl.on { color: #C8FF00; }
+
+/* Coach section */
+.coach-card { background: #1c1c1e; border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 9px; }
+.coach-av { width: 36px; height: 36px; border-radius: 50%; background: #1a2a3a; border: 1.5px solid #5AC8FA; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #5AC8FA; flex-shrink: 0; }
+.coach-name { color: #fff; font-size: 11px; font-weight: 600; }
+.coach-sub { color: #888; font-size: 9px; margin-top: 1px; }
+.coach-badge { background: #1a3a1a; color: #C8FF00; font-size: 8px; padding: 2px 6px; border-radius: 6px; display: inline-block; margin-top: 2px; }
+</style>
+
+<div class="wrap">
+<h2 style="display:none">Registration flow with photo upload and messenger, plus student profile with Text My Coach button</h2>
+
+<!-- REGISTRATION FLOW ADDITIONS -->
+<div style="color:#C8FF00;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;text-align:center;margin-bottom:14px;">Registration flow — new screens</div>
+
+<div class="row">
+
+  <!-- Step 1.5: Photo upload (inserted into Step 2 "About you") -->
+  <div style="display:flex;flex-direction:column;align-items:center;">
+    <div class="slbl">Step 2 of 4 — About you (updated)</div>
+    <div class="phone">
+      <div class="screen">
+        <div class="sbar"><span class="st">21:26</span><span class="sr">▪▪ 68%</span></div>
+        <div class="prog-wrap">
+          <div class="prog-meta"><span class="prog-step">Step 2 of 4</span></div>
+          <div class="prog-title">About you</div>
+          <div style="margin-top:5px;" class="prog-bar"><div class="prog-fill" style="width:50%;"></div></div>
+        </div>
+        <div class="card">
+          <div class="card-sub" style="margin-bottom:10px;">Tell us about you. This helps personalize your experience.</div>
+
+          <!-- Photo upload -->
+          <div class="photo-upload">
+            <div class="photo-circle">
+              <div class="photo-icon">📷</div>
+            </div>
+            <div class="photo-hint">Tap to add a <span>profile photo</span></div>
+            <div class="photo-options">
+              <div class="photo-opt">📷 Camera</div>
+              <div class="photo-opt">🖼 Library</div>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div>
+              <div class="field-lbl">First name</div>
+              <div class="field">First name</div>
+            </div>
+            <div>
+              <div class="field-lbl">Last name</div>
+              <div class="field">Last name</div>
+            </div>
+          </div>
+          <div class="field-lbl">Date of birth</div>
+          <div class="field">Select date</div>
+          <div class="field-lbl">Sex</div>
+          <div style="display:flex;gap:6px;margin-bottom:8px;">
+            <div style="flex:1;background:#2a3a1a;border:1px solid #C8FF00;border-radius:9px;padding:7px;text-align:center;color:#C8FF00;font-size:10px;font-weight:600;">Male</div>
+            <div style="flex:1;background:#2a2a2c;border-radius:9px;padding:7px;text-align:center;color:#888;font-size:10px;">Female</div>
+          </div>
+          <div class="btn-lime">Continue</div>
+        </div>
+      </div>
+    </div>
+    <div class="note">
+      <div class="nt">Photo upload — Step 2</div>
+      <div class="nb">Added above name fields. Tap the circle: action sheet appears with Camera / Photo Library. Skip is implicit — photo is optional. Shows filled avatar preview once chosen.</div>
+    </div>
+  </div>
+
+  <!-- Photo filled state -->
+  <div style="display:flex;flex-direction:column;align-items:center;">
+    <div class="slbl">Step 2 — Photo selected state</div>
+    <div class="phone">
+      <div class="screen">
+        <div class="sbar"><span class="st">21:26</span><span class="sr">▪▪ 68%</span></div>
+        <div class="prog-wrap">
+          <div class="prog-meta"><span class="prog-step">Step 2 of 4</span></div>
+          <div class="prog-title">About you</div>
+          <div style="margin-top:5px;" class="prog-bar"><div class="prog-fill" style="width:50%;"></div></div>
+        </div>
+        <div class="card">
+          <div class="card-sub" style="margin-bottom:10px;">Tell us about you.</div>
+          <div class="photo-upload">
+            <div class="photo-circle filled" style="background:#222;position:relative;">
+              <!-- Simulated face -->
+              <div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#2a3a2a,#1a2a1a);display:flex;align-items:center;justify-content:center;font-size:28px;">🧑</div>
+              <div class="photo-edit-badge">✏️</div>
+            </div>
+            <div class="photo-hint" style="color:#C8FF00;">Photo added · tap to change</div>
+          </div>
+          <div class="field-row">
+            <div>
+              <div class="field-lbl">First name</div>
+              <div class="field active">Sergey</div>
+            </div>
+            <div>
+              <div class="field-lbl">Last name</div>
+              <div class="field active">Sierp...</div>
+            </div>
+          </div>
+          <div class="field-lbl">Date of birth</div>
+          <div class="field active">14 Mar 1995</div>
+          <div style="display:flex;gap:6px;margin-bottom:8px;">
+            <div style="flex:1;background:#2a3a1a;border:1px solid #C8FF00;border-radius:9px;padding:7px;text-align:center;color:#C8FF00;font-size:10px;font-weight:600;">Male</div>
+            <div style="flex:1;background:#2a2a2c;border-radius:9px;padding:7px;text-align:center;color:#888;font-size:10px;">Female</div>
+          </div>
+          <div class="btn-lime">Continue</div>
+        </div>
+      </div>
+    </div>
+    <div class="note">
+      <div class="nt">Filled state</div>
+      <div class="nb">Lime border on avatar circle confirms photo chosen. Edit pencil badge stays visible. Label changes to "tap to change". Continue is active.</div>
+    </div>
+  </div>
+
+  <!-- NEW Step 3: Contact / messenger (students only) -->
+  <div style="display:flex;flex-direction:column;align-items:center;">
+    <div class="slbl">NEW Step 3 of 4 — Contact (students)</div>
+    <div class="phone">
+      <div class="screen">
+        <div class="sbar"><span class="st">21:26</span><span class="sr">▪▪ 68%</span></div>
+        <div class="prog-wrap">
+          <div class="prog-meta"><span class="prog-step">Step 3 of 4</span></div>
+          <div class="prog-title">Stay in touch</div>
+          <div style="margin-top:5px;" class="prog-bar"><div class="prog-fill" style="width:75%;"></div></div>
+        </div>
+        <div class="card">
+          <div class="card-sub" style="margin-bottom:12px;">Add a contact so your coach can reach you directly — and so you can text them with one tap.</div>
+
+          <div class="messenger-lbl">Preferred messenger</div>
+          <div class="messenger-row">
+            <div class="msg-opt selected">
+              <div class="msg-icon">✈️</div>
+              <div class="msg-name">Telegram</div>
+              <div class="msg-check"></div>
+            </div>
+            <div class="msg-opt">
+              <div class="msg-icon">📱</div>
+              <div class="msg-name">WhatsApp</div>
+              <div class="msg-check"></div>
+            </div>
+          </div>
+
+          <!-- Telegram username field -->
+          <div class="field-lbl">Telegram username</div>
+          <div class="field active" style="display:flex;align-items:center;gap:4px;">
+            <span style="color:#555;">@</span><span style="color:#fff;">username</span>
+          </div>
+          <div style="color:#555;font-size:9px;margin-bottom:10px;">Find it in Telegram → Settings → Username</div>
+
+          <div class="btn-lime">Continue</div>
+          <div class="skip-link">Skip for now</div>
+        </div>
+      </div>
+    </div>
+    <div class="note">
+      <div class="nt">Students only — Step 3</div>
+      <div class="nb">Coaches fill this too (their contact is what students use to reach them). Selecting WhatsApp swaps the field to "Phone number". Skip is always available — field is optional.</div>
+    </div>
+  </div>
+
+  <!-- WhatsApp variant -->
+  <div style="display:flex;flex-direction:column;align-items:center;">
+    <div class="slbl">Step 3 — WhatsApp selected</div>
+    <div class="phone">
+      <div class="screen">
+        <div class="sbar"><span class="st">21:26</span><span class="sr">▪▪ 68%</span></div>
+        <div class="prog-wrap">
+          <div class="prog-meta"><span class="prog-step">Step 3 of 4</span></div>
+          <div class="prog-title">Stay in touch</div>
+          <div style="margin-top:5px;" class="prog-bar"><div class="prog-fill" style="width:75%;"></div></div>
+        </div>
+        <div class="card">
+          <div class="card-sub" style="margin-bottom:12px;">Add a contact so your coach can reach you directly.</div>
+
+          <div class="messenger-lbl">Preferred messenger</div>
+          <div class="messenger-row">
+            <div class="msg-opt">
+              <div class="msg-icon">✈️</div>
+              <div class="msg-name">Telegram</div>
+              <div class="msg-check"></div>
+            </div>
+            <div class="msg-opt selected">
+              <div class="msg-icon">📱</div>
+              <div class="msg-name">WhatsApp</div>
+              <div class="msg-check"></div>
+            </div>
+          </div>
+
+          <div class="field-lbl">Phone number</div>
+          <div class="field active" style="display:flex;align-items:center;gap:4px;">
+            <span style="color:#555;">🇵🇱 +48</span><span style="color:#fff;margin-left:4px;">123 456 789</span>
+          </div>
+          <div style="color:#555;font-size:9px;margin-bottom:10px;">Include country code · WhatsApp uses your phone number</div>
+
+          <div class="btn-lime">Continue</div>
+          <div class="skip-link">Skip for now</div>
+        </div>
+      </div>
+    </div>
+    <div class="note">
+      <div class="nt">WhatsApp variant</div>
+      <div class="nb">Switching to WhatsApp swaps the field label and input hint. Phone field should auto-detect country code from device locale.</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- PROFILE TAB -->
+<div style="color:#C8FF00;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;text-align:center;margin:24px 0 14px;">Student profile tab — with "Text my coach"</div>
+
+<div class="row">
+
+  <!-- No coach linked yet -->
+  <div style="display:flex;flex-direction:column;align-items:center;">
+    <div class="slbl">No coach linked yet</div>
+    <div class="phone">
+      <div class="screen">
+        <div class="sbar"><span class="st">21:05</span><span class="sr">▪▪ 73%</span></div>
+        <div class="profile-header"><div class="ph-title">Profile</div></div>
+        <div class="divider"></div>
+
+        <div class="profile-card">
+          <div class="pc-user">
+            <div class="pc-avatar">ST</div>
+            <div>
+              <div class="pc-name">Sergey Tracking</div>
+              <div class="pc-email">tracking@mail.com</div>
+              <div class="pc-role">Ученик</div>
+              <div class="pc-stats">47 тренировок · Последняя: 2 авг.</div>
+            </div>
+          </div>
+          <!-- No coach state -->
+          <div style="background:#1a1a1a;border-radius:10px;padding:9px 11px;margin-bottom:8px;display:flex;align-items:center;gap:8px;">
+            <span style="font-size:14px;">👤</span>
+            <div>
+              <div style="color:#888;font-size:10px;">No coach linked yet</div>
+              <div style="color:#555;font-size:9px;margin-top:1px;">Waiting for a coach to invite you</div>
+            </div>
+          </div>
+          <div class="edit-btn">Edit Profile</div>
+        </div>
+
+        <div class="section-lbl">APP PREFERENCES</div>
+        <div class="settings-card">
+          <div class="setting-row"><div class="set-ic">🌐</div><div class="set-body"><div class="set-title">Language</div><div class="set-sub">Russian</div></div><div class="set-chev">›</div></div>
+          <div class="setting-row"><div class="set-ic">⚖️</div><div class="set-body"><div class="set-title">Units</div><div class="set-sub">Kilograms</div></div><div class="set-chev">›</div></div>
+        </div>
+
+        <div style="flex:1;"></div>
+        <div class="nav-bar">
+          <div class="nav-item"><div class="ni">⚙</div><div class="nl">Workouts</div></div>
+          <div class="nav-item"><div class="ni">🕐</div><div class="nl">History</div></div>
+          <div class="nav-item"><div class="ni">▪▪</div><div class="nl">Progress</div></div>
+          <div class="nav-item"><div class="ni on">👤</div><div class="nl on">Profile</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="note"><div class="nt">No coach state</div><div class="nb">"Text my coach" doesn't appear. Instead shows a muted "No coach linked yet" row — won't confuse students who just registered.</div></div>
+  </div>
+
+  <!-- Coach linked, Telegram -->
+  <div style="display:flex;flex-direction:column;align-items:center;">
+    <div class="slbl">Coach linked — Telegram</div>
+    <div class="phone">
+      <div class="screen">
+        <div class="sbar"><span class="st">21:05</span><span class="sr">▪▪ 73%</span></div>
+        <div class="profile-header"><div class="ph-title">Profile</div></div>
+        <div class="divider"></div>
+
+        <div class="profile-card">
+          <div class="pc-user">
+            <div class="pc-avatar" style="background:#1a2a10;">
+              <div style="width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,#2a3a2a,#1a2a1a);display:flex;align-items:center;justify-content:center;font-size:18px;">🧑</div>
+            </div>
+            <div>
+              <div class="pc-name">Sergey Tracking</div>
+              <div class="pc-email">tracking@mail.com</div>
+              <div class="pc-role">Ученик</div>
+              <div class="pc-stats">47 тренировок · Последняя: 2 авг.</div>
+            </div>
+          </div>
+
+          <!-- Coach info -->
+          <div class="coach-card" style="margin-bottom:8px;">
+            <div class="coach-av">SS</div>
+            <div style="flex:1;">
+              <div class="coach-name">Sergey Sierpatowski</div>
+              <div class="coach-sub">Your coach</div>
+              <div class="coach-badge">✓ Linked</div>
+            </div>
+          </div>
+
+          <!-- Text my coach button — Telegram -->
+          <div class="text-coach-btn" style="margin-bottom:8px;">
+            <div class="tcb-icon">✈️</div>
+            <div class="tcb-body">
+              <div class="tcb-title">Text my coach</div>
+              <div class="tcb-sub">Open chat in Telegram</div>
+            </div>
+            <div class="tcb-arrow">›</div>
+          </div>
+
+          <div class="edit-btn">Edit Profile</div>
+        </div>
+
+        <div class="section-lbl">APP PREFERENCES</div>
+        <div class="settings-card">
+          <div class="setting-row"><div class="set-ic">🌐</div><div class="set-body"><div class="set-title">Language</div><div class="set-sub">Russian</div></div><div class="set-chev">›</div></div>
+          <div class="setting-row"><div class="set-ic">⚖️</div><div class="set-body"><div class="set-title">Units</div><div class="set-sub">Kilograms</div></div><div class="set-chev">›</div></div>
+        </div>
+
+        <div style="flex:1;"></div>
+        <div class="nav-bar">
+          <div class="nav-item"><div class="ni">⚙</div><div class="nl">Workouts</div></div>
+          <div class="nav-item"><div class="ni">🕐</div><div class="nl">History</div></div>
+          <div class="nav-item"><div class="ni">▪▪</div><div class="nl">Progress</div></div>
+          <div class="nav-item"><div class="ni on">👤</div><div class="nl on">Profile</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="note"><div class="nt">Coach linked — Telegram</div><div class="nb">Button shows when coach has set Telegram. Tapping opens https://t.me/[coach_username]. If Telegram not installed → App Store / Play Store.</div></div>
+  </div>
+
+  <!-- Coach linked, WhatsApp -->
+  <div style="display:flex;flex-direction:column;align-items:center;">
+    <div class="slbl">Coach linked — WhatsApp</div>
+    <div class="phone">
+      <div class="screen">
+        <div class="sbar"><span class="st">21:05</span><span class="sr">▪▪ 73%</span></div>
+        <div class="profile-header"><div class="ph-title">Profile</div></div>
+        <div class="divider"></div>
+
+        <div class="profile-card">
+          <div class="pc-user">
+            <div class="pc-avatar" style="background:#1a2a10;">
+              <div style="width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,#2a3a2a,#1a2a1a);display:flex;align-items:center;justify-content:center;font-size:18px;">🧑</div>
+            </div>
+            <div>
+              <div class="pc-name">Sergey Tracking</div>
+              <div class="pc-email">tracking@mail.com</div>
+              <div class="pc-role">Ученик</div>
+              <div class="pc-stats">47 тренировок · Последняя: 2 авг.</div>
+            </div>
+          </div>
+
+          <div class="coach-card" style="margin-bottom:8px;">
+            <div class="coach-av">SS</div>
+            <div style="flex:1;">
+              <div class="coach-name">Sergey Sierpatowski</div>
+              <div class="coach-sub">Your coach</div>
+              <div class="coach-badge">✓ Linked</div>
+            </div>
+          </div>
+
+          <!-- Text my coach button — WhatsApp -->
+          <div class="text-coach-btn" style="margin-bottom:8px; border-color:#25D366; background:#0d2010;">
+            <div class="tcb-icon">📱</div>
+            <div class="tcb-body">
+              <div class="tcb-title" style="color:#25D366;">Text my coach</div>
+              <div class="tcb-sub">Open chat in WhatsApp</div>
+            </div>
+            <div class="tcb-arrow" style="color:#25D366;">›</div>
+          </div>
+
+          <div class="edit-btn">Edit Profile</div>
+        </div>
+
+        <div class="section-lbl">APP PREFERENCES</div>
+        <div class="settings-card">
+          <div class="setting-row"><div class="set-ic">🌐</div><div class="set-body"><div class="set-title">Language</div><div class="set-sub">Russian</div></div><div class="set-chev">›</div></div>
+          <div class="setting-row"><div class="set-ic">⚖️</div><div class="set-body"><div class="set-title">Units</div><div class="set-sub">Kilograms</div></div><div class="set-chev">›</div></div>
+        </div>
+
+        <div style="flex:1;"></div>
+        <div class="nav-bar">
+          <div class="nav-item"><div class="ni">⚙</div><div class="nl">Workouts</div></div>
+          <div class="nav-item"><div class="ni">🕐</div><div class="nl">History</div></div>
+          <div class="nav-item"><div class="ni">▪▪</div><div class="nl">Progress</div></div>
+          <div class="nav-item"><div class="ni on">👤</div><div class="nl on">Profile</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="note"><div class="nt">Coach linked — WhatsApp</div><div class="nb">Button turns WhatsApp green (#25D366). Tapping opens https://wa.me/[phone]. If WhatsApp not installed → store redirect.</div></div>
+  </div>
+
+</div>
+</div>

@@ -5,5 +5,7 @@ export interface StudentSummary {
   firstName?: string;
   lastName?: string;
   photoURL?: string | null;
+  messengerType?: "telegram" | "whatsapp" | null;
+  messengerHandle?: string | null;
 }
 
