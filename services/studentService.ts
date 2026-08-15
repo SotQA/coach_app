@@ -30,6 +30,8 @@ const mapStudentDoc = (snap: { id: string; data: () => any }): StudentSummary =>
     firstName: data.firstName,
     lastName: data.lastName,
     photoURL: data.photoURL ?? null,
+    messengerType: data.messengerType ?? null,
+    messengerHandle: data.messengerHandle ?? null,
   };
 };
 

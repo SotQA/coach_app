@@ -7,10 +7,14 @@ import { useI18n } from "../../context/I18nContext";
 import { studentService } from "../../services/studentService";
 import { trainingGroupService } from "../../services/trainingGroupService";
 import { workoutService } from "../../services/workoutService";
+import { useRealtimeUserContact } from "../../hooks/useRealtimeUserContact";
+import { openMessengerContact } from "../../utils/messengerValidation";
 import type { StudentSummary } from "../../types/StudentSummary";
 import type { WorkoutPlan, WorkoutLog } from "../../types/Workout";
 import { formatDurationForHistory } from "../../utils/workoutDuration";
 import { PrimaryButton } from "../../components/PrimaryButton";
+import { ContactButton } from "../../components/profile/ContactButton";
+import { WarningBanner } from "../../components/profile/WarningBanner";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
@@ -86,6 +90,8 @@ export default function StudentDetails() {
 
   const { data: detailsData, loading, error: loadError } = useAsyncData<StudentDetailsData>(fetcher, [fetcher]);
 
+  const studentContact = useRealtimeUserContact(studentId || undefined);
+
   const student = detailsData?.student ?? null;
   const plans = useMemo(() => detailsData?.plans ?? [], [detailsData]);
   const logs = useMemo(() => detailsData?.logs ?? [], [detailsData]);
@@ -102,6 +108,11 @@ export default function StudentDetails() {
   const assignedPct = useMemo(() => assignedProgramBarPercent(compliancePct, weeklyProg), [compliancePct, weeklyProg]);
   const avgDurationSeconds = useMemo(() => averageRecentDurationSeconds(logs), [logs]);
   const avgDurationLabel = useMemo(() => (avgDurationSeconds != null ? formatDurationForHistory(avgDurationSeconds, t) : null), [avgDurationSeconds, t]);
+
+  const effectiveStudentType = studentContact.loading ? student?.messengerType ?? null : studentContact.messengerType;
+  const effectiveStudentHandle = studentContact.loading ? student?.messengerHandle ?? null : studentContact.messengerHandle;
+  const studentHasContact = Boolean(effectiveStudentType && effectiveStudentHandle);
+  const coachHasOwnContact = Boolean(user?.messengerType && user?.messengerHandle);
 
   if (loading) {
     return (
@@ -185,6 +196,39 @@ export default function StudentDetails() {
               onPress={() => router.push({ pathname: "/coach/progress", params: { studentId, focusProgress: "1" } })}
             />
           </View>
+
+          {!studentHasContact ? (
+            <WarningBanner
+              title={t("studentNoContactTitle")}
+              body={t("studentNoContactBody", { name: student.firstName || displayName })}
+            />
+          ) : null}
+
+          <ContactButton
+            variant={studentHasContact ? (effectiveStudentType === "telegram" ? "telegram" : "whatsapp") : "disabled"}
+            title={t("textStudent")}
+            subtitle={
+              studentHasContact
+                ? effectiveStudentType === "telegram"
+                  ? t("openTelegramHandle", { handle: effectiveStudentHandle })
+                  : t("openWhatsappNumber", { number: effectiveStudentHandle })
+                : t("studentContactMissingBtn")
+            }
+            onPress={
+              studentHasContact
+                ? () => openMessengerContact(effectiveStudentType!, effectiveStudentHandle!)
+                : undefined
+            }
+          />
+
+          {!coachHasOwnContact ? (
+            <WarningBanner
+              title={t("yourContactMissingTitle")}
+              body={t("yourContactMissingCoachBody")}
+              linkText={t("addInSettingsLink")}
+              onPressLink={() => router.push({ pathname: "/(profile)/edit", params: { focus: "messenger" } })}
+            />
+          ) : null}
 
           <Text style={styles.sectionLabel}>{t("quickStats")}</Text>
           <View style={styles.statsRow}>

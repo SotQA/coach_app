@@ -17,6 +17,8 @@ export interface UserFirestoreDoc {
   createdAt?: Timestamp | string;
   photoURL?: string;
   expoPushToken?: string | null;
+  messengerType?: "telegram" | "whatsapp" | null;
+  messengerHandle?: string | null;
 }
 
 export interface ExerciseFirestoreDoc {

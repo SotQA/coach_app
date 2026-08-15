@@ -18,7 +18,7 @@ import {
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "../firebase/firebaseConfig";
-import type { AppUser, UserRole, Sex } from "../types/User";
+import type { AppUser, UserRole, Sex, MessengerType } from "../types/User";
 import { logger } from "../utils/logger";
 import { authService } from "../services/authService";
 
@@ -42,6 +42,8 @@ type ProfilePatch = {
   lastName?: string;
   dateOfBirth?: string;
   sex?: Sex;
+  messengerType?: MessengerType | null;
+  messengerHandle?: string | null;
 };
 
 type AuthContextValue = {
@@ -59,7 +61,8 @@ type AuthContextValue = {
     firstName: string,
     lastName: string,
     dateOfBirth: string,
-    sex: Sex
+    sex: Sex,
+    contact?: { messengerType: MessengerType; messengerHandle: string } | null
   ) => Promise<AppUser>;
   logout: () => Promise<void>;
   updateProfile: (patch: ProfilePatch) => Promise<void>;
@@ -99,6 +102,9 @@ const mapToAppUser = (user: User, data: any): AppUser | null => {
     dateOfBirth: data?.dateOfBirth ?? "",
     sex: normalizeSex(data?.sex),
     photoURL: data?.photoURL ?? null,
+    coachId: data?.coachId ?? null,
+    messengerType: data?.messengerType ?? null,
+    messengerHandle: data?.messengerHandle ?? null,
   };
 };
 
@@ -280,14 +286,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     firstName: string,
     lastName: string,
     dateOfBirth: string,
-    sex: Sex
+    sex: Sex,
+    contact?: { messengerType: MessengerType; messengerHandle: string } | null
   ): Promise<AppUser> => {
     const normalizedEmail = email.trim().toLowerCase();
     const credential = await createUserWithEmailAndPassword(auth, normalizedEmail, password);
     const { user: firebaseUser } = credential;
 
     const createdAt = new Date().toISOString();
-    await setDoc(doc(db, USERS_COLLECTION, firebaseUser.uid), {
+    const docData = {
       email: normalizedEmail,
       role,
       firstName,
@@ -295,17 +302,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       dateOfBirth,
       sex,
       createdAt,
-    });
+      messengerType: contact?.messengerType ?? null,
+      messengerHandle: contact?.messengerHandle ?? null,
+    };
+    await setDoc(doc(db, USERS_COLLECTION, firebaseUser.uid), docData);
 
-    const appUser = mapToAppUser(firebaseUser, {
-      email: normalizedEmail,
-      role,
-      firstName,
-      lastName,
-      dateOfBirth,
-      sex,
-      createdAt,
-    });
+    const appUser = mapToAppUser(firebaseUser, docData);
     if (!appUser) throw new Error("Signup produced an invalid role. Please contact support.");
     return appUser;
   };
@@ -334,6 +336,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               ...(patch.lastName !== undefined && { lastName: patch.lastName.trim() }),
               ...(patch.dateOfBirth !== undefined && { dateOfBirth: patch.dateOfBirth.trim() }),
               ...(patch.sex !== undefined && { sex: patch.sex }),
+              ...(patch.messengerType !== undefined && { messengerType: patch.messengerType }),
+              ...(patch.messengerHandle !== undefined && { messengerHandle: patch.messengerHandle }),
             }
           : prev
       );

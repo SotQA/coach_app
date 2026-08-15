@@ -10,7 +10,7 @@ import {
   Text,
   View,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -20,6 +20,7 @@ import * as ImageManipulator from "expo-image-manipulator";
 import { Avatar } from "../../components/Avatar";
 import { InputField } from "../../components/InputField";
 import { PrimaryButton } from "../../components/PrimaryButton";
+import { MessengerContactFields } from "../../components/registration/MessengerContactFields";
 import { useAuth } from "../../context/AuthContext";
 import { useI18n } from "../../context/I18nContext";
 import { avatarService } from "../../services/avatarService";
@@ -28,7 +29,8 @@ import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography, FontSizes } from "../../theme/typography";
 import { getUserInitials } from "../../utils/userDisplay";
-import type { Sex } from "../../types/User";
+import { getDefaultDialCode, resolveMessengerContact } from "../../utils/messengerValidation";
+import type { Sex, MessengerType } from "../../types/User";
 
 const PRESS_SCALE = 0.97;
 const AVATAR_SIZE = 88;
@@ -123,9 +125,18 @@ function SexChipGroup({ value, onChange }: { value: Sex; onChange: (v: Sex) => v
   );
 }
 
+/** Best-effort split of a stored "+<dial><digits>" WhatsApp number back into local digits for the input field. */
+function splitWhatsappLocal(fullNumber: string | null | undefined): string {
+  if (!fullNumber) return "";
+  const digits = fullNumber.replace(/^\+/, "");
+  const dial = getDefaultDialCode().dialCode;
+  return digits.startsWith(dial) ? digits.slice(dial.length) : digits;
+}
+
 export default function EditProfile() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const params = useLocalSearchParams<{ focus?: string }>();
   const { user, updateProfile, refreshUser } = useAuth();
   const { t } = useI18n();
 
@@ -135,16 +146,28 @@ export default function EditProfile() {
   const [sex, setSex] = useState<Sex>(user?.sex ?? "other");
   const [dobPickerOpen, setDobPickerOpen] = useState(false);
   const [dobDraft, setDobDraft] = useState<Date | null>(null);
+  const [messengerType, setMessengerType] = useState<MessengerType>((user?.messengerType as MessengerType) ?? "telegram");
+  const [telegramInput, setTelegramInput] = useState(user?.messengerType === "telegram" ? user?.messengerHandle ?? "" : "");
+  const [whatsappInput, setWhatsappInput] = useState(
+    user?.messengerType === "whatsapp" ? splitWhatsappLocal(user?.messengerHandle) : ""
+  );
+  const [messengerError, setMessengerError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [photoUploading, setPhotoUploading] = useState(false);
   const [photoStatus, setPhotoStatus] = useState<"idle" | "success">("idle");
   const [error, setError] = useState<string | null>(null);
+
+  const scrollRef = useRef<ScrollView | null>(null);
+  const messengerSectionY = useRef(0);
+  const hasScrolledToFocus = useRef(false);
 
   const originals = useRef({
     firstName: user?.firstName ?? "",
     lastName: user?.lastName ?? "",
     dateOfBirth: user?.dateOfBirth ?? "",
     sex: (user?.sex ?? "other") as Sex,
+    messengerType: (user?.messengerType ?? null) as MessengerType | null,
+    messengerHandle: user?.messengerHandle ?? null,
   });
 
   useEffect(() => {
@@ -153,23 +176,49 @@ export default function EditProfile() {
       lastName: user?.lastName ?? "",
       dateOfBirth: user?.dateOfBirth ?? "",
       sex: (user?.sex ?? "other") as Sex,
+      messengerType: (user?.messengerType ?? null) as MessengerType | null,
+      messengerHandle: user?.messengerHandle ?? null,
     };
     setFirstName(user?.firstName ?? "");
     setLastName(user?.lastName ?? "");
     setDateOfBirth(user?.dateOfBirth ?? "");
     setSex(user?.sex ?? "other");
+    setMessengerType((user?.messengerType as MessengerType) ?? "telegram");
+    setTelegramInput(user?.messengerType === "telegram" ? user?.messengerHandle ?? "" : "");
+    setWhatsappInput(user?.messengerType === "whatsapp" ? splitWhatsappLocal(user?.messengerHandle) : "");
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
+  // Deep-link support: "Add in Edit Profile" / "Add in Settings" warning
+  // links pass ?focus=messenger so this screen scrolls straight to the field.
+  useEffect(() => {
+    if (params.focus === "messenger" && messengerSectionY.current > 0 && !hasScrolledToFocus.current) {
+      hasScrolledToFocus.current = true;
+      requestAnimationFrame(() => {
+        scrollRef.current?.scrollTo({ y: Math.max(0, messengerSectionY.current - 24), animated: true });
+      });
+    }
+  }, [params.focus]);
+
+  const buildContactPayload = useCallback(
+    () => resolveMessengerContact(messengerType, telegramInput, whatsappInput),
+    [messengerType, telegramInput, whatsappInput]
+  );
+
   const hasChanges = useCallback(() => {
     const o = originals.current;
+    const { contact } = buildContactPayload();
+    const newMessengerType = contact?.messengerType ?? null;
+    const newMessengerHandle = contact?.messengerHandle ?? null;
     return (
       firstName.trim() !== o.firstName.trim() ||
       lastName.trim() !== o.lastName.trim() ||
       dateOfBirth.trim() !== o.dateOfBirth.trim() ||
-      sex !== o.sex
+      sex !== o.sex ||
+      newMessengerType !== o.messengerType ||
+      newMessengerHandle !== o.messengerHandle
     );
-  }, [firstName, lastName, dateOfBirth, sex]);
+  }, [firstName, lastName, dateOfBirth, sex, buildContactPayload]);
 
   const dobValue = dateOfBirth ? parseYMD(dateOfBirth) ?? new Date(2000, 0, 1) : new Date(2000, 0, 1);
   const activeDobValue = dobDraft ?? dobValue;
@@ -274,11 +323,19 @@ export default function EditProfile() {
   // ── Profile field save ──────────────────────────────────────────────────────
 
   const handleSave = async () => {
+    setError(null);
+    setMessengerError(null);
+
+    const { error: contactErr, contact } = buildContactPayload();
+    if (contactErr) {
+      setMessengerError(contactErr);
+      return;
+    }
+
     if (!hasChanges()) {
       router.back();
       return;
     }
-    setError(null);
     setSubmitting(true);
     try {
       const patch: Parameters<typeof updateProfile>[0] = {};
@@ -287,6 +344,10 @@ export default function EditProfile() {
       if (lastName.trim() !== o.lastName.trim()) patch.lastName = lastName.trim();
       if (dateOfBirth.trim() !== o.dateOfBirth.trim()) patch.dateOfBirth = dateOfBirth.trim();
       if (sex !== o.sex) patch.sex = sex;
+      const newMessengerType = contact?.messengerType ?? null;
+      const newMessengerHandle = contact?.messengerHandle ?? null;
+      if (newMessengerType !== o.messengerType) patch.messengerType = newMessengerType;
+      if (newMessengerHandle !== o.messengerHandle) patch.messengerHandle = newMessengerHandle;
       await updateProfile(patch);
       router.back();
     } catch (e: unknown) {
@@ -304,6 +365,7 @@ export default function EditProfile() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView
+        ref={scrollRef}
         contentContainerStyle={{ flexGrow: 1, paddingBottom: Spacing.xl }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
@@ -498,6 +560,25 @@ export default function EditProfile() {
               {t("sex")}
             </Text>
             <SexChipGroup value={sex} onChange={setSex} />
+          </View>
+
+          {/* Messenger contact */}
+          <View onLayout={(e) => { messengerSectionY.current = e.nativeEvent.layout.y; }}>
+            <Text style={{ fontSize: 14, fontWeight: "600", color: Colors.text, marginBottom: 8 }}>
+              {t("messengerContactSectionTitle")}
+            </Text>
+            <Text style={{ ...Typography.secondary, color: Colors.textMuted, fontSize: 12, marginBottom: 10 }}>
+              {t("messengerContactSectionSub")}
+            </Text>
+            <MessengerContactFields
+              type={messengerType}
+              onChangeType={(v) => { setMessengerType(v); setMessengerError(null); }}
+              telegramInput={telegramInput}
+              onChangeTelegramInput={(v) => { setTelegramInput(v); setMessengerError(null); }}
+              whatsappInput={whatsappInput}
+              onChangeWhatsappInput={(v) => { setWhatsappInput(v); setMessengerError(null); }}
+              error={messengerError}
+            />
           </View>
 
           {/* Read-only: email */}

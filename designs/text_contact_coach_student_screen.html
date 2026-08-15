@@ -1,0 +1,439 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif; }
+.wrap { background: #0a0a0a; padding: 20px 12px 28px; border-radius: 16px; }
+.row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 8px; }
+.phone { width: 172px; background: #000; border-radius: 30px; border: 1.5px solid #2a2a2a; overflow: hidden; }
+.screen { background: #000; min-height: 420px; display: flex; flex-direction: column; }
+.sbar { padding: 10px 14px 4px; display: flex; justify-content: space-between; }
+.st { color: #fff; font-size: 10px; font-weight: 600; }
+.sr { color: #fff; font-size: 9px; }
+.slbl { font-size: 9px; font-weight: 700; color: #C8FF00; text-transform: uppercase; letter-spacing: 0.07em; text-align: center; padding: 0 0 8px; }
+.note { background: #111; border-radius: 10px; padding: 8px 10px; margin-top: 7px; width: 172px; }
+.nt { color: #C8FF00; font-size: 9px; font-weight: 700; margin-bottom: 3px; }
+.nb { color: #666; font-size: 9px; line-height: 1.5; }
+
+.top-nav { display: flex; align-items: center; padding: 7px 12px 8px; gap: 8px; }
+.back-btn { background: #1c1c1e; border-radius: 12px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; flex-shrink: 0; }
+.nav-title { color: #fff; font-size: 13px; font-weight: 600; }
+.divider { height: 0.5px; background: #1e1e1e; margin: 0 12px; }
+
+/* Profile card */
+.profile-card { background: #1c1c1e; border-radius: 14px; margin: 8px 12px; padding: 13px; }
+.pc-center { text-align: center; margin-bottom: 10px; }
+.pc-avatar { width: 52px; height: 52px; border-radius: 50%; background: #1c2c1c; border: 2px solid #C8FF00; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; color: #C8FF00; margin: 0 auto 6px; }
+.pc-name { color: #fff; font-size: 13px; font-weight: 700; }
+.pc-email { color: #666; font-size: 9px; margin-top: 1px; }
+
+/* Stats pills */
+.pill-row { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
+.pill { background: #2a2a2c; border-radius: 8px; padding: 6px 9px; color: #666; font-size: 9px; }
+
+/* Action buttons row */
+.action-row { display: flex; gap: 6px; margin-bottom: 10px; }
+.act-btn { flex: 1; border-radius: 12px; padding: 8px 5px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.act-btn.lime { background: #C8FF00; }
+.act-btn.dark { background: #1c1c1e; }
+.act-btn .ab-icon { font-size: 13px; }
+.act-btn .ab-lbl { font-size: 8px; font-weight: 600; color: #000; line-height: 1.2; }
+.act-btn.dark .ab-lbl { color: #fff; }
+.act-btn.dark .ab-icon { color: #C8FF00; }
+.act-btn.blue .ab-icon { color: #5AC8FA; }
+
+/* Stats grid */
+.stats-title { color: #fff; font-size: 11px; font-weight: 600; padding: 6px 12px 5px; }
+.stats-grid { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 12px 8px; }
+.stat-card { width: calc(50% - 3px); background: #1c1c1e; border-radius: 11px; padding: 9px; }
+.sc-icon { font-size: 13px; color: #C8FF00; margin-bottom: 3px; }
+.sc-lbl { color: #888; font-size: 8px; margin-bottom: 3px; }
+.sc-val { color: #fff; font-size: 14px; font-weight: 700; }
+.sc-val.dash { color: #555; }
+
+/* Text contact button */
+.contact-btn { border-radius: 13px; padding: 10px 11px; display: flex; align-items: center; gap: 8px; margin: 0 12px 8px; }
+.contact-btn.telegram { background: #1a2200; border: 1.5px solid #C8FF00; }
+.contact-btn.whatsapp { background: #0d2010; border: 1.5px solid #25D366; }
+.contact-btn.not-set { background: #1a1a1a; border: 1.5px solid #333; }
+.cb-icon { font-size: 18px; flex-shrink: 0; }
+.cb-body { flex: 1; min-width: 0; }
+.cb-title { font-size: 10px; font-weight: 700; }
+.cb-title.lime { color: #C8FF00; }
+.cb-title.green { color: #25D366; }
+.cb-title.muted { color: #555; }
+.cb-sub { font-size: 8px; color: #888; margin-top: 1px; line-height: 1.3; }
+.cb-sub.warning { color: #FF9500; }
+.cb-arrow { font-size: 13px; flex-shrink: 0; }
+.cb-arrow.lime { color: #C8FF00; }
+.cb-arrow.green { color: #25D366; }
+
+/* Assigned program section */
+.section-title { color: #fff; font-size: 11px; font-weight: 600; padding: 6px 12px 4px; }
+.prog-card { background: #1c1c1e; border-radius: 11px; margin: 0 12px 8px; padding: 9px 11px; }
+.prog-empty { color: #555; font-size: 9px; }
+
+/* Warning banner */
+.warn-banner { background: #1a1200; border: 1px solid #FF9500; border-radius: 10px; padding: 8px 10px; margin: 0 12px 8px; display: flex; gap: 7px; align-items: flex-start; }
+.wb-icon { font-size: 13px; flex-shrink: 0; margin-top: 1px; }
+.wb-body { flex: 1; }
+.wb-title { color: #FF9500; font-size: 9px; font-weight: 700; margin-bottom: 2px; }
+.wb-sub { color: #888; font-size: 8px; line-height: 1.4; }
+.wb-link { color: #C8FF00; font-size: 8px; margin-top: 3px; display: block; }
+
+.h2 { color: #C8FF00; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; text-align: center; margin: 20px 0 14px; }
+</style>
+
+<div class="wrap">
+<h2 style="display:none">Coach student screen and student profile contact states</h2>
+
+<!-- COACH SIDE -->
+<div class="h2">Coach view — Student screen ("Профиль студента")</div>
+<div class="row">
+
+  <!-- Student has Telegram set -->
+  <div style="display:flex;flex-direction:column;align-items:center;">
+    <div class="slbl">Student has Telegram</div>
+    <div class="phone">
+      <div class="screen">
+        <div class="sbar"><span class="st">21:14</span><span class="sr">▪▪ 72%</span></div>
+        <div class="top-nav">
+          <div class="back-btn">‹</div>
+          <div class="nav-title">Профиль студента</div>
+        </div>
+        <div class="divider"></div>
+
+        <div class="profile-card">
+          <div class="pc-center">
+            <div class="pc-avatar">MT</div>
+            <div class="pc-name">Marta Test</div>
+            <div class="pc-email">martatest@mail.com</div>
+          </div>
+          <div class="pill-row">
+            <div class="pill">Нет активной программы тренировок</div>
+            <div class="pill">Тренировок/неделю —</div>
+            <div class="pill">Последняя тренировка: —</div>
+          </div>
+          <div class="action-row">
+            <div class="act-btn lime"><div class="ab-icon">⚙</div><div class="ab-lbl">Назначить тренировку</div></div>
+            <div class="act-btn dark"><div class="ab-icon" style="color:#C8FF00;">⊕</div><div class="ab-lbl">Создать группу</div></div>
+            <div class="act-btn dark"><div class="ab-icon" style="color:#5AC8FA;">▪▪▪</div><div class="ab-lbl">Посмотреть прогресс</div></div>
+          </div>
+        </div>
+
+        <!-- Text student button — Telegram -->
+        <div class="contact-btn telegram">
+          <div class="cb-icon">✈️</div>
+          <div class="cb-body">
+            <div class="cb-title lime">Text student</div>
+            <div class="cb-sub">Open Telegram · @martatest</div>
+          </div>
+          <div class="cb-arrow lime">›</div>
+        </div>
+
+        <div class="stats-title">Краткая статистика</div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="sc-icon">⚙</div><div class="sc-lbl">Завершено тренировок</div><div class="sc-val">0</div></div>
+          <div class="stat-card"><div class="sc-icon" style="color:#ff6b6b;">✓✓</div><div class="sc-lbl">Выполнение плана</div><div class="sc-val dash">—</div></div>
+          <div class="stat-card"><div class="sc-icon" style="color:#ff9500;">🔥</div><div class="sc-lbl">Текущая серия</div><div class="sc-val dash">—</div></div>
+          <div class="stat-card"><div class="sc-icon" style="color:#5AC8FA;">🕐</div><div class="sc-lbl">Ср. продолжительность</div><div class="sc-val dash">—</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="note"><div class="nt">Telegram set</div><div class="nb">Button shows @handle as subtitle so coach knows who they're texting. Tapping opens t.me/martatest directly.</div></div>
+  </div>
+
+  <!-- Student has WhatsApp -->
+  <div style="display:flex;flex-direction:column;align-items:center;">
+    <div class="slbl">Student has WhatsApp</div>
+    <div class="phone">
+      <div class="screen">
+        <div class="sbar"><span class="st">21:14</span><span class="sr">▪▪ 72%</span></div>
+        <div class="top-nav">
+          <div class="back-btn">‹</div>
+          <div class="nav-title">Профиль студента</div>
+        </div>
+        <div class="divider"></div>
+
+        <div class="profile-card">
+          <div class="pc-center">
+            <div class="pc-avatar">MT</div>
+            <div class="pc-name">Marta Test</div>
+            <div class="pc-email">martatest@mail.com</div>
+          </div>
+          <div class="pill-row">
+            <div class="pill">Нет активной программы тренировок</div>
+            <div class="pill">Тренировок/неделю —</div>
+            <div class="pill">Последняя тренировка: —</div>
+          </div>
+          <div class="action-row">
+            <div class="act-btn lime"><div class="ab-icon">⚙</div><div class="ab-lbl">Назначить тренировку</div></div>
+            <div class="act-btn dark"><div class="ab-icon" style="color:#C8FF00;">⊕</div><div class="ab-lbl">Создать группу</div></div>
+            <div class="act-btn dark"><div class="ab-icon" style="color:#5AC8FA;">▪▪▪</div><div class="ab-lbl">Посмотреть прогресс</div></div>
+          </div>
+        </div>
+
+        <!-- Text student button — WhatsApp -->
+        <div class="contact-btn whatsapp">
+          <div class="cb-icon">📱</div>
+          <div class="cb-body">
+            <div class="cb-title green">Text student</div>
+            <div class="cb-sub">Open WhatsApp · +48 123 456 789</div>
+          </div>
+          <div class="cb-arrow green">›</div>
+        </div>
+
+        <div class="stats-title">Краткая статистика</div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="sc-icon">⚙</div><div class="sc-lbl">Завершено тренировок</div><div class="sc-val">0</div></div>
+          <div class="stat-card"><div class="sc-icon" style="color:#ff6b6b;">✓✓</div><div class="sc-lbl">Выполнение плана</div><div class="sc-val dash">—</div></div>
+          <div class="stat-card"><div class="sc-icon" style="color:#ff9500;">🔥</div><div class="sc-lbl">Текущая серия</div><div class="sc-val dash">—</div></div>
+          <div class="stat-card"><div class="sc-icon" style="color:#5AC8FA;">🕐</div><div class="sc-lbl">Ср. продолжительность</div><div class="sc-val dash">—</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="note"><div class="nt">WhatsApp set</div><div class="nb">Green tint matches WhatsApp brand. Shows phone number as subtitle. Tapping opens wa.me/48123456789.</div></div>
+  </div>
+
+  <!-- Student has NOT set contact — coach's own contact also missing -->
+  <div style="display:flex;flex-direction:column;align-items:center;">
+    <div class="slbl">Student has no contact set</div>
+    <div class="phone">
+      <div class="screen">
+        <div class="sbar"><span class="st">21:14</span><span class="sr">▪▪ 72%</span></div>
+        <div class="top-nav">
+          <div class="back-btn">‹</div>
+          <div class="nav-title">Профиль студента</div>
+        </div>
+        <div class="divider"></div>
+
+        <div class="profile-card">
+          <div class="pc-center">
+            <div class="pc-avatar">MT</div>
+            <div class="pc-name">Marta Test</div>
+            <div class="pc-email">martatest@mail.com</div>
+          </div>
+          <div class="pill-row">
+            <div class="pill">Нет активной программы тренировок</div>
+            <div class="pill">Тренировок/неделю —</div>
+          </div>
+          <div class="action-row">
+            <div class="act-btn lime"><div class="ab-icon">⚙</div><div class="ab-lbl">Назначить тренировку</div></div>
+            <div class="act-btn dark"><div class="ab-icon" style="color:#C8FF00;">⊕</div><div class="ab-lbl">Создать группу</div></div>
+            <div class="act-btn dark"><div class="ab-icon" style="color:#5AC8FA;">▪▪▪</div><div class="ab-lbl">Посмотреть прогресс</div></div>
+          </div>
+        </div>
+
+        <!-- Warning: student hasn't set contact -->
+        <div class="warn-banner">
+          <div class="wb-icon">⚠️</div>
+          <div class="wb-body">
+            <div class="wb-title">No contact set by student</div>
+            <div class="wb-sub">Marta hasn't added a Telegram or WhatsApp yet. They can add one in their Profile → Edit Profile.</div>
+          </div>
+        </div>
+
+        <!-- Disabled button -->
+        <div class="contact-btn not-set">
+          <div class="cb-icon" style="opacity:0.3;">💬</div>
+          <div class="cb-body">
+            <div class="cb-title muted">Text student</div>
+            <div class="cb-sub warning">Student hasn't set up a contact yet</div>
+          </div>
+        </div>
+
+        <div class="stats-title">Краткая статистика</div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="sc-icon">⚙</div><div class="sc-lbl">Завершено тренировок</div><div class="sc-val">0</div></div>
+          <div class="stat-card"><div class="sc-icon" style="color:#ff6b6b;">✓✓</div><div class="sc-lbl">Выполнение плана</div><div class="sc-val dash">—</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="note"><div class="nt">Student no contact</div><div class="nb">Button is shown but disabled + grayed. Orange warning banner above explains why and hints where student can fix it. Updates automatically when student saves a contact.</div></div>
+  </div>
+
+  <!-- Coach hasn't set their OWN contact -->
+  <div style="display:flex;flex-direction:column;align-items:center;">
+    <div class="slbl">Coach's own contact missing</div>
+    <div class="phone">
+      <div class="screen">
+        <div class="sbar"><span class="st">21:14</span><span class="sr">▪▪ 72%</span></div>
+        <div class="top-nav">
+          <div class="back-btn">‹</div>
+          <div class="nav-title">Профиль студента</div>
+        </div>
+        <div class="divider"></div>
+
+        <div class="profile-card">
+          <div class="pc-center">
+            <div class="pc-avatar">MT</div>
+            <div class="pc-name">Marta Test</div>
+            <div class="pc-email">martatest@mail.com</div>
+          </div>
+          <div class="pill-row">
+            <div class="pill">Нет активной программы тренировок</div>
+          </div>
+          <div class="action-row">
+            <div class="act-btn lime"><div class="ab-icon">⚙</div><div class="ab-lbl">Назначить тренировку</div></div>
+            <div class="act-btn dark"><div class="ab-icon" style="color:#C8FF00;">⊕</div><div class="ab-lbl">Создать группу</div></div>
+            <div class="act-btn dark"><div class="ab-icon" style="color:#5AC8FA;">▪▪▪</div><div class="ab-lbl">Посмотреть прогресс</div></div>
+          </div>
+        </div>
+
+        <!-- Student CAN text coach (has contact), but coach can't text back -->
+        <div class="contact-btn telegram">
+          <div class="cb-icon">✈️</div>
+          <div class="cb-body">
+            <div class="cb-title lime">Text student</div>
+            <div class="cb-sub">Open Telegram · @martatest</div>
+          </div>
+          <div class="cb-arrow lime">›</div>
+        </div>
+
+        <!-- Separate warning: coach's OWN contact missing so student can't reach them -->
+        <div class="warn-banner">
+          <div class="wb-icon">⚠️</div>
+          <div class="wb-body">
+            <div class="wb-title">Your contact isn't set</div>
+            <div class="wb-sub">Students can't text you until you add a Telegram or WhatsApp.</div>
+            <span class="wb-link">→ Add in Settings</span>
+          </div>
+        </div>
+
+        <div class="stats-title">Краткая статистика</div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="sc-icon">⚙</div><div class="sc-lbl">Завершено</div><div class="sc-val">0</div></div>
+          <div class="stat-card"><div class="sc-icon" style="color:#ff9500;">🔥</div><div class="sc-lbl">Серия</div><div class="sc-val dash">—</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="note"><div class="nt">Coach missing own contact</div><div class="nb">Coach can still text the student (student has it set). But a separate orange banner warns the coach that students can't text them back. "Add in Settings" deep-links to their own profile edit.</div></div>
+  </div>
+
+</div>
+
+<!-- STUDENT SIDE reminder -->
+<div class="h2" style="margin-top:24px;">Student view — "Text my coach" states (reference)</div>
+<div class="row">
+
+  <!-- Coach no contact set — student side -->
+  <div style="display:flex;flex-direction:column;align-items:center;">
+    <div class="slbl">Coach hasn't set contact</div>
+    <div class="phone">
+      <div class="screen" style="min-height:280px;">
+        <div class="sbar"><span class="st">21:05</span><span class="sr">▪▪ 72%</span></div>
+        <div style="padding:8px 12px 6px;"><div style="color:#fff;font-size:16px;font-weight:700;">Profile</div></div>
+        <div class="divider"></div>
+
+        <div class="profile-card" style="margin-bottom:6px;">
+          <div style="display:flex;align-items:center;gap:9px;margin-bottom:9px;">
+            <div class="pc-avatar" style="width:44px;height:44px;font-size:13px;">ST</div>
+            <div>
+              <div class="pc-name" style="font-size:12px;">Sergey Tracking</div>
+              <div class="pc-email">tracking@mail.com</div>
+              <div style="color:#C8FF00;font-size:9px;font-weight:600;margin-top:2px;">Ученик</div>
+            </div>
+          </div>
+          <!-- Coach row -->
+          <div style="background:#1a1a1a;border-radius:10px;padding:8px 10px;display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <div style="width:30px;height:30px;border-radius:50%;background:#1a2a3a;border:1.5px solid #5AC8FA;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#5AC8FA;flex-shrink:0;">SS</div>
+            <div style="flex:1;">
+              <div style="color:#fff;font-size:10px;font-weight:600;">Sergey Sierpatowski</div>
+              <div style="color:#888;font-size:8px;">Your coach</div>
+              <div style="background:#1a3a1a;color:#C8FF00;font-size:7px;padding:1px 5px;border-radius:5px;display:inline-block;margin-top:2px;">✓ Linked</div>
+            </div>
+          </div>
+
+          <!-- Coach hasn't set contact warning -->
+          <div class="warn-banner" style="margin:0 0 8px;">
+            <div class="wb-icon">⚠️</div>
+            <div class="wb-body">
+              <div class="wb-title">Coach contact not set up</div>
+              <div class="wb-sub">Your coach hasn't added Telegram or WhatsApp yet. Ask them to add it in their settings.</div>
+            </div>
+          </div>
+
+          <!-- Disabled button -->
+          <div class="contact-btn not-set" style="margin:0 0 8px;">
+            <div class="cb-icon" style="opacity:0.3;">💬</div>
+            <div class="cb-body">
+              <div class="cb-title muted">Text my coach</div>
+              <div class="cb-sub warning">Coach hasn't set up a contact yet</div>
+            </div>
+          </div>
+
+          <div style="background:#C8FF00;border-radius:16px;padding:8px;text-align:center;color:#000;font-size:10px;font-weight:700;">Edit Profile</div>
+        </div>
+      </div>
+    </div>
+    <div class="note"><div class="nt">Coach no contact — student view</div><div class="nb">Button disabled, orange warning tells the student to ask their coach to add it. Button activates automatically once coach saves their contact.</div></div>
+  </div>
+
+  <!-- Student hasn't set their OWN contact -->
+  <div style="display:flex;flex-direction:column;align-items:center;">
+    <div class="slbl">Student's own contact missing</div>
+    <div class="phone">
+      <div class="screen" style="min-height:280px;">
+        <div class="sbar"><span class="st">21:05</span><span class="sr">▪▪ 72%</span></div>
+        <div style="padding:8px 12px 6px;"><div style="color:#fff;font-size:16px;font-weight:700;">Profile</div></div>
+        <div class="divider"></div>
+        <div class="profile-card">
+          <div style="display:flex;align-items:center;gap:9px;margin-bottom:9px;">
+            <div class="pc-avatar" style="width:44px;height:44px;font-size:13px;">ST</div>
+            <div>
+              <div class="pc-name" style="font-size:12px;">Sergey Tracking</div>
+              <div class="pc-email">tracking@mail.com</div>
+              <div style="color:#C8FF00;font-size:9px;font-weight:600;margin-top:2px;">Ученик</div>
+            </div>
+          </div>
+
+          <!-- Coach linked and has contact — button works -->
+          <div style="background:#1a1a1a;border-radius:10px;padding:8px 10px;display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <div style="width:30px;height:30px;border-radius:50%;background:#1a2a3a;border:1.5px solid #5AC8FA;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#5AC8FA;flex-shrink:0;">SS</div>
+            <div style="flex:1;"><div style="color:#fff;font-size:10px;font-weight:600;">Sergey Sierpatowski</div><div style="color:#888;font-size:8px;">Your coach</div></div>
+          </div>
+
+          <div class="contact-btn telegram" style="margin:0 0 8px;">
+            <div class="cb-icon">✈️</div>
+            <div class="cb-body"><div class="cb-title lime">Text my coach</div><div class="cb-sub">Open Telegram · @sierpatowski</div></div>
+            <div class="cb-arrow lime">›</div>
+          </div>
+
+          <!-- Warning: YOUR contact missing (coach can't text you) -->
+          <div class="warn-banner" style="margin:0 0 8px;">
+            <div class="wb-icon">⚠️</div>
+            <div class="wb-body">
+              <div class="wb-title">Your contact isn't set</div>
+              <div class="wb-sub">Your coach can't text you until you add a Telegram or WhatsApp.</div>
+              <span class="wb-link">→ Add in Edit Profile</span>
+            </div>
+          </div>
+
+          <div style="background:#C8FF00;border-radius:16px;padding:8px;text-align:center;color:#000;font-size:10px;font-weight:700;">Edit Profile</div>
+        </div>
+      </div>
+    </div>
+    <div class="note"><div class="nt">Student missing own contact</div><div class="nb">Student CAN text coach (coach has it set). But they get a separate warning that their coach can't text them. Deep-links to Edit Profile where they can add it.</div></div>
+  </div>
+
+</div>
+
+<!-- Logic summary -->
+<div style="background:#111;border-radius:12px;padding:12px 14px;margin-top:16px;">
+  <div style="color:#C8FF00;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">Logic matrix — when button shows / enables</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+    <div style="background:#1a1a1a;border-radius:8px;padding:8px;">
+      <div style="color:#fff;font-size:9px;font-weight:600;margin-bottom:4px;">✅ Button active</div>
+      <div style="color:#666;font-size:8px;line-height:1.6;">The OTHER person has messenger_handle set. Tapping opens their deep link.</div>
+    </div>
+    <div style="background:#1a1200;border-radius:8px;padding:8px;">
+      <div style="color:#FF9500;font-size:9px;font-weight:600;margin-bottom:4px;">⚠️ Button disabled</div>
+      <div style="color:#666;font-size:8px;line-height:1.6;">The OTHER person has no contact set. Show orange warning. Button grayed out.</div>
+    </div>
+    <div style="background:#1a1a1a;border-radius:8px;padding:8px;">
+      <div style="color:#888;font-size:9px;font-weight:600;margin-bottom:4px;">ℹ️ Own contact missing</div>
+      <div style="color:#666;font-size:8px;line-height:1.6;">YOU have no contact. Show separate warning regardless of button state. Deep-link to Edit Profile.</div>
+    </div>
+  </div>
+  <div style="color:#555;font-size:8px;margin-top:8px;">Both warnings can appear at the same time. Real-time update: subscribe to messenger_handle column changes via Supabase realtime — button activates without requiring a screen reload.</div>
+</div>
+
+</div>
