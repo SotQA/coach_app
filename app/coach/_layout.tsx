@@ -84,7 +84,8 @@ function CoachStack() {
         <Stack.Screen name="exerciseDetail" options={{ headerShown: false }} />
         <Stack.Screen name="createPersonalPlan" options={{ title: t("createPlanTitle") }} />
         <Stack.Screen name="workoutPlanDetail" options={{ title: t("workoutTitle") }} />
-        <Stack.Screen name="personalProgress" options={{ title: t("myProgressTitle") }} />
+        <Stack.Screen name="personalProgress" options={{ headerShown: false }} />
+        <Stack.Screen name="workoutHistory" options={{ headerShown: false }} />
       </Stack>
       <CoachSpeedDial />
     </View>

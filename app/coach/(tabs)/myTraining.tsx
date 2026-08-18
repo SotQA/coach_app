@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Animated,
   Pressable,
   ScrollView,
@@ -14,6 +15,7 @@ import { useAuth } from "../../../context/AuthContext";
 import { useActiveWorkoutSession } from "../../../context/ActiveWorkoutSessionContext";
 import { useElapsedSeconds } from "../../../context/ElapsedTimeContext";
 import { useI18n } from "../../../context/I18nContext";
+import { useToast } from "../../../context/ToastContext";
 import { workoutService } from "../../../services/workoutService";
 import type { WorkoutLog, WorkoutPlan } from "../../../types/Workout";
 import { Colors } from "../../../theme/colors";
@@ -22,6 +24,8 @@ import { Typography, FontSizes } from "../../../theme/typography";
 import { NotificationBellButton } from "../../../components/NotificationBellButton";
 import { PrimaryButton } from "../../../components/PrimaryButton";
 import { ScreenLayout } from "../../../components/ScreenLayout";
+import { ConfirmPopup } from "../../../components/ConfirmPopup";
+import { PlanCardMenu } from "../../../components/workout/PlanCardMenu";
 import { formatElapsedForTimer } from "../../../utils/workoutDuration";
 import { useStartWorkout } from "../../../hooks/useStartWorkout";
 import { formatDateShort } from "../../../utils/formatLocale";
@@ -96,12 +100,16 @@ export default function MyTrainingTab() {
   const { t, locale } = useI18n();
   const { session } = useActiveWorkoutSession();
   const startWorkout = useStartWorkout();
+  const { showToast } = useToast();
   const activePlanId = session?.workoutPlanId ?? null;
   const elapsedSeconds = useElapsedSeconds();
   const [plans, setPlans] = useState<WorkoutPlan[]>([]);
   const [logs, setLogs] = useState<WorkoutLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [removeTarget, setRemoveTarget] = useState<WorkoutPlan | null>(null);
+  const [removing, setRemoving] = useState(false);
   const hasLoadedOnceRef = useRef(false);
 
   useFocusEffect(
@@ -251,6 +259,15 @@ export default function MyTrainingTab() {
             <Text style={{ ...Typography.title, fontSize: FontSizes.h3 }}>{t("nav_myTraining")}</Text>
             <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.sm }}>
               <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t("historyTitle")}
+                onPress={() => router.push("/coach/workoutHistory" as any)}
+                hitSlop={12}
+                style={({ pressed }) => ({ padding: Spacing.sm, borderRadius: Radius.md, opacity: pressed ? 0.7 : 1 })}
+              >
+                <Ionicons name="calendar-outline" size={24} color={Colors.primary} />
+              </Pressable>
+              <Pressable
                 onPress={() => router.push("/coach/personalProgress" as any)}
                 hitSlop={12}
                 style={({ pressed }) => ({ padding: Spacing.sm, borderRadius: Radius.md, opacity: pressed ? 0.7 : 1 })}
@@ -388,6 +405,25 @@ export default function MyTrainingTab() {
                             ) : null}
                           </View>
                         </View>
+                        <PlanCardMenu
+                          isOpen={openMenuId === plan.id}
+                          onOpen={() => setOpenMenuId(plan.id)}
+                          onClose={() => setOpenMenuId(null)}
+                          onEdit={() => {
+                            if (isActive) {
+                              Alert.alert(t("workoutInProgressTitle"), t("cannotEditActiveWorkoutBody", { name: plan.name }));
+                              return;
+                            }
+                            router.push({ pathname: "/coach/editWorkout" as any, params: { workoutPlanId: plan.id } });
+                          }}
+                          onRemove={() => {
+                            if (isActive) {
+                              Alert.alert(t("workoutInProgressTitle"), t("cannotRemoveActiveWorkoutBody", { name: plan.name }));
+                              return;
+                            }
+                            setRemoveTarget(plan);
+                          }}
+                        />
                       </View>
                       <View style={{ flexDirection: "row", gap: Spacing.sm, marginTop: Spacing.md }}>
                         <View style={{ flex: 1 }}>
@@ -430,6 +466,32 @@ export default function MyTrainingTab() {
           )}
         </ScrollView>
       </View>
+
+      <ConfirmPopup
+        visible={removeTarget !== null}
+        icon="🗑️"
+        title={t("removePlanConfirmTitle", { name: removeTarget?.name ?? "" })}
+        body={t("removeWorkoutConfirmBody")}
+        cancelLabel={t("cancel")}
+        confirmLabel={t("removeAction")}
+        confirmTone="danger"
+        confirming={removing}
+        onCancel={() => setRemoveTarget(null)}
+        onConfirm={async () => {
+          if (!removeTarget || !user) return;
+          setRemoving(true);
+          try {
+            await workoutService.deactivateWorkoutPlan(removeTarget.id, user.id);
+            setPlans((prev) => prev.filter((p) => p.id !== removeTarget.id));
+            setRemoveTarget(null);
+            showToast(t("workoutRemovedToast"));
+          } catch (e: any) {
+            Alert.alert(t("failedToRemoveTitle"), e?.message ?? t("unknownErrorFallback"));
+          } finally {
+            setRemoving(false);
+          }
+        }}
+      />
     </ScreenLayout>
   );
 }

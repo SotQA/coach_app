@@ -20,15 +20,12 @@ import { ScreenLayout } from "../../components/ScreenLayout";
 import { useAuth } from "../../context/AuthContext";
 import { useI18n } from "../../context/I18nContext";
 import { useToast } from "../../context/ToastContext";
-import { useHideCoachFabOnFocus } from "../../context/CoachFabVisibilityContext";
 import { workoutService } from "../../services/workoutService";
-import { studentService } from "../../services/studentService";
 import { exerciseTemplateService } from "../../services/exerciseTemplateService";
 import type { Exercise } from "../../types/Workout";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography, FontSizes } from "../../theme/typography";
-import { getDisplayName } from "../../utils/userDisplay";
 import { logger } from "@/utils/logger";
 
 const toDraft = (e: Exercise): ExerciseDraft => ({
@@ -45,24 +42,20 @@ const toDraft = (e: Exercise): ExerciseDraft => ({
   exerciseDbId: e.exerciseDbId,
 });
 
-export default function EditWorkout() {
+export default function AthleteEditPlan() {
   const router = useRouter();
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const { t } = useI18n();
   const { showToast } = useToast();
-  useHideCoachFabOnFocus();
   const params = useLocalSearchParams<{ workoutPlanId?: string }>();
   const workoutPlanId = useMemo(() => String(params.workoutPlanId ?? "").trim(), [params]);
 
   const [planName, setPlanName] = useState("");
-  const [planNote, setPlanNote] = useState("");
+  const [note, setNote] = useState("");
   const [order, setOrder] = useState(0);
   const [estimatedMinutes, setEstimatedMinutes] = useState("");
-  const [coachMessage, setCoachMessage] = useState("");
-  const [studentDisplayName, setStudentDisplayName] = useState<string | null>(null);
-  const [planStudentId, setPlanStudentId] = useState<string | null>(null);
   const [exercises, setExercises] = useState<ExerciseDraft[]>([]);
   const [expandedKey, setExpandedKey] = useState<string | null>(null);
   const [lastAddedKey, setLastAddedKey] = useState<string | null>(null);
@@ -71,14 +64,13 @@ export default function EditWorkout() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [coachId, setCoachId] = useState<string | null>(null);
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
   const initialSnapshotRef = useRef<string | null>(null);
   const blockedActionRef = useRef<unknown>(null);
 
   useEffect(() => {
     const load = async () => {
-      logger.log("[coach/editWorkout] load start", { workoutPlanId });
+      logger.log("[athlete/editPlan] load start", { workoutPlanId });
       setLoading(true);
       try {
         setError(null);
@@ -87,25 +79,23 @@ export default function EditWorkout() {
           setError(t("missingWorkoutPlanIdError"));
           return;
         }
-
-        if (!user || user.role !== "coach") {
-          setError(t("mustBeLoggedInAsCoachError"));
+        if (!user) {
+          setError(t("goToLogin"));
           return;
         }
-        setCoachId(user.id);
 
         const plan = await workoutService.getWorkoutPlanById(workoutPlanId);
         if (!plan) {
           setError(t("workoutPlanNotFoundError"));
           return;
         }
-        if (plan.coachId !== user.id) {
+        if (plan.studentId !== user.id) {
           setError(t("noAccessToWorkoutPlanError"));
           return;
         }
 
         const name = plan.name ?? t("workoutPlanFallbackName");
-        const note = plan.note?.trim() ?? "";
+        const noteVal = plan.note?.trim() ?? "";
         const orderVal = typeof plan.order === "number" && Number.isFinite(plan.order) ? plan.order : 0;
         const estVal = plan.estimatedDurationMinutes != null ? String(plan.estimatedDurationMinutes) : "";
         const initial =
@@ -113,19 +103,13 @@ export default function EditWorkout() {
         const initialDrafts = initial.map(toDraft);
 
         setPlanName(name);
-        setPlanNote(note);
+        setNote(noteVal);
         setOrder(orderVal);
         setEstimatedMinutes(estVal);
         setExercises(initialDrafts);
-        setPlanStudentId(plan.studentId ?? null);
-        initialSnapshotRef.current = JSON.stringify({ name, note, orderVal, estVal, exercises: initialDrafts });
-
-        if (plan.studentId && plan.studentId !== user.id) {
-          const student = await studentService.getStudentById(plan.studentId).catch(() => null);
-          if (student) setStudentDisplayName(getDisplayName(student, t("theStudentFallback")));
-        }
+        initialSnapshotRef.current = JSON.stringify({ name, noteVal, orderVal, estVal, exercises: initialDrafts });
       } catch (e: any) {
-        console.error("[coach/editWorkout] load error", e);
+        console.error("[athlete/editPlan] load error", e);
         setError(e.message ?? t("failedToLoadWorkoutPlanError"));
       } finally {
         setLoading(false);
@@ -133,21 +117,13 @@ export default function EditWorkout() {
     };
 
     load();
-  }, [workoutPlanId, user?.id, user?.role, t]);
-
-  const isPersonalPlan = planStudentId !== null && user?.id === planStudentId;
+  }, [workoutPlanId, user?.id, t]);
 
   const hasUnsavedChanges = useMemo(() => {
     if (initialSnapshotRef.current === null) return false;
-    const current = JSON.stringify({
-      name: planName,
-      note: planNote,
-      orderVal: order,
-      estVal: estimatedMinutes,
-      exercises,
-    });
+    const current = JSON.stringify({ name: planName, noteVal: note, orderVal: order, estVal: estimatedMinutes, exercises });
     return current !== initialSnapshotRef.current;
-  }, [planName, planNote, order, estimatedMinutes, exercises]);
+  }, [planName, note, order, estimatedMinutes, exercises]);
 
   // `usePreventRemove` reads `hasUnsavedChanges` from the last completed
   // render — mutating `initialSnapshotRef` right before `router.back()` in
@@ -173,99 +149,61 @@ export default function EditWorkout() {
   const addExerciseFromLibrary = (payload: { name: string; exerciseDbId?: string }) => {
     const base = workoutService.createEmptyExercise();
     const nextKey = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-    const next: ExerciseDraft = {
-      _key: nextKey,
-      ...base,
-      name: payload.name,
-      coachNote: "",
-      exerciseDbId: payload.exerciseDbId,
-    };
-    setExercises((prev) => [...prev, next]);
+    setExercises((prev) => [...prev, { _key: nextKey, ...base, name: payload.name, coachNote: "", exerciseDbId: payload.exerciseDbId }]);
     setLastAddedKey(nextKey);
     setExpandedKey(nextKey);
   };
 
   const handleSave = async () => {
-    if (!coachId || !workoutPlanId) return;
+    if (!user || !workoutPlanId) return;
     setSaving(true);
     setError(null);
     try {
-      const trimmedName = planName.trim() || t("workoutPlanFallbackName");
-      if (planNote.trim().length > 500) throw new Error(t("coachNotesMaxLenError"));
-      if (coachMessage.trim().length > 500) throw new Error(t("messageToStudentMaxLenError"));
+      const trimmedName = planName.trim();
+      if (!trimmedName) throw new Error(t("workoutNameRequiredError"));
+      if (trimmedName.length > 50) throw new Error(t("workoutNameMaxLenError"));
+      if (note.trim().length > 500) throw new Error(t("notesMaxLenError"));
+
+      const durationTrim = estimatedMinutes.trim();
+      if (durationTrim !== "" && !Number.isFinite(Number(durationTrim))) {
+        throw new Error(t("estDurationMustBeNumberError"));
+      }
+      const durationNum = durationTrim === "" ? undefined : Math.max(0, Math.floor(Number(durationTrim)));
 
       const normalizedExercises: Exercise[] = exercises
-        .map((e) => {
-          const rest = (e.rest ?? "").trim();
-          const tempo = (e.tempo ?? "").trim();
-          const rpe = e.rpe === null || e.rpe === undefined ? null : e.rpe;
-
-          return {
-            id: e._key,
-            name: (e.name ?? "").trim(),
-            sets: Number(e.sets ?? 0),
-            reps: (e.reps ?? "").trim(),
-            weight: e.weight,
-            rest,
-            tempo,
-            rpe: rpe === null ? null : rpe,
-            coachNote: (e.coachNote ?? "").trim() || undefined,
-            videoUrl: (e.videoUrl ?? "").trim() || undefined,
-            exerciseDbId: e.exerciseDbId || undefined,
-          };
-        })
+        .map((e) => ({
+          id: e._key,
+          name: (e.name ?? "").trim(),
+          sets: Number(e.sets ?? 0),
+          reps: (e.reps ?? "").trim(),
+          weight: e.weight,
+          rest: (e.rest ?? "").trim(),
+          tempo: (e.tempo ?? "").trim(),
+          rpe: e.rpe === null || e.rpe === undefined ? null : e.rpe,
+          coachNote: (e.coachNote ?? "").trim() || undefined,
+          videoUrl: (e.videoUrl ?? "").trim() || undefined,
+          exerciseDbId: e.exerciseDbId || undefined,
+        }))
         .filter((e) => e.name.length > 0);
 
-      if (normalizedExercises.length === 0) {
-        throw new Error(t("atLeastOneExerciseRequiredError"));
-      }
+      if (normalizedExercises.length === 0) throw new Error(t("addAtLeastOneExerciseError"));
 
       for (const ex of normalizedExercises) {
-        if (!Number.isFinite(ex.sets) || ex.sets <= 0) {
-          throw new Error(t("setsMustBePositiveError", { name: ex.name }));
-        }
-        if (ex.rest !== "") {
-          const n = Number(ex.rest);
-          if (!Number.isFinite(n) || n < 0) {
-            throw new Error(t("restMustBeNonNegativeError", { name: ex.name }));
-          }
-        }
-        if (ex.tempo.length > 20) {
-          throw new Error(t("tempoMaxLenError", { name: ex.name }));
-        }
-        if (ex.rpe !== null) {
-          if (!Number.isFinite(ex.rpe) || ex.rpe < 1 || ex.rpe > 10) {
-            throw new Error(t("rpeRangeError", { name: ex.name }));
-          }
-        }
-        if (ex.weight != null) {
-          const w = Number(ex.weight);
-          if (!Number.isFinite(w) || w < 0) {
-            throw new Error(t("weightMustBeNonNegativeError", { name: ex.name }));
-          }
+        if (!Number.isFinite(ex.sets) || ex.sets <= 0) throw new Error(t("setsMustBePositiveError", { name: ex.name }));
+        if (ex.rpe !== null && (!Number.isFinite(ex.rpe) || ex.rpe < 1 || ex.rpe > 10)) {
+          throw new Error(t("rpeRangeError", { name: ex.name }));
         }
       }
 
-      const parsedOrder = Number(order);
-      const parsedEstMinutes = estimatedMinutes.trim() === "" ? undefined : Number(estimatedMinutes);
+      await workoutService.updateWorkoutPlan(workoutPlanId, user.id, {
+        name: trimmedName,
+        exercises: normalizedExercises,
+        note: note.trim(),
+        order,
+        estimatedDurationMinutes: durationNum,
+      });
 
-      await workoutService.updateWorkoutPlan(
-        workoutPlanId,
-        coachId,
-        {
-          name: trimmedName,
-          exercises: normalizedExercises,
-          note: planNote.trim(),
-          order: Number.isFinite(parsedOrder) ? parsedOrder : undefined,
-          estimatedDurationMinutes:
-            parsedEstMinutes !== undefined && Number.isFinite(parsedEstMinutes) ? parsedEstMinutes : undefined,
-        },
-        coachMessage.trim() || undefined
-      );
-
-      await Promise.all(
-        normalizedExercises.map((e) => exerciseTemplateService.upsertNameIfNeeded(e.name))
-      );
+      await Promise.all(normalizedExercises.map((e) => exerciseTemplateService.upsertNameIfNeeded(e.name)));
 
       initialSnapshotRef.current = null;
       justSavedRef.current = true;
@@ -293,8 +231,6 @@ export default function EditWorkout() {
       </View>
     );
   }
-
-  const studentLabel = studentDisplayName ?? t("theStudentFallback");
 
   return (
     <ScreenLayout>
@@ -327,11 +263,11 @@ export default function EditWorkout() {
                   marginBottom: Spacing.md,
                 }}
               >
-                <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("planNameLabel")}</Text>
+                <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("workoutNameLabel")}</Text>
                 <TextInput
                   value={planName}
                   onChangeText={(text) => setPlanName(text.slice(0, 50))}
-                  placeholder={t("workoutPlanFallbackName")}
+                  placeholder={t("workoutNamePlaceholder")}
                   placeholderTextColor={Colors.textMuted}
                   style={{
                     borderWidth: 1,
@@ -350,9 +286,8 @@ export default function EditWorkout() {
                     <TextInput
                       value={String(order)}
                       onChangeText={(text) => {
-                        const cleaned = text.trim().replace(/[^0-9-]/g, "");
-                        const n = Number(cleaned);
-                        setOrder(Number.isFinite(n) ? n : 0);
+                        const n = Number(text.trim().replace(/[^0-9]/g, ""));
+                        setOrder(Number.isFinite(n) ? Math.max(0, n) : 0);
                       }}
                       keyboardType="number-pad"
                       style={{
@@ -385,11 +320,11 @@ export default function EditWorkout() {
                   </View>
                 </View>
 
-                <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("coachNotesOptionalLabel")}</Text>
+                <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("notesOptionalLabel")}</Text>
                 <TextInput
-                  value={planNote}
-                  onChangeText={(text) => setPlanNote(text.slice(0, 500))}
-                  placeholder={t("planNoteInputPlaceholder")}
+                  value={note}
+                  onChangeText={(text) => setNote(text.slice(0, 500))}
+                  placeholder={t("notesPlaceholder")}
                   placeholderTextColor={Colors.textMuted}
                   multiline
                   style={{
@@ -419,36 +354,7 @@ export default function EditWorkout() {
             </>
           }
           ListFooterComponent={
-            <View style={{ marginTop: Spacing.sm }}>
-              {!isPersonalPlan ? (
-                <>
-                  <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("messageToStudentLabel", { name: studentLabel })}</Text>
-                  <TextInput
-                    value={coachMessage}
-                    onChangeText={(text) => setCoachMessage(text.slice(0, 500))}
-                    placeholder={t("messageToStudentPlaceholder")}
-                    placeholderTextColor={Colors.textMuted}
-                    multiline
-                    style={{
-                      borderWidth: 1,
-                      borderColor: Colors.border,
-                      padding: 12,
-                      borderRadius: Radius.md,
-                      color: Colors.text,
-                      backgroundColor: Colors.surface,
-                      minHeight: 64,
-                      marginBottom: Spacing.xs,
-                    }}
-                  />
-                  <Text style={{ ...Typography.secondary, color: Colors.textMuted, fontSize: FontSizes.tiny, textAlign: "center" }}>
-                    {t("studentWillBeNotifiedNote", { name: studentLabel })}
-                  </Text>
-                </>
-              ) : null}
-              {error ? (
-                <Text style={{ color: Colors.danger, marginTop: Spacing.sm, textAlign: "center" }}>{error}</Text>
-              ) : null}
-            </View>
+            error ? <Text style={{ color: Colors.danger, marginTop: Spacing.sm, textAlign: "center" }}>{error}</Text> : null
           }
           renderItem={({ item, drag, isActive, getIndex }: RenderItemParams<ExerciseDraft>) => {
             if (item._key === confirmDeleteKey) {
@@ -542,10 +448,10 @@ export default function EditWorkout() {
         {saving ? <ActivityIndicator /> : <PrimaryButton title={t("saveChanges")} onPress={handleSave} />}
       </View>
 
-      {coachId ? (
+      {user ? (
         <ExerciseLibraryModal
           visible={libraryOpen}
-          coachId={coachId}
+          coachId={user.id}
           onClose={() => setLibraryOpen(false)}
           onAddExercise={(p) => addExerciseFromLibrary({ name: p.name, exerciseDbId: p.exerciseDbId })}
         />

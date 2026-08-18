@@ -434,7 +434,7 @@ export const workoutService = {
   async updateWorkoutPlan(
     planId: string,
     coachId: string,
-    patch: Partial<Pick<WorkoutPlan, "name" | "exercises" | "note" | "order" | "isActive">>,
+    patch: Partial<Pick<WorkoutPlan, "name" | "exercises" | "note" | "order" | "isActive" | "estimatedDurationMinutes">>,
     coachMessage?: string
   ): Promise<void> {
     assertNonEmpty(planId, "workoutPlanId");

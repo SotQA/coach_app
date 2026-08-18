@@ -8,6 +8,7 @@ import { ActiveWorkoutSessionProvider, useActiveWorkoutSession } from "../contex
 import { ElapsedTimeProvider } from "../context/ElapsedTimeContext";
 import { I18nProvider } from "../context/I18nContext";
 import { UnitsProvider } from "../context/UnitsContext";
+import { ToastProvider } from "../context/ToastContext";
 import { SpotlightRegistryProvider } from "../context/SpotlightRegistryContext";
 import { OnboardingTourProvider } from "../context/OnboardingTourContext";
 import { WelcomeSplash } from "../components/onboarding/WelcomeSplash";
@@ -285,11 +286,13 @@ export default function Layout() {
           <ActiveWorkoutSessionProvider>
             <ElapsedTimeProvider>
               <ThemeProvider value={navTheme}>
-                <ErrorBoundary>
-                  <RootNavigator />
-                </ErrorBoundary>
-                <WelcomeSplash />
-                <SpotlightOverlay />
+                <ToastProvider>
+                  <ErrorBoundary>
+                    <RootNavigator />
+                  </ErrorBoundary>
+                  <WelcomeSplash />
+                  <SpotlightOverlay />
+                </ToastProvider>
               </ThemeProvider>
             </ElapsedTimeProvider>
           </ActiveWorkoutSessionProvider>

@@ -44,6 +44,7 @@ export default function AthleteLayout() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false, title: t("back") }} />
         <Stack.Screen name="workoutExecution" options={{ headerShown: false }} />
         <Stack.Screen name="createPlan" options={{ title: t("createPlanTitle") }} />
+        <Stack.Screen name="editPlan" options={{ title: t("editWorkoutTitle") }} />
         <Stack.Screen name="workoutPlanDetail" options={{ title: t("workoutTitle") }} />
         <Stack.Screen name="exerciseDetail" options={{ headerShown: false }} />
         <Stack.Screen name="workoutHistory" options={{ title: t("historyTitle") }} />

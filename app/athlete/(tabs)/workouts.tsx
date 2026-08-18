@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Animated,
   Pressable,
   RefreshControl,
@@ -15,6 +16,7 @@ import { useAuth } from "../../../context/AuthContext";
 import { useActiveWorkoutSession } from "../../../context/ActiveWorkoutSessionContext";
 import { useElapsedSeconds } from "../../../context/ElapsedTimeContext";
 import { useI18n } from "../../../context/I18nContext";
+import { useToast } from "../../../context/ToastContext";
 import { workoutService } from "../../../services/workoutService";
 import type { WorkoutLog, WorkoutPlan } from "../../../types/Workout";
 import { Colors } from "../../../theme/colors";
@@ -22,6 +24,8 @@ import { Radius, Spacing } from "../../../theme/spacing";
 import { Typography, FontSizes } from "../../../theme/typography";
 import { PrimaryButton } from "../../../components/PrimaryButton";
 import { ScreenLayout } from "../../../components/ScreenLayout";
+import { ConfirmPopup } from "../../../components/ConfirmPopup";
+import { PlanCardMenu } from "../../../components/workout/PlanCardMenu";
 import { SpotlightTarget } from "../../../components/onboarding/SpotlightTarget";
 import { formatElapsedForTimer } from "../../../utils/workoutDuration";
 import { useStartWorkout } from "../../../hooks/useStartWorkout";
@@ -89,6 +93,7 @@ export default function AthleteWorkoutsTab() {
   const { t, locale } = useI18n();
   const { session } = useActiveWorkoutSession();
   const startWorkout = useStartWorkout();
+  const { showToast } = useToast();
   const activePlanId = session?.workoutPlanId ?? null;
   const elapsedSeconds = useElapsedSeconds();
   const [plans, setPlans] = useState<WorkoutPlan[]>([]);
@@ -96,6 +101,9 @@ export default function AthleteWorkoutsTab() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [removeTarget, setRemoveTarget] = useState<WorkoutPlan | null>(null);
+  const [removing, setRemoving] = useState(false);
   const hasLoadedOnceRef = useRef(false);
 
   const fetchHubData = useCallback(async (athleteId: string) => {
@@ -341,30 +349,51 @@ export default function AthleteWorkoutsTab() {
                   const isActive = plan.id === activePlanId;
                   return (
                     <ScaleCard key={plan.id} style={{ backgroundColor: Colors.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: Colors.border }}>
-                      <View style={{ flex: 1 }}>
-                        <View style={{ flexDirection: "row", alignItems: "center", flexWrap: "wrap", gap: Spacing.sm }}>
-                          <Text style={{ ...Typography.section, fontSize: FontSizes.subheading, fontWeight: "800" }}>{plan.name}</Text>
-                          {isActive ? (
-                            <View style={{ backgroundColor: "rgba(212,255,68,0.18)", paddingHorizontal: Spacing.sm, paddingVertical: 4, borderRadius: Radius.sm, borderWidth: 1, borderColor: "rgba(212,255,68,0.45)" }}>
-                              <Text style={{ ...Typography.micro, color: Colors.primary, fontWeight: "700" }}>{t("inProgress")}</Text>
-                            </View>
-                          ) : null}
+                      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" }}>
+                        <View style={{ flex: 1, marginRight: Spacing.sm }}>
+                          <View style={{ flexDirection: "row", alignItems: "center", flexWrap: "wrap", gap: Spacing.sm }}>
+                            <Text style={{ ...Typography.section, fontSize: FontSizes.subheading, fontWeight: "800" }}>{plan.name}</Text>
+                            {isActive ? (
+                              <View style={{ backgroundColor: "rgba(212,255,68,0.18)", paddingHorizontal: Spacing.sm, paddingVertical: 4, borderRadius: Radius.sm, borderWidth: 1, borderColor: "rgba(212,255,68,0.45)" }}>
+                                <Text style={{ ...Typography.micro, color: Colors.primary, fontWeight: "700" }}>{t("inProgress")}</Text>
+                              </View>
+                            ) : null}
+                          </View>
+                          <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4 }}>
+                            {t(exCount === 1 ? "exerciseCount_one" : "exerciseCount_other", { count: exCount })} · {t("lastWhen", { when: formatRelativeDone(lastMs, t, locale) })}
+                          </Text>
+                          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: Spacing.sm, marginTop: Spacing.sm }}>
+                            {isNew ? (
+                              <View style={{ backgroundColor: "#D4FF4422", paddingHorizontal: Spacing.sm, paddingVertical: 4, borderRadius: Radius.sm }}>
+                                <Text style={{ color: Colors.primary, fontSize: FontSizes.caption, fontWeight: "700" }}>{t("new")}</Text>
+                              </View>
+                            ) : null}
+                            {doneThisWeek && !isNew ? (
+                              <View style={{ backgroundColor: "#34C75922", paddingHorizontal: Spacing.sm, paddingVertical: 4, borderRadius: Radius.sm }}>
+                                <Text style={{ color: Colors.success, fontSize: FontSizes.caption, fontWeight: "700" }}>{t("doneThisWeek")}</Text>
+                              </View>
+                            ) : null}
+                          </View>
                         </View>
-                        <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4 }}>
-                          {t(exCount === 1 ? "exerciseCount_one" : "exerciseCount_other", { count: exCount })} · {t("lastWhen", { when: formatRelativeDone(lastMs, t, locale) })}
-                        </Text>
-                        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: Spacing.sm, marginTop: Spacing.sm }}>
-                          {isNew ? (
-                            <View style={{ backgroundColor: "#D4FF4422", paddingHorizontal: Spacing.sm, paddingVertical: 4, borderRadius: Radius.sm }}>
-                              <Text style={{ color: Colors.primary, fontSize: FontSizes.caption, fontWeight: "700" }}>{t("new")}</Text>
-                            </View>
-                          ) : null}
-                          {doneThisWeek && !isNew ? (
-                            <View style={{ backgroundColor: "#34C75922", paddingHorizontal: Spacing.sm, paddingVertical: 4, borderRadius: Radius.sm }}>
-                              <Text style={{ color: Colors.success, fontSize: FontSizes.caption, fontWeight: "700" }}>{t("doneThisWeek")}</Text>
-                            </View>
-                          ) : null}
-                        </View>
+                        <PlanCardMenu
+                          isOpen={openMenuId === plan.id}
+                          onOpen={() => setOpenMenuId(plan.id)}
+                          onClose={() => setOpenMenuId(null)}
+                          onEdit={() => {
+                            if (isActive) {
+                              Alert.alert(t("workoutInProgressTitle"), t("cannotEditActiveWorkoutBody", { name: plan.name }));
+                              return;
+                            }
+                            router.push({ pathname: "/athlete/editPlan" as any, params: { workoutPlanId: plan.id } });
+                          }}
+                          onRemove={() => {
+                            if (isActive) {
+                              Alert.alert(t("workoutInProgressTitle"), t("cannotRemoveActiveWorkoutBody", { name: plan.name }));
+                              return;
+                            }
+                            setRemoveTarget(plan);
+                          }}
+                        />
                       </View>
                       <View style={{ flexDirection: "row", gap: Spacing.sm, marginTop: Spacing.md }}>
                         <View style={{ flex: 1 }}>
@@ -400,6 +429,32 @@ export default function AthleteWorkoutsTab() {
           )}
         </ScrollView>
       </View>
+
+      <ConfirmPopup
+        visible={removeTarget !== null}
+        icon="🗑️"
+        title={t("removePlanConfirmTitle", { name: removeTarget?.name ?? "" })}
+        body={t("removeWorkoutConfirmBody")}
+        cancelLabel={t("cancel")}
+        confirmLabel={t("removeAction")}
+        confirmTone="danger"
+        confirming={removing}
+        onCancel={() => setRemoveTarget(null)}
+        onConfirm={async () => {
+          if (!removeTarget || !user) return;
+          setRemoving(true);
+          try {
+            await workoutService.deactivateWorkoutPlan(removeTarget.id, user.id);
+            setPlans((prev) => prev.filter((p) => p.id !== removeTarget.id));
+            setRemoveTarget(null);
+            showToast(t("workoutRemovedToast"));
+          } catch (e: any) {
+            Alert.alert(t("failedToRemoveTitle"), e?.message ?? t("unknownErrorFallback"));
+          } finally {
+            setRemoving(false);
+          }
+        }}
+      />
     </ScreenLayout>
   );
 }

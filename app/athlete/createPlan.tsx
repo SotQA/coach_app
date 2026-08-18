@@ -246,7 +246,22 @@ export default function AthletCreatePlan() {
                     setExpandedKey((prev) => (prev === item._key ? null : prev));
                     setLastAddedKey((prev) => (prev === item._key ? null : prev));
                   }}
-                  dragHandleProps={{ onLongPress: drag }}
+                  dragHandleProps={{
+                    onLongPress: () => {
+                      // Starting a drag on an expanded card (tall form of
+                      // inputs) races the collapse against the drag gesture's
+                      // own layout measurement — the row's height changes out
+                      // from under it mid-drag, causing the list to jump and
+                      // the drag to break. So this press only collapses the
+                      // card; the next long-press (now on the compact row)
+                      // actually starts the drag.
+                      if (expandedKey === item._key) {
+                        setExpandedKey(null);
+                        return;
+                      }
+                      drag();
+                    },
+                  }}
                 />
               </View>
             );
