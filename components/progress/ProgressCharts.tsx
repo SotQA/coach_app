@@ -5,13 +5,15 @@ import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography, FontSizes } from "../../theme/typography";
+import { useI18n } from "../../context/I18nContext";
 import type { TimeRangePreset, WeeklyPoint, WeeklyWeightReps } from "../../utils/coachProgressAnalytics";
 
-export const TIME_PRESETS: { key: TimeRangePreset; label: string }[] = [
-  { key: "2w", label: "Last 2 weeks" },
-  { key: "1m", label: "Last month" },
-  { key: "3m", label: "Last 3 months" },
-  { key: "all", label: "All time" },
+// `labelKey` is an i18n key (module scope can't call hooks), translated by the consumer.
+export const TIME_PRESETS: { key: TimeRangePreset; labelKey: string }[] = [
+  { key: "2w", labelKey: "rangeLast2Weeks" },
+  { key: "1m", labelKey: "rangeLastMonth" },
+  { key: "3m", labelKey: "rangeLast3Months" },
+  { key: "all", labelKey: "rangeAllTime" },
 ];
 
 // Reserved gutter for a vertical-axis number column (e.g. "140") and the gap before the plot area.
@@ -67,6 +69,7 @@ function TapColumns({
 }
 
 function WeekAxisLabels({ coords, plotWidth }: { coords: { x: number }[]; plotWidth: number }) {
+  const { t } = useI18n();
   const labelWidth = 32;
   const maxLabels = Math.max(1, Math.floor(plotWidth / labelWidth));
   const step = Math.max(1, Math.ceil(coords.length / maxLabels));
@@ -89,7 +92,7 @@ function WeekAxisLabels({ coords, plotWidth }: { coords: { x: number }[]; plotWi
               color: Colors.textMuted,
             }}
           >
-            {`W${i + 1}`}
+            {`${t("weekAbbrev")}${i + 1}`}
           </Text>
         );
       })}
@@ -110,6 +113,7 @@ export function MiniLineChart({
   highlightPr: boolean;
   width: number;
 }) {
+  const { t } = useI18n();
   const W = width;
   const H = height;
   const padY = 10;
@@ -190,12 +194,12 @@ export function MiniLineChart({
       <WeekAxisLabels coords={coords} plotWidth={plotWidth} />
       {selected != null && points[selected] ? (
         <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4, textAlign: "center" }}>
-          {points[selected].label}: {points[selected].value} kg e1RM
-          {points[selected].isPr ? " · PR" : ""}
+          {t("e1rmDetail", { label: points[selected].label, value: points[selected].value })}
+          {points[selected].isPr ? t("prBadgeSuffix") : ""}
         </Text>
       ) : (
         <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4, textAlign: "center" }}>
-          Tap a point for details
+          {t("tapPointForDetails")}
         </Text>
       )}
     </View>
@@ -203,6 +207,7 @@ export function MiniLineChart({
 }
 
 export function WeightRepsChart({ data, width }: { data: WeeklyWeightReps[]; width: number }) {
+  const { t } = useI18n();
   const W = width;
   const H = 190;
   const padY = 10;
@@ -217,7 +222,7 @@ export function WeightRepsChart({ data, width }: { data: WeeklyWeightReps[]; wid
   }, [data]);
 
   if (data.length === 0) {
-    return <Text style={{ ...Typography.secondary, color: Colors.textMuted }}>Not enough data</Text>;
+    return <Text style={{ ...Typography.secondary, color: Colors.textMuted }}>{t("notEnoughData")}</Text>;
   }
 
   const weights = data.map((d) => d.weight);
@@ -290,11 +295,15 @@ export function WeightRepsChart({ data, width }: { data: WeeklyWeightReps[]; wid
       <WeekAxisLabels coords={weightCoords} plotWidth={plotWidth} />
       {selected != null && data[selected] ? (
         <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4, textAlign: "center" }}>
-          {data[selected].label}: {data[selected].weight} kg × {data[selected].reps} reps
+          {t("weightRepsDetail", {
+            label: data[selected].label,
+            weight: data[selected].weight,
+            reps: data[selected].reps,
+          })}
         </Text>
       ) : (
         <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4, textAlign: "center" }}>
-          Tap a point for details
+          {t("tapPointForDetails")}
         </Text>
       )}
     </View>

@@ -3,6 +3,7 @@ import { View, Text, TextInput, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import type { Exercise } from "../types/Workout";
 import { exerciseTemplateService } from "../services/exerciseTemplateService";
+import { useI18n } from "../context/I18nContext";
 import { Colors } from "../theme/colors";
 import { Radius, Spacing } from "../theme/spacing";
 import { Typography } from "../theme/typography";
@@ -32,6 +33,7 @@ export const ExerciseInput: FC<ExerciseInputProps> = ({
     Array<{ name: string; gifUrl?: string }>
   >([]);
   const suggestTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { t } = useI18n();
 
   useEffect(() => {
     if (!weightFocused) {
@@ -117,7 +119,7 @@ export const ExerciseInput: FC<ExerciseInputProps> = ({
         borderColor: Colors.border,
       }}
     >
-      <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Exercise Name</Text>
+      <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("exerciseNameLabel")}</Text>
       <TextInput
         placeholder="Bench Press"
         placeholderTextColor={Colors.textMuted}
@@ -169,7 +171,7 @@ export const ExerciseInput: FC<ExerciseInputProps> = ({
 
       <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
         <View style={{ flex: 1, marginRight: 4 }}>
-          <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Sets</Text>
+          <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("exerciseFieldSets")}</Text>
           <TextInput
             keyboardType="numeric"
             value={String(value.sets)}
@@ -187,7 +189,7 @@ export const ExerciseInput: FC<ExerciseInputProps> = ({
         </View>
 
         <View style={{ flex: 1, marginHorizontal: 4 }}>
-          <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Reps</Text>
+          <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("exerciseFieldReps")}</Text>
           <TextInput
             // `reps` is stored in Firestore as a string, so allow full text input/paste.
             keyboardType="default"
@@ -205,7 +207,7 @@ export const ExerciseInput: FC<ExerciseInputProps> = ({
         </View>
 
         <View style={{ flex: 1, marginLeft: 4 }}>
-          <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Weight (kg)</Text>
+          <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("weightLabel")} ({t("unitKg").toUpperCase()})</Text>
           <TextInput
             keyboardType="numeric"
             value={weightText}
@@ -249,7 +251,7 @@ export const ExerciseInput: FC<ExerciseInputProps> = ({
         <>
           <View style={{ flexDirection: "row", marginTop: Spacing.xs }}>
             <View style={{ flex: 1, marginRight: 4 }}>
-              <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Rest (seconds)</Text>
+              <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("restSecondsLabel")}</Text>
               <TextInput
                 keyboardType="numeric"
                 value={value.rest ?? ""}
@@ -271,7 +273,7 @@ export const ExerciseInput: FC<ExerciseInputProps> = ({
             </View>
 
             <View style={{ flex: 1, marginLeft: 4 }}>
-              <Text style={{ ...Typography.secondary, marginBottom: 6 }}>RPE (1-10)</Text>
+              <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("rpeRangeLabel")}</Text>
               <TextInput
                 keyboardType="numeric"
                 value={value.rpe === null || value.rpe === undefined ? "" : String(value.rpe)}
@@ -295,7 +297,7 @@ export const ExerciseInput: FC<ExerciseInputProps> = ({
           </View>
 
           <View style={{ marginTop: Spacing.xs }}>
-            <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Tempo (e.g. 3-1-1)</Text>
+            <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("tempoExampleLabel")}</Text>
             <TextInput
               value={value.tempo ?? ""}
               onChangeText={(text) => updateField("tempo", text)}

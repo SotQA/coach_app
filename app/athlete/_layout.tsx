@@ -1,6 +1,7 @@
 import { Redirect, Stack, useRouter } from "expo-router";
 import { Pressable, View } from "react-native";
 import { useAuth } from "../../context/AuthContext";
+import { useI18n } from "../../context/I18nContext";
 import { Colors } from "../../theme/colors";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -21,6 +22,7 @@ function HeaderBackButton() {
 
 export default function AthleteLayout() {
   const { user } = useAuth();
+  const { t } = useI18n();
 
   if (!user) return <Redirect href="/login" />;
   if (user.role === "coach") return <Redirect href="/coach/dashboard" />;
@@ -39,13 +41,13 @@ export default function AthleteLayout() {
           contentStyle: { backgroundColor: Colors.bg },
         }}
       >
-        <Stack.Screen name="(tabs)" options={{ headerShown: false, title: "Back" }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false, title: t("back") }} />
         <Stack.Screen name="workoutExecution" options={{ headerShown: false }} />
-        <Stack.Screen name="createPlan" options={{ title: "Create Plan" }} />
-        <Stack.Screen name="workoutPlanDetail" options={{ title: "Workout" }} />
+        <Stack.Screen name="createPlan" options={{ title: t("createPlanTitle") }} />
+        <Stack.Screen name="workoutPlanDetail" options={{ title: t("workoutTitle") }} />
         <Stack.Screen name="exerciseDetail" options={{ headerShown: false }} />
-        <Stack.Screen name="workoutHistory" options={{ title: "History" }} />
-        <Stack.Screen name="progress" options={{ title: "Progress" }} />
+        <Stack.Screen name="workoutHistory" options={{ title: t("historyTitle") }} />
+        <Stack.Screen name="progress" options={{ title: t("progress") }} />
       </Stack>
     </View>
   );

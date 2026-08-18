@@ -13,13 +13,25 @@ import * as WebBrowser from "expo-web-browser";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { getExerciseById, getExerciseName } from "../../services/localExerciseService";
+import {
+  getExerciseById,
+  getExerciseInstructions,
+  getExerciseName,
+} from "../../services/localExerciseService";
+import {
+  translateCategory,
+  translateEquipment,
+  translateLevel,
+  translateMuscle,
+} from "../../services/exerciseEnumTranslations";
+import { useI18n } from "../../context/I18nContext";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 
 export default function ExerciseDetailScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { locale, t } = useI18n();
   const params = useLocalSearchParams<{
     exerciseName: string;
     exerciseDbId?: string;
@@ -28,11 +40,12 @@ export default function ExerciseDetailScreen() {
     lang?: string;
   }>();
 
-  const lang = (params.lang as "en" | "ru" | "pl") ?? "en";
+  const lang = locale;
   const localExercise = params.exerciseDbId ? getExerciseById(params.exerciseDbId) : null;
   const displayName = localExercise
     ? getExerciseName(localExercise, lang)
     : params.exerciseName;
+  const instructions = localExercise ? getExerciseInstructions(localExercise, lang) : [];
 
   const { width } = useWindowDimensions();
   const playerWidth = width - Spacing.md * 2;
@@ -77,17 +90,17 @@ export default function ExerciseDetailScreen() {
 
       {/* No local data note */}
       {!localExercise && (
-        <Text style={styles.mutedNote}>Exercise details not available for custom exercises</Text>
+        <Text style={styles.mutedNote}>{t("exerciseNoLocalData")}</Text>
       )}
 
       {/* Primary muscles */}
       {localExercise && localExercise.primaryMuscles.length > 0 && (
         <View style={styles.muscleCard}>
-          <Text style={styles.microLabel}>PRIMARY MUSCLES</Text>
+          <Text style={styles.microLabel}>{t("primaryMusclesLabel")}</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6, paddingVertical: 4 }}>
             {localExercise.primaryMuscles.map(m => (
               <View key={m} style={styles.chipPrimary}>
-                <Text style={styles.chipPrimaryText}>{capitalize(m)}</Text>
+                <Text style={styles.chipPrimaryText}>{translateMuscle(m, lang)}</Text>
               </View>
             ))}
           </ScrollView>
@@ -97,11 +110,11 @@ export default function ExerciseDetailScreen() {
       {/* Secondary muscles */}
       {localExercise && localExercise.secondaryMuscles.length > 0 && (
         <View style={styles.muscleCard}>
-          <Text style={styles.microLabel}>SECONDARY MUSCLES</Text>
+          <Text style={styles.microLabel}>{t("secondaryMusclesLabel")}</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6, paddingVertical: 4 }}>
             {localExercise.secondaryMuscles.map(m => (
               <View key={m} style={styles.chipSecondary}>
-                <Text style={styles.chipSecondaryText}>{capitalize(m)}</Text>
+                <Text style={styles.chipSecondaryText}>{translateMuscle(m, lang)}</Text>
               </View>
             ))}
           </ScrollView>
@@ -114,22 +127,22 @@ export default function ExerciseDetailScreen() {
           {localExercise.equipment && (
             <View style={styles.metaTile}>
               <Ionicons name="barbell-outline" size={14} color={Colors.textMuted} />
-              <Text style={styles.microLabel}>Equipment</Text>
-              <Text style={styles.metaValue}>{capitalize(localExercise.equipment)}</Text>
+              <Text style={styles.microLabel}>{t("equipmentLabel")}</Text>
+              <Text style={styles.metaValue}>{translateEquipment(localExercise.equipment, lang)}</Text>
             </View>
           )}
           {localExercise.level && (
             <View style={styles.metaTile}>
               <Ionicons name="speedometer-outline" size={14} color={Colors.textMuted} />
-              <Text style={styles.microLabel}>Level</Text>
-              <Text style={styles.metaValue}>{capitalize(localExercise.level)}</Text>
+              <Text style={styles.microLabel}>{t("levelLabel")}</Text>
+              <Text style={styles.metaValue}>{translateLevel(localExercise.level, lang)}</Text>
             </View>
           )}
           {localExercise.category && (
             <View style={styles.metaTile}>
               <Ionicons name="grid-outline" size={14} color={Colors.textMuted} />
-              <Text style={styles.microLabel}>Category</Text>
-              <Text style={styles.metaValue}>{capitalize(localExercise.category)}</Text>
+              <Text style={styles.microLabel}>{t("categoryLabel")}</Text>
+              <Text style={styles.metaValue}>{translateCategory(localExercise.category, lang)}</Text>
             </View>
           )}
         </View>
@@ -141,7 +154,7 @@ export default function ExerciseDetailScreen() {
       {videoId && (
         <View style={styles.videoCard}>
           <Text style={[styles.microLabel, { padding: Spacing.sm, paddingBottom: Spacing.xs }]}>
-            TUTORIAL VIDEO
+            {t("tutorialVideoLabel")}
           </Text>
           <TouchableOpacity
             activeOpacity={0.85}
@@ -175,7 +188,7 @@ export default function ExerciseDetailScreen() {
             style={styles.watchBtn}
           >
             <Ionicons name="logo-youtube" size={16} color="#FF0000" />
-            <Text style={styles.watchBtnText}>Watch Tutorial</Text>
+            <Text style={styles.watchBtnText}>{t("watchTutorial")}</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -189,7 +202,7 @@ export default function ExerciseDetailScreen() {
         >
           <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
             <Ionicons name="play-circle-outline" size={18} color="#fff" />
-            <Text style={styles.btnPrimaryText}>Watch Tutorial</Text>
+            <Text style={styles.btnPrimaryText}>{t("watchTutorial")}</Text>
           </View>
         </TouchableOpacity>
       )}
@@ -208,7 +221,7 @@ export default function ExerciseDetailScreen() {
         >
           <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
             <Ionicons name="search-outline" size={18} color={Colors.primary} />
-            <Text style={styles.btnOutlinedText}>Search on YouTube</Text>
+            <Text style={styles.btnOutlinedText}>{t("searchOnYoutube")}</Text>
           </View>
         </TouchableOpacity>
       )}
@@ -218,17 +231,17 @@ export default function ExerciseDetailScreen() {
         <View style={styles.card}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 4 }}>
             <Ionicons name="person-circle-outline" size={16} color={Colors.primary} />
-            <Text style={styles.sectionLabel}>Coach Notes</Text>
+            <Text style={styles.sectionLabel}>{t("coachNotesLabel")}</Text>
           </View>
           <Text style={styles.noteText}>{params.coachNote}</Text>
         </View>
       )}
 
       {/* Instructions */}
-      {localExercise && localExercise.instructions.length > 0 && (
+      {instructions.length > 0 && (
         <View style={styles.muscleCard}>
-          <Text style={styles.microLabel}>HOW TO PERFORM</Text>
-          {localExercise.instructions.map((step, i) => (
+          <Text style={styles.microLabel}>{t("howToPerformLabel")}</Text>
+          {instructions.map((step, i) => (
             <View key={i} style={styles.instructionRow}>
               <View style={styles.stepBadge}>
                 <Text style={styles.stepNum}>{i + 1}</Text>
@@ -240,10 +253,6 @@ export default function ExerciseDetailScreen() {
       )}
     </ScrollView>
   );
-}
-
-function capitalize(s: string) {
-  return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
 /**

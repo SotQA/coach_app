@@ -19,7 +19,9 @@ import {
   type ExerciseTemplate,
 } from "../services/exerciseTemplateService";
 import * as localExerciseService from "../services/localExerciseService";
-import type { LocalExercise } from "../services/localExerciseService";
+import { getExerciseName, type LocalExercise } from "../services/localExerciseService";
+import { translateEquipment, translateMuscle } from "../services/exerciseEnumTranslations";
+import { useI18n } from "../context/I18nContext";
 import { toMs } from "../utils/dateConvert";
 
 // ---------------------------------------------------------------------------
@@ -37,6 +39,20 @@ const LIBRARY_CATEGORIES = [
   "Cardio",
   "Mobility",
 ] as const;
+
+// Display label only — LIBRARY_CATEGORIES values stay in English since they're
+// persisted as the template's `category` field and matched against directly.
+const CATEGORY_LABEL_KEYS: Record<(typeof LIBRARY_CATEGORIES)[number], string> = {
+  Chest: "libraryCategoryChest",
+  Back: "libraryCategoryBack",
+  Legs: "libraryCategoryLegs",
+  Shoulders: "libraryCategoryShoulders",
+  Arms: "libraryCategoryArms",
+  Core: "libraryCategoryCore",
+  Glutes: "libraryCategoryGlutes",
+  Cardio: "libraryCategoryCardio",
+  Mobility: "libraryCategoryMobility",
+};
 
 // ---------------------------------------------------------------------------
 // Types
@@ -76,6 +92,8 @@ type LocalCardProps = {
 };
 
 function LocalExerciseCard({ item, onAdd, isSelected = false }: LocalCardProps) {
+  const { locale } = useI18n();
+  const displayName = getExerciseName(item, locale);
   return (
     <View
       style={{
@@ -96,7 +114,7 @@ function LocalExerciseCard({ item, onAdd, isSelected = false }: LocalCardProps) 
           style={{ ...Typography.section, fontWeight: "900" }}
           numberOfLines={2}
         >
-          {toTitleCase(item.name)}
+          {toTitleCase(displayName)}
         </Text>
         <View
           style={{
@@ -118,7 +136,7 @@ function LocalExerciseCard({ item, onAdd, isSelected = false }: LocalCardProps) 
               }}
             >
               <Text style={{ ...Typography.secondary, color: Colors.textMuted, fontSize: 11 }}>
-                {toTitleCase(item.primaryMuscles[0])}
+                {translateMuscle(item.primaryMuscles[0], locale)}
               </Text>
             </View>
           ) : null}
@@ -136,7 +154,7 @@ function LocalExerciseCard({ item, onAdd, isSelected = false }: LocalCardProps) 
               <Text
                 style={{ ...Typography.secondary, color: Colors.textMuted, fontSize: 11 }}
               >
-                {toTitleCase(item.equipment)}
+                {translateEquipment(item.equipment, locale)}
               </Text>
             </View>
           ) : null}
@@ -174,6 +192,7 @@ export function ExerciseLibraryModal({
   onAddExercise,
 }: Props) {
   const insets = useSafeAreaInsets();
+  const { t, locale } = useI18n();
 
   // ---- Tab state ----
   const [activeTab, setActiveTab] = useState<Tab>("db");
@@ -225,20 +244,16 @@ export function ExerciseLibraryModal({
 
   const musclePickerOptions: { label: string; value: string | null }[] = useMemo(
     () => muscleOptions.map(m =>
-      m === "all" ? { label: "All", value: null } : { label: toTitleCase(m), value: m }
+      m === "all" ? { label: t("categoryAll"), value: null } : { label: translateMuscle(m, locale), value: m }
     ),
-    // muscleOptions is stable (computed from static JSON)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [muscleOptions, t, locale]
   );
 
   const equipmentPickerOptions: { label: string; value: string | null }[] = useMemo(
     () => equipmentOptions.map(e =>
-      e === "all" ? { label: "All", value: null } : { label: toTitleCase(e), value: e }
+      e === "all" ? { label: t("categoryAll"), value: null } : { label: translateEquipment(e, locale), value: e }
     ),
-    // equipmentOptions is stable (computed from static JSON)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [equipmentOptions, t, locale]
   );
 
   // ---------------------------------------------------------------------------
@@ -251,9 +266,9 @@ export function ExerciseLibraryModal({
         query: dbDebounced,
         muscle: selectedBodyPart,
         equipment: selectedEquipment,
-        lang: "en",
+        lang: locale,
       }),
-    [dbDebounced, selectedBodyPart, selectedEquipment]
+    [dbDebounced, selectedBodyPart, selectedEquipment, locale]
   );
 
   const displayedExercises = filteredExercises.slice(0, displayLimit);
@@ -325,8 +340,8 @@ export function ExerciseLibraryModal({
   // ---------------------------------------------------------------------------
 
   const handleAddLocal = useCallback((exercise: LocalExercise) => {
-    togglePending(exercise.id, { name: exercise.name, exerciseDbId: exercise.id });
-  }, [togglePending]);
+    togglePending(exercise.id, { name: getExerciseName(exercise, locale), exerciseDbId: exercise.id });
+  }, [togglePending, locale]);
 
   // ---------------------------------------------------------------------------
   // Computed (Library tab)
@@ -377,14 +392,14 @@ export function ExerciseLibraryModal({
   // ---------------------------------------------------------------------------
 
   const pickerOptions = openPicker === "bodyPart" ? musclePickerOptions : equipmentPickerOptions;
-  const pickerTitle = openPicker === "bodyPart" ? "Body Part" : "Equipment";
+  const pickerTitle = openPicker === "bodyPart" ? t("bodyPartLabel") : t("equipmentLabel");
 
   const isBodyPartActive = selectedBodyPart !== null;
   const isEquipmentActive = selectedEquipment !== null;
 
   // Display labels for current filter values
-  const bodyPartLabel = selectedBodyPart ? toTitleCase(selectedBodyPart) : "All";
-  const equipmentLabel = selectedEquipment ? toTitleCase(selectedEquipment) : "All";
+  const bodyPartLabel = selectedBodyPart ? translateMuscle(selectedBodyPart, locale) : t("categoryAll");
+  const equipmentLabel = selectedEquipment ? translateEquipment(selectedEquipment, locale) : t("categoryAll");
 
   // ---------------------------------------------------------------------------
   // Render
@@ -436,7 +451,7 @@ export function ExerciseLibraryModal({
               <Ionicons name="close" size={18} color={Colors.text} />
             </Pressable>
             <Text style={{ ...Typography.section, fontWeight: "900" }}>
-              Exercise Library
+              {t("exerciseLibrary")}
             </Text>
             <View style={{ width: 40, height: 40 }} />
           </View>
@@ -454,7 +469,7 @@ export function ExerciseLibraryModal({
           >
             {(["db", "library"] as Tab[]).map((tab) => {
               const active = activeTab === tab;
-              const label = tab === "db" ? "Exercise DB" : "My Library";
+              const label = tab === "db" ? t("exerciseDbTab") : t("myLibraryTab");
               return (
                 <Pressable
                   key={tab}
@@ -508,7 +523,7 @@ export function ExerciseLibraryModal({
                   })}
                 >
                   <Text style={{ ...Typography.body, color: Colors.textMuted }}>
-                    Load more ({filteredExercises.length - displayLimit} remaining)
+                    {t("loadMoreRemaining", { n: filteredExercises.length - displayLimit })}
                   </Text>
                 </Pressable>
               ) : null
@@ -541,7 +556,7 @@ export function ExerciseLibraryModal({
                     }}
                     value={dbQuery}
                     onChangeText={setDbQuery}
-                    placeholder="Search exercises..."
+                    placeholder={t("searchExercisesPlaceholder")}
                     placeholderTextColor={Colors.textMuted}
                     autoCapitalize="none"
                     autoCorrect={false}
@@ -591,7 +606,7 @@ export function ExerciseLibraryModal({
                   >
                     <View style={{ flex: 1, marginRight: 4 }}>
                       <Text style={{ ...Typography.micro, marginBottom: 2 }}>
-                        MUSCLE
+                        {t("muscleMicroLabel")}
                       </Text>
                       <Text
                         style={{
@@ -630,7 +645,7 @@ export function ExerciseLibraryModal({
                   >
                     <View style={{ flex: 1, marginRight: 4 }}>
                       <Text style={{ ...Typography.micro, marginBottom: 2 }}>
-                        EQUIPMENT
+                        {t("equipmentMicroLabel")}
                       </Text>
                       <Text
                         style={{
@@ -653,7 +668,7 @@ export function ExerciseLibraryModal({
 
                 {/* Count */}
                 <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: Spacing.sm }}>
-                  Showing {displayedExercises.length} of {filteredExercises.length}
+                  {t("showingCountOfTotal", { shown: displayedExercises.length, total: filteredExercises.length })}
                 </Text>
               </View>
             }
@@ -679,7 +694,7 @@ export function ExerciseLibraryModal({
                     marginTop: Spacing.sm,
                   }}
                 >
-                  No exercises found
+                  {t("noExercisesFound")}
                 </Text>
                 <Pressable
                   onPress={() => {
@@ -698,7 +713,7 @@ export function ExerciseLibraryModal({
                   })}
                 >
                   <Text style={{ ...Typography.secondary, color: Colors.text }}>
-                    Create custom exercise
+                    {t("createCustomExercise")}
                   </Text>
                 </Pressable>
               </View>
@@ -744,7 +759,7 @@ export function ExerciseLibraryModal({
                       }}
                       value={libQuery}
                       onChangeText={setLibQuery}
-                      placeholder="Search exercise..."
+                      placeholder={t("searchExercisesPlaceholder")}
                       placeholderTextColor={Colors.textMuted}
                       autoCapitalize="none"
                       autoCorrect={false}
@@ -800,7 +815,7 @@ export function ExerciseLibraryModal({
                               color: active ? Colors.onPrimary : Colors.text,
                             }}
                           >
-                            {c}
+                            {t(CATEGORY_LABEL_KEYS[c])}
                           </Text>
                         </Pressable>
                       );
@@ -819,32 +834,32 @@ export function ExerciseLibraryModal({
                           marginBottom: Spacing.sm,
                         }}
                       >
-                        Recently Used
+                        {t("recentlyUsed")}
                       </Text>
                       <View style={{ gap: Spacing.xs }}>
-                        {recentlyUsed.slice(0, 8).map((t) => (
+                        {recentlyUsed.slice(0, 8).map((tpl) => (
                           <Pressable
-                            key={`recent-${t.id}`}
+                            key={`recent-${tpl.id}`}
                             onPress={() => {
-                              togglePending(t.id, {
-                                name: t.name,
-                                category: t.category,
-                                equipment: t.equipment,
+                              togglePending(tpl.id, {
+                                name: tpl.name,
+                                category: tpl.category,
+                                equipment: tpl.equipment,
                               });
                             }}
                             style={({ pressed }) => ({
                               padding: Spacing.md,
                               borderRadius: Radius.lg,
-                              backgroundColor: pendingMap.has(t.id) ? Colors.primaryGlow : Colors.card,
-                              borderWidth: pendingMap.has(t.id) ? 2 : 1,
-                              borderColor: pendingMap.has(t.id) ? Colors.primary : Colors.border,
+                              backgroundColor: pendingMap.has(tpl.id) ? Colors.primaryGlow : Colors.card,
+                              borderWidth: pendingMap.has(tpl.id) ? 2 : 1,
+                              borderColor: pendingMap.has(tpl.id) ? Colors.primary : Colors.border,
                               opacity: pressed ? 0.92 : 1,
                             })}
                           >
                             <Text
                               style={{ ...Typography.section, fontWeight: "900" }}
                             >
-                              {t.name}
+                              {tpl.name}
                             </Text>
                             <Text
                               style={{
@@ -853,8 +868,8 @@ export function ExerciseLibraryModal({
                                 marginTop: 4,
                               }}
                             >
-                              {(t.category ?? "Custom") +
-                                (t.equipment ? ` • ${t.equipment}` : "")}
+                              {(tpl.category ?? t("customCategoryFallback")) +
+                                (tpl.equipment ? ` • ${tpl.equipment}` : "")}
                             </Text>
                           </Pressable>
                         ))}
@@ -881,7 +896,7 @@ export function ExerciseLibraryModal({
                           marginBottom: Spacing.sm,
                         }}
                       >
-                        Create custom exercise
+                        {t("createCustomExercise")}
                       </Text>
                       <Text
                         style={{
@@ -890,7 +905,7 @@ export function ExerciseLibraryModal({
                           marginBottom: 6,
                         }}
                       >
-                        Name
+                        {t("exerciseFieldName")}
                       </Text>
                       <TextInput
                         value={createName}
@@ -916,7 +931,7 @@ export function ExerciseLibraryModal({
                           marginBottom: 6,
                         }}
                       >
-                        Category
+                        {t("categoryLabel")}
                       </Text>
                       <View
                         style={{
@@ -954,7 +969,7 @@ export function ExerciseLibraryModal({
                                     : Colors.text,
                                 }}
                               >
-                                {c}
+                                {t(CATEGORY_LABEL_KEYS[c])}
                               </Text>
                             </Pressable>
                           );
@@ -967,12 +982,12 @@ export function ExerciseLibraryModal({
                           marginBottom: 6,
                         }}
                       >
-                        Equipment (optional)
+                        {t("equipmentOptionalLabel")}
                       </Text>
                       <TextInput
                         value={createEquipment}
                         onChangeText={setCreateEquipment}
-                        placeholder="Barbell, Dumbbell, Machine..."
+                        placeholder={t("equipmentExamplesPlaceholder")}
                         placeholderTextColor={Colors.textMuted}
                         style={{
                           borderWidth: 1,
@@ -1037,7 +1052,7 @@ export function ExerciseLibraryModal({
                               color: Colors.onPrimary,
                             }}
                           >
-                            + Create custom exercise
+                            {`+ ${t("createCustomExercise")}`}
                           </Text>
                         )}
                       </Pressable>
@@ -1075,7 +1090,7 @@ export function ExerciseLibraryModal({
                         marginTop: 4,
                       }}
                     >
-                      {(item.category ?? "Custom") +
+                      {(item.category ?? t("customCategoryFallback")) +
                         (item.equipment ? ` • ${item.equipment}` : "")}
                     </Text>
                   </View>
@@ -1102,7 +1117,7 @@ export function ExerciseLibraryModal({
                         color: Colors.onPrimary,
                       }}
                     >
-                      {pendingMap.has(item.id) ? "✓" : "+ Add"}
+                      {pendingMap.has(item.id) ? "✓" : `+ ${t("nav_add")}`}
                     </Text>
                   </Pressable>
                 </View>
@@ -1118,7 +1133,7 @@ export function ExerciseLibraryModal({
                       textAlign: "center",
                     }}
                   >
-                    No exercises found.
+                    {t("noExercisesFound")}
                   </Text>
                 </View>
               )
@@ -1155,7 +1170,7 @@ export function ExerciseLibraryModal({
               })}
             >
               <Text style={{ ...Typography.section, fontWeight: "900", color: Colors.onPrimary }}>
-                {`Add ${pendingMap.size} exercise${pendingMap.size === 1 ? "" : "s"}`}
+                {t(pendingMap.size === 1 ? "addExercisesCount_one" : "addExercisesCount_other", { count: pendingMap.size })}
               </Text>
             </Pressable>
           </View>

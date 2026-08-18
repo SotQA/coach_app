@@ -2,6 +2,8 @@ export type UserRole = "coach" | "student" | "athlete";
 
 export type Sex = "male" | "female" | "other";
 
+export type MessengerType = "telegram" | "whatsapp";
+
 export interface AppUser {
   id: string;
   email: string;
@@ -11,6 +13,9 @@ export interface AppUser {
   dateOfBirth: string;
   sex: Sex;
   photoURL?: string | null;
+  coachId?: string | null;
+  messengerType?: MessengerType | null;
+  messengerHandle?: string | null;
 }
 
 // Shape used when signing up a new user
@@ -22,4 +27,6 @@ export interface SignupPayload {
   lastName: string;
   dateOfBirth: string;
   sex: Sex;
+  messengerType?: MessengerType | null;
+  messengerHandle?: string | null;
 }

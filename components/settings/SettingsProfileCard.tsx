@@ -1,9 +1,11 @@
 import { ActivityIndicator, Platform, Text, View } from "react-native";
+import type { ReactNode } from "react";
 import { Avatar } from "../Avatar";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography, FontSizes } from "../../theme/typography";
 import { PrimaryButton } from "../PrimaryButton";
+import { useI18n } from "../../context/I18nContext";
 
 const cardShadow = Platform.select({
   ios: {
@@ -27,6 +29,8 @@ type Props = {
   metaLine?: string | null;
   /** Profile photo URL. When present, displays instead of the initials circle. */
   photoURL?: string | null;
+  /** Rendered between the meta line and the Edit Profile button (e.g. coach card + Text my coach button). */
+  children?: ReactNode;
 };
 
 export function SettingsProfileCard({
@@ -38,7 +42,9 @@ export function SettingsProfileCard({
   statsLoading = false,
   metaLine = null,
   photoURL = null,
+  children,
 }: Props) {
+  const { t } = useI18n();
   return (
     <View
       style={[
@@ -82,7 +88,8 @@ export function SettingsProfileCard({
           ) : null}
         </View>
       </View>
-      <PrimaryButton title="Edit Profile" onPress={onEditProfile} />
+      {children}
+      <PrimaryButton title={t("editProfile")} onPress={onEditProfile} />
     </View>
   );
 }

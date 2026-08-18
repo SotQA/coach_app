@@ -15,6 +15,7 @@ import { ExerciseLibraryModal } from "../../components/ExerciseLibraryModal";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { ScreenLayout } from "../../components/ScreenLayout";
 import { useAuth } from "../../context/AuthContext";
+import { useI18n } from "../../context/I18nContext";
 import { useHideCoachFabOnFocus } from "../../context/CoachFabVisibilityContext";
 import { exerciseTemplateService } from "../../services/exerciseTemplateService";
 import { trainingGroupService } from "../../services/trainingGroupService";
@@ -30,6 +31,7 @@ export default function CreateWorkoutPlan() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
+  const { t } = useI18n();
   useHideCoachFabOnFocus();
   const params = useLocalSearchParams<{
     studentId?: string;
@@ -37,7 +39,7 @@ export default function CreateWorkoutPlan() {
     groupId?: string;
   }>();
 
-  const [studentName] = useState(params.studentName ?? "Student");
+  const [studentName] = useState(params.studentName ?? t("roleStudent"));
   const [studentId] = useState(params.studentId ?? "");
   const [selectedGroup, setSelectedGroup] = useState<TrainingGroup | null>(null);
   const [planName, setPlanName] = useState("");
@@ -58,13 +60,13 @@ export default function CreateWorkoutPlan() {
     const init = async () => {
       try {
         if (!user || user.role !== "coach") {
-          setError("You must be logged in as a coach.");
+          setError(t("mustBeLoggedInAsCoachError"));
           return;
         }
         setCoachId(user.id);
 
         if (!studentId) {
-          setError("Missing student context.");
+          setError(t("missingStudentContextError"));
           return;
         }
 
@@ -96,14 +98,14 @@ export default function CreateWorkoutPlan() {
         }, -1);
         setOrder(maxOrder + 1);
       } catch (e: any) {
-        setError(e.message ?? "Failed to load user.");
+        setError(e.message ?? t("failedToLoadUserError"));
       } finally {
         setInitializingUser(false);
       }
     };
 
     init();
-  }, [user?.id, user?.role, studentId, params.groupId, studentName, router]);
+  }, [user?.id, user?.role, studentId, params.groupId, studentName, router, t]);
 
   const resolvedGroupName = useMemo(() => {
     if (!selectedGroup) return null;
@@ -147,11 +149,11 @@ export default function CreateWorkoutPlan() {
 
   const handleSavePlan = async () => {
     if (!coachId || !studentId) {
-      setError("Missing coach or student information.");
+      setError(t("missingCoachOrStudentError"));
       return;
     }
     if (!selectedGroup) {
-      setError("Select or create a training group first.");
+      setError(t("selectOrCreateGroupError"));
       return;
     }
 
@@ -159,15 +161,15 @@ export default function CreateWorkoutPlan() {
     setLoading(true);
     try {
       const name = planName.trim();
-      if (!name) throw new Error("Workout name is required.");
-      if (name.length > 50) throw new Error("Workout name must be at most 50 characters.");
-      if (note.trim().length > 500) throw new Error("Coach notes must be at most 500 characters.");
+      if (!name) throw new Error(t("workoutNameRequiredError"));
+      if (name.length > 50) throw new Error(t("workoutNameMaxLenError"));
+      if (note.trim().length > 500) throw new Error(t("coachNotesMaxLenError"));
 
       const durationTrim = estimatedMinutes.trim();
       const durationNum =
         durationTrim === "" ? undefined : Math.max(0, Math.floor(Number(durationTrim)));
       if (durationTrim !== "" && !Number.isFinite(Number(durationTrim))) {
-        throw new Error("Estimated duration must be a number of minutes.");
+        throw new Error(t("estDurationMustBeNumberError"));
       }
 
       const sanitizedExercises: Exercise[] = exercises
@@ -192,31 +194,31 @@ export default function CreateWorkoutPlan() {
         .filter((e) => e.name.length > 0);
 
       if (sanitizedExercises.length === 0) {
-        throw new Error("Add at least one exercise.");
+        throw new Error(t("addAtLeastOneExerciseError"));
       }
 
       for (const ex of sanitizedExercises) {
         if (!Number.isFinite(ex.sets) || ex.sets <= 0) {
-          throw new Error(`Sets for "${ex.name}" must be > 0.`);
+          throw new Error(t("setsMustBePositiveError", { name: ex.name }));
         }
         if (ex.rest !== "") {
           const n = Number(ex.rest);
           if (!Number.isFinite(n) || n < 0) {
-            throw new Error(`Rest for "${ex.name}" must be a number >= 0.`);
+            throw new Error(t("restMustBeNonNegativeError", { name: ex.name }));
           }
         }
         if (ex.tempo.length > 20) {
-          throw new Error(`Tempo for "${ex.name}" must be at most 20 characters.`);
+          throw new Error(t("tempoMaxLenError", { name: ex.name }));
         }
         if (ex.rpe !== null) {
           if (!Number.isFinite(ex.rpe) || ex.rpe < 1 || ex.rpe > 10) {
-            throw new Error(`RPE for "${ex.name}" must be between 1 and 10.`);
+            throw new Error(t("rpeRangeError", { name: ex.name }));
           }
         }
         if (ex.weight != null) {
           const w = Number(ex.weight);
           if (!Number.isFinite(w) || w < 0) {
-            throw new Error(`Weight for "${ex.name}" must be a number >= 0.`);
+            throw new Error(t("weightMustBeNonNegativeError", { name: ex.name }));
           }
         }
       }
@@ -225,7 +227,7 @@ export default function CreateWorkoutPlan() {
         coachId,
         studentId,
         groupId: selectedGroup.id,
-        groupName: selectedGroup.name?.trim() || "Legacy Plan",
+        groupName: selectedGroup.name?.trim() || t("legacyPlanFallback"),
         name,
         exercises: sanitizedExercises,
         createdAt: new Date(),
@@ -242,7 +244,7 @@ export default function CreateWorkoutPlan() {
       );
       router.replace("/coach/dashboard");
     } catch (e: any) {
-      setError(e.message ?? "Failed to save workout plan.");
+      setError(e.message ?? t("failedToSaveWorkoutPlanError"));
     } finally {
       setLoading(false);
     }
@@ -286,11 +288,11 @@ export default function CreateWorkoutPlan() {
               {/* Header */}
               <View style={{ marginBottom: Spacing.md }}>
                 <Text style={{ ...Typography.title, fontSize: FontSizes.h2, marginBottom: 6 }}>
-                  Create Workout Plan
+                  {t("createWorkoutPlanTitle")}
                 </Text>
                 <Text style={{ ...Typography.section, fontWeight: "900" }}>{studentName}</Text>
                 <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 4 }}>
-                  {resolvedGroupName ?? "Legacy Plan"}
+                  {resolvedGroupName ?? t("legacyPlanFallback")}
                 </Text>
               </View>
 
@@ -305,9 +307,9 @@ export default function CreateWorkoutPlan() {
                   marginBottom: Spacing.md,
                 }}
               >
-                <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Workout name</Text>
+                <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("workoutNameLabel")}</Text>
                 <TextInput
-                  placeholder="e.g. Push Day"
+                  placeholder={t("workoutNamePlaceholder")}
                   placeholderTextColor={Colors.textMuted}
                   value={planName}
                   onChangeText={(t) => setPlanName(t.slice(0, 50))}
@@ -324,9 +326,9 @@ export default function CreateWorkoutPlan() {
 
                 <View style={{ flexDirection: "row", gap: Spacing.sm, marginBottom: Spacing.sm }}>
                   <View style={{ flex: 1 }}>
-                    <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Order</Text>
+                    <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("orderLabel")}</Text>
                     <TextInput
-                      placeholder="e.g. 1"
+                      placeholder={t("orderPlaceholder")}
                       placeholderTextColor={Colors.textMuted}
                       value={String(order)}
                       onChangeText={(t) => {
@@ -352,10 +354,10 @@ export default function CreateWorkoutPlan() {
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={{ ...Typography.secondary, marginBottom: 6 }}>
-                      Est. minutes
+                      {t("estMinutesLabel")}
                     </Text>
                     <TextInput
-                      placeholder="e.g. 60"
+                      placeholder={t("estMinutesPlaceholder")}
                       placeholderTextColor={Colors.textMuted}
                       value={estimatedMinutes}
                       onChangeText={setEstimatedMinutes}
@@ -372,9 +374,9 @@ export default function CreateWorkoutPlan() {
                   </View>
                 </View>
 
-                <Text style={{ ...Typography.secondary, marginBottom: 6 }}>Coach notes (optional)</Text>
+                <Text style={{ ...Typography.secondary, marginBottom: 6 }}>{t("coachNotesOptionalLabel")}</Text>
                 <TextInput
-                  placeholder="Key cues, intent, constraints…"
+                  placeholder={t("coachNotesPlaceholder")}
                   placeholderTextColor={Colors.textMuted}
                   value={note}
                   onChangeText={(t) => setNote(t.slice(0, 500))}
@@ -401,9 +403,9 @@ export default function CreateWorkoutPlan() {
                   marginBottom: Spacing.sm,
                 }}
               >
-                <Text style={{ ...Typography.section, fontWeight: "900" }}>Exercises</Text>
+                <Text style={{ ...Typography.section, fontWeight: "900" }}>{t("exercisesHeading")}</Text>
                 <PrimaryButton
-                  title="+ Add Exercise"
+                  title={t("addExerciseButton")}
                   onPress={() => setLibraryOpen(true)}
                   style={{ width: "auto", paddingHorizontal: Spacing.md }}
                 />
@@ -481,7 +483,7 @@ export default function CreateWorkoutPlan() {
           borderTopColor: Colors.border,
         }}
       >
-        {loading ? <ActivityIndicator /> : <PrimaryButton title="Save Workout Plan" onPress={handleSavePlan} />}
+        {loading ? <ActivityIndicator /> : <PrimaryButton title={t("saveWorkoutPlanButton")} onPress={handleSavePlan} />}
       </View>
 
       {coachId ? (

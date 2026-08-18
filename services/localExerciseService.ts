@@ -10,6 +10,8 @@ export type LocalExercise = {
   primaryMuscles: string[];
   secondaryMuscles: string[];
   instructions: string[];
+  instructionsRu?: string[];
+  instructionsPl?: string[];
   level: string | null;
   force: string | null;
   mechanic: string | null;
@@ -27,8 +29,28 @@ export function getExerciseName(
   return exercise.name;
 }
 
+export function getExerciseInstructions(
+  exercise: LocalExercise,
+  lang: "en" | "ru" | "pl"
+): string[] {
+  if (lang === "ru" && exercise.instructionsRu) return exercise.instructionsRu;
+  if (lang === "pl" && exercise.instructionsPl) return exercise.instructionsPl;
+  return exercise.instructions;
+}
+
 export function getExerciseById(id: string): LocalExercise | null {
   return ALL_EXERCISES.find(e => e.id === id) ?? null;
+}
+
+/**
+ * Case-insensitive lookup by English name. Used to localize exercise names
+ * in places that only stored the raw name string (e.g. logged workout
+ * history), which predate the exerciseDbId-based lookups.
+ */
+export function getExerciseByName(name: string): LocalExercise | null {
+  const q = name.trim().toLowerCase();
+  if (!q) return null;
+  return ALL_EXERCISES.find(e => e.name.toLowerCase() === q) ?? null;
 }
 
 export type ExerciseFilter = {
@@ -58,12 +80,17 @@ export function filterExercises(filter: ExerciseFilter): LocalExercise[] {
   if (filter.query && filter.query.trim().length >= 2) {
     const q = filter.query.trim().toLowerCase();
     const lang = filter.lang ?? "en";
+    // Match against both the localized name and the English name — a query
+    // in the active language should work, but so should typing the English
+    // term even while the app is in ru/pl.
+    const matchNames = (e: LocalExercise): string[] =>
+      lang === "en" ? [e.name] : [getExerciseName(e, lang), e.name];
     const startsWith = results.filter(e =>
-      getExerciseName(e, lang).toLowerCase().startsWith(q)
+      matchNames(e).some(n => n.toLowerCase().startsWith(q))
     );
     const contains = results.filter(e =>
-      !getExerciseName(e, lang).toLowerCase().startsWith(q) &&
-      getExerciseName(e, lang).toLowerCase().includes(q)
+      !matchNames(e).some(n => n.toLowerCase().startsWith(q)) &&
+      matchNames(e).some(n => n.toLowerCase().includes(q))
     );
     results = [...startsWith, ...contains];
   }

@@ -2,6 +2,7 @@ import { Redirect, Stack, useNavigation, useRouter } from "expo-router";
 import { useEffect } from "react";
 import { Pressable, View } from "react-native";
 import { useAuth } from "../../context/AuthContext";
+import { useI18n } from "../../context/I18nContext";
 import { CoachSpeedDial } from "../../components/CoachSpeedDial";
 import { CoachFabVisibilityProvider, useCoachFabVisibility } from "../../context/CoachFabVisibilityContext";
 import { Colors } from "../../theme/colors";
@@ -25,6 +26,7 @@ function HeaderBackButton() {
 function CoachStack() {
   const navigation = useNavigation();
   const { setVisible } = useCoachFabVisibility();
+  const { t } = useI18n();
 
   // `transitionStart` fires the moment a native-stack transition begins —
   // including at the start of an interactive swipe-back gesture — unlike
@@ -60,29 +62,29 @@ function CoachStack() {
           contentStyle: { backgroundColor: Colors.bg },
         }}
       >
-        <Stack.Screen name="(tabs)" options={{ headerShown: false, title: "Back" }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false, title: t("back") }} />
         <Stack.Screen name="studentDetails" options={{ headerShown: false }} />
         <Stack.Screen name="notifications" options={{ headerShown: false }} />
         <Stack.Screen name="workoutComparison" options={{ headerShown: false }} />
         <Stack.Screen
           name="createStudent"
           options={{
-            title: "Create Student",
+            title: t("createStudentTitle"),
             headerLeft: () => null,
           }}
         />
-        <Stack.Screen name="selectTrainingGroup" options={{ title: "Select Training Group" }} />
-        <Stack.Screen name="createTrainingGroup" options={{ title: "Create Training Group" }} />
-        <Stack.Screen name="createWorkoutPlan" options={{ title: "Create Workout Plan" }} />
-        <Stack.Screen name="workout" options={{ title: "Workout" }} />
-        <Stack.Screen name="editWorkout" options={{ title: "Edit Workout" }} />
-        <Stack.Screen name="workoutLogFeedback" options={{ title: "Workout feedback" }} />
-        <Stack.Screen name="assignedWorkouts" options={{ title: "Assigned workouts" }} />
+        <Stack.Screen name="selectTrainingGroup" options={{ title: t("selectTrainingGroupTitle") }} />
+        <Stack.Screen name="createTrainingGroup" options={{ title: t("createTrainingGroupTitle") }} />
+        <Stack.Screen name="createWorkoutPlan" options={{ title: t("createWorkoutPlanTitle") }} />
+        <Stack.Screen name="workout" options={{ title: t("workoutTitle") }} />
+        <Stack.Screen name="editWorkout" options={{ title: t("editWorkoutTitle") }} />
+        <Stack.Screen name="workoutLogFeedback" options={{ title: t("workoutFeedbackTitle") }} />
+        <Stack.Screen name="assignedWorkouts" options={{ title: t("assignedWorkoutsFallbackTitle") }} />
         <Stack.Screen name="workoutExecution" options={{ headerShown: false }} />
         <Stack.Screen name="exerciseDetail" options={{ headerShown: false }} />
-        <Stack.Screen name="createPersonalPlan" options={{ title: "Create Plan" }} />
-        <Stack.Screen name="workoutPlanDetail" options={{ title: "Workout" }} />
-        <Stack.Screen name="personalProgress" options={{ title: "My Progress" }} />
+        <Stack.Screen name="createPersonalPlan" options={{ title: t("createPlanTitle") }} />
+        <Stack.Screen name="workoutPlanDetail" options={{ title: t("workoutTitle") }} />
+        <Stack.Screen name="personalProgress" options={{ title: t("myProgressTitle") }} />
       </Stack>
       <CoachSpeedDial />
     </View>

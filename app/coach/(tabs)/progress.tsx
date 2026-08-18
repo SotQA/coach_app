@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { useAuth } from "../../../context/AuthContext";
+import { useI18n } from "../../../context/I18nContext";
 import { studentService } from "../../../services/studentService";
 import { workoutService } from "../../../services/workoutService";
 import { trainingGroupService } from "../../../services/trainingGroupService";
@@ -14,6 +15,7 @@ import { ProgressAnalyticsView } from "../../../components/progress/ProgressAnal
 
 export default function CoachProgressTab() {
   const { user } = useAuth();
+  const { t } = useI18n();
   const params = useLocalSearchParams<{ studentId?: string; focusProgress?: string }>();
   const paramStudentId = useMemo(() => String(params.studentId ?? "").trim(), [params.studentId]);
 
@@ -105,7 +107,7 @@ export default function CoachProgressTab() {
     return (
       <ScreenLayout>
         <View style={{ flex: 1, padding: Spacing.md, backgroundColor: Colors.bg }}>
-          <Text style={{ color: Colors.danger }}>Coach access only.</Text>
+          <Text style={{ color: Colors.danger }}>{t("coachAccessOnly")}</Text>
         </View>
       </ScreenLayout>
     );

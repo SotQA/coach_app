@@ -25,6 +25,7 @@ import { Typography, FontSizes } from "../../../theme/typography";
 import { PrimaryButton } from "../../../components/PrimaryButton";
 import { ScreenLayout } from "../../../components/ScreenLayout";
 import { NotificationBellButton } from "../../../components/NotificationBellButton";
+import { SpotlightTarget } from "../../../components/onboarding/SpotlightTarget";
 import { formatElapsedForTimer } from "../../../utils/workoutDuration";
 import { useStartWorkout } from "../../../hooks/useStartWorkout";
 import { formatDateShort } from "../../../utils/formatLocale";
@@ -49,12 +50,12 @@ function formatRelativeDone(
   return formatDateShort(ms, locale);
 }
 
-function focusFromPlan(plan: WorkoutPlan): string {
+function focusFromPlan(plan: WorkoutPlan, t: (key: string) => string): string {
   const names = (plan.exercises ?? []).map((e) => e.name).filter(Boolean);
-  if (names.length === 0) return "Full session";
+  if (names.length === 0) return t("fullSessionFallback");
   if (names.length === 1) return names[0];
   if (names.length === 2) return `${names[0]} + ${names[1]}`;
-  return `${names[0]} + ${names[1]} + more`;
+  return `${names[0]} + ${names[1]} + ${t("moreExercisesSuffix")}`;
 }
 
 /** Consecutive calendar days with a session, ending today or (if idle today) yesterday. */
@@ -354,7 +355,9 @@ export default function StudentWorkouts() {
           >
             <Text style={{ ...Typography.title, fontSize: FontSizes.h3 }}>{t("workouts")}</Text>
             <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.xs }}>
-              <NotificationBellButton />
+              <SpotlightTarget id="student-bell">
+                <NotificationBellButton />
+              </SpotlightTarget>
               <Pressable
                 onPress={() => router.push("/student/workoutHistory")}
                 hitSlop={12}
@@ -426,7 +429,8 @@ export default function StudentWorkouts() {
           ) : null}
 
           {!showHub ? (
-            <View
+            <SpotlightTarget
+              id="student-emptyState"
               style={{
                 backgroundColor: Colors.card,
                 borderRadius: Radius.lg,
@@ -443,7 +447,7 @@ export default function StudentWorkouts() {
               <Text style={{ ...Typography.secondary, color: Colors.textMuted, textAlign: "center" }}>
                 {t("coachWillAssign")}
               </Text>
-            </View>
+            </SpotlightTarget>
           ) : (
             <>
               <ScaleCard
@@ -510,7 +514,7 @@ export default function StudentWorkouts() {
                         ) : null}
                       </View>
                       <Text style={{ ...Typography.secondary, color: Colors.textSecondary, marginBottom: Spacing.sm }}>
-                        {focusFromPlan(recommendedPlan)}
+                        {focusFromPlan(recommendedPlan, t)}
                       </Text>
                       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: Spacing.md }}>
                         <Text style={Typography.secondary}>

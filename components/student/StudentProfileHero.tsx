@@ -4,6 +4,7 @@ import { Avatar } from "../Avatar";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
+import { useI18n } from "../../context/I18nContext";
 import type { TrainingGroup } from "../../types/TrainingGroup";
 
 export interface StudentProfileHeroProps {
@@ -23,6 +24,7 @@ function StudentProfileHeroImpl({
   latestGroup,
   lastWorkoutLabel: lastLbl,
 }: StudentProfileHeroProps) {
+  const { t } = useI18n();
   return (
     <View style={styles.heroCard}>
       <View style={styles.heroRow}>
@@ -41,16 +43,20 @@ function StudentProfileHeroImpl({
           <View style={styles.chipsRow}>
             <View style={styles.chip}>
               <Text style={styles.chipText}>
-                {latestGroup?.name?.trim() ? latestGroup.name.trim() : "No active training split"}
+                {latestGroup?.name?.trim() ? latestGroup.name.trim() : t("noActiveTrainingSplit")}
               </Text>
             </View>
             <View style={styles.chip}>
               <Text style={styles.chipText}>
-                {latestGroup?.workoutsPerWeek ? `${latestGroup.workoutsPerWeek} workouts/week` : "Workouts/week —"}
+                {latestGroup?.workoutsPerWeek
+                  ? t("workoutsPerWeekChip", { n: latestGroup.workoutsPerWeek })
+                  : t("workoutsPerWeekChipEmpty")}
               </Text>
             </View>
             <View style={styles.chip}>
-              <Text style={styles.chipText}>{lastLbl ? `Last workout: ${lastLbl}` : "Last workout: —"}</Text>
+              <Text style={styles.chipText}>
+                {lastLbl ? t("lastWorkoutChip", { value: lastLbl }) : t("lastWorkoutChipEmpty")}
+              </Text>
             </View>
           </View>
         </View>

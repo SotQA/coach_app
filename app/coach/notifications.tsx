@@ -373,32 +373,31 @@ export default function CoachNotifications() {
       <View style={{ flex: 1, backgroundColor: Colors.bg }}>
         <View
           style={{
-            position: "relative",
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
             paddingHorizontal: Spacing.md,
             paddingTop: Spacing.sm,
             paddingBottom: Spacing.xs,
           }}
         >
-          <Pressable onPress={() => router.back()} hitSlop={10} style={{ zIndex: 1 }}>
-            <Ionicons name="chevron-back" size={26} color={Colors.text} />
-          </Pressable>
-          <Text
-            style={{
-              ...Typography.title,
-              fontSize: FontSizes.h3,
-              position: "absolute",
-              left: 0,
-              right: 0,
-              textAlign: "center",
-            }}
-            pointerEvents="none"
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <View style={{ width: 26, alignItems: "flex-start" }}>
+              <Pressable onPress={() => router.back()} hitSlop={10}>
+                <Ionicons name="chevron-back" size={26} color={Colors.text} />
+              </Pressable>
+            </View>
+            <Text
+              style={{ ...Typography.title, fontSize: FontSizes.h3, flex: 1, textAlign: "center" }}
+              numberOfLines={1}
+            >
+              {t("notifications")}
+            </Text>
+            <View style={{ width: 26 }} />
+          </View>
+          <Pressable
+            onPress={handleMarkAllRead}
+            disabled={unreadCount === 0}
+            hitSlop={10}
+            style={{ alignSelf: "flex-end", marginTop: Spacing.xs }}
           >
-            {t("notifications")}
-          </Text>
-          <Pressable onPress={handleMarkAllRead} disabled={unreadCount === 0} hitSlop={10} style={{ zIndex: 1 }}>
             <Text
               style={{
                 ...Typography.secondary,

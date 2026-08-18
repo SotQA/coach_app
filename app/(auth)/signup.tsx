@@ -14,16 +14,22 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from "react-native-reanimated";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import type { Sex, UserRole } from "../../types/User";
+import type { Sex, UserRole, MessengerType } from "../../types/User";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { InputField } from "../../components/InputField";
+import { PhotoPickerCircle } from "../../components/registration/PhotoPickerCircle";
+import { MessengerContactFields } from "../../components/registration/MessengerContactFields";
 import { useAuth } from "../../context/AuthContext";
 import { useI18n } from "../../context/I18nContext";
+import { useOnboardingTour } from "../../context/OnboardingTourContext";
+import { avatarService } from "../../services/avatarService";
+import { resolveMessengerContact } from "../../utils/messengerValidation";
+import { logger } from "../../utils/logger";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography, FontSizes } from "../../theme/typography";
 
-const TOTAL_STEPS = 3;
+const TOTAL_STEPS = 4;
 const PRESS_SCALE = 0.97;
 
 /** Reanimated spring scale on press for `Pressable`s (0.97). */
@@ -238,8 +244,9 @@ export default function Signup() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { width: windowWidth } = useWindowDimensions();
-  const { user, loading: authLoading, signup } = useAuth();
+  const { user, loading: authLoading, signup, refreshUser } = useAuth();
   const { t } = useI18n();
+  const { presentWelcome } = useOnboardingTour();
   const scrollRef = useRef<KeyboardAwareScrollView | null>(null);
   const trackWidth = Math.max(0, windowWidth - Spacing.lg * 2);
   const barW = useSharedValue((trackWidth * 1) / TOTAL_STEPS);
@@ -255,10 +262,20 @@ export default function Signup() {
   const [role, setRole] = useState<UserRole | null>(null);
   const [dobPickerOpen, setDobPickerOpen] = useState(false);
   const [dobDraft, setDobDraft] = useState<Date | null>(null);
+  const [avatarUri, setAvatarUri] = useState<string | null>(null);
+  const [messengerType, setMessengerType] = useState<MessengerType>("telegram");
+  const [telegramInput, setTelegramInput] = useState("");
+  const [whatsappInput, setWhatsappInput] = useState("");
+  const [contactError, setContactError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const STEP_TITLES = [t("stepYourRole"), t("stepAboutYou"), t("stepAccount")] as const;
+  const STEP_TITLES = [
+    t("stepYourRole"),
+    t("stepAboutYou"),
+    t("stepStayInTouch"),
+    t("stepAccount"),
+  ] as const;
 
   useEffect(() => {
     const w = Math.max(0, windowWidth - Spacing.lg * 2);
@@ -285,6 +302,11 @@ export default function Signup() {
     return null;
   }, [firstName, lastName, dateOfBirth, t]);
 
+  const buildContactPayload = useCallback(
+    () => resolveMessengerContact(messengerType, telegramInput, whatsappInput),
+    [messengerType, telegramInput, whatsappInput]
+  );
+
   const validateAccountStep = useCallback((): string | null => {
     if (!validateEmail(email)) return t("errorInvalidEmail");
     if (password.length < 8) return t("errorPasswordMin");
@@ -308,6 +330,21 @@ export default function Signup() {
         return;
       }
     }
+    if (step === 2) {
+      const { error: err } = buildContactPayload();
+      if (err) {
+        setContactError(err);
+        return;
+      }
+      setContactError(null);
+    }
+    if (step < TOTAL_STEPS - 1) setStep((s) => s + 1);
+  };
+
+  const skipContact = () => {
+    setContactError(null);
+    setTelegramInput("");
+    setWhatsappInput("");
     if (step < TOTAL_STEPS - 1) setStep((s) => s + 1);
   };
 
@@ -321,24 +358,38 @@ export default function Signup() {
     setError(null);
     const eRole = validateRoleStep();
     const eAbout = validateAboutStep();
+    const { error: eContact, contact } = buildContactPayload();
     const eAccount = validateAccountStep();
-    if (eRole || eAbout || eAccount) {
-      setError(eRole ?? eAbout ?? eAccount ?? t("errorCompleteSteps"));
+    if (eRole || eAbout || eContact || eAccount) {
+      setError(eRole ?? eAbout ?? (eContact ? t(eContact) : null) ?? eAccount ?? t("errorCompleteSteps"));
       return;
     }
     if (role == null) return;
 
     setSubmitting(true);
     try {
-      await signup(
+      const newUser = await signup(
         email.trim(),
         password,
         role,
         firstName.trim(),
         lastName.trim(),
         dateOfBirth.trim(),
-        sex
+        sex,
+        contact
       );
+
+      if (avatarUri) {
+        try {
+          await avatarService.uploadAvatar(newUser.id, avatarUri);
+          await refreshUser();
+        } catch (avatarErr) {
+          // Non-fatal — the account exists; the user can add a photo later from Edit Profile.
+          logger.error("[signup] avatar upload failed", avatarErr);
+        }
+      }
+
+      presentWelcome(firstName.trim());
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : t("failedToSignup");
       setError(msg);
@@ -485,6 +536,7 @@ export default function Signup() {
                 <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: Spacing.lg, lineHeight: 22 }}>
                   {t("tellAboutYou")}
                 </Text>
+                <PhotoPickerCircle uri={avatarUri} onChange={setAvatarUri} disabled={submitting} />
                 <Text style={{ ...Typography.secondary, marginBottom: 6, fontWeight: "600" }}>{t("firstName")}</Text>
                 <TextInput
                   placeholder={t("firstName")}
@@ -591,6 +643,42 @@ export default function Signup() {
             ) : null}
 
             {step === 2 ? (
+              <>
+                <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: Spacing.lg, lineHeight: 22 }}>
+                  {t("stepStayInTouchSub")}
+                </Text>
+                <MessengerContactFields
+                  type={messengerType}
+                  onChangeType={(v) => {
+                    setMessengerType(v);
+                    setContactError(null);
+                  }}
+                  telegramInput={telegramInput}
+                  onChangeTelegramInput={(v) => {
+                    setTelegramInput(v);
+                    setContactError(null);
+                  }}
+                  whatsappInput={whatsappInput}
+                  onChangeWhatsappInput={(v) => {
+                    setWhatsappInput(v);
+                    setContactError(null);
+                  }}
+                  error={contactError}
+                />
+                <View style={{ marginTop: Spacing.md }}>
+                  <PrimaryButton title={t("continue")} onPress={goNext} disabled={submitting} />
+                </View>
+                <SpringPressScale fullWidth onPress={skipContact}>
+                  <View style={{ paddingVertical: Spacing.sm }}>
+                    <Text style={{ ...Typography.secondary, color: "#555", textAlign: "center" }}>
+                      {t("skipForNow")}
+                    </Text>
+                  </View>
+                </SpringPressScale>
+              </>
+            ) : null}
+
+            {step === 3 ? (
               <>
                 <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginBottom: Spacing.lg, lineHeight: 22 }}>
                   {t("createCredentials")}

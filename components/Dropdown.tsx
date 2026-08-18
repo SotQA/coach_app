@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "../theme/colors";
 import { Radius, Spacing } from "../theme/spacing";
 import { FontSizes, Typography } from "../theme/typography";
+import { useI18n } from "../context/I18nContext";
 
 export type DropdownOption = { value: string; label: string };
 
@@ -16,7 +17,9 @@ export interface DropdownProps {
   testID?: string;
 }
 
-export function Dropdown({ label, value, options, onChange, placeholder = "Select…", testID }: DropdownProps) {
+export function Dropdown({ label, value, options, onChange, placeholder, testID }: DropdownProps) {
+  const { t } = useI18n();
+  const resolvedPlaceholder = placeholder ?? t("selectPlaceholder");
   const [open, setOpen] = useState(false);
   const selected = options.find((o) => o.value === value) ?? null;
 
@@ -42,7 +45,7 @@ export function Dropdown({ label, value, options, onChange, placeholder = "Selec
           numberOfLines={1}
           style={{ ...Typography.body, fontSize: FontSizes.note, color: selected ? Colors.text : Colors.textMuted, flex: 1 }}
         >
-          {selected ? selected.label : placeholder}
+          {selected ? selected.label : resolvedPlaceholder}
         </Text>
         <Ionicons name="chevron-down" size={16} color={Colors.textMuted} />
       </Pressable>

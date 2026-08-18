@@ -1,7 +1,9 @@
+import { Pressable } from "react-native";
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "../../../theme/colors";
 import { useI18n } from "../../../context/I18nContext";
+import { SpotlightTarget } from "../../../components/onboarding/SpotlightTarget";
 
 export default function StudentTabsLayout() {
   const { t } = useI18n();
@@ -51,6 +53,11 @@ export default function StudentTabsLayout() {
           title: t("nav_profile"),
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="person-outline" color={color} size={size} />
+          ),
+          tabBarButton: ({ ref: _ref, ...props }) => (
+            <SpotlightTarget id="student-tab-profile" style={{ flex: 1 }}>
+              <Pressable {...props} />
+            </SpotlightTarget>
           ),
         }}
       />

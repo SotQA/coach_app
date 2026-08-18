@@ -3,6 +3,7 @@ import { Text, View } from "react-native";
 import { Colors } from "@/theme/colors";
 import { Radius, Spacing } from "@/theme/spacing";
 import { Typography } from "@/theme/typography";
+import { useI18n } from "@/context/I18nContext";
 import type { LogWithMeta } from "@/hooks/useWorkoutHistory";
 import { WorkoutLogCard } from "./WorkoutLogCard";
 
@@ -21,6 +22,7 @@ function WorkoutLogListImpl({
   expandedLogId,
   onToggleExpanded,
 }: WorkoutLogListProps) {
+  const { t } = useI18n();
   if (logs.length === 0) {
     return (
       <View
@@ -40,8 +42,7 @@ function WorkoutLogListImpl({
             textAlign: "center",
           }}
         >
-          No sessions for this day with the current filter. Try another date or
-          &quot;All&quot;.
+          {t("noSessionsForDayFilter")}
         </Text>
       </View>
     );

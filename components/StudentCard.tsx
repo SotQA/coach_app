@@ -6,6 +6,7 @@ import { PrimaryButton } from "./PrimaryButton";
 import { Colors } from "../theme/colors";
 import { Radius, Spacing } from "../theme/spacing";
 import { Typography, FontSizes } from "../theme/typography";
+import { useI18n } from "../context/I18nContext";
 
 interface StudentCardProps {
   student: StudentSummary;
@@ -26,13 +27,15 @@ interface StudentCardProps {
 export const StudentCard: FC<StudentCardProps> = ({
   student,
   onPress,
-  actionTitle = "Plan Workout",
+  actionTitle,
   secondaryActionTitle,
   onSecondaryPress,
   currentSplitName,
 }) => {
+  const { t } = useI18n();
   const fullName = [student.firstName, student.lastName].filter(Boolean).join(" ").trim();
-  const header = fullName || student.email || "Student";
+  const header = fullName || student.email || t("roleStudent");
+  const resolvedActionTitle = actionTitle ?? t("planWorkout");
   const initials =
     `${student.firstName?.trim()?.[0] ?? ""}${student.lastName?.trim()?.[0] ?? ""}`.toUpperCase() ||
     "S";
@@ -63,8 +66,8 @@ export const StudentCard: FC<StudentCardProps> = ({
           <Text style={{ ...Typography.section, fontSize: 16, fontWeight: "800" }}>{header}</Text>
           <Text style={{ ...Typography.secondary, color: Colors.textMuted, marginTop: 2 }}>
             {currentSplitName
-              ? `Current Split: ${currentSplitName}`
-              : "No training split assigned"}
+              ? t("currentSplitChip", { name: currentSplitName })
+              : t("noTrainingSplitAssigned")}
           </Text>
         </View>
       </View>
@@ -90,7 +93,7 @@ export const StudentCard: FC<StudentCardProps> = ({
           </View>
           <View style={{ flex: 1, minWidth: 0 }}>
             <PrimaryButton
-              title={actionTitle}
+              title={resolvedActionTitle}
               onPress={onPress as () => void}
               style={{
                 width: "100%",
@@ -113,7 +116,7 @@ export const StudentCard: FC<StudentCardProps> = ({
       ) : onPress ? (
         <View style={{ marginTop: Spacing.sm }}>
           <PrimaryButton
-            title={actionTitle}
+            title={resolvedActionTitle}
             onPress={onPress}
             style={{ alignSelf: "flex-start", width: "auto", paddingHorizontal: Spacing.md }}
           />

@@ -18,6 +18,7 @@ import type { StudentSummary } from "../../../types/StudentSummary";
 import type { WorkoutPlan, WorkoutLog } from "../../../types/Workout";
 import { Avatar } from "../../../components/Avatar";
 import { NotificationBellButton } from "../../../components/NotificationBellButton";
+import { SpotlightTarget } from "../../../components/onboarding/SpotlightTarget";
 import { PrimaryButton } from "../../../components/PrimaryButton";
 import { Colors } from "../../../theme/colors";
 import { Radius, Spacing } from "../../../theme/spacing";
@@ -295,7 +296,9 @@ export default function CoachDashboard() {
                 </Text>
               </View>
             </View>
-            <NotificationBellButton />
+            <SpotlightTarget id="coach-bell">
+              <NotificationBellButton />
+            </SpotlightTarget>
           </View>
 
           <Text style={{ ...Typography.title, fontSize: FontSizes.h2, marginBottom: 4 }}>{t("overview")}</Text>
@@ -417,32 +420,35 @@ export default function CoachDashboard() {
                 {t("nav_myTraining")}
               </Text>
             </Pressable>
-            <Pressable
-              onPress={() => router.push("/coach/createStudent")}
-              style={({ pressed }) => ({
-                flex: 1,
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: Spacing.sm,
-                paddingVertical: 16,
-                paddingHorizontal: Spacing.sm,
-                borderRadius: Radius.lg,
-                backgroundColor: Colors.card,
-                borderWidth: 1,
-                borderColor: Colors.border,
-                opacity: pressed ? 0.92 : 1,
-              })}
-            >
-              <Ionicons name="person-add-outline" size={22} color={Colors.primary} />
-              <Text style={{ ...Typography.section, fontWeight: "700", color: Colors.text }}>
-                {t("addStudent")}
-              </Text>
-            </Pressable>
+            <SpotlightTarget id="coach-addStudent" style={{ flex: 1 }}>
+              <Pressable
+                onPress={() => router.push("/coach/createStudent")}
+                style={({ pressed }) => ({
+                  flex: 1,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: Spacing.sm,
+                  paddingVertical: 16,
+                  paddingHorizontal: Spacing.sm,
+                  borderRadius: Radius.lg,
+                  backgroundColor: Colors.card,
+                  borderWidth: 1,
+                  borderColor: Colors.border,
+                  opacity: pressed ? 0.92 : 1,
+                })}
+              >
+                <Ionicons name="person-add-outline" size={22} color={Colors.primary} />
+                <Text style={{ ...Typography.section, fontWeight: "700", color: Colors.text }}>
+                  {t("addStudent")}
+                </Text>
+              </Pressable>
+            </SpotlightTarget>
           </View>
 
           {/* My Training preview */}
-          <View
+          <SpotlightTarget
+            id="coach-myTraining"
             style={{
               backgroundColor: Colors.card,
               borderRadius: Radius.lg,
@@ -498,7 +504,7 @@ export default function CoachDashboard() {
                 </Pressable>
               </View>
             )}
-          </View>
+          </SpotlightTarget>
 
         </ScrollView>
       </View>

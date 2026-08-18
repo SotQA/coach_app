@@ -4,6 +4,7 @@ import {
   type WorkoutCategory,
   type WorkoutCategoryChip,
 } from "@/constants/workoutCategories";
+import { useI18n } from "@/context/I18nContext";
 import { Colors } from "@/theme/colors";
 import { Radius, Spacing } from "@/theme/spacing";
 import { FontSizes } from "@/theme/typography";
@@ -15,6 +16,15 @@ interface WorkoutHistoryFilterProps {
   onChange: (c: WorkoutCategory) => void;
 }
 
+const CATEGORY_LABEL_KEYS: Record<WorkoutCategory, string> = {
+  all: "categoryAll",
+  strength: "categoryStrength",
+  hypertrophy: "categoryHypertrophy",
+  cardio: "categoryCardio",
+  mobility: "categoryMobility",
+  other: "categoryOther",
+};
+
 /**
  * Horizontal filter-chip row. Behavior is identical to the inline row
  * that previously lived in `app/student/workoutHistory.tsx`.
@@ -24,6 +34,7 @@ function WorkoutHistoryFilterImpl({
   active,
   onChange,
 }: WorkoutHistoryFilterProps) {
+  const { t } = useI18n();
   return (
     <ScrollView
       horizontal
@@ -52,7 +63,7 @@ function WorkoutHistoryFilterImpl({
                 color: sel ? Colors.onPrimary : Colors.text,
               }}
             >
-              {c.label}
+              {t(CATEGORY_LABEL_KEYS[c.key])}
             </Text>
           </Pressable>
         );

@@ -15,6 +15,7 @@ import type { UserRole } from "../../types/User";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { useAuth } from "../../context/AuthContext";
 import { useI18n } from "../../context/I18nContext";
+import { useOnboardingTour } from "../../context/OnboardingTourContext";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
 import { Typography } from "../../theme/typography";
@@ -149,6 +150,7 @@ export default function GoogleRoleScreen() {
   const insets = useSafeAreaInsets();
   const { pendingGoogleUser, completeGoogleSignup, cancelGoogleSignup } = useAuth();
   const { t } = useI18n();
+  const { presentWelcome } = useOnboardingTour();
 
   const [role, setRole] = useState<UserRole | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -170,8 +172,10 @@ export default function GoogleRoleScreen() {
     }
     setError(null);
     setSubmitting(true);
+    const firstName = pendingGoogleUser.firstName;
     try {
       await completeGoogleSignup(role);
+      presentWelcome(firstName);
     } catch (e: any) {
       setError(e.message ?? t("failedToSignup"));
       setSubmitting(false);

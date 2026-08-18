@@ -6,6 +6,8 @@ import {
 } from "@/services/workoutService";
 import type { WorkoutLog, WorkoutLogExercise } from "@/types/Workout";
 import { toMs } from "@/utils/dateConvert";
+import { useI18n } from "@/context/I18nContext";
+import { localeTag } from "@/utils/formatLocale";
 import {
   addMonths,
   dayKeyFromDate,
@@ -91,6 +93,8 @@ export interface UseWorkoutHistoryResult {
 export function useWorkoutHistory(
   user: { id: string; role: string } | null | undefined,
 ): UseWorkoutHistoryResult {
+  const { locale } = useI18n();
+
   // ── Local state ───────────────────────────────────────────────────────
   const [refreshing, setRefreshing] = useState(false);
   const [visibleMonth, setVisibleMonth] = useState(() =>
@@ -159,11 +163,11 @@ export function useWorkoutHistory(
   // ── Derived: month label, in-month + filtered logs ────────────────────
   const monthLabel = useMemo(
     () =>
-      visibleMonth.toLocaleDateString(undefined, {
+      visibleMonth.toLocaleDateString(localeTag(locale), {
         month: "long",
         year: "numeric",
       }),
-    [visibleMonth],
+    [visibleMonth, locale],
   );
 
   const logsInVisibleMonth = useMemo(() => {
@@ -299,13 +303,13 @@ export function useWorkoutHistory(
     if (!selectedDayKey) return "";
     const [yy, mm, dd] = selectedDayKey.split("-").map(Number);
     const d = new Date(yy, (mm ?? 1) - 1, dd ?? 1);
-    return d.toLocaleDateString(undefined, {
+    return d.toLocaleDateString(localeTag(locale), {
       weekday: "long",
       month: "long",
       day: "numeric",
       year: "numeric",
     });
-  }, [selectedDayKey]);
+  }, [selectedDayKey, locale]);
 
   // ── Month navigation ──────────────────────────────────────────────────
   const goToPrevMonth = useCallback(() => {
