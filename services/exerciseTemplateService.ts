@@ -10,8 +10,6 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import type { ExerciseTemplateFirestoreDoc } from "../types/firestore";
-import type { CachedExercise } from "./exerciseDbService";
-import { cacheMappedExerciseToFirestore } from "./exerciseDbService";
 
 const COLLECTION = "exerciseTemplates";
 const GLOBAL_EXERCISES_COLLECTION = "globalExercises";
@@ -254,70 +252,6 @@ export const exerciseTemplateService = {
       name,
       category,
       equipment: equipment || undefined,
-      createdAt: now,
-      usageCount: 0,
-      lastUsedAt: now,
-    };
-  },
-
-  /**
-   * Add a template from ExerciseDB. Checks for duplicates by exerciseDbId before
-   * inserting. Also caches the exercise to /globalExercises.
-   */
-  async addFromExerciseDB(
-    coachId: string,
-    exercise: CachedExercise
-  ): Promise<ExerciseTemplate> {
-    const ref = collection(db, COLLECTION);
-
-    // Check for existing template with the same exerciseDbId for this coach.
-    const dupSnap = await getDocs(
-      query(
-        ref,
-        where("coachId", "==", coachId),
-        where("exerciseDbId", "==", exercise.id),
-        limit(1)
-      )
-    );
-    if (!dupSnap.empty) {
-      return mapDoc(dupSnap.docs[0].id, dupSnap.docs[0].data());
-    }
-
-    // Ensure the exercise is cached in the global collection.
-    cacheMappedExerciseToFirestore(exercise).catch(() => {});
-
-    const now = new Date();
-    const docRef = await addDoc(
-      ref,
-      sanitizeForFirestore({
-        coachId,
-        name: exercise.name,
-        category: exercise.category,
-        equipment: exercise.equipment,
-        source: "exerciseDB",
-        exerciseDbId: exercise.id,
-        gifUrl: exercise.gifUrl,
-        targetMuscle: exercise.targetMuscle,
-        secondaryMuscles: exercise.secondaryMuscles,
-        instructions: exercise.instructions,
-        createdAt: now,
-        usageCount: 0,
-        lastUsedAt: now,
-      }) as any
-    );
-
-    return {
-      id: docRef.id,
-      coachId,
-      name: exercise.name,
-      category: exercise.category,
-      equipment: exercise.equipment,
-      source: "exerciseDB",
-      exerciseDbId: exercise.id,
-      gifUrl: exercise.gifUrl,
-      targetMuscle: exercise.targetMuscle,
-      secondaryMuscles: exercise.secondaryMuscles,
-      instructions: exercise.instructions,
       createdAt: now,
       usageCount: 0,
       lastUsedAt: now,
