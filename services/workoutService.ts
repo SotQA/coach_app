@@ -189,6 +189,12 @@ export function normalizeLoggedExercise(ex: any): WorkoutLogExercise {
       ? Number(volumeRaw)
       : computeExerciseVolumeFromLoggedSets(setList);
 
+  const validFlagReasons = ["different_gym", "different_machine", "miscalibrated", "other"];
+  const equipmentFlagReason =
+    typeof ex?.equipmentFlagReason === "string" && validFlagReasons.includes(ex.equipmentFlagReason)
+      ? (ex.equipmentFlagReason as WorkoutLogExercise["equipmentFlagReason"])
+      : undefined;
+
   return {
     name: ex?.name != null ? String(ex.name) : ex?.exercise != null ? String(ex.exercise) : "Exercise",
     repsPlanned,
@@ -198,6 +204,21 @@ export function normalizeLoggedExercise(ex: any): WorkoutLogExercise {
     rpe,
     volume,
     isPr: ex?.isPr === true,
+    isSubstituted: ex?.isSubstituted === true,
+    originalExerciseName:
+      ex?.originalExerciseName != null && String(ex.originalExerciseName).trim() !== ""
+        ? String(ex.originalExerciseName)
+        : undefined,
+    originalExerciseDbId:
+      ex?.originalExerciseDbId != null && String(ex.originalExerciseDbId).trim() !== ""
+        ? String(ex.originalExerciseDbId)
+        : undefined,
+    equipmentFlagged: ex?.equipmentFlagged === true,
+    equipmentFlagReason,
+    equipmentFlagNote:
+      ex?.equipmentFlagNote != null && String(ex.equipmentFlagNote).trim() !== ""
+        ? String(ex.equipmentFlagNote).slice(0, 100)
+        : undefined,
   };
 }
 

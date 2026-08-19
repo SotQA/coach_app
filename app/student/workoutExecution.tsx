@@ -6,9 +6,15 @@ import { Ionicons } from "@expo/vector-icons";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { HoldToConfirmButton } from "../../components/HoldToConfirmButton";
 import { ExerciseGroup } from "../../components/workout/ExerciseGroup";
+import { SubstituteExerciseSheet } from "../../components/workout/SubstituteExerciseSheet";
+import { FlagEquipmentSheet } from "../../components/workout/FlagEquipmentSheet";
 import { type SetDraft } from "../../components/workout/SetInputRow";
 import { useAuth } from "../../context/AuthContext";
-import { useActiveWorkoutSession, type ActiveExerciseDraft } from "../../context/ActiveWorkoutSessionContext";
+import {
+  useActiveWorkoutSession,
+  type ActiveExerciseDraft,
+  type EquipmentFlagReason,
+} from "../../context/ActiveWorkoutSessionContext";
 import { useElapsedSeconds } from "../../context/ElapsedTimeContext";
 import { useI18n } from "../../context/I18nContext";
 import type { WorkoutPlan } from "../../types/Workout";
@@ -28,6 +34,7 @@ import { toKg, toUnit } from "../../utils/units";
 import type { WeightUnit } from "../../context/UnitsContext";
 import { normalizeExerciseName } from "../../utils/workoutMetrics";
 import { formatWeekday } from "../../utils/formatLocale";
+import { getExerciseName, type LocalExercise } from "../../services/localExerciseService";
 
 type ExerciseDraft = { sets: SetDraft[] };
 
@@ -133,6 +140,8 @@ export default function WorkoutExecution() {
   const [sessionNotes, setSessionNotes] = useState("");
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [notesHeight, setNotesHeight] = useState(72);
+  const [subSheetExIdx, setSubSheetExIdx] = useState<number | null>(null);
+  const [flagSheetExIdx, setFlagSheetExIdx] = useState<number | null>(null);
 
   const planRef = useRef<WorkoutPlan | null>(null);
   const draftsRef = useRef<ExerciseDraft[]>([]);
@@ -262,6 +271,49 @@ export default function WorkoutExecution() {
     notesDebounceRef.current = setTimeout(() => { activeWorkout.updateNotes(text); }, 400);
   };
 
+  const handleConfirmSub = (selected: LocalExercise) => {
+    if (subSheetExIdx == null || !plan) return;
+    const exIdx = subSheetExIdx;
+    const original = plan.exercises[exIdx];
+    const localizedName = getExerciseName(selected, locale);
+    const bestKg = bestWeightByExercise.get(normalizeExerciseName(localizedName)) ?? null;
+    activeWorkout.substituteExercise(
+      exIdx,
+      {
+        name: localizedName,
+        exerciseDbId: selected.id,
+        originalName: original.name,
+        originalExerciseDbId: original.exerciseDbId,
+      },
+      bestKg != null ? String(bestKg) : undefined
+    );
+    setDrafts((prev) =>
+      prev.map((row, i) =>
+        i !== exIdx ? row : { sets: row.sets.map(() => ({ weight: weightToDisplay(bestKg, unit), reps: "", rpe: "", done: false })) }
+      )
+    );
+    setSubSheetExIdx(null);
+  };
+
+  const handleUndoSub = (exIdx: number) => {
+    if (!plan) return;
+    const original = plan.exercises[exIdx];
+    const prescribedKg = original.weight != null && Number.isFinite(Number(original.weight)) ? Number(original.weight) : null;
+    const bestKg = bestWeightByExercise.get(normalizeExerciseName(original.name)) ?? prescribedKg;
+    activeWorkout.undoSubstitution(exIdx, bestKg != null ? String(bestKg) : undefined);
+    setDrafts((prev) =>
+      prev.map((row, i) =>
+        i !== exIdx ? row : { sets: row.sets.map(() => ({ weight: weightToDisplay(bestKg, unit), reps: "", rpe: "", done: false })) }
+      )
+    );
+  };
+
+  const handleConfirmFlag = (reason: EquipmentFlagReason, note?: string) => {
+    if (flagSheetExIdx == null) return;
+    activeWorkout.setEquipmentFlag(flagSheetExIdx, { reason, note });
+    setFlagSheetExIdx(null);
+  };
+
   const handleDiscardWorkout = async () => {
     await activeWorkout.finishSession();
     router.back();
@@ -348,22 +400,34 @@ export default function WorkoutExecution() {
         </View>
 
         {/* Exercise groups */}
-        {plan.exercises.map((exercise, exIdx) => (
-          <ExerciseGroup
-            key={`${exercise.name}-${exIdx}`}
-            exerciseIndex={exIdx}
-            exercise={exercise}
-            drafts={drafts[exIdx]?.sets ?? []}
-            lastResults={lastResultsByExercise.get(normalizeExerciseName(exercise.name))}
-            disabled={submitting}
-            onSetChange={(setIdx, patch) => updateSet(exIdx, setIdx, patch)}
-            onMarkSetDone={(setIdx) => {
-              const nextDone = !drafts[exIdx]?.sets[setIdx]?.done;
-              updateSet(exIdx, setIdx, { done: nextDone });
-            }}
-            registerRef={(setIdx, field, node) => refs.registerRef(exIdx, setIdx, field, node)}
-          />
-        ))}
+        {plan.exercises.map((exercise, exIdx) => {
+          const activeExercise = activeWorkout.session?.exercises[exIdx];
+          const substitution = activeExercise?.substitution;
+          const equipmentFlag = activeExercise?.equipmentFlag;
+          const effectiveName = substitution?.name ?? exercise.name;
+          return (
+            <ExerciseGroup
+              key={`${exercise.name}-${exIdx}`}
+              exerciseIndex={exIdx}
+              exercise={exercise}
+              drafts={drafts[exIdx]?.sets ?? []}
+              lastResults={lastResultsByExercise.get(normalizeExerciseName(effectiveName))}
+              disabled={submitting}
+              onSetChange={(setIdx, patch) => updateSet(exIdx, setIdx, patch)}
+              onMarkSetDone={(setIdx) => {
+                const nextDone = !drafts[exIdx]?.sets[setIdx]?.done;
+                updateSet(exIdx, setIdx, { done: nextDone });
+              }}
+              registerRef={(setIdx, field, node) => refs.registerRef(exIdx, setIdx, field, node)}
+              substitution={substitution}
+              equipmentFlag={equipmentFlag}
+              onOpenSub={() => setSubSheetExIdx(exIdx)}
+              onUndoSub={() => handleUndoSub(exIdx)}
+              onOpenFlag={() => setFlagSheetExIdx(exIdx)}
+              onClearFlag={() => activeWorkout.clearEquipmentFlag(exIdx)}
+            />
+          );
+        })}
 
         {submitError ? (
           <Text style={S.errorText}>{submitError}</Text>
@@ -405,6 +469,20 @@ export default function WorkoutExecution() {
           </View>
         )}
       </View>
+
+      <SubstituteExerciseSheet
+        visible={subSheetExIdx != null}
+        currentExerciseName={subSheetExIdx != null ? plan.exercises[subSheetExIdx]?.name ?? "" : ""}
+        currentExerciseDbId={subSheetExIdx != null ? plan.exercises[subSheetExIdx]?.exerciseDbId : undefined}
+        onCancel={() => setSubSheetExIdx(null)}
+        onConfirm={handleConfirmSub}
+      />
+
+      <FlagEquipmentSheet
+        visible={flagSheetExIdx != null}
+        onCancel={() => setFlagSheetExIdx(null)}
+        onConfirm={handleConfirmFlag}
+      />
     </ScreenLayout>
   );
 }

@@ -61,6 +61,10 @@ export function useFinishWorkout(): UseFinishWorkout {
         if (!draft || draft.sets.length === 0) {
           throw new Error(`Missing set data for "${exercise.name}".`);
         }
+        const activeExercise = activeWorkout.session?.exercises[exIdx];
+        const substitution = activeExercise?.substitution;
+        const equipmentFlag = activeExercise?.equipmentFlag;
+        const effectiveName = substitution?.name ?? exercise.name;
 
         const loggedSets: LoggedSet[] = draft.sets.map((d, si) => {
           if (!d.done) {
@@ -87,7 +91,7 @@ export function useFinishWorkout(): UseFinishWorkout {
           return { setNumber: si + 1, reps: r, weight: weightOut };
         });
 
-        const exKey = normalizeExerciseName(exercise.name);
+        const exKey = normalizeExerciseName(effectiveName);
         const prevBest = bestWeightByExercise.get(exKey);
         const maxKg = Math.max(
           0,
@@ -99,7 +103,7 @@ export function useFinishWorkout(): UseFinishWorkout {
         const volume = computeExerciseVolumeFromLoggedSets(loggedSets);
 
         return {
-          name: exercise.name,
+          name: effectiveName,
           repsPlanned: String(exercise.reps ?? ""),
           sets: loggedSets,
           rest: exercise.rest ?? "",
@@ -107,6 +111,20 @@ export function useFinishWorkout(): UseFinishWorkout {
           rpe: exercise.rpe ?? null,
           volume,
           isPr,
+          ...(substitution
+            ? {
+                isSubstituted: true,
+                originalExerciseName: exercise.name,
+                originalExerciseDbId: exercise.exerciseDbId,
+              }
+            : {}),
+          ...(equipmentFlag
+            ? {
+                equipmentFlagged: true,
+                equipmentFlagReason: equipmentFlag.reason,
+                equipmentFlagNote: equipmentFlag.note,
+              }
+            : {}),
         };
       });
 

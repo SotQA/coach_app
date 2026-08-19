@@ -162,6 +162,8 @@ export interface LoggedSet {
   weight: number | null;
 }
 
+export type EquipmentFlagReason = "different_gym" | "different_machine" | "miscalibrated" | "other";
+
 export interface WorkoutLogExercise {
   name: string;
   repsPlanned: string;
@@ -174,5 +176,16 @@ export interface WorkoutLogExercise {
   volume?: number;
   /** True when max weight this session beats prior best for this exercise. */
   isPr?: boolean;
+  /** True when this was swapped in for the plan's exercise, for this session only. */
+  isSubstituted?: boolean;
+  /** Plan exercise name this replaced, when `isSubstituted` is true. */
+  originalExerciseName?: string;
+  /** Plan exercise's exerciseDbId, when `isSubstituted` is true and available. */
+  originalExerciseDbId?: string;
+  /** True when the student flagged this session's equipment as non-comparable. */
+  equipmentFlagged?: boolean;
+  equipmentFlagReason?: EquipmentFlagReason;
+  /** Optional note, only meaningful when equipmentFlagReason === "other". Max 100 chars. */
+  equipmentFlagNote?: string;
 }
 

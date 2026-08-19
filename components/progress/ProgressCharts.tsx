@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useState } from "react";
 import { View, Text, Pressable } from "react-native";
-import Svg, { Polyline, Polygon, Circle, Line, Text as SvgText } from "react-native-svg";
+import Svg, { Polyline, Polygon, Circle, Line, Rect, Text as SvgText } from "react-native-svg";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "../../theme/colors";
 import { Radius, Spacing } from "../../theme/spacing";
@@ -178,17 +178,48 @@ export function MiniLineChart({
         ) : coords.length === 1 ? (
           <Circle cx={coords[0].x} cy={coords[0].y} r={5} fill={color} />
         ) : null}
-        {coords.map((c, i) => (
-          <Circle
-            key={i}
-            cx={c.x}
-            cy={c.y}
-            r={5}
-            fill={highlightPr && c.p.isPr ? Colors.primary : color}
-            stroke={Colors.bg}
-            strokeWidth={2}
-          />
-        ))}
+        {coords.map((c, i) => {
+          if (c.p.isFlagged) {
+            return (
+              <Circle
+                key={i}
+                cx={c.x}
+                cy={c.y}
+                r={5}
+                fill={Colors.flagOrangeTint}
+                stroke={Colors.flagOrange}
+                strokeWidth={1.5}
+              />
+            );
+          }
+          if (c.p.isSubstituted) {
+            return (
+              <Rect
+                key={i}
+                x={c.x - 4}
+                y={c.y - 4}
+                width={8}
+                height={8}
+                rx={1}
+                fill={Colors.subBlueTint}
+                stroke={Colors.subBlue}
+                strokeWidth={1.5}
+                transform={`rotate(45 ${c.x} ${c.y})`}
+              />
+            );
+          }
+          return (
+            <Circle
+              key={i}
+              cx={c.x}
+              cy={c.y}
+              r={5}
+              fill={highlightPr && c.p.isPr ? Colors.primary : color}
+              stroke={Colors.bg}
+              strokeWidth={2}
+            />
+          );
+        })}
       </Svg>
       <TapColumns coords={coords} width={W} height={H} onSelect={setSelected} />
       <WeekAxisLabels coords={coords} plotWidth={plotWidth} />

@@ -42,4 +42,10 @@ export const Colors = {
   // Chart series (Progress analytics — weight vs reps detail chart)
   chartBlue:   "#4A9EFF",
   chartOrange: "#FF9E64",
+
+  // Session-only exercise substitution / equipment flag (workout tracking)
+  subBlue:        "#5AC8FA",
+  subBlueTint:    "#0d1a2a",
+  flagOrange:     "#FF9500",
+  flagOrangeTint: "#1a1200",
 } as const;
