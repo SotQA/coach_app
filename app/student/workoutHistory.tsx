@@ -36,6 +36,10 @@ export default function WorkoutHistory() {
   const { t } = useI18n();
   const h = useWorkoutHistory(user);
 
+  const rolePrefix = user?.role === "athlete" ? "/athlete" : user?.role === "coach" ? "/coach" : "/student";
+  const workoutsPath = user?.role === "coach" ? "/coach/myTraining" : `${rolePrefix}/workouts`;
+  const profilePath = `${rolePrefix}/profile`;
+
   // ── Loading / error / global-empty branches ───────────────────────────
   if (h.loading) {
     return (
@@ -107,7 +111,7 @@ export default function WorkoutHistory() {
         <View style={{ marginTop: Spacing.lg }}>
           <PrimaryButton
             title={t("viewWorkoutsButton")}
-            onPress={() => router.replace("/student/workouts")}
+            onPress={() => router.replace(workoutsPath as any)}
           />
         </View>
       </ScrollView>
@@ -162,7 +166,7 @@ export default function WorkoutHistory() {
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={t("openSettingsA11y")}
-              onPress={() => router.push("/student/profile")}
+              onPress={() => router.push(profilePath as any)}
               style={({ pressed }) => ({
                 width: 44,
                 height: 44,
@@ -238,7 +242,7 @@ export default function WorkoutHistory() {
           <View style={{ marginTop: Spacing.md }}>
             <PrimaryButton
               title={t("viewWorkoutsButton")}
-              onPress={() => router.replace("/student/workouts")}
+              onPress={() => router.replace(workoutsPath as any)}
               style={{ backgroundColor: Colors.border }}
             />
           </View>

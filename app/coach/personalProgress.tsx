@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
+import { useRouter } from "expo-router";
 import { useAuth } from "../../context/AuthContext";
 import { workoutService } from "../../services/workoutService";
 import { trainingGroupService } from "../../services/trainingGroupService";
@@ -8,6 +9,7 @@ import { Colors } from "../../theme/colors";
 import { ProgressAnalyticsView } from "../../components/progress/ProgressAnalyticsView";
 
 export default function CoachPersonalProgressScreen() {
+  const router = useRouter();
   const { user } = useAuth();
   const [logs, setLogs] = useState<WorkoutLog[]>([]);
   const [wpw, setWpw] = useState(0);
@@ -59,6 +61,7 @@ export default function CoachPersonalProgressScreen() {
       wpw={wpw}
       refreshing={refreshing}
       onRefresh={onRefresh}
+      onBack={() => router.back()}
     />
   );
 }

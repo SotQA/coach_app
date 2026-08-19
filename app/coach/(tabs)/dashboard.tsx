@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import {
   View,
   Text,
@@ -67,66 +68,85 @@ export default function CoachDashboard() {
     return t("todayHappening", { date: dateStr });
   }, [locale, t]);
 
-  useEffect(() => {
-    if (!user || user.role !== "coach") {
-      setLoading(false);
-      return;
-    }
+  const hasLoadedOnceRef = useRef(false);
 
-    const loadData = async () => {
-      setLoading(true);
-      try {
-        setError(null);
-        const data = await studentService.getStudentsForCoach(user.id);
-        setStudents(data);
-
-        const start = new Date();
-        start.setHours(0, 0, 0, 0);
-        const end = new Date(start);
-        end.setDate(end.getDate() + 1);
-        const startMs = start.getTime();
-        const endMs = end.getTime();
-
-        const logsByStudent = await Promise.all(
-          data.map(async (s) => {
-            try {
-              return await workoutService.getWorkoutHistory(s.id);
-            } catch {
-              return [];
-            }
-          })
-        );
-        const count = logsByStudent
-          .flat()
-          .filter((l: any) => {
-            const when = l?.completedAt ?? l?.date;
-            if (!when) return false;
-            const ms = new Date(String(when)).getTime();
-            return Number.isFinite(ms) && ms >= startMs && ms < endMs;
-          }).length;
-        setWorkoutsCompletedToday(count);
-
-        // Personal training — non-blocking
-        try {
-          const [plans, logs] = await Promise.all([
-            workoutService.getActiveWorkoutPlansForStudent(user.id),
-            workoutService.getWorkoutHistory(user.id),
-          ]);
-          setPersonalPlans(plans.sort((a, b) => (a.order ?? 999) - (b.order ?? 999)));
-          setPersonalLogs(logs);
-        } catch {
-          // silently ignore; student data is already rendered
-        }
-      } catch (e: any) {
-        console.error("[coach/dashboard] load error", e);
-        setError(e.message ?? t("failedToLoad"));
-      } finally {
+  // Refetch on every focus, not just mount — otherwise plans/students
+  // removed or changed on another tab (e.g. "My Training") leave this
+  // screen's "Next up" card showing stale data until a manual pull-to-refresh.
+  useFocusEffect(
+    useCallback(() => {
+      let cancelled = false;
+      if (!user || user.role !== "coach") {
         setLoading(false);
+        return undefined;
       }
-    };
 
-    loadData();
-  }, [user]);
+      const showFullScreenLoad = !hasLoadedOnceRef.current;
+
+      const loadData = async () => {
+        if (showFullScreenLoad) setLoading(true);
+        try {
+          setError(null);
+          const data = await studentService.getStudentsForCoach(user.id);
+          if (cancelled) return;
+          setStudents(data);
+
+          const start = new Date();
+          start.setHours(0, 0, 0, 0);
+          const end = new Date(start);
+          end.setDate(end.getDate() + 1);
+          const startMs = start.getTime();
+          const endMs = end.getTime();
+
+          const logsByStudent = await Promise.all(
+            data.map(async (s) => {
+              try {
+                return await workoutService.getWorkoutHistory(s.id);
+              } catch {
+                return [];
+              }
+            })
+          );
+          if (cancelled) return;
+          const count = logsByStudent
+            .flat()
+            .filter((l: any) => {
+              const when = l?.completedAt ?? l?.date;
+              if (!when) return false;
+              const ms = new Date(String(when)).getTime();
+              return Number.isFinite(ms) && ms >= startMs && ms < endMs;
+            }).length;
+          setWorkoutsCompletedToday(count);
+
+          // Personal training — non-blocking
+          try {
+            const [plans, logs] = await Promise.all([
+              workoutService.getActiveWorkoutPlansForStudent(user.id),
+              workoutService.getWorkoutHistory(user.id),
+            ]);
+            if (cancelled) return;
+            setPersonalPlans(plans.sort((a, b) => (a.order ?? 999) - (b.order ?? 999)));
+            setPersonalLogs(logs);
+          } catch {
+            // silently ignore; student data is already rendered
+          }
+          hasLoadedOnceRef.current = true;
+        } catch (e: any) {
+          if (!cancelled) {
+            console.error("[coach/dashboard] load error", e);
+            setError(e.message ?? t("failedToLoad"));
+          }
+        } finally {
+          if (!cancelled && showFullScreenLoad) setLoading(false);
+        }
+      };
+
+      loadData();
+      return () => {
+        cancelled = true;
+      };
+    }, [user?.id, user?.role, t])
+  );
 
   const onRefresh = useCallback(async () => {
     if (!user || user.role !== "coach") return;

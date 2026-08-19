@@ -47,6 +47,13 @@ export type ProgressAnalyticsViewProps = {
   coachContext?: ProgressAnalyticsCoachContext;
   /** When set (e.g. from student profile “View Progress”), applies filters; `forStudentId` bumps identity when the target student changes. */
   coachProgressDefaults?: { timePreset: TimeRangePreset; exerciseAll: true; forStudentId?: string } | null;
+  /**
+   * When set, renders a back button next to the title. Pass this when the
+   * screen hosting this view has its native header disabled (e.g. pushed on
+   * a stack rather than shown inside a tab) — otherwise there'd be no way
+   * back, since this view doesn't rely on a native header for navigation.
+   */
+  onBack?: () => void;
 };
 
 const ALL_EXERCISES = "__all__";
@@ -121,6 +128,7 @@ export function ProgressAnalyticsView({
   onRefresh,
   coachContext,
   coachProgressDefaults = null,
+  onBack,
 }: ProgressAnalyticsViewProps) {
   const { t, locale } = useI18n();
   const { width: windowWidth } = useWindowDimensions();
@@ -266,7 +274,28 @@ export function ProgressAnalyticsView({
           }}
         >
           <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: Spacing.sm }}>
-            <Text style={{ ...Typography.title, fontSize: FontSizes.h3 }}>{screenTitle}</Text>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.sm, flex: 1 }}>
+              {onBack ? (
+                <Pressable
+                  onPress={onBack}
+                  hitSlop={10}
+                  style={({ pressed }) => ({
+                    width: 32,
+                    height: 32,
+                    borderRadius: Radius.md,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: Colors.card,
+                    borderWidth: 1,
+                    borderColor: Colors.border,
+                    opacity: pressed ? 0.7 : 1,
+                  })}
+                >
+                  <Ionicons name="chevron-back" size={20} color={Colors.text} />
+                </Pressable>
+              ) : null}
+              <Text style={{ ...Typography.title, fontSize: FontSizes.h3 }}>{screenTitle}</Text>
+            </View>
             {variant === "coach" ? <NotificationBellButton /> : null}
           </View>
           {variant === "student" ? (
