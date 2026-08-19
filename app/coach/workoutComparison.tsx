@@ -7,7 +7,8 @@ import { useI18n } from "../../context/I18nContext";
 import { studentService } from "../../services/studentService";
 import { workoutService } from "../../services/workoutService";
 import type { StudentSummary } from "../../types/StudentSummary";
-import type { LoggedSet, WorkoutLog } from "../../types/Workout";
+import type { EquipmentFlagReason, LoggedSet, WorkoutLog } from "../../types/Workout";
+import { EQUIPMENT_FLAG_REASON_BADGE_KEY } from "../../utils/equipmentFlagLabels";
 import { Avatar } from "../../components/Avatar";
 import { ScreenLayout } from "../../components/ScreenLayout";
 import { Colors } from "../../theme/colors";
@@ -91,9 +92,14 @@ type ExerciseRowData = {
   name: string;
   latestSets: LoggedSet[];
   prevSets: LoggedSet[] | null;
+  equipmentFlagged?: boolean;
+  equipmentFlagReason?: EquipmentFlagReason;
+  isSubstituted?: boolean;
+  originalExerciseName?: string;
 };
 
 function ExerciseRow({ row, hasPrevious }: { row: ExerciseRowData; hasPrevious: boolean }) {
+  const { t } = useI18n();
   return (
     <View
       style={{
@@ -103,9 +109,41 @@ function ExerciseRow({ row, hasPrevious }: { row: ExerciseRowData; hasPrevious: 
         borderColor: Colors.border,
       }}
     >
-      <Text style={{ ...Typography.section, fontSize: FontSizes.note, fontWeight: "700", marginBottom: 6 }}>
-        {row.name}
-      </Text>
+      <View style={{ flexDirection: "row", alignItems: "center", flexWrap: "wrap", gap: 6, marginBottom: 6 }}>
+        <Text style={{ ...Typography.section, fontSize: FontSizes.note, fontWeight: "700" }}>{row.name}</Text>
+        {row.equipmentFlagged ? (
+          <View
+            style={{
+              backgroundColor: Colors.flagOrangeTint,
+              borderWidth: 1,
+              borderColor: Colors.flagOrange,
+              borderRadius: Radius.sm,
+              paddingVertical: 2,
+              paddingHorizontal: 6,
+            }}
+          >
+            <Text style={{ color: Colors.flagOrange, fontSize: FontSizes.tiny, fontWeight: "700" }}>
+              {`⚑ ${t(row.equipmentFlagReason ? EQUIPMENT_FLAG_REASON_BADGE_KEY[row.equipmentFlagReason] : "coachBadgeOtherReason")}`}
+            </Text>
+          </View>
+        ) : null}
+        {row.isSubstituted ? (
+          <View
+            style={{
+              backgroundColor: Colors.subBlueTint,
+              borderWidth: 1,
+              borderColor: Colors.subBlue,
+              borderRadius: Radius.sm,
+              paddingVertical: 2,
+              paddingHorizontal: 6,
+            }}
+          >
+            <Text style={{ color: Colors.subBlue, fontSize: FontSizes.tiny, fontWeight: "700" }}>
+              {t("coachBadgeSubFor", { name: row.originalExerciseName ?? "" })}
+            </Text>
+          </View>
+        ) : null}
+      </View>
       <View style={{ flexDirection: "row", gap: Spacing.sm }}>
         <View style={{ flex: 1, gap: 4 }}>
           {row.latestSets.map((s, i) => (
@@ -185,8 +223,27 @@ export default function WorkoutComparison() {
       name: ex.name,
       latestSets: ex.sets,
       prevSets: previous ? prevByName.get(normalizeExerciseName(ex.name)) ?? null : null,
+      equipmentFlagged: ex.equipmentFlagged,
+      equipmentFlagReason: ex.equipmentFlagReason,
+      isSubstituted: ex.isSubstituted,
+      originalExerciseName: ex.originalExerciseName,
     }));
   }, [log, previous]);
+
+  const flaggedRows = useMemo(() => rows.filter((r) => r.equipmentFlagged), [rows]);
+  const substitutedRows = useMemo(() => rows.filter((r) => r.isSubstituted), [rows]);
+  const hasEquipmentNote = flaggedRows.length > 0 || substitutedRows.length > 0;
+  const equipmentNoteBody = useMemo(() => {
+    const parts: string[] = [];
+    for (const r of flaggedRows) {
+      const reasonText = t(r.equipmentFlagReason ? EQUIPMENT_FLAG_REASON_BADGE_KEY[r.equipmentFlagReason] : "coachBadgeOtherReason");
+      parts.push(t("coachEquipmentNoteFlaggedLine", { name: r.name, reason: reasonText }));
+    }
+    for (const r of substitutedRows) {
+      parts.push(t("coachEquipmentNoteSubLine", { name: r.name, original: r.originalExerciseName ?? "" }));
+    }
+    return parts.join(" ");
+  }, [flaggedRows, substitutedRows, t]);
 
   if (loading) {
     return (
@@ -305,6 +362,27 @@ export default function WorkoutComparison() {
           renderItem={({ item }) => <ExerciseRow row={item} hasPrevious={!!previous} />}
           contentContainerStyle={{ paddingBottom: Spacing.md }}
         />
+
+        {hasEquipmentNote ? (
+          <View
+            style={{
+              backgroundColor: Colors.flagOrangeTint,
+              borderWidth: 1,
+              borderColor: Colors.flagOrange,
+              borderRadius: Radius.md,
+              margin: Spacing.md,
+              marginTop: 0,
+              padding: Spacing.sm,
+            }}
+          >
+            <Text style={{ color: Colors.flagOrange, fontSize: FontSizes.note, fontWeight: "700", marginBottom: 4 }}>
+              {`⚑ ${t("coachEquipmentNoteTitle")}`}
+            </Text>
+            <Text style={{ ...Typography.secondary, color: Colors.textMuted, fontSize: FontSizes.caption, lineHeight: 18 }}>
+              {equipmentNoteBody}
+            </Text>
+          </View>
+        ) : null}
 
         {previous ? (
           <View

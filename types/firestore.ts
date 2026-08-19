@@ -85,6 +85,12 @@ export interface WorkoutLogExerciseFirestoreDoc {
   rpe?: number | string | null;
   volume?: number | string;
   isPr?: boolean;
+  isSubstituted?: boolean;
+  originalExerciseName?: string;
+  originalExerciseDbId?: string;
+  equipmentFlagged?: boolean;
+  equipmentFlagReason?: string;
+  equipmentFlagNote?: string;
 }
 
 export interface WorkoutLogFirestoreDoc {

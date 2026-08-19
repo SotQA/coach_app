@@ -16,6 +16,9 @@ import {
   scheduleRestNotification,
 } from "../services/notificationService";
 import { logger } from "../utils/logger";
+import type { EquipmentFlagReason } from "../types/Workout";
+
+export type { EquipmentFlagReason };
 
 const STORAGE_KEY = "activeWorkoutSession.v2";
 
@@ -31,9 +34,26 @@ export interface ActiveSetDraft {
   completed: boolean;
 }
 
+/** Session-only exercise swap — the plan itself is never modified. */
+export interface ActiveSubstitution {
+  name: string;
+  exerciseDbId?: string;
+  originalName: string;
+  originalExerciseDbId?: string;
+}
+
+export interface ActiveEquipmentFlag {
+  reason: EquipmentFlagReason;
+  note?: string;
+}
+
 export interface ActiveExerciseDraft {
   name: string;
   sets: ActiveSetDraft[];
+  /** Present when this exercise was swapped for a different one, this session only. */
+  substitution?: ActiveSubstitution;
+  /** Present when this session's equipment was flagged as non-comparable. */
+  equipmentFlag?: ActiveEquipmentFlag;
 }
 
 /**
@@ -92,6 +112,12 @@ interface ActiveWorkoutSessionContextValue {
   startSession: (params: StartSessionParams) => Promise<void>;
   updateSet: (exIdx: number, setIdx: number, patch: Partial<ActiveSetDraft>) => void;
   updateNotes: (notes: string) => void;
+  /** Swaps the exercise at `exIdx` for a different one, this session only, and resets its sets to a fresh state. */
+  substituteExercise: (exIdx: number, sub: ActiveSubstitution, prefillWeightKg?: string) => void;
+  /** Restores the original exercise at `exIdx` and resets its sets to a fresh state. */
+  undoSubstitution: (exIdx: number, prefillWeightKg?: string) => void;
+  setEquipmentFlag: (exIdx: number, flag: ActiveEquipmentFlag) => void;
+  clearEquipmentFlag: (exIdx: number) => void;
   finishSession: () => Promise<void>;
   startRestTimer: (durationSeconds: number, nextExerciseIndex: number, nextSetIndex: number) => void;
   skipRestTimer: () => void;
@@ -406,6 +432,78 @@ export function ActiveWorkoutSessionProvider({ children }: { children: ReactNode
     [persistDebounced]
   );
 
+  /** Fresh, uncompleted sets for a newly-assigned exercise identity (same set count as before). */
+  function freshSets(count: number, prefillWeightKg?: string): ActiveSetDraft[] {
+    return Array.from({ length: Math.max(1, count) }, () => ({
+      weight: prefillWeightKg ?? "",
+      reps: "",
+      rpe: "",
+      completed: false,
+    }));
+  }
+
+  /** Writes `updated` to state + storage immediately, bypassing the debounce — for deliberate, infrequent actions. */
+  const commitImmediate = useCallback((updated: ActiveWorkoutSession) => {
+    setSession(updated);
+    lastQueuedSessionRef.current = updated;
+    if (persistTimerRef.current) {
+      clearTimeout(persistTimerRef.current);
+      persistTimerRef.current = null;
+    }
+    writeToStorage(updated).catch((e) => logger.warn("[ActiveWorkout] commitImmediate failed", e));
+  }, []);
+
+  const substituteExercise = useCallback(
+    (exIdx: number, sub: ActiveSubstitution, prefillWeightKg?: string) => {
+      const current = sessionRef.current;
+      if (!current) return;
+      const target = current.exercises[exIdx];
+      if (!target) return;
+      const exercises = current.exercises.map((ex, i) =>
+        i !== exIdx ? ex : { ...ex, name: sub.name, substitution: sub, sets: freshSets(ex.sets.length, prefillWeightKg) }
+      );
+      commitImmediate({ ...current, exercises });
+    },
+    [commitImmediate]
+  );
+
+  const undoSubstitution = useCallback(
+    (exIdx: number, prefillWeightKg?: string) => {
+      const current = sessionRef.current;
+      if (!current) return;
+      const target = current.exercises[exIdx];
+      if (!target?.substitution) return;
+      const originalName = target.substitution.originalName;
+      const exercises = current.exercises.map((ex, i) =>
+        i !== exIdx
+          ? ex
+          : { ...ex, name: originalName, substitution: undefined, sets: freshSets(ex.sets.length, prefillWeightKg) }
+      );
+      commitImmediate({ ...current, exercises });
+    },
+    [commitImmediate]
+  );
+
+  const setEquipmentFlag = useCallback(
+    (exIdx: number, flag: ActiveEquipmentFlag) => {
+      const current = sessionRef.current;
+      if (!current || !current.exercises[exIdx]) return;
+      const exercises = current.exercises.map((ex, i) => (i !== exIdx ? ex : { ...ex, equipmentFlag: flag }));
+      commitImmediate({ ...current, exercises });
+    },
+    [commitImmediate]
+  );
+
+  const clearEquipmentFlag = useCallback(
+    (exIdx: number) => {
+      const current = sessionRef.current;
+      if (!current || !current.exercises[exIdx]) return;
+      const exercises = current.exercises.map((ex, i) => (i !== exIdx ? ex : { ...ex, equipmentFlag: undefined }));
+      commitImmediate({ ...current, exercises });
+    },
+    [commitImmediate]
+  );
+
   const updateNotes = useCallback((notes: string) => {
     setSession((prev) => {
       if (!prev) return prev;
@@ -614,6 +712,10 @@ export function ActiveWorkoutSessionProvider({ children }: { children: ReactNode
         startSession,
         updateSet,
         updateNotes,
+        substituteExercise,
+        undoSubstitution,
+        setEquipmentFlag,
+        clearEquipmentFlag,
         finishSession,
         startRestTimer,
         skipRestTimer,

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { View, Text, ScrollView, Pressable, RefreshControl, useWindowDimensions } from "react-native";
+import { View, Text, ScrollView, Pressable, RefreshControl, Switch, useWindowDimensions } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import type { StudentSummary } from "../../types/StudentSummary";
 import type { WorkoutLog } from "../../types/Workout";
@@ -139,6 +139,7 @@ export function ProgressAnalyticsView({
   const [timePreset, setTimePreset] = useState<TimeRangePreset>("3m");
   const [e1rmInfoOpen, setE1rmInfoOpen] = useState(false);
   const [detailInfoOpen, setDetailInfoOpen] = useState(false);
+  const [hideFlaggedSub, setHideFlaggedSub] = useState(false);
 
   useEffect(() => {
     if (!coachProgressDefaults) return;
@@ -175,14 +176,30 @@ export function ProgressAnalyticsView({
 
   const exerciseNames = useMemo(() => collectExerciseNames(logs), [logs]);
 
-  const weekly1RM = useMemo(
+  const weekly1RMUnfiltered = useMemo(
     () => buildWeekly1RMSeries(logsInRange, exerciseNorm, timePreset === "all" ? null : rangeStartMs, nowMs, locale),
     [logsInRange, exerciseNorm, timePreset, rangeStartMs, nowMs, locale]
   );
+  const hasFlaggedOrSub = useMemo(
+    () => weekly1RMUnfiltered.some((p) => p.isFlagged || p.isSubstituted),
+    [weekly1RMUnfiltered]
+  );
+  const weekly1RM = useMemo(
+    () =>
+      hideFlaggedSub
+        ? buildWeekly1RMSeries(logsInRange, exerciseNorm, timePreset === "all" ? null : rangeStartMs, nowMs, locale, {
+            excludeFlaggedAndSubstituted: true,
+          })
+        : weekly1RMUnfiltered,
+    [hideFlaggedSub, weekly1RMUnfiltered, logsInRange, exerciseNorm, timePreset, rangeStartMs, nowMs, locale]
+  );
 
   const weightReps = useMemo(
-    () => buildWeeklyWeightRepsSeries(logsInRange, exerciseNorm, timePreset === "all" ? null : rangeStartMs, nowMs, locale),
-    [logsInRange, exerciseNorm, timePreset, rangeStartMs, nowMs, locale]
+    () =>
+      buildWeeklyWeightRepsSeries(logsInRange, exerciseNorm, timePreset === "all" ? null : rangeStartMs, nowMs, locale, {
+        excludeFlaggedAndSubstituted: hideFlaggedSub,
+      }),
+    [logsInRange, exerciseNorm, timePreset, rangeStartMs, nowMs, locale, hideFlaggedSub]
   );
 
   // Kept for the coaching-signals heuristic (volume-stable-but-intensity-rising check); not charted directly anymore.
@@ -417,6 +434,39 @@ export function ProgressAnalyticsView({
                 ) : (
                   <MiniLineChart points={weekly1RM} color={Colors.primary} height={190} highlightPr width={chartWidth} />
                 )}
+                {hasFlaggedOrSub ? (
+                  <ChartLegend
+                    items={[
+                      { color: Colors.primary, label: t("chartLegendStandard") },
+                      { color: Colors.flagOrange, label: t("chartLegendDiffEquipment") },
+                      { color: Colors.subBlue, label: t("chartLegendSubstituted") },
+                    ]}
+                  />
+                ) : null}
+                {hasFlaggedOrSub ? (
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      backgroundColor: Colors.surface,
+                      borderRadius: Radius.md,
+                      paddingVertical: 8,
+                      paddingHorizontal: Spacing.sm,
+                      marginTop: Spacing.sm,
+                    }}
+                  >
+                    <Text style={{ ...Typography.secondary, color: Colors.text, fontSize: FontSizes.note }}>
+                      {t("hideFlaggedAndSubstitutedLabel")}
+                    </Text>
+                    <Switch
+                      value={hideFlaggedSub}
+                      onValueChange={setHideFlaggedSub}
+                      trackColor={{ false: Colors.disabled, true: Colors.primary }}
+                      thumbColor={Colors.text}
+                    />
+                  </View>
+                ) : null}
               </Card>
 
               <Card>

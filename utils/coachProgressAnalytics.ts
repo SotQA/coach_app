@@ -86,6 +86,18 @@ export type WeeklyPoint = {
   label: string;
   value: number;
   isPr: boolean;
+  /** True when the exercise entry that produced this week's best value was equipment-flagged. */
+  isFlagged?: boolean;
+  /** True when the exercise entry that produced this week's best value was a session-only substitution. */
+  isSubstituted?: boolean;
+};
+
+export type WeeklySeriesOptions = {
+  /**
+   * When true, exercise entries that are equipment-flagged or substituted are excluded before
+   * aggregating each week's best value — the curve is recomputed from standard data only.
+   */
+  excludeFlaggedAndSubstituted?: boolean;
 };
 
 /**
@@ -96,27 +108,28 @@ export function buildWeekly1RMSeries(
   exerciseNorm: string | null,
   rangeStartMs: number | null,
   nowMs: number,
-  locale: SupportedLocale = "en"
+  locale: SupportedLocale = "en",
+  options?: WeeklySeriesOptions
 ): WeeklyPoint[] {
   const filtered = logs
     .map((l) => ({ l, ms: logCompletedMs(l) }))
     .filter(({ ms }) => ms > 0 && ms <= nowMs)
     .filter(({ ms }) => (rangeStartMs == null ? true : ms >= rangeStartMs));
 
-  const byWeek = new Map<number, { best: number; ms: number }>();
+  const byWeek = new Map<number, { best: number; ms: number; isFlagged: boolean; isSubstituted: boolean }>();
 
   for (const { l, ms } of filtered) {
     const wk = startOfWeekMondayMs(ms);
-    let bestSession = 0;
     for (const ex of l.exercises ?? []) {
       const key = normalizeExerciseName(ex.name);
       if (exerciseNorm && key !== exerciseNorm) continue;
-      bestSession = Math.max(bestSession, bestE1RMFromExercise(ex));
-    }
-    if (bestSession <= 0) continue;
-    const cur = byWeek.get(wk);
-    if (!cur || bestSession > cur.best) {
-      byWeek.set(wk, { best: bestSession, ms: wk });
+      if (options?.excludeFlaggedAndSubstituted && (ex.equipmentFlagged || ex.isSubstituted)) continue;
+      const e1 = bestE1RMFromExercise(ex);
+      if (e1 <= 0) continue;
+      const cur = byWeek.get(wk);
+      if (!cur || e1 > cur.best) {
+        byWeek.set(wk, { best: e1, ms: wk, isFlagged: !!ex.equipmentFlagged, isSubstituted: !!ex.isSubstituted });
+      }
     }
   }
 
@@ -124,14 +137,16 @@ export function buildWeekly1RMSeries(
   let runningMax = 0;
   const out: WeeklyPoint[] = [];
   for (const wk of weeks) {
-    const v = byWeek.get(wk)!.best;
-    const isPr = v > runningMax;
-    if (v > runningMax) runningMax = v;
+    const rec = byWeek.get(wk)!;
+    const isPr = rec.best > runningMax;
+    if (rec.best > runningMax) runningMax = rec.best;
     out.push({
       weekStartMs: wk,
       label: weekLabel(wk, locale),
-      value: v,
+      value: rec.best,
       isPr,
+      isFlagged: rec.isFlagged,
+      isSubstituted: rec.isSubstituted,
     });
   }
   return out;
@@ -196,6 +211,8 @@ export type WeeklyWeightReps = {
   label: string;
   weight: number;
   reps: number;
+  isFlagged?: boolean;
+  isSubstituted?: boolean;
 };
 
 /**
@@ -208,27 +225,29 @@ export function buildWeeklyWeightRepsSeries(
   exerciseNorm: string | null,
   rangeStartMs: number | null,
   nowMs: number,
-  locale: SupportedLocale = "en"
+  locale: SupportedLocale = "en",
+  options?: WeeklySeriesOptions
 ): WeeklyWeightReps[] {
   const filtered = logs
     .map((l) => ({ l, ms: logCompletedMs(l) }))
     .filter(({ ms }) => ms > 0 && ms <= nowMs)
     .filter(({ ms }) => (rangeStartMs == null ? true : ms >= rangeStartMs));
 
-  const byWeek = new Map<number, { bestE1RM: number; weight: number; reps: number }>();
+  const byWeek = new Map<number, { bestE1RM: number; weight: number; reps: number; isFlagged: boolean; isSubstituted: boolean }>();
 
   for (const { l, ms } of filtered) {
     const wk = startOfWeekMondayMs(ms);
     for (const ex of l.exercises ?? []) {
       const key = normalizeExerciseName(ex.name);
       if (exerciseNorm && key !== exerciseNorm) continue;
+      if (options?.excludeFlaggedAndSubstituted && (ex.equipmentFlagged || ex.isSubstituted)) continue;
       for (const s of ex.sets ?? []) {
         if (s.weight == null || !Number.isFinite(s.weight) || s.weight <= 0) continue;
         if (!Number.isFinite(s.reps) || s.reps <= 0) continue;
         const e1 = estimateEpley1RM(s.weight, s.reps);
         const cur = byWeek.get(wk);
         if (!cur || e1 > cur.bestE1RM) {
-          byWeek.set(wk, { bestE1RM: e1, weight: s.weight, reps: s.reps });
+          byWeek.set(wk, { bestE1RM: e1, weight: s.weight, reps: s.reps, isFlagged: !!ex.equipmentFlagged, isSubstituted: !!ex.isSubstituted });
         }
       }
     }
@@ -237,7 +256,14 @@ export function buildWeeklyWeightRepsSeries(
   const weeks = Array.from(byWeek.keys()).sort((a, b) => a - b);
   return weeks.map((wk) => {
     const v = byWeek.get(wk)!;
-    return { weekStartMs: wk, label: weekLabel(wk, locale), weight: v.weight, reps: v.reps };
+    return {
+      weekStartMs: wk,
+      label: weekLabel(wk, locale),
+      weight: v.weight,
+      reps: v.reps,
+      isFlagged: v.isFlagged,
+      isSubstituted: v.isSubstituted,
+    };
   });
 }
 

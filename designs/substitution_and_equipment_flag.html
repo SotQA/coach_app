@@ -1,0 +1,570 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif; }
+.wrap { background: #0a0a0a; padding: 20px 12px 28px; border-radius: 16px; }
+.row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 8px; }
+.phone { width: 172px; background: #000; border-radius: 30px; border: 1.5px solid #2a2a2a; overflow: hidden; }
+.screen { background: #000; min-height: 400px; display: flex; flex-direction: column; position: relative; }
+.sbar { padding: 10px 14px 4px; display: flex; justify-content: space-between; }
+.st { color: #fff; font-size: 10px; font-weight: 600; }
+.sr { color: #fff; font-size: 9px; }
+.slbl { font-size: 9px; font-weight: 700; color: #C8FF00; text-transform: uppercase; letter-spacing: 0.07em; text-align: center; padding: 0 0 8px; }
+.note { background: #111; border-radius: 10px; padding: 8px 10px; margin-top: 7px; width: 172px; }
+.nt { color: #C8FF00; font-size: 9px; font-weight: 700; margin-bottom: 3px; }
+.nb { color: #666; font-size: 9px; line-height: 1.5; }
+.h2 { color: #C8FF00; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; text-align: center; margin: 4px 0 14px; }
+
+/* common */
+.top-nav { display: flex; align-items: center; gap: 8px; padding: 7px 12px 8px; }
+.back-btn { background: #1c1c1e; border-radius: 10px; padding: 4px 9px; color: #fff; font-size: 10px; }
+.nav-title { color: #fff; font-size: 13px; font-weight: 600; }
+.divider { height: 0.5px; background: #1e1e1e; margin: 0 12px; }
+.section-lbl { color: #888; font-size: 9px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 7px 12px 5px; }
+
+/* Exercise tracking card */
+.ex-track-card { background: #1c1c1e; border-radius: 13px; margin: 0 12px 7px; padding: 11px; }
+.ex-track-card.flagged { border: 1.5px solid #FF9500; background: #1a1200; }
+.ex-track-card.substituted { border: 1.5px solid #5AC8FA; background: #0d1a2a; }
+.etc-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 6px; }
+.etc-name { color: #fff; font-size: 11px; font-weight: 700; }
+.etc-name.substituted { color: #5AC8FA; }
+.etc-original { color: #555; font-size: 8px; margin-top: 1px; text-decoration: line-through; }
+.etc-sub-label { color: #5AC8FA; font-size: 8px; margin-top: 1px; }
+.etc-actions { display: flex; gap: 4px; }
+.etc-btn { padding: 3px 7px; border-radius: 8px; font-size: 8px; font-weight: 600; }
+.etc-btn.sub { background: #0d1a2a; color: #5AC8FA; border: 1px solid #5AC8FA; }
+.etc-btn.flag { background: #1a1200; color: #FF9500; border: 1px solid #FF9500; }
+.etc-btn.flag.active { background: #FF9500; color: #000; }
+.etc-btn.sub.active { background: #5AC8FA; color: #000; }
+
+.set-row { display: flex; gap: 5px; align-items: center; margin-bottom: 4px; }
+.set-num { color: #555; font-size: 9px; width: 18px; }
+.set-field { background: #2a2a2c; border-radius: 7px; padding: 5px 7px; color: #fff; font-size: 9px; flex: 1; text-align: center; }
+.set-x { color: #555; font-size: 9px; }
+.set-check { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid #555; display: flex; align-items: center; justify-content: center; font-size: 9px; flex-shrink: 0; }
+.set-check.done { background: #C8FF00; border-color: #C8FF00; color: #000; }
+
+/* flag pill */
+.flag-pill { display: inline-flex; align-items: center; gap: 4px; background: #1a1200; border: 1px solid #FF9500; border-radius: 8px; padding: 3px 7px; margin-top: 4px; }
+.fp-text { color: #FF9500; font-size: 8px; font-weight: 600; }
+
+/* sub pill */
+.sub-pill { display: inline-flex; align-items: center; gap: 4px; background: #0d1a2a; border: 1px solid #5AC8FA; border-radius: 8px; padding: 3px 7px; margin-top: 4px; }
+.sp-text { color: #5AC8FA; font-size: 8px; font-weight: 600; }
+
+/* Overlay */
+.ov { position: absolute; inset: 0; background: rgba(0,0,0,0.82); z-index: 10; display: flex; flex-direction: column; }
+.bottom-sheet { position: absolute; bottom: 0; left: 0; right: 0; background: #1c1c1e; border-radius: 18px 18px 0 0; z-index: 20; padding: 0 0 16px; }
+.bs-handle { width: 36px; height: 4px; background: #444; border-radius: 2px; margin: 10px auto 10px; }
+.bs-title { color: #fff; font-size: 13px; font-weight: 700; padding: 0 14px 4px; }
+.bs-sub { color: #888; font-size: 9px; padding: 0 14px 10px; line-height: 1.4; }
+.bs-divider { height: 0.5px; background: #2a2a2a; margin: 0 14px 10px; }
+
+/* Muscle filter pills */
+.muscle-row { display: flex; gap: 5px; padding: 0 12px 8px; overflow-x: auto; }
+.muscle-pill { padding: 4px 10px; border-radius: 14px; font-size: 9px; font-weight: 500; white-space: nowrap; flex-shrink: 0; }
+.muscle-pill.on { background: #C8FF00; color: #000; }
+.muscle-pill.off { background: #2a2a2c; color: #888; }
+
+/* Exercise DB list item */
+.db-item { display: flex; align-items: center; gap: 9px; padding: 9px 14px; border-bottom: 0.5px solid #1e1e1e; }
+.db-item.selected { background: #0d1a2a; }
+.db-icon { width: 28px; height: 28px; border-radius: 8px; background: #2a2a2c; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+.db-icon.selected { background: #5AC8FA; }
+.db-body { flex: 1; }
+.db-name { color: #fff; font-size: 10px; font-weight: 600; }
+.db-tags { color: #888; font-size: 8px; margin-top: 1px; }
+.db-check { width: 18px; height: 18px; border-radius: 50%; background: #5AC8FA; display: flex; align-items: center; justify-content: center; font-size: 9px; color: #000; font-weight: 700; }
+
+/* Confirm sub sheet */
+.confirm-row { display: flex; gap: 8px; padding: 0 14px 10px; }
+.cr-card { flex: 1; background: #2a2a2c; border-radius: 10px; padding: 8px; text-align: center; }
+.cr-label { color: #888; font-size: 8px; margin-bottom: 3px; }
+.cr-name { color: #fff; font-size: 9px; font-weight: 600; line-height: 1.3; }
+.cr-arrow { color: #5AC8FA; font-size: 16px; align-self: center; flex-shrink: 0; }
+.bs-btn { margin: 0 14px; background: #5AC8FA; border-radius: 16px; padding: 9px; text-align: center; color: #000; font-size: 11px; font-weight: 700; margin-bottom: 6px; }
+.bs-btn-cancel { margin: 0 14px; background: #2a2a2c; border-radius: 16px; padding: 9px; text-align: center; color: #888; font-size: 11px; }
+
+/* reason sheet */
+.reason-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 0.5px solid #1e1e1e; }
+.ri-icon { font-size: 16px; }
+.ri-label { color: #fff; font-size: 10px; font-weight: 500; flex: 1; }
+.ri-check { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid #555; }
+.ri-check.on { background: #FF9500; border-color: #FF9500; }
+
+/* Progress chart markers */
+.chart-wrap { padding: 0 12px; }
+.chart-title { color: #fff; font-size: 11px; font-weight: 600; margin-bottom: 8px; }
+.chart-area { background: #1c1c1e; border-radius: 11px; padding: 12px 10px 8px; position: relative; height: 90px; }
+.chart-line { position: absolute; bottom: 20px; left: 10px; right: 10px; height: 1px; background: #2a2a2a; }
+svg.chart { width: 100%; height: 70px; }
+.chart-legend { display: flex; gap: 10px; margin-top: 6px; flex-wrap: wrap; }
+.legend-item { display: flex; align-items: center; gap: 4px; }
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+.legend-dot.normal { background: #C8FF00; }
+.legend-dot.flagged { background: #FF9500; }
+.legend-dot.sub { background: #5AC8FA; border-radius: 2px; transform: rotate(45deg); width: 7px; height: 7px; }
+.legend-lbl { color: #666; font-size: 8px; }
+
+/* coach view */
+.coach-notif { background: #1c1c1e; border-radius: 12px; margin: 0 12px 7px; padding: 10px; }
+.cn-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.cn-av { width: 26px; height: 26px; border-radius: 50%; background: #2a3a1a; color: #C8FF00; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; flex-shrink: 0; }
+.cn-name { color: #fff; font-size: 10px; font-weight: 600; }
+.cn-time { color: #555; font-size: 8px; margin-left: auto; }
+.cn-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
+.cn-ex { color: #fff; font-size: 9px; font-weight: 600; }
+.cn-badge { font-size: 7px; font-weight: 600; padding: 2px 6px; border-radius: 6px; }
+.cn-badge.sub { background: #0d1a2a; color: #5AC8FA; border: 1px solid #5AC8FA; }
+.cn-badge.flag { background: #1a1200; color: #FF9500; border: 1px solid #FF9500; }
+.cn-sets { color: #888; font-size: 8px; }
+</style>
+
+<div class="wrap">
+<h2 style="display:none">Exercise substitution and equipment flag UI designs</h2>
+
+<!-- FEATURE 2 — SUBSTITUTION -->
+<div class="h2">Feature 2 — Exercise substitution (session-only)</div>
+<div class="row">
+
+  <!-- Tracking screen default -->
+  <div style="display:flex;flex-direction:column;align-items:center;">
+    <div class="slbl">Tracking — default</div>
+    <div class="phone">
+      <div class="screen">
+        <div class="sbar"><span class="st">21:04</span><span class="sr">▪▪ 64%</span></div>
+        <div class="top-nav">
+          <div class="back-btn">‹ Back</div>
+          <div class="nav-title">Upper Body A</div>
+        </div>
+        <div class="divider"></div>
+        <div class="section-lbl">Exercise 1 of 3</div>
+
+        <div class="ex-track-card">
+          <div class="etc-header">
+            <div>
+              <div class="etc-name">Bench Press</div>
+              <div style="color:#888;font-size:8px;margin-top:1px;">Chest · Primary</div>
+            </div>
+            <div class="etc-actions">
+              <div class="etc-btn sub">⇄ Sub</div>
+              <div class="etc-btn flag">⚑ Flag</div>
+            </div>
+          </div>
+          <div class="set-row">
+            <div class="set-num">S1</div>
+            <div class="set-field">70 kg</div>
+            <div class="set-x">×</div>
+            <div class="set-field">8</div>
+            <div class="set-check done">✓</div>
+          </div>
+          <div class="set-row">
+            <div class="set-num">S2</div>
+            <div class="set-field">70 kg</div>
+            <div class="set-x">×</div>
+            <div class="set-field">8</div>
+            <div class="set-check"></div>
+          </div>
+          <div class="set-row">
+            <div class="set-num">S3</div>
+            <div class="set-field">70 kg</div>
+            <div class="set-x">×</div>
+            <div class="set-field">8</div>
+            <div class="set-check"></div>
+          </div>
+        </div>
+
+        <div class="ex-track-card" style="opacity:0.5;">
+          <div class="etc-header">
+            <div><div class="etc-name">Overhead Press</div></div>
+            <div class="etc-actions">
+              <div class="etc-btn sub">⇄ Sub</div>
+              <div class="etc-btn flag">⚑ Flag</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="note"><div class="nt">Two buttons per exercise</div><div class="nb">"⇄ Sub" opens substitution picker. "⚑ Flag" marks different equipment. Both are subtle — don't distract from normal logging flow.</div></div>
+  </div>
+
+  <!-- Sub picker sheet -->
+  <div style="display:flex;flex-direction:column;align-items:center;">
+    <div class="slbl">Substitution picker</div>
+    <div class="phone">
+      <div class="screen">
+        <div class="sbar"><span class="st">21:04</span><span class="sr">▪▪ 64%</span></div>
+        <div class="top-nav" style="opacity:0.3;">
+          <div class="back-btn">‹ Back</div>
+          <div class="nav-title">Upper Body A</div>
+        </div>
+        <div class="ex-track-card" style="opacity:0.3; margin-top:4px;">
+          <div class="etc-name">Bench Press</div>
+        </div>
+
+        <div class="ov"></div>
+
+        <div class="bottom-sheet">
+          <div class="bs-handle"></div>
+          <div class="bs-title">Substitute for Bench Press</div>
+          <div class="bs-sub">Showing exercises for the same muscle group. This session only — your plan stays unchanged.</div>
+
+          <!-- Muscle filter -->
+          <div class="muscle-row">
+            <div class="muscle-pill on">Chest</div>
+            <div class="muscle-pill off">Shoulders</div>
+            <div class="muscle-pill off">Triceps</div>
+            <div class="muscle-pill off">All</div>
+          </div>
+
+          <div class="db-item selected">
+            <div class="db-icon selected">🏋️</div>
+            <div class="db-body">
+              <div class="db-name">Dumbbell Press</div>
+              <div class="db-tags">Chest · Free weights</div>
+            </div>
+            <div class="db-check">✓</div>
+          </div>
+          <div class="db-item">
+            <div class="db-icon">🏋️</div>
+            <div class="db-body">
+              <div class="db-name">Cable Fly</div>
+              <div class="db-tags">Chest · Cable</div>
+            </div>
+          </div>
+          <div class="db-item">
+            <div class="db-icon">🏋️</div>
+            <div class="db-body">
+              <div class="db-name">Push-up</div>
+              <div class="db-tags">Chest · Bodyweight</div>
+            </div>
+          </div>
+          <div class="db-item">
+            <div class="db-icon">🏋️</div>
+            <div class="db-body">
+              <div class="db-name">Machine Chest Press</div>
+              <div class="db-tags">Chest · Machine</div>
+            </div>
+          </div>
+
+          <div style="height:8px;"></div>
+          <div class="bs-btn">Substitute with Dumbbell Press</div>
+          <div class="bs-btn-cancel">Cancel</div>
+        </div>
+      </div>
+    </div>
+    <div class="note"><div class="nt">Muscle-group filtered</div><div class="nb">Only shows exercises for same muscle group (Chest here). Student can't browse the full DB — scoped to relevant alternatives only. Single select.</div></div>
+  </div>
+
+  <!-- Substituted state -->
+  <div style="display:flex;flex-direction:column;align-items:center;">
+    <div class="slbl">After substitution</div>
+    <div class="phone">
+      <div class="screen">
+        <div class="sbar"><span class="st">21:04</span><span class="sr">▪▪ 64%</span></div>
+        <div class="top-nav">
+          <div class="back-btn">‹ Back</div>
+          <div class="nav-title">Upper Body A</div>
+        </div>
+        <div class="divider"></div>
+        <div class="section-lbl">Exercise 1 of 3</div>
+
+        <div class="ex-track-card substituted">
+          <div class="etc-header">
+            <div>
+              <div class="etc-name substituted">Dumbbell Press</div>
+              <div class="etc-original">Bench Press</div>
+              <div class="etc-sub-label">⇄ Substituted this session</div>
+            </div>
+            <div class="etc-actions">
+              <div class="etc-btn sub active">⇄ Undo</div>
+            </div>
+          </div>
+          <div class="set-row">
+            <div class="set-num">S1</div>
+            <div class="set-field">30 kg</div>
+            <div class="set-x">×</div>
+            <div class="set-field">8</div>
+            <div class="set-check done">✓</div>
+          </div>
+          <div class="set-row">
+            <div class="set-num">S2</div>
+            <div class="set-field">30 kg</div>
+            <div class="set-x">×</div>
+            <div class="set-field">8</div>
+            <div class="set-check"></div>
+          </div>
+          <div class="set-row">
+            <div class="set-num">S3</div>
+            <div class="set-field">30 kg</div>
+            <div class="set-x">×</div>
+            <div class="set-field">8</div>
+            <div class="set-check"></div>
+          </div>
+        </div>
+
+        <div class="ex-track-card" style="opacity:0.6;">
+          <div class="etc-header">
+            <div><div class="etc-name">Overhead Press</div></div>
+            <div class="etc-actions">
+              <div class="etc-btn sub">⇄ Sub</div>
+              <div class="etc-btn flag">⚑ Flag</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="note"><div class="nt">Substituted state</div><div class="nb">Blue border + blue name signals substitution. Original shown struck-through. "Undo" restores original. Logged as Dumbbell Press, Bench Press curve untouched.</div></div>
+  </div>
+
+</div>
+
+<!-- FEATURE 3 — EQUIPMENT FLAG -->
+<div class="h2" style="margin-top:20px;">Feature 3 — Different equipment flag</div>
+<div class="row">
+
+  <!-- Flag reason sheet -->
+  <div style="display:flex;flex-direction:column;align-items:center;">
+    <div class="slbl">Flag — reason picker</div>
+    <div class="phone">
+      <div class="screen">
+        <div class="sbar"><span class="st">21:04</span><span class="sr">▪▪ 64%</span></div>
+        <div class="top-nav" style="opacity:0.3;">
+          <div class="back-btn">‹ Back</div>
+          <div class="nav-title">Upper Body A</div>
+        </div>
+        <div class="ex-track-card" style="opacity:0.3; margin-top:4px;">
+          <div class="etc-name">Bench Press</div>
+        </div>
+
+        <div class="ov"></div>
+
+        <div class="bottom-sheet">
+          <div class="bs-handle"></div>
+          <div class="bs-title">Flag different equipment</div>
+          <div class="bs-sub">This session's data will be marked — progress charts will show it separately so your curve stays accurate.</div>
+          <div class="bs-divider"></div>
+
+          <div class="reason-item">
+            <div class="ri-icon">🏢</div>
+            <div class="ri-label">Different gym</div>
+            <div class="ri-check on"></div>
+          </div>
+          <div class="reason-item">
+            <div class="ri-icon">⚙️</div>
+            <div class="ri-label">Different machine / brand</div>
+            <div class="ri-check"></div>
+          </div>
+          <div class="reason-item">
+            <div class="ri-icon">⚖️</div>
+            <div class="ri-label">Equipment feels off / miscalibrated</div>
+            <div class="ri-check"></div>
+          </div>
+          <div class="reason-item">
+            <div class="ri-icon">✏️</div>
+            <div class="ri-label">Other reason</div>
+            <div class="ri-check"></div>
+          </div>
+
+          <div style="height:8px;"></div>
+          <div class="bs-btn" style="background:#FF9500;">Flag this exercise</div>
+          <div class="bs-btn-cancel">Cancel</div>
+        </div>
+      </div>
+    </div>
+    <div class="note"><div class="nt">Reason picker</div><div class="nb">Quick select — one tap. "Other" could optionally show a short text field. Reason is stored with the session log for the coach to see context.</div></div>
+  </div>
+
+  <!-- Flagged exercise state -->
+  <div style="display:flex;flex-direction:column;align-items:center;">
+    <div class="slbl">Flagged state</div>
+    <div class="phone">
+      <div class="screen">
+        <div class="sbar"><span class="st">21:04</span><span class="sr">▪▪ 64%</span></div>
+        <div class="top-nav">
+          <div class="back-btn">‹ Back</div>
+          <div class="nav-title">Upper Body A</div>
+        </div>
+        <div class="divider"></div>
+        <div class="section-lbl">Exercise 1 of 3</div>
+
+        <div class="ex-track-card flagged">
+          <div class="etc-header">
+            <div>
+              <div class="etc-name">Bench Press</div>
+              <div style="color:#888;font-size:8px;margin-top:1px;">Chest · Primary</div>
+            </div>
+            <div class="etc-actions">
+              <div class="etc-btn sub">⇄ Sub</div>
+              <div class="etc-btn flag active">⚑ Flagged</div>
+            </div>
+          </div>
+          <div class="flag-pill">
+            <span>⚑</span>
+            <span class="fp-text">Different gym · data marked</span>
+          </div>
+          <div style="height:6px;"></div>
+          <div class="set-row">
+            <div class="set-num">S1</div>
+            <div class="set-field">70 kg</div>
+            <div class="set-x">×</div>
+            <div class="set-field">8</div>
+            <div class="set-check done">✓</div>
+          </div>
+          <div class="set-row">
+            <div class="set-num">S2</div>
+            <div class="set-field">70 kg</div>
+            <div class="set-x">×</div>
+            <div class="set-field">8</div>
+            <div class="set-check"></div>
+          </div>
+        </div>
+
+        <div class="ex-track-card" style="opacity:0.6;">
+          <div class="etc-header">
+            <div><div class="etc-name">Overhead Press</div></div>
+            <div class="etc-actions">
+              <div class="etc-btn sub">⇄ Sub</div>
+              <div class="etc-btn flag">⚑ Flag</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="note"><div class="nt">Flagged state</div><div class="nb">Orange border + orange pill label. "⚑ Flagged" button stays active — tap again to remove flag. Data is still logged normally, just tagged.</div></div>
+  </div>
+
+  <!-- Progress chart with markers -->
+  <div style="display:flex;flex-direction:column;align-items:center;">
+    <div class="slbl">Progress chart — marked points</div>
+    <div class="phone">
+      <div class="screen">
+        <div class="sbar"><span class="st">21:04</span><span class="sr">▪▪ 64%</span></div>
+        <div class="top-nav">
+          <div class="back-btn">‹ Back</div>
+          <div class="nav-title">Bench Press</div>
+        </div>
+        <div class="divider"></div>
+
+        <div style="padding: 10px 12px 6px;">
+          <div style="color:#fff;font-size:13px;font-weight:700;margin-bottom:2px;">Bench Press</div>
+          <div style="color:#888;font-size:9px;">1RM estimate · last 8 weeks</div>
+        </div>
+
+        <div class="chart-wrap">
+          <div class="chart-area">
+            <svg class="chart" viewBox="0 0 152 60" xmlns="http://www.w3.org/2000/svg">
+              <!-- grid lines -->
+              <line x1="0" y1="48" x2="152" y2="48" stroke="#2a2a2a" stroke-width="0.5"/>
+              <line x1="0" y1="32" x2="152" y2="32" stroke="#2a2a2a" stroke-width="0.5"/>
+              <line x1="0" y1="16" x2="152" y2="16" stroke="#2a2a2a" stroke-width="0.5"/>
+              <!-- curve -->
+              <polyline points="10,44 30,40 50,36 70,38 90,30 110,26 130,22 150,18"
+                fill="none" stroke="#C8FF00" stroke-width="1.5" stroke-linejoin="round"/>
+              <!-- normal dots -->
+              <circle cx="10" cy="44" r="3.5" fill="#C8FF00"/>
+              <circle cx="30" cy="40" r="3.5" fill="#C8FF00"/>
+              <circle cx="50" cy="36" r="3.5" fill="#C8FF00"/>
+              <!-- flagged dot — orange, hollow -->
+              <circle cx="70" cy="38" r="4" fill="#1a1200" stroke="#FF9500" stroke-width="1.5"/>
+              <text x="70" y="41.5" text-anchor="middle" fill="#FF9500" font-size="5">⚑</text>
+              <!-- normal -->
+              <circle cx="90" cy="30" r="3.5" fill="#C8FF00"/>
+              <circle cx="110" cy="26" r="3.5" fill="#C8FF00"/>
+              <!-- substituted dot — blue diamond -->
+              <rect x="126" y="18" width="8" height="8" rx="1" fill="#0d1a2a" stroke="#5AC8FA" stroke-width="1.5" transform="rotate(45 130 22)"/>
+              <!-- normal -->
+              <circle cx="150" cy="18" r="3.5" fill="#C8FF00"/>
+              <!-- y labels -->
+              <text x="2" y="50" fill="#555" font-size="6">70</text>
+              <text x="2" y="34" fill="#555" font-size="6">80</text>
+              <text x="2" y="18" fill="#555" font-size="6">90</text>
+            </svg>
+            <!-- x labels -->
+            <div style="display:flex;justify-content:space-between;padding:0 6px;margin-top:-2px;">
+              <span style="color:#555;font-size:7px;">Jun</span>
+              <span style="color:#555;font-size:7px;">Jul</span>
+              <span style="color:#555;font-size:7px;">Aug</span>
+            </div>
+          </div>
+          <div class="chart-legend">
+            <div class="legend-item"><div class="legend-dot normal"></div><div class="legend-lbl">Standard</div></div>
+            <div class="legend-item"><div class="legend-dot flagged"></div><div class="legend-lbl">Diff. equipment</div></div>
+            <div class="legend-item"><div class="legend-dot sub"></div><div class="legend-lbl">Substituted</div></div>
+          </div>
+        </div>
+
+        <!-- Filter toggle -->
+        <div style="padding: 10px 12px 0;">
+          <div style="background:#1c1c1e;border-radius:10px;padding:8px 10px;display:flex;justify-content:space-between;align-items:center;">
+            <div style="color:#fff;font-size:9px;font-weight:500;">Hide flagged & substituted</div>
+            <div style="width:28px;height:16px;background:#2a2a2c;border-radius:8px;position:relative;">
+              <div style="width:12px;height:12px;background:#555;border-radius:50%;position:absolute;top:2px;left:2px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="note"><div class="nt">Chart markers + filter</div><div class="nb">Orange hollow circle = flagged session. Blue diamond = substituted exercise. Toggle hides them to show clean standard-equipment curve only.</div></div>
+  </div>
+
+</div>
+
+<!-- COACH VIEW -->
+<div class="h2" style="margin-top:20px;">Coach view — sees both flags on student comparison screen</div>
+<div class="row">
+  <div style="display:flex;flex-direction:column;align-items:center;">
+    <div class="slbl">Coach notification — workout completed</div>
+    <div class="phone">
+      <div class="screen">
+        <div class="sbar"><span class="st">21:04</span><span class="sr">▪▪ 64%</span></div>
+        <div class="top-nav">
+          <div class="back-btn">‹ Notifications</div>
+          <div class="nav-title">Session detail</div>
+        </div>
+        <div class="divider"></div>
+
+        <div style="padding:8px 12px 6px;display:flex;align-items:center;gap:8px;">
+          <div style="width:34px;height:34px;border-radius:50%;background:#2a3a1a;border:1.5px solid #C8FF00;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#C8FF00;flex-shrink:0;">MT</div>
+          <div>
+            <div style="color:#fff;font-size:11px;font-weight:700;">Marta Test</div>
+            <div style="color:#888;font-size:8px;">Upper Body A · Today 19:42</div>
+          </div>
+        </div>
+
+        <div class="section-lbl">Exercises this session</div>
+
+        <div class="coach-notif">
+          <div class="cn-row">
+            <div class="cn-ex">Bench Press</div>
+            <div class="cn-badge flag">⚑ Diff. gym</div>
+          </div>
+          <div class="cn-sets">4 × 8 · 70 kg · flagged</div>
+        </div>
+
+        <div class="coach-notif">
+          <div class="cn-row">
+            <div class="cn-ex">Dumbbell Press</div>
+            <div class="cn-badge sub">⇄ Sub for OHP</div>
+          </div>
+          <div class="cn-sets">3 × 10 · 30 kg each</div>
+        </div>
+
+        <div class="coach-notif">
+          <div class="cn-row">
+            <div class="cn-ex">Lat Pulldown</div>
+          </div>
+          <div class="cn-sets">4 × 10 · 55 kg</div>
+        </div>
+
+        <div style="background:#1a1200;border-radius:10px;margin:0 12px;padding:8px 10px;">
+          <div style="color:#FF9500;font-size:9px;font-weight:700;margin-bottom:2px;">⚑ Equipment note</div>
+          <div style="color:#888;font-size:8px;line-height:1.4;">Marta was at a different gym this session. Bench Press data is flagged — don't compare directly with previous sessions.</div>
+        </div>
+      </div>
+    </div>
+    <div class="note"><div class="nt">Coach context</div><div class="nb">Coach sees both badges inline on the session detail. Orange flag for equipment, blue badge for substitution. Summary note at the bottom explains the flag. No surprises in the progress comparison.</div></div>
+  </div>
+</div>
+
+</div>
